@@ -1,0 +1,92 @@
+{
+    "projectName": "KinkLink", // Nome provisório definido
+    "projectSummary": "App para casais descobrirem interesses mútuos (dates, desejos, atividades, incluindo NSFW) anonimamente via swipe de cartas. Match revelado apenas em concordância mútua, criando uma lista compartilhada.",
+    "coreConcept": {
+      "userLinking": "Login individual (Firebase Auth), um usuário gera código curto (Firestore), parceiro insere para vincular contas (Firestore `partnerId`). Desvinculação via perfil.",
+      "cardMechanism": "Pilha de cartas apresentada individualmente. Interação via swipe simplificado (detecta fim do gesto) ou botões.",
+      "cardAnimation": "Animação CSS 'Slide Out' (via `transform: translateX`) acionada no fim do swipe/clique. Opcional overlay X/✓.",
+      "matchLogic": "Quando ambos usuários curtem a mesma carta (registrado no Firestore), um 'match' é criado e a carta movida/copiada para a lista compartilhada.",
+      "matchList": "Tela dedicada exibindo as cartas que receberam match, visível para ambos os parceiros vinculados."
+    },
+    "targetAudience": "Casais buscando melhorar comunicação sobre desejos/atividades, de forma privada e gamificada.",
+    "features": {
+      "mvp": [
+        "Autenticação Firebase (Google, Facebook, Email/Senha)",
+        "Geração/Exibição de Código Curto e Amigável para vinculação",
+        "Campo para Inserir Código do Parceiro e Lógica de Vinculação (Firestore)",
+        "Desvinculação de Contas",
+        "Exibição da Pilha de Cartas (uma por vez)",
+        "Mecanismo de Swipe Simplificado/Botões (Aceitar/Rejeitar)",
+        "Animação CSS 'Slide Out'",
+        "Registro de Curtidas no Firestore",
+        "Detecção de Match (comparando curtidas no Firestore)",
+        "Exibição da Lista de Matches",
+        "Conteúdo de Cartas Pré-definido (incluindo NSFW)",
+        "Estrutura básica de navegação (Tabs)",
+        "Tela 'Meu Perfil/Configurações' básica"
+      ],
+      "future": [
+        "Sugestão de Cartas pelo Usuário (inicialmente privadas para o casal)",
+        "Vinculação via QR Code",
+        "Álbum de Fotos Compartilhado",
+        "Categorias/Filtros para Cartas",
+        "Notificações Push (PWA/Capacitor)",
+        "Tela 'Novidades em Breve'",
+        "Onboarding visual (GIF/Tutorial pós-vinculação)",
+        "Funcionalidades PWA completas (instalação, offline básico)",
+        "Evolução para Híbrido (Capacitor) se necessário"
+      ]
+    },
+    "techStack": {
+      "frontend": {
+        "framework": "React.js",
+        "tooling": "Vite", // Adicionado tooling
+        "approach": "PWA (Progressive Web App) primeiro ('site funcional'), depois PWA completo, avaliar Híbrido (Capacitor) se necessário.",
+        "stateManagement": "React Context/useState inicialmente, avaliar Zustand/Redux Toolkit se crescer."
+      },
+      "backend": {
+        "platform": "Firebase",
+        "servicesUsed": ["Authentication", "Firestore"],
+        "potentialServices": ["Cloud Functions (gerar código único, lógica complexa)", "Firebase Hosting"]
+      },
+      "database": {
+        "type": "Firestore (NoSQL)",
+        "collectionsPlanned": ["users", "cards", "matches", "user_suggested_cards (talvez?)"] // Estrutura a refinar
+      },
+      "versionControl": "Git", // Adicionado controle de versão
+      "repository": "https://github.com/ruishalm/kinklink.git" // Adicionado link do repo
+    },
+    "uiUx": {
+      "theme": "'Motel Neon' - Fundo escuro (preto/vermelho), acentos neon vibrantes (CSS text/box-shadow). Foco na legibilidade.",
+      "navigation": "Barra de navegação inferior (Tabs: Cartas, Matches, Perfil).",
+      "keyScreens": ["Login/Cadastro", "Principal (Código/Swipe)", "Lista Matches", "Meu Perfil/Configurações", "Novidades"]
+    },
+    "contentStrategy": {
+      "initialCards": "Pré-definidas, incluindo ampla gama NSFW. Necessidade de fonte externa para geração/curadoria.",
+      "userGenerated": "Permitir criação, visível apenas ao casal inicialmente.",
+      "nsfwConsiderations": "Aviso explícito obrigatório na entrada, considerar verificação de idade. Implicações legais a serem tratadas profissionalmente."
+    },
+    "legal": {
+      "status": "Necessidade de aconselhamento jurídico profissional para Política de Privacidade e Termos de Serviço.",
+      "actionItem": "Consultar advogado especializado em direito digital/privacidade, especialmente devido ao conteúdo NSFW e coleta de dados."
+    },
+    "developmentStatus": {
+      "currentPhase": "Fase 0: Preparação e Configuração (em andamento)",
+      "lastCompletedStep": "Passo 0.5: Testar o Projeto Básico (npm run dev funcionou)",
+      "nextSteps": [
+        "Passo 0.6: Configurar Controle de Versão (Git - `git init`, `.gitignore`, `git commit`)",
+        "Passo 0.7: Conectar e Salvar no GitHub (`git remote add`, `git push`)",
+        "Passo 0.8: Criar Projeto no Firebase (Console Web)",
+        "Passo 0.9: Ativar Serviços Firebase (Auth, Firestore)",
+        "Passo 0.10: Conectar Código React com Firebase (`.env`, `firebase/config.js`)",
+        "Passo 0.11: Organizar Pastas (Opcional)"
+      ],
+      "blockers": [],
+      "openQuestions": [
+        "Definir estrutura exata das coleções Firestore (como armazenar curtidas/matches eficientemente?).",
+        "Como garantir unicidade do código curto de forma simples no MVP?"
+      ]
+    },
+    "communicationNotes": "Explique os passos de forma extremamente detalhada, como se eu fosse um iniciante completo ou tivesse acabado de ter um AVC. Usar linguagem simples e dividir em passos bem pequenos.", // Nota adicionada
+    "lastUpdated": "2024-09-06T16:00:00Z" // Atualizado com data/hora aproximada
+  }

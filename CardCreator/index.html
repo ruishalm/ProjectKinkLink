@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Creator - KinkLink</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Card Creator</h1>
+
+    <div id="category-selector">
+        <p>1. Escolha o "Nipe" (Categoria):</p>
+        <button class="category-button" data-category="sensorial">Sensorial</button>
+        <button class="category-button" data-category="poder">Poder</button>
+        <button class="category-button" data-category="fantasia">Fantasia</button>
+        <button class="category-button" data-category="exposicao">Exposição</button>
+        <button class="category-button" data-category="conexao">Conexão</button> <!-- ADICIONADO -->
+    </div>
+
+    <div id="card-creation-area">
+        <p>2. Crie a Carta:</p>
+        <div id="card-preview" class="card">
+            <input type="text" id="intensity-input" class="intensity top-left" placeholder="?" maxlength="2">
+            <textarea id="card-text-input" placeholder="Digite o texto da carta aqui..."></textarea>
+            <span id="intensity-display-br" class="intensity bottom-right">?</span>
+        </div>
+        <button id="create-card-btn">Criar Carta</button>
+    </div>
+
+    <div id="created-cards-area">
+        <p>3. Cartas Criadas:</p>
+        <div class="card-lists">
+            <div class="list-container">
+                <h3>Sensorial</h3>
+                <ul id="list-sensorial" class="card-list"></ul>
+            </div>
+            <div class="list-container">
+                <h3>Poder</h3>
+                <ul id="list-poder" class="card-list"></ul>
+            </div>
+            <div class="list-container">
+                <h3>Fantasia</h3>
+                <ul id="list-fantasia" class="card-list"></ul>
+            </div>
+             <div class="list-container">
+                <h3>Exposição</h3>
+                <ul id="list-exposicao" class="card-list"></ul>
+            </div>
+            <div class="list-container"> <!-- ADICIONADO -->
+                <h3>Conexão</h3>
+                <ul id="list-conexao" class="card-list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="export-area">
+         <p>4. Exportar Dados:</p>
+         <button id="generate-json-btn">Gerar JSON</button>
+         <textarea id="json-output" readonly placeholder="O JSON com todas as cartas aparecerá aqui..."></textarea>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

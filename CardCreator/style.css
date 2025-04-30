@@ -1,0 +1,219 @@
+body {
+    font-family: sans-serif;
+    line-height: 1.6;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
+
+h1, h3, p {
+    margin-bottom: 10px;
+}
+
+h1 {
+    text-align: center;
+}
+
+#category-selector {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+#category-selector button {
+    padding: 10px 15px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #333; /* Cor padrão do texto */
+    transition: transform 0.1s ease, background-color 0.3s ease;
+}
+
+#category-selector button.active {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+#card-creation-area {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.card {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 50px 40px 40px 40px;
+    width: 350px;
+    height: 520px;
+    background-color: #fff;
+    position: relative;
+    box-shadow: 3px 3px 8px rgba(0,0,0,0.1);
+    margin-bottom: 15px;
+    transition: background-color 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.card textarea {
+    width: 100%;
+    height: 100%;
+    border: 1px dashed #ccc;
+    padding: 10px;
+    box-sizing: border-box;
+    resize: none;
+    font-size: 1.2em;
+    line-height: 1.4;
+    background-color: #fdfdfd;
+    border-radius: 5px;
+}
+
+.intensity {
+    position: absolute;
+    font-weight: bold;
+    color: #555;
+}
+
+.top-left {
+    top: 15px;
+    left: 15px;
+    width: 45px;
+    height: 1.5em;
+    line-height: 1.5em;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 2px;
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #555;
+    box-sizing: border-box;
+}
+
+.bottom-right {
+    bottom: 15px;
+    right: 15px;
+    transform: rotate(180deg);
+    display: inline-block;
+    font-size: 2.2em;
+}
+
+#create-card-btn {
+    padding: 12px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s ease;
+}
+
+#create-card-btn:hover {
+    background-color: #218838;
+}
+
+#created-cards-area {
+    margin-top: 30px;
+    border-top: 1px solid #ccc;
+    padding-top: 20px;
+    max-width: 1000px; /* Mantido, mas agora com 5 listas */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.card-lists {
+    display: flex;
+    flex-wrap: wrap; /* Permite quebrar se necessário, mas idealmente não */
+    gap: 20px;
+    justify-content: center;
+}
+
+.list-container {
+    border: 1px solid #eee;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: #fff;
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: 180px; /* <<< MODIFICADO: Reduzido para caber 5 */
+    box-sizing: border-box;
+}
+
+.card-list {
+    list-style: none;
+    padding: 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.card-list li {
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    padding: 8px;
+    margin-bottom: 5px;
+    border-radius: 3px;
+    font-size: 0.9em;
+    word-wrap: break-word;
+}
+
+#export-area {
+    margin-top: 30px;
+    border-top: 1px solid #ccc;
+    padding-top: 20px;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#generate-json-btn {
+     display: block;
+     margin: 0 auto 15px auto;
+     padding: 10px 15px;
+     background-color: #007bff;
+     color: white;
+     border: none;
+     border-radius: 5px;
+     cursor: pointer;
+}
+#generate-json-btn:hover {
+    background-color: #0056b3;
+}
+
+#json-output {
+    width: 100%;
+    height: 250px;
+    margin-top: 10px;
+    font-family: monospace;
+    font-size: 0.9em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+/* === REGRAS PARA CORES DAS CATEGORIAS === */
+
+/* Cores dos Botões */
+#category-selector button[data-category="sensorial"] { background-color: #D8BFD8; } /* Thistle */
+#category-selector button[data-category="poder"]     { background-color: #4682B4; color: white; } /* SteelBlue */
+#category-selector button[data-category="fantasia"]  { background-color: #FF69B4; } /* HotPink */
+#category-selector button[data-category="exposicao"] { background-color: #FFD700; } /* Gold */
+#category-selector button[data-category="conexao"]  { background-color: #ADD8E6; } /* ADICIONADO (LightBlue) */
+
+/* Cores do Preview da Carta */
+.card.sensorial { background-color: #D8BFD8; }
+.card.poder     { background-color: #4682B4; }
+.card.fantasia  { background-color: #FF69B4; }
+.card.exposicao { background-color: #FFD700; }
+.card.conexao   { background-color: #ADD8E6; } /* ADICIONADO */
+
+/* Opcional: Cor de fundo para itens da lista */
+.card-list li.list-item-sensorial { border-left: 3px solid #D8BFD8; }
+.card-list li.list-item-poder     { border-left: 3px solid #4682B4; }
+.card-list li.list-item-fantasia  { border-left: 3px solid #FF69B4; }
+.card-list li.list-item-exposicao { border-left: 3px solid #FFD700; }
+.card-list li.list-item-conexao   { border-left: 3px solid #ADD8E6; } /* ADICIONADO */

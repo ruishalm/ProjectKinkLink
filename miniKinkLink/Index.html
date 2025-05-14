@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>miniKinkLink - Teste</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>miniKinkLink (Teste Tinder-Style)</h1>
+
+        <div class="info-usuario">
+            <p>Usuário Atual: <strong id="nomeUsuarioAtual"></strong></p>
+            <button id="botaoTrocarUsuario">Trocar Usuário</button>
+        </div>
+
+        <div class="area-carta">
+            <h2>Carta Atual:</h2>
+            <div id="containerCartaUnica" class="container-carta-individual">
+                <p id="semCartasMsg" class="mensagem-feedback" style="display:none;">Você viu todas as cartas! Crie novas ou reinicie.</p>
+                <div id="areaCartaUnica">
+                    </div>
+            </div>
+            <div class="botoes-interacao">
+                <button id="botaoNaoQuero">Não Quero</button>
+                <button id="botaoQuero">Quero</button>
+            </div>
+        </div>
+
+        <div class="area-criacao">
+            <h2>Criar Nova Carta:</h2>
+            <input type="text" id="inputNovaCartaDescricao" placeholder="Descrição da nova carta">
+            <select id="selectNovaCartaCategoria">
+                <option value="sensorial">Sensorial</option>
+                <option value="poder">Poder</option>
+                <option value="fantasia">Fantasia</option>
+                <option value="exposicao">Exposição</option>
+                <option value="outras">Outras</option>
+            </select>
+            <input type="number" id="inputNovaCartaIntensidade" placeholder="Intensidade (ex: 1)" min="1" value="1">
+            <button id="botaoCriarCarta">Criar Carta</button>
+        </div>
+
+        <div class="area-matches">
+            <h2>Interesses em Comum (Matches):</h2>
+            <ul id="listaInteressesEmComum">
+                </ul>
+            <p id="semMatchesMsg" class="mensagem-feedback" style="display:none;">Ainda não há matches. Continuem explorando!</p>
+        </div>
+
+        <div class="area-debug">
+            <button id="botaoResetarVistas">Resetar Cartas Vistas (Debug)</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

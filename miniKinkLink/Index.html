@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>miniKinkLink - Teste</title>
+    <title>miniKinkLink - Chat nos Matches</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>miniKinkLink (Teste Tinder-Style)</h1>
+        <h1>miniKinkLink</h1>
 
         <div class="info-usuario">
             <p>Usuário Atual: <strong id="nomeUsuarioAtual"></strong></p>
@@ -17,15 +17,18 @@
 
         <div class="area-carta">
             <h2>Carta Atual:</h2>
-            <div id="containerCartaUnica" class="container-carta-individual">
-                <p id="semCartasMsg" class="mensagem-feedback" style="display:none;">Você viu todas as cartas! Crie novas ou reinicie.</p>
-                <div id="areaCartaUnica">
-                    </div>
+            <div id="containerCartaUnicaWrapper">
+                <div id="containerCartaUnica" class="container-carta-individual">
+                    <div id="areaCartaUnica">
+                        </div>
+                    <p id="semCartasMsg" class="mensagem-feedback" style="display:none;">Você viu todas as cartas! Crie novas ou reinicie.</p>
+                </div>
             </div>
             <div class="botoes-interacao">
-                <button id="botaoNaoQuero">Não Quero</button>
-                <button id="botaoQuero">Quero</button>
+                <button id="botaoNaoQuero">Não Topo</button>
+                <button id="botaoQuero">Topo!</button>
             </div>
+            <p class="instrucao-teclado">Use as setas ⬅️ para "Não Topo" e ➡️ para "Topo!"</p>
         </div>
 
         <div class="area-criacao">
@@ -50,7 +53,22 @@
         </div>
 
         <div class="area-debug">
-            <button id="botaoResetarVistas">Resetar Cartas Vistas (Debug)</button>
+            <button id="botaoResetarApp">Resetar App Totalmente</button> </div>
+    </div>
+
+    <div id="modalChatOverlay" class="modal-overlay" style="display: none;">
+        <div id="modalChatConteudo" class="container-carta-individual modal-chat-carta"> <button id="botaoFecharModalChat" class="fechar-modal-chat">&times;</button>
+            <div class="cabecalho-chat-carta">
+                <div class="carta-canto canto-superior-esquerdo" id="modalChatIntensidade"></div>
+                <div class="carta-canto canto-superior-direito" id="modalChatNaipe"></div>
+                <h3 id="modalChatTituloCarta">Chat sobre: ...</h3>
+            </div>
+            <div id="chatMensagensArea" class="chat-mensagens-area">
+                </div>
+            <div class="chat-input-area">
+                <input type="text" id="inputMensagemChat" placeholder="Digite sua mensagem...">
+                <button id="botaoEnviarMensagemChat">Enviar</button>
+            </div>
         </div>
     </div>
 

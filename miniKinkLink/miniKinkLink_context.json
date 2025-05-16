@@ -1,22 +1,28 @@
 {
-  "projectName": "miniKinkLink - Protótipo",
-  "projectGoal": "Testar e validar as mecânicas centrais de descoberta de interesses mútuos entre um casal, utilizando uma interface de interação com cartas no estilo 'Tinder' (uma por vez), com persistência local.",
-  "coreConcept": "Um aplicativo web simples onde dois usuários fixos ('Quadrado' e 'Bolinha') podem interagir com cartas de interesse individualmente. As cartas que ambos os usuários 'curtirem' são exibidas como matches. Novas cartas podem ser criadas dinamicamente.",
-  "targetAudience": "Primariamente o desenvolvedor (você) para testes de conceito e fluxo de interação.",
+  "projectName": "miniKinkLink - Protótipo Final",
+  "lastUpdated": "2025-05-16T00:15:00Z",
+  "projectGoal": "Testar e validar as mecânicas centrais de descoberta de interesses mútuos entre um casal, utilizando uma interface de interação com cartas no estilo 'Tinder' (uma por vez), com persistência local, criação de cartas, e feedback visual aprimorado.",
+  "coreConcept": "Um aplicativo web simples onde dois usuários fixos ('Quadrado' e 'Bolinha') podem interagir com cartas de interesse individualmente. As cartas que ambos os usuários 'curtirem' são exibidas como matches e um alerta é disparado. Novas cartas podem ser criadas dinamicamente, sendo priorizadas para o outro usuário. O estado é persistido localmente e pode ser completamente resetado.",
+  "targetAudience": "Primariamente o desenvolvedor para testes de conceito, fluxo de interação e experiência do usuário.",
   "keyFeatures": [
-    "Apresentação de uma carta de interesse por vez.",
-    "Interação com botões 'Quero' / 'Não Quero'.",
+    "Apresentação de uma carta de interesse por vez, com visual de carta de baralho.",
+    "Estilização da carta com cor de fundo baseada na categoria, número de intensidade e nome da categoria ('naipe') visíveis.",
+    "Interação com botões 'Topo!' / 'Não Topo'.",
+    "Animação da carta deslizando para fora ao interagir.",
+    "Controles via teclado (setas Esquerda/Direita) para 'Não Topo'/'Topo!'.",
     "Dois usuários pré-definidos: 'Usuário Quadrado 🔲' e 'Usuário Bolinha ⚪'.",
     "Funcionalidade de trocar entre os usuários.",
+    "Cor de fundo leve da página muda de acordo com o usuário ativo (Verde para Quadrado, Amarelo para Bolinha).",
     "Criação de novas cartas pelo usuário (com descrição, categoria e intensidade).",
     "'Like' automático na carta para o usuário que a criou.",
-    "Prioridade de exibição para cartas recém-criadas.",
+    "Lógica para remover o 'like' automático se o criador rejeitar sua própria carta.",
+    "Carta recém-criada por um usuário é priorizada para exibição para o *outro* usuário.",
+    "Alerta visual (JavaScript `alert()`) para novos matches formados.",
     "Cálculo e exibição de 'matches' (cartas curtidas por ambos os usuários).",
-    "Persistência de todo o estado (cartas, seleções, usuário atual, cartas vistas) via `localStorage` do navegador.",
-    "Conjunto inicial de aproximadamente 40 cartas pré-definidas.",
-    "Estilização visual das cartas com cores baseadas em sua categoria.",
-    "Sorteio aleatório de cartas (dentre as ainda não vistas).",
-    "Opção de resetar o histórico de cartas vistas para fins de teste."
+    "Persistência de todo o estado via `localStorage` do navegador (usuário atual, todas as cartas, seleções de like por usuário, histórico de interação por usuário, matches anunciados, carta prioritária).",
+    "Conjunto inicial de 40 cartas pré-definidas (fornecidas pelo usuário).",
+    "Sorteio aleatório de cartas (dentre as ainda não interagidas pelo usuário atual).",
+    "Botão de 'Reset App Totalmente' que limpa interações, likes, cartas criadas, matches e outros estados, restaurando para as cartas padrão."
   ],
   "technicalStack": [
     "HTML5",
@@ -27,47 +33,47 @@
   "dataModel": {
     "card": "{ id: String, description: String, category: String, intensity: Number }",
     "user": "{ id: String, name: String } (Dois usuários fixos)",
-    "userSelections": "Array de IDs de cartas (um array por usuário, ex: selecoesQuadrado)",
-    "seenCardIndices": "Array de índices da lista 'todosOsInteresses' que já foram sorteados (indicesJaSorteadosGlobalmente)"
+    "userSelections": "Array de IDs de cartas 'curtidas' (um array por usuário, ex: selecoesQuadrado)",
+    "userInteractions": "Array de IDs de cartas já interagidas (curtidas ou não) por cada usuário (ex: interacoesQuadrado)",
+    "priorityCardForOther": "{ cardId: String, targetUserId: String } (Para priorizar carta criada)",
+    "announcedMatchIds": "Array de IDs de cartas que já tiveram seu match anunciado"
   },
   "userInterface": {
-    "layout": "Página única (Single Page Application).",
+    "layout": "Página única.",
     "components": [
-      "Área de exibição da carta atual (com descrição, categoria, intensidade e cor de fundo categórica).",
-      "Botões de interação ('Quero', 'Não Quero').",
+      "Área de exibição da carta atual estilizada.",
+      "Botões de interação com animação.",
       "Indicador e botão de troca de usuário.",
       "Formulário para criação de novas cartas.",
-      "Lista de matches (interesses em comum).",
-      "Botão de debug para resetar cartas vistas."
+      "Lista de matches.",
+      "Botão de reset completo do app."
     ]
   },
   "cardMechanism": {
-    "presentation": "Cartas apresentadas individualmente.",
-    "drawLogic": "Sorteio aleatório de cartas ainda não vistas. Cartas criadas pelo usuário são priorizadas para aparecerem em seguida.",
-    "interaction": "Interação via botões 'Quero' / 'Não Quero'."
+    "presentation": "Cartas apresentadas individualmente, com visual aprimorado.",
+    "drawLogic": "Sorteio aleatório de cartas ainda não interagidas pelo usuário atual. Cartas criadas por um parceiro são priorizadas para o outro.",
+    "interaction": "Botões 'Topo!' / 'Não Topo' e teclas de seta."
   },
-  "matchLogic": "Comparação das listas de seleções ('likes') de ambos os usuários. Cartas presentes em ambas as listas são consideradas matches.",
+  "matchLogic": "Comparação das listas de 'likes' de ambos os usuários. Um alerta é disparado para novos matches.",
   "developmentWorkflow": {
-    "status": "Protótipo funcional implementado.",
+    "status": "Protótipo funcional com múltiplas iterações de refinamento concluídas.",
     "milestones": [
-      { "name": "M1: Estrutura básica e Definição de Usuários", "status": "Concluído", "tasks": ["HTML inicial", "CSS básico", "Definição dos objetos de usuário em JS"] },
-      { "name": "M2: Lógica de Cartas e Sorteio", "status": "Concluído", "tasks": ["Carregamento de cartas iniciais", "Exibição de uma carta por vez", "Lógica de sorteio aleatório", "Rastreamento de cartas vistas"] },
-      { "name": "M3: Interação e Seleções", "status": "Concluído", "tasks": ["Implementação dos botões 'Quero'/'Não Quero'", "Armazenamento das seleções por usuário"] },
-      { "name": "M4: Lógica de Match", "status": "Concluído", "tasks": ["Cálculo de interesses em comum", "Exibição da lista de matches"] },
-      { "name": "M5: Troca de Usuário", "status": "Concluído", "tasks": ["Implementação da funcionalidade de alternar entre Quadrado e Bolinha"] },
-      { "name": "M6: Criação de Cartas", "status": "Concluído", "tasks": ["Formulário de criação", "Adição de novas cartas à lista principal", "Like automático para o criador", "Prioridade de exibição"] },
-      { "name": "M7: Persistência com localStorage", "status": "Concluído", "tasks": ["Salvamento e carregamento do estado do app (usuário atual, seleções, todas as cartas, cartas vistas)"] },
-      { "name": "M8: Estilização de Cartas por Categoria", "status": "Concluído", "tasks": ["Aplicação de classes CSS dinâmicas baseadas na categoria da carta", "Definição de estilos de cores por categoria no CSS"] }
+      { "name": "M1-M8: Funcionalidades Base e Estilização Inicial", "status": "Concluído" },
+      { "name": "M9: Correção de Exibição de Usuário e Fundo Dinâmico", "status": "Concluído" },
+      { "name": "M10: Correção Lógica de Interação de Cartas (Baralho por Usuário)", "status": "Concluído" },
+      { "name": "M11: Lógica para Rejeitar Carta Própria", "status": "Concluído" },
+      { "name": "M12: Priorização de Carta Criada para o Outro Usuário", "status": "Concluído" },
+      { "name": "M13: Sistema de Alerta para Novos Matches", "status": "Concluído" },
+      { "name": "M14: Funcionalidade de Reset Completo do Aplicativo", "status": "Concluído" }
     ]
   },
   "monetization": "N/A (Protótipo)",
   "futureEnhancementsPotential": [
-    "Interface de swipe (além dos botões).",
-    "Reset individual de seleções por usuário.",
+    "Interface de swipe real (além dos botões/teclado).",
     "Opção de editar/deletar cartas criadas.",
-    "Mecânica de 'desbloqueio' de intensidades (se desejado).",
-    "Lógica de intercalação de cartas vistas pelo parceiro ao trocar de usuário (conforme discutido)."
+    "Feedback visual mais sofisticado para matches (além do alert).",
+    "Possibilidade de resetar apenas os 'likes', mantendo cartas criadas."
   ],
   "securityPrivacyNotes": "Todos os dados são armazenados localmente no navegador do usuário via `localStorage`. Nenhuma informação é enviada para servidores externos. Este é um protótipo para fins de teste local.",
-  "communicationNotes": "Este documento resume o estado e as funcionalidades do protótipo 'miniKinkLink'."
+  "communicationNotes": "Este documento resume o estado e as funcionalidades da versão final do protótipo 'miniKinkLink'."
 }

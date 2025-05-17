@@ -78,7 +78,28 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: 'c37', description: 'Filmar um ato sexual seu mascarados e postar anonimamente', category: 'exposicao', intensity: 4 },
       { id: 'c38', description: 'Deixar o parceiro observar você se masturbar', category: 'exposicao', intensity: 2 },
       { id: 'c39', description: 'Fazer sexo em um local semi-público com baixo risco de ser pego', category: 'exposicao', intensity: 3 },
-      { id: 'c40', description: 'Ser exibido pelo parceiro em sites de cameras roletas', category: 'exposicao', intensity: 4 }
+      { id: 'c40', description: 'Ser exibido pelo parceiro em sites de cameras roletas', category: 'exposicao', intensity: 4 },
+      { id: 'c41', description: 'Masturba-se no carro em Auto estrada - Plateia rotativa', category: 'exposicao', intensity: 4 },
+      { id: 'c42', description: 'Pedir informações com roupas largas quase a mostra', category: 'exposicao', intensity: 2 },
+      { id: 'c43', description: 'Receber um delivery somente de toalha ou lingerie', category: 'exposicao', intensity: 3 },
+      { id: 'c44', description: 'Receber um delivery somente de toalha e acientalmente derrubar a toalha toda ou aprialmente', category: 'exposicao', intensity: 4 },
+      { id: 'c45', description: 'Compartilhar um print com terceiros onde "acidentalmente" aparece uma foto nua no rolo de imagens', category: 'exposicao', intensity: 2 },
+      { id: 'c46', description: 'Entregar seu celular para alguem ver uma foto qualquer. as fotos antes e depois daquela exibida devem ser fotos sensuais/sexuais', category: 'exposicao', intensity: 3 },
+      { id: 'c47', description: 'Fazer sexo no carro em uma area de Voyurs', category: 'exposicao', intensity: 3 },
+      { id: 'c48', description: 'Beijar e lamber os pes do parceiro em submissão durante o ato', category: 'poder', intensity: 3 },
+      { id: 'c49', description: 'Spankin: tapas na cara durante ato ou masturbacao', category: 'poder', intensity: 3 },
+      { id: 'c50', description: 'Roleplay: nada dito! No chat dessa carta marquem algo difernete, acertem e marquem tudo pelo chat. nenhuma palavra sobre pessoalemtne', category: 'fantasia', intensity: 3 },
+      { id: 'c51', description: 'Roleplay: Prostituição de rua: "contrate" os serviços do parceiro numa esquina.', category: 'fantasia', intensity: 4 },
+      { id: 'c52', description: 'Dar banho no parceiro de forma submissiva', category: 'poder', intensity: 2 },
+      { id: 'c53', description: 'Dar banho no parceiro de forma dominante', category: 'poder', intensity: 2 },
+      { id: 'c54', description: 'Usar preservativos texturizados', category: 'sensorial', intensity: 1 },
+      { id: 'c55', description: 'Masturbaçãoem lugar exposto(mas seguro) usando uma venda. Parceiro fica de guarda', category: 'exposicao', intensity: 3 },
+      { id: 'c56', description: 'Sair em casal com  roupa chamativa, sem nada por baixo', category: 'exposicao', intensity: 3 },
+      { id: 'c57', description: 'Roupa curta sem nada por baixo. deixeque alguem note', category: 'exposicao', intensity: 3 },
+      { id: 'c58', description: 'Exposição leve (seios ou similar) em local sabidamente filmado', category: 'exposicao', intensity: 3 },
+      { id: 'c59', description: 'Expocição leve para o parceiro em local movimentado', category: 'exposicao', intensity: 2 },
+      { id: 'c60', description: 'Usar um vibrador sem fio em publico, parceiro controla', category: 'poder', intensity: 3 },
+      { id: 'c61', description: 'Usar um vibrador sem fio em publico, um terceiro cntrola', category: 'exposicao', intensity: 4 }
     ];
 
     let idUsuarioAtual;

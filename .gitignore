@@ -62,8 +62,30 @@ node_modules/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
+# dotenv environment variables files
 .env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # dataconnect generated files
 .dataconnect
+
+# Vite build output
+dist
+dist-ssr
+
+# Vite cache directory
+.vite
+
+# TypeScript build info
+*.tsbuildinfo
+
+# macOS specific
+.DS_Store
+
+# IDE specific
+.vscode/
+.idea/

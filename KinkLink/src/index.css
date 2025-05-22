@@ -1,0 +1,54 @@
+/* Resets básicos e estilos globais para o corpo da página */
+body {
+  margin: 0; /* Remove margens padrão do navegador */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif; /* Uma pilha de fontes comum e moderna */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f0f2f5; /* Um fundo neutro e suave para a área fora do conteúdo principal */
+  /* A cor de texto padrão será definida no #root para o tema escuro */
+  line-height: 1.6; /* Espaçamento entre linhas para melhor legibilidade */
+}
+
+/* Estilizando o contêiner raiz da aplicação (#root) */
+#root {
+  max-width: 1200px; /* Define uma largura máxima para o conteúdo. Ajuste conforme necessário. */
+  min-height: 100vh; /* Garante que o #root ocupe pelo menos toda a altura da viewport. */
+  
+  /* Estas duas linhas são a chave para centralizar o #root horizontalmente */
+  margin-left: auto;
+  margin-right: auto;
+  
+  padding: 20px; /* Adiciona um espaçamento interno para o conteúdo não colar nas bordas */
+  
+  background-color: #242424; /* Cinza bem escuro, similar ao Vite */
+  color: rgba(255, 255, 255, 0.87); /* Cor de texto clara para contraste */
+  /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); Sombra não é ideal em fundo escuro, pode remover ou ajustar */
+  
+  /* Para garantir que o padding não aumente a largura total além do max-width */
+  box-sizing: border-box; 
+}
+
+/* Opcional: Um reset simples para margens de títulos e parágrafos */
+h1, h2, h3, h4, h5, h6, p {
+  margin-top: 0;
+  margin-bottom: 0.75em; /* Adiciona um pouco de espaço abaixo de parágrafos e títulos */
+}
+
+/* Estilos padrão para links, se desejar */
+a {
+  color: #646cff; /* Cor de link clara para tema escuro (Vite) */
+  text-decoration: none; /* Remove o sublinhado padrão */
+}
+
+a:hover {
+  text-decoration: underline; /* Adiciona sublinhado no hover */
+  color: #747bff; /* Cor de link mais clara no hover */
+}
+
+/* Estilos para botões, se desejar um padrão global (opcional) */
+button {
+  cursor: pointer;
+  font-family: inherit; /* Usa a mesma fonte do resto do corpo */
+}

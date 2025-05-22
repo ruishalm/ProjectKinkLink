@@ -1,6 +1,6 @@
 {
   "projectName": "KinkLink",
-  "projectSummary": "App para casais descobrirem interesses mútuos (dates, desejos, atividades, incluindo NSFW) anonimamente via swipe de cartas. Match revelado apenas em concordância mútua, criando uma lista compartilhada. Foco atual em refinar a experiência do usuário no frontend e preparar para integração com backend Firebase.",
+  "projectSummary": "App para casais descobrirem interesses mútuos (dates, desejos, atividades, incluindo NSFW) anonimamente via swipe de cartas. Match revelado apenas em concordância mútua, criando uma lista compartilhada. Frontend simulado para M3 concluído, foco agora na integração com backend Firebase.",
   "coreConcept": {
     "userLinking": "Login individual (Firebase Auth). User A clica em 'Criar Vínculo', gerando um código único temporário ('linkCode'). App cria um doc na coleção `pendingLinks` com `initiatorUserId: userA.uid`, `linkCode`, `status: 'pending'`, `createdAt`. User A compartilha o código manualmente com User B. User B insere o código. App busca em `pendingLinks` pelo código com status 'pending'. Se encontrado e válido (não expirado, usuários não vinculados), app (em transação) cria doc em `couples`, atualiza `partnerId` e `coupleId` nos docs `users` de A e B, e atualiza/deleta o doc em `pendingLinks`. Desvinculação via perfil.",
     "cardMechanism": "Pilha de cartas apresentada individualmente. Interação via swipe simplificado (detecta fim do gesto) ou botões.",
@@ -163,7 +163,7 @@
             { "id": "M3.T7", "description": "Lógica de Swipe/Botão: Verificar `card.category`. Se 'conexao', incrementar contador `conexaoAccepted`/`conexaoRejected` em `users`. Se NÃO for 'conexao', gravar decisão ('like'/'dislike') em `userSwipes`." },
             { "id": "M3.T8", "description": "Refinar regras de segurança para 'cards' (leitura para autenticados) e 'userSwipes' (escrita apenas pelo próprio usuário no seu swipe)." }
           ],
-          "status": "Não iniciado"
+          "status": "Concluído (Frontend Simulado)"
         }
         {
           "id": "M3.5",
@@ -200,16 +200,16 @@
           "goal": "Permitir que casais criem suas próprias cartas e implementar funcionalidades básicas do perfil (tema, desvinculação).",
           "tasks": [
             { "id": "M5.T1", "description": "Criar coleção 'userCards' no Firestore." },
-            { "id": "M5.T2", "description": "Na UI: Adicionar interface para criar 'Cartas em Branco' (campo de texto simples, botão Salvar). Local: talvez modal na tela de swipe ou seção no perfil." },
-            { "id": "M5.T3", "description": "Lógica 'Salvar Carta': Criar doc em 'userCards' (coupleId, cardText, createdByUserId, createdAt)." },
+            { "id": "M5.T2", "description": "Na UI: Adicionar interface para criar 'Cartas em Branco' (campo de texto simples, botão Salvar). Local: talvez modal na tela de swipe ou seção no perfil.", "status": "Concluído (UI - CreateUserCardModal)" },
+            { "id": "M5.T3", "description": "Lógica 'Salvar Carta': Criar doc em 'userCards' (coupleId, cardText, createdByUserId, createdAt).", "status": "Concluído (Frontend Simulado - useUserCardInteractions)" },
             { "id": "M5.T4", "description": "Modificar lógica de busca de cartas (M3.T4) para incluir cartas de 'userCards' pertencentes ao `coupleId` do usuário, além das 'cards' pré-definidas." },
-            { "id": "M5.T5", "description": "Na UI (Tela 'Perfil'): Construir a tela básica de perfil/configurações." },
+            { "id": "M5.T5", "description": "Na UI (Tela 'Perfil'): Construir a tela básica de perfil/configurações.", "status": "Concluído (UI - ProfilePage básica)" },
             { "id": "M5.T6", "description": "Implementar funcionalidade de troca de tema (claro/escuro) e persistir escolha (localStorage ou Firestore)." },
-            { "id": "M5.T7", "description": "Na UI (Tela 'Perfil'): Adicionar botão 'Desvincular'." },
+            { "id": "M5.T7", "description": "Na UI (Tela 'Perfil'): Adicionar botão 'Desvincular'.", "status": "Concluído (UI - ProfilePage básica)" },
             { "id": "M5.T8", "description": "Implementar Lógica de Desvinculação: Confirmação, Transação/Cloud Function para limpar 'partnerId'/'coupleId' em ambos 'users', deletar doc 'couples'. Decidir e implementar o que fazer com 'matches' e 'userCards' associados." },
             { "id": "M5.T9", "description": "Refinar regras de segurança para 'userCards' (leitura/escrita apenas por membros do casal) e ajustar regras de 'users'/'couples' para desvinculação." }
           ],
-          "status": "Não iniciado"
+          "status": "Em Andamento (Frontend UI/Simulação)"
         },
         {
           "id": "M6",
@@ -235,7 +235,7 @@
         "Estratégia de lançamento e marketing inicial"
       ],
       "communicationNotes": "Explique os passos de forma extremamente detalhada, como se eu fosse um iniciante completo idiota ou tivesse acabado de ter um AVC. Usar linguagem simples e dividir em passos bem pequenos.",
-      "lastUpdated": "2025-05-16T00:15:00Z", // ATUALIZADO
+      "lastUpdated": "2025-05-16T02:00:00Z", // ATUALIZADO
       "developmentPrinciples": {
         "modularity": {
           "goal": "Manter o código organizado, reutilizável e fácil de manter.",
@@ -298,28 +298,25 @@
       "sessionCheckpointNotes": [
         "SESSION CHECKPOINT & NEXT STEPS FOCUS (Data: 2024-09-07)",
         "",
-        "STATUS ATUAL (Frontend Simulado - ATUALIZADO 2025-05-16):",
+        "STATUS ATUAL (Frontend Simulado - ATUALIZADO 2025-05-16):", // ATUALIZADO
         "- PlayingCard.tsx: Refinado com tamanho fixo, fonte dinâmica, dimensões ajustadas (maior), e botão/lógica de 'foguinho' (favorito) implementados.",
         "- CardPilePage.tsx: Layout melhorado com carta principal e botões de interação centralizados. Implementada animação de saída da carta atual, aparecimento da próxima carta de costas e subsequente flip para revelar conteúdo. Adicionada carta de fundo estática para simular baralho. Navegação inferior redesenhada (Em Breve, Matches, Perfil). Botão 'Crie seu Kink' transformado em miniatura da carta de costas com texto sobreposto, posicionado ao lado dos botões de ação.",
-        "- MatchesPage.tsx: Sistema de 'foguinhos' (favoritos) implementado (marcação/desmarcação, seção de destaque). Layout da grade de matches e área de clique corrigidos. Erros de TypeScript resolvidos.",
+        "- MatchesPage.tsx: Sistema de 'foguinhos' (favoritos) implementado (marcação/desmarcação, seção de destaque). Layout da grade de matches, área de clique, proporção visual e espaçamento das cartas corrigidos. Erros de TypeScript resolvidos. Botão 'Voltar para Cartas' estilizado e link 'Voltar ao Início' removido.",
         "- Estilo Global: Tema escuro aplicado ao #root. #root centralizado na tela. Centralização do conteúdo DENTRO das páginas individuais (Login, Perfil, Home, LinkCouple) implementada/revisada.",
         "- Chat (M3.5): UI e lógica local com localStorage para o chat de cartas de match estão funcionais.",
         "- HomePage.tsx: Estilizada com novo layout e botões de Login/Cadastro. Implementada lógica de redirecionamento para usuários logados e vinculados.",
         "- App.tsx: Rotas ajustadas para usar `LinkedRoute` para `/cards` e `/matches`. Adicionado placeholder para Header global.",
         "- CardBack.tsx: Texto 'Kink Link' aumentado e em negrito.",
+        "- Lógica de Cartas 'Conexão' (M3.T7): Implementada no `useCardPileLogic` para tratar interações com cartas de conexão (não geram match, simulam incremento de contadores).",
+        "- UI para Criação de Cartas (M5.T2): `CreateUserCardModal` e botão 'Crie seu Kink' funcionais.",
+        "- UI Básica do Perfil (M5.T5) e Botão de Desvincular (M5.T7): `ProfilePage` acessível com opção de desvincular (simulada).",
         "",
         "PRÓXIMOS PASSOS IMEDIATOS:",
-        "1. FINALIZAR M3 (Frontend Simulado) - Implementar Lógica das \"Cartas Conexão\" (M3.T7):",
-        "   - No `useCardPileLogic.ts` (`handleInteraction`):",
-        "       - Identificar cartas com `category: 'conexao'`.",
-        "       - Para estas cartas, em vez de verificar match:",
-        "           - Simular o incremento de contadores `conexaoAccepted` / `conexaoRejected` no `AuthContext`.",
-        "       - Garantir que cartas \"Conexão\" NÃO disparem o `MatchModal` nem sejam adicionadas à lista de `matchedCards`.",
-        "2. INICIAR M1/M4 (Backend) - Integração da Autenticação Real com Firebase:",
+        "1. INICIAR M1/M4 (Backend) - Integração da Autenticação Real com Firebase:",
         "   - Configurar o Firebase no projeto React (M1.T3).",
         "   - Substituir o login/cadastro simulado no `AuthContext.tsx` por chamadas reais ao Firebase Authentication (M1.T4, M1.T7).",
         "   - Ao registrar um novo usuário via Firebase Auth, criar um documento correspondente na coleção `users` no Firestore (M1.T8).",
-        "3. (Após Autenticação Real) INICIAR M2/M4 (Backend) - Vinculação Real de Casais:",
+        "2. (Após Autenticação Real) INICIAR M2/M4 (Backend) - Vinculação Real de Casais:",
         "   - Implementar a lógica de vinculação usando o Firestore para as coleções `pendingLinks` e `couples`, e atualizando os documentos dos usuários (M2.T1, M2.T3, M2.T6, M2.T9).",
         "",
         "FOCO PÓS-MVP PARA CHAT:",

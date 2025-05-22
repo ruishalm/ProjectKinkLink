@@ -15,8 +15,16 @@ import LinkedRoute from './components/LinkedRoute'; // Importa o LinkedRoute
 
 // Componente Header placeholder - substitua pelo seu real
 const HeaderPlaceholder = () => (
-  <header style={{ padding: '10px 20px', backgroundColor: '#222', color: 'white', textAlign: 'center', marginBottom: '20px' }}>
-    KinkLink Header (Substitua este placeholder)
+  <header style={{
+    padding: '10px 20px',
+    backgroundColor: '#222', // Mantém o fundo escuro para contraste
+    color: 'red', // Cor do texto vermelha
+    textAlign: 'center',
+    marginBottom: '20px',
+    fontSize: '2em', // Fonte grande
+    fontWeight: 'bold' // Negrito
+  }}>
+    Kink🔗Link
   </header>
 );
 

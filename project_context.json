@@ -1,6 +1,6 @@
 {
   "projectName": "KinkLink",
-  "projectSummary": "App para casais descobrirem interesses mútuos (dates, desejos, atividades, incluindo NSFW) anonimamente via swipe de cartas. Match revelado apenas em concordância mútua, criando uma lista compartilhada.",
+  "projectSummary": "App para casais descobrirem interesses mútuos (dates, desejos, atividades, incluindo NSFW) anonimamente via swipe de cartas. Match revelado apenas em concordância mútua, criando uma lista compartilhada. Foco atual em refinar a experiência do usuário no frontend e preparar para integração com backend Firebase.",
   "coreConcept": {
     "userLinking": "Login individual (Firebase Auth). User A clica em 'Criar Vínculo', gerando um código único temporário ('linkCode'). App cria um doc na coleção `pendingLinks` com `initiatorUserId: userA.uid`, `linkCode`, `status: 'pending'`, `createdAt`. User A compartilha o código manualmente com User B. User B insere o código. App busca em `pendingLinks` pelo código com status 'pending'. Se encontrado e válido (não expirado, usuários não vinculados), app (em transação) cria doc em `couples`, atualiza `partnerId` e `coupleId` nos docs `users` de A e B, e atualiza/deleta o doc em `pendingLinks`. Desvinculação via perfil.",
     "cardMechanism": "Pilha de cartas apresentada individualmente. Interação via swipe simplificado (detecta fim do gesto) ou botões.",
@@ -13,11 +13,15 @@
     "mvp": [
       "Autenticação Firebase (Google, Facebook, Email/Senha)",
       "Geração/Exibição de Código Curto e Amigável para vinculação (criado via 'Criar Vínculo', armazenado em `pendingLinks`)",
-      "Campo para Inserir Código de Vínculo e Lógica de Vinculação (busca em `pendingLinks`, validação, transação para criar `couples` e atualizar `users`)",
+      "Campo para Inserir Código de Vínculo e Lógica de Vinculação (busca em `pendingLinks`, validação, transação para criar `couples` e atualizar `users`) - Frontend Simulado",
       "Desvinculação de Contas",
       "Exibição da Pilha de Cartas (uma por vez, incluindo cartas 'Conexão' misturadas)",
       "Mecanismo de Swipe Simplificado/Botões (Aceitar/Rejeitar)",
       "Animação CSS 'Slide Out'",
+      "Animação da próxima carta aparecendo de costas e virando para revelar conteúdo.",
+      "Carta de fundo estática para simular baralho na pilha principal.",
+      "Navegação inferior na tela de cartas redesenhada (Botões: Em Breve, Matches, Perfil com ícone).",
+      "Botão 'Crie seu Kink' como miniatura da carta de costas, integrado aos botões de ação.",
       "Registro de Swipes ('like'/'dislike') na coleção 'userSwipes' (APENAS para cartas que não são 'Conexão')",
       "Detecção de Match (Lógica 'Ideia 2' ao dar 'like' em cartas que não são 'Conexão')",
       "Exibição da Lista de Matches (status 'active', rolagem infinita inicial)",
@@ -66,7 +70,7 @@
       "servicesUsed": ["Authentication", "Firestore"],
       "potentialServices": ["Cloud Functions (gerar código único complexo, lógica de backend, limpeza agendada)", "Firebase Hosting", "Firebase Storage (para fotos futuras)"]
     },
-    "database": {
+      "database": { // Nota: As coleções e lógica de backend ainda não foram implementadas, apenas simuladas no frontend.
       "type": "Firestore (NoSQL)",
       "collectionsPlanned": [
         "users (contém partnerId, coupleId, conexaoAccepted: number, conexaoRejected: number)",
@@ -95,7 +99,7 @@
       "cardAppearance": "Visual de carta de baralho, com cor de fundo baseada na categoria. Texto claro e legível. Intensidade e categoria visíveis.",
       "animations": "Animações sutis para swipe/interação e transições de tela.",
       "userFeedback": "Feedback visual claro para ações (loading, sucesso, erro, match).",
-      "accessibility": "Considerar contraste de cores, navegação por teclado (básico), e ARIA labels onde apropriado.",
+      "accessibility": "Considerar contraste de cores, navegação por teclado (básico), e ARIA labels onde apropriado. Botão 'Crie seu Kink' com atributos de acessibilidade.",
       "nsfwHandling": "Aviso de conteúdo NSFW na entrada/cadastro. Conteúdo NSFW é parte integral, mas deve ser claro que é opcional interagir com ele."
     },
     "developmentWorkflow": {
@@ -230,19 +234,15 @@
         "Consulta Jurídica e finalização de documentos legais",
         "Estratégia de lançamento e marketing inicial"
       ],
-      "legalConsiderations": {
-        "status": "Coberto por hora, mas necessidade de aconselhamento jurídico profissional para Política de Privacidade e Termos de Serviço antes de lançamento amplo.",
-        "actionItem": "Consultar advogado especializado em direito digital/privacidade, especialmente devido ao conteúdo NSFW e coleta de dados, antes de escalar."
-      },
       "communicationNotes": "Explique os passos de forma extremamente detalhada, como se eu fosse um iniciante completo idiota ou tivesse acabado de ter um AVC. Usar linguagem simples e dividir em passos bem pequenos.",
-      "lastUpdated": "2024-09-07T15:00:00Z",
+      "lastUpdated": "2025-05-16T00:15:00Z", // ATUALIZADO
       "developmentPrinciples": {
         "modularity": {
           "goal": "Manter o código organizado, reutilizável e fácil de manter.",
           "practices": [
             "Dividir UI em componentes pequenos e focados.",
             "Utilizar hooks customizados para lógica reutilizável.",
-            "Utilizar Context API ou gerenciador de estado para estado compartilhado.",
+            "Utilizar Context API para estado compartilhado (ex: AuthContext).",
             "Definir constantes em arquivos dedicados (`constants/`).",
             "Manter uma estrutura de pastas clara e lógica."
           ],
@@ -298,12 +298,15 @@
       "sessionCheckpointNotes": [
         "SESSION CHECKPOINT & NEXT STEPS FOCUS (Data: 2024-09-07)",
         "",
-        "STATUS ATUAL (Frontend Simulado):",
+        "STATUS ATUAL (Frontend Simulado - ATUALIZADO 2025-05-16):",
         "- PlayingCard.tsx: Refinado com tamanho fixo, fonte dinâmica, dimensões ajustadas (maior), e botão/lógica de 'foguinho' (favorito) implementados.",
-        "- CardPilePage.tsx: Layout melhorado com carta principal e botões de interação centralizados.",
+        "- CardPilePage.tsx: Layout melhorado com carta principal e botões de interação centralizados. Implementada animação de saída da carta atual, aparecimento da próxima carta de costas e subsequente flip para revelar conteúdo. Adicionada carta de fundo estática para simular baralho. Navegação inferior redesenhada (Em Breve, Matches, Perfil). Botão 'Crie seu Kink' transformado em miniatura da carta de costas com texto sobreposto, posicionado ao lado dos botões de ação.",
         "- MatchesPage.tsx: Sistema de 'foguinhos' (favoritos) implementado (marcação/desmarcação, seção de destaque). Layout da grade de matches e área de clique corrigidos. Erros de TypeScript resolvidos.",
         "- Estilo Global: Tema escuro aplicado ao #root. #root centralizado na tela. Centralização do conteúdo DENTRO das páginas individuais (Login, Perfil, Home, LinkCouple) implementada/revisada.",
         "- Chat (M3.5): UI e lógica local com localStorage para o chat de cartas de match estão funcionais.",
+        "- HomePage.tsx: Estilizada com novo layout e botões de Login/Cadastro. Implementada lógica de redirecionamento para usuários logados e vinculados.",
+        "- App.tsx: Rotas ajustadas para usar `LinkedRoute` para `/cards` e `/matches`. Adicionado placeholder para Header global.",
+        "- CardBack.tsx: Texto 'Kink Link' aumentado e em negrito.",
         "",
         "PRÓXIMOS PASSOS IMEDIATOS:",
         "1. FINALIZAR M3 (Frontend Simulado) - Implementar Lógica das \"Cartas Conexão\" (M3.T7):",

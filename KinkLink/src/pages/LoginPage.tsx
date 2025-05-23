@@ -5,18 +5,32 @@ import { useAuth } from '../contexts/AuthContext';
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
+  const [error, setError] = useState<string | null>(null); // Para exibir mensagens de erro
+  const [isLoading, setIsLoading] = useState(false); // Para feedback de carregamento
+  const { login, isLoading: authIsLoading } = useAuth(); // Pega isLoading do AuthContext também
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/profile'; // Destino padrão após login
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault(); // Previne o recarregamento da página
-    console.log('Login attempt com:', { email, password });
-    // Simula o login e define o usuário no contexto
-    // No futuro, isso viria da sua API após uma autenticação bem-sucedida
-    login(email, 'user-123'); // Passa o email e um ID mockado
-    navigate(from, { replace: true }); // Redireciona para a página de origem ou perfil
+    setError(null); // Limpa erros anteriores
+    setIsLoading(true); // Inicia o carregamento
+
+    try {
+      await login(email, password); // Chama a função de login do AuthContext
+      navigate(from, { replace: true }); // Redireciona após login bem-sucedido
+    } catch (err: unknown) {
+      console.error("Falha no login:", err);
+      // Idealmente, mapear códigos de erro do Firebase para mensagens amigáveis
+      if (err instanceof Error) {
+        setError(err.message || 'Falha ao tentar fazer login. Verifique suas credenciais.');
+      } else {
+        setError('Ocorreu um erro desconhecido ao tentar fazer login.');
+      }
+    } finally {
+      setIsLoading(false); // Finaliza o carregamento
+    }
   };
 
   const pageContainerStyle: CSSProperties = {
@@ -40,6 +54,12 @@ function LoginPage() {
   const labelStyle: CSSProperties = { display: 'block', marginBottom: '5px' };
   const inputStyle: CSSProperties = { width: '100%', padding: '10px', boxSizing: 'border-box', borderRadius: '4px', border: '1px solid #555' };
   const buttonStyle: CSSProperties = { width: '100%', padding: '12px', marginTop: '10px', cursor: 'pointer' };
+  const errorStyle: CSSProperties = { color: 'red', marginTop: '10px', textAlign: 'center' };
+
+  // Se o AuthContext ainda está carregando o estado inicial do usuário, pode mostrar um loader
+  if (authIsLoading) {
+    return <div style={pageContainerStyle}><p>Carregando...</p></div>;
+  }
 
   return (
     <div style={pageContainerStyle}>
@@ -69,8 +89,9 @@ function LoginPage() {
             style={inputStyle}
           />
         </div>
-        <button type="submit" style={buttonStyle}>Entrar</button>
+        <button type="submit" style={buttonStyle} disabled={isLoading}>{isLoading ? 'Entrando...' : 'Entrar'}</button>
       </form>
+      {error && <p style={errorStyle}>{error}</p>}
       <p style={{ marginTop: '20px' }}>Não tem uma conta? <Link to="/signup">Cadastre-se</Link></p>
       <Link to="/" style={{ marginTop: '10px', display: 'inline-block' }}>Voltar para a Página Inicial</Link>
     </div>

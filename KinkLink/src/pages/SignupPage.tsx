@@ -6,22 +6,45 @@ function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const { login } = useAuth();
+  const [error, setError] = useState<string | null>(null); // Para exibir mensagens de erro
+  const [isLoading, setIsLoading] = useState(false); // Para feedback de carregamento
+  const { signup, isLoading: authIsLoading } = useAuth(); // Pega signup e isLoading do AuthContext
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/profile'; // Destino padrão após signup
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setError(null); // Limpa erros anteriores
+
     if (password !== confirmPassword) {
       alert("As senhas não coincidem!");
       return;
     }
     console.log('Signup attempt com:', { email, password });
-    // Simula o cadastro e login automático
-    // No futuro, isso viria da sua API após um cadastro bem-sucedido
-    login(email, 'user-456'); // Passa o email e um ID mockado diferente
-    navigate(from, { replace: true }); // Redireciona para a página de origem ou perfil
+
+    setIsLoading(true); // Inicia o carregamento
+    try {
+      await signup(email, password); // Chama a função de signup do AuthContext
+      navigate(from, { replace: true }); // Redireciona após cadastro bem-sucedido
+    } catch (err: unknown) {
+      const errorMessage = 'Falha ao tentar cadastrar. Tente novamente.';
+      let errorCode: string | undefined = undefined;
+
+      if (typeof err === 'object' && err !== null && 'code' in err) {
+        errorCode = (err as { code: string }).code;
+        if (errorCode === 'auth/email-already-in-use') {
+          setError('Este e-mail já está em uso. Tente fazer login ou use um e-mail diferente.');
+        }
+      } else if (err instanceof Error) {
+        setError(err.message || errorMessage);
+      } else {
+        setError('Ocorreu um erro desconhecido ao tentar cadastrar.');
+      }
+      console.error("Falha no cadastro:", errorCode || (err instanceof Error ? err.message : 'Erro desconhecido'), err);
+    } finally {
+      setIsLoading(false); // Finaliza o carregamento
+    }
   };
 
   const pageContainerStyle: CSSProperties = {
@@ -45,6 +68,12 @@ function SignupPage() {
   const labelStyle: CSSProperties = { display: 'block', marginBottom: '5px' };
   const inputStyle: CSSProperties = { width: '100%', padding: '10px', boxSizing: 'border-box', borderRadius: '4px', border: '1px solid #555' };
   const buttonStyle: CSSProperties = { width: '100%', padding: '12px', marginTop: '10px', cursor: 'pointer' };
+  const errorStyle: CSSProperties = { color: 'red', marginTop: '10px', textAlign: 'center' };
+
+  // Se o AuthContext ainda está carregando o estado inicial do usuário, pode mostrar um loader
+  if (authIsLoading) {
+    return <div style={pageContainerStyle}><p>Carregando...</p></div>;
+  }
 
   return (
     <div style={pageContainerStyle}>
@@ -86,8 +115,9 @@ function SignupPage() {
             style={inputStyle}
           />
         </div>
-        <button type="submit" style={buttonStyle}>Cadastrar</button>
+        <button type="submit" style={buttonStyle} disabled={isLoading}>{isLoading ? 'Cadastrando...' : 'Cadastrar'}</button>
       </form>
+      {error && <p style={errorStyle}>{error}</p>}
       <p style={{ marginTop: '20px' }}>Já tem uma conta? <Link to="/login">Faça login</Link></p>
       <Link to="/" style={{ marginTop: '10px', display: 'inline-block' }}>Voltar para a Página Inicial</Link>
     </div>

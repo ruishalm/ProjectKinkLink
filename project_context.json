@@ -276,7 +276,7 @@
       "developerTooling": {
         "cardCreator": {
           "toolName": "Card Creator (Local Tool)",
-          "description": "Uma ferramenta auxiliar simples e standalone (HTML/CSS/JS) criada para facilitar a geração do conteúdo JSON das cartas pré-definidas (coleção 'cards').",
+          "description": "Uma ferramenta auxiliar simples e standalone (HTML/CSS/JS) criada para facilitar a geração do conteúdo JSON das cartas pré-definidas (coleção 'cards'). NOTA: Para o lote inicial de ~200+ cartas do arquivo `outras ideias.txt`, um script de conversão foi usado em vez da entrada manual por eficiência, resultando no arquivo `Cartas provisorias.json`.",
           "status": "Desenvolvida e finalizada conforme solicitado.",
           "technology": "HTML, CSS, Vanilla JavaScript. Executada localmente no navegador ao abrir o arquivo 'index.html'.",
           "features": [
@@ -285,7 +285,7 @@
             "Listagem das cartas criadas na sessão atual, organizadas por categoria.",
             "Geração de um array JSON formatado contendo todas as cartas criadas na sessão."
           ],
-          "workflow": "Abrir 'index.html' -> Criar cartas usando a interface -> Clicar em 'Gerar JSON' -> Copiar o JSON resultante -> Usar o JSON para popular a coleção 'cards' no Firestore (manualmente ou via script de importação). *Nota: Para o lote inicial de ~200+ cartas do arquivo `outras ideias.txt`, um script de conversão foi usado em vez da entrada manual por eficiência, resultando no arquivo `Cartas provisorias.json`.*",
+          "workflow": "Abrir 'index.html' -> Criar cartas usando a interface -> Clicar em 'Gerar JSON' -> Copiar o JSON resultante -> Usar o JSON para popular a coleção 'cards' no Firestore (manualmente ou via script de importação).",
           "limitations": [
             "Ferramenta local/offline, sem conexão direta com o Firestore.",
             "Não persiste dados entre sessões (começa vazia a cada abertura).",
@@ -296,6 +296,24 @@
         }
       },
       "sessionCheckpointNotes": [
+        "SESSION CHECKPOINT & NEXT STEPS FOCUS (Data: 2025-05-23)",
+        "",
+        "STATUS ATUAL (Cloud Functions Setup):",
+        "- O erro de parsing do ESLint no arquivo `functions/.eslintrc.js` (relacionado ao `tsconfig.json` não encontrado no diretório pai) FOI RESOLVIDO com a configuração `eslint.workingDirectories` no arquivo `.vscode/settings.json` e reinicialização do VS Code.",
+        "- PERSISTE um erro de tipo no arquivo `functions/src/index.ts` (linha 28): `Namespace '.../firebase-functions/lib/v2/providers/https' has no exported member 'CallableContext'.ts(2694)`. Este erro aparece e desaparece, indicando instabilidade.",
+        "- O TypeScript Server (TSServer) no VS Code está INSTÁVEL, sendo finalizado com `Signal: SIGTERM`, conforme logs. Isso é a causa provável do erro intermitente do `CallableContext`.",
+        "- Configurações relevantes na pasta `functions`:",
+        "  - `package.json`: `firebase-functions: ^6.0.1`, `typescript: ^4.9.0`, `engines.node: \"22\"`.",
+        "  - `tsconfig.json`: `module: \"commonjs\"`, `moduleResolution: \"node\"` (correto para API v1).",
+        "  - `src/index.ts`: Usa `import * as functions from \"firebase-functions\";` e `functions.https.CallableContext` (correto para API v1).",
+        "",
+        "PRÓXIMOS PASSOS IMEDIATOS (Foco: Estabilizar TSServer e resolver erro do `CallableContext`):",
+        "1. REINICIAR O PC (ação imediata do usuário).",
+        "2. Se o TSServer continuar instável e o erro do `CallableContext` persistir após o reinício do PC:",
+        "   a. **MUDAR A VERSÃO DO NODE.JS:** A versão Node 22 é muito recente. Utilizar `nvm-windows` para instalar e usar uma versão LTS do Node.js (ex: Node 20 ou Node 18). Após mudar a versão do Node, fechar VS Code, deletar `node_modules`, `package-lock.json` e `lib` da pasta `functions`, rodar `npm install` na pasta `functions`, e reabrir o VS Code.",
+        "   b. (Se a mudança do Node não resolver) DESABILITAR EXTENSÕES do VS Code temporariamente para identificar possíveis conflitos.",
+        "3. OBJETIVO FINAL DESTA ETAPA: Ter a Cloud Function `acceptLinkRequestFunction` compilando sem erros para que possa ser integrada ao frontend do KinkLink (para a funcionalidade de matches/vínculo).",
+        "",
         "SESSION CHECKPOINT & NEXT STEPS FOCUS (Data: 2024-09-07)",
         "",
         "STATUS ATUAL (Frontend Simulado - ATUALIZADO 2025-05-16):", // ATUALIZADO

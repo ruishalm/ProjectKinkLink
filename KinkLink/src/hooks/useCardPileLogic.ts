@@ -26,16 +26,14 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
   const {
     matchedCards, // Obtém matchedCards do hook de interações
     seenCards, // Obtém seenCards do hook de interações
-    addMatch,
     markCardAsSeen,
-    handleConexaoCardInteraction: authHandleConexaoInteraction // Função para lidar com interação de conexão
+    handleRegularCardInteraction, // Usaremos esta para interações normais e detecção de match
+    handleConexaoCardInteraction: authHandleConexaoInteraction
   } = useUserCardInteractions();
 
-  const [mockPartnerInteractions, setMockPartnerInteractions] = useState<Record<string, boolean>>({});
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [currentMatchCard, setCurrentMatchCard] = useState<Card | null>(null);
   const [currentCard, setCurrentCard] = useState<Card | null>(null);
-  const [preferPrioritizedCardNext, setPreferPrioritizedCardNext] = useState(true);
 
   // Estados para cartas "Conexão" e lógica de gatilho (apenas exibição)
   const [conexaoCardsPool, setConexaoCardsPool] = useState<Card[]>([]);
@@ -57,25 +55,6 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
     return { swipableCards: swipable, allConexaoCards: conexao };
   }, []);
 
-  // Inicializa interações simuladas e pool de cartas de conexão
-  useEffect(() => {
-    const generateMockInteractions = (cards: Card[], percentage: number): Record<string, boolean> => {
-      const interactions: Record<string, boolean> = {};
-      const cardsToLike = Math.floor(cards.length * (percentage / 100));
-      const shuffledCards = [...cards].sort(() => 0.5 - Math.random());
-      shuffledCards.slice(0, cardsToLike).forEach(card => {
-        interactions[card.id] = true;
-      });
-      return interactions;
-    };
-
-    if (swipableCards.length > 0 && swipableCards[0].id !== 'fallback') {
-      // Gera interações simuladas apenas para cartas que não são de conexão (60% de likes)
-      setMockPartnerInteractions(generateMockInteractions(swipableCards, 60));
-    }
-    setConexaoCardsPool(allConexaoCards);
-  }, [swipableCards, allConexaoCards]);
-
   // Atualiza a lista de cartas de conexão não vistas quando o usuário ou o pool mudar
   useEffect(() => {
     if (user && conexaoCardsPool.length > 0) {
@@ -93,32 +72,31 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
      // Inicializa lastConexaoMatchTriggerCount com o total de matches atuais do usuário
      setLastConexaoMatchTriggerCount(matchedCards.length);
 
-  }, [user, conexaoCardsPool, seenCards, matchedCards.length]); // Depende de user, pool e seenCards/matchedCards do hook de interações
+  }, [user, conexaoCardsPool, seenCards, matchedCards.length]);
 
-  // Filtra as cartas swipeáveis não vistas com base nas interações simuladas
-  const { prioritizedUnseen, generalUnseen } = useMemo(() => {
+  // Inicializa o pool de cartas de conexão (apenas uma vez)
+  useEffect(() => {
+    setConexaoCardsPool(allConexaoCards);
+  }, [allConexaoCards]);
+
+  // Filtra as cartas swipeáveis não vistas.
+  // Sem mockPartnerInteractions, não há mais "prioritizedUnseen" da mesma forma.
+  // Todas as não vistas são "generalUnseen" por enquanto.
+  const { generalUnseen } = useMemo(() => { // Removido prioritizedUnseen da desestruturação
     const unseen = swipableCards.filter(card => !seenCards.includes(card.id));
-    const prioritized = unseen.filter(card => mockPartnerInteractions[card.id] === true);
-    const general = unseen.filter(card => mockPartnerInteractions[card.id] !== true);
-    return { prioritizedUnseen: prioritized, generalUnseen: general };
-  }, [swipableCards, seenCards, mockPartnerInteractions]); // Depende de seenCards do hook de interações
+    return { prioritizedUnseen: [], generalUnseen: unseen }; // Simplificado: todas são gerais
+  }, [swipableCards, seenCards]);
 
   // Seleciona a próxima carta para exibir
   const selectNextCard = useCallback(() => {
     let nextCard: Card | null = null;
-    const availablePrioritized = [...prioritizedUnseen];
-    const availableGeneral = [...generalUnseen];
+    const availableGeneral = [...generalUnseen]; // Única fonte de cartas agora
 
-    if (preferPrioritizedCardNext && availablePrioritized.length > 0) {
-      nextCard = availablePrioritized[0]; // Pega a primeira carta priorizada
-    } else if (availableGeneral.length > 0) {
+    if (availableGeneral.length > 0) {
       nextCard = availableGeneral[0]; // Pega a primeira carta geral
-    } else if (availablePrioritized.length > 0) {
-      nextCard = availablePrioritized[0]; // Fallback para priorizada se não houver geral
     }
-
     setCurrentCard(nextCard);
-  }, [preferPrioritizedCardNext, prioritizedUnseen, generalUnseen]);
+  }, [generalUnseen]);
 
   // Efeito para selecionar a primeira carta ao carregar ou quando as listas mudam
   useEffect(() => {
@@ -126,24 +104,24 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
   }, [selectNextCard]); // Depende da função selectNextCard
 
   // Lida com a interação do usuário (like/dislike)
-  const handleInteraction = (liked: boolean) => {
+  const handleInteraction = async (liked: boolean) => { // Tornar async
     if (!currentCard) return;
 
     const interactedCard = currentCard;
 
     // Marca a carta atual como vista imediatamente
-    markCardAsSeen(interactedCard.id);
+    await markCardAsSeen(interactedCard.id); // markCardAsSeen agora é async
 
     let matchOccurredThisInteraction = false; // Renomeado para clareza
 
     if (interactedCard.category === 'conexao') {
       // Lógica específica para cartas de conexão
-      authHandleConexaoInteraction(interactedCard.id, liked);
+      await authHandleConexaoInteraction(interactedCard.id, liked); // authHandleConexaoInteraction agora é async
       // Cartas de conexão não geram "match" no sentido tradicional
     } else {
-      // Lógica para cartas normais (verificar match)
-      if (liked && mockPartnerInteractions[interactedCard.id] === true) {
-        addMatch(interactedCard);
+      // Lógica para cartas normais (chama o backend para registrar interação e verificar match)
+      const didMatch = await handleRegularCardInteraction(interactedCard, liked);
+      if (didMatch) {
         setCurrentMatchCard(interactedCard);
         setShowMatchModal(true);
         matchOccurredThisInteraction = true;
@@ -191,17 +169,15 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
 
 
     // Seleciona a próxima carta para a pilha principal
-    selectNextCard();
-    // Alterna a preferência entre cartas priorizadas e gerais
-    setPreferPrioritizedCardNext(prev => !prev);
+    selectNextCard(); // Chama depois de toda a lógica de interação e gatilho
   };
 
   // Lida com a interação dentro do modal de carta "Conexão"
-  const handleConexaoInteractionInModal = (accepted: boolean) => {
+  const handleConexaoInteractionInModal = async (accepted: boolean) => { // Tornar async
     if (!currentConexaoCardForModal) return;
 
     // Chama a função do hook de interações para atualizar o usuário (contadores e seenCards)
-    authHandleConexaoInteraction(currentConexaoCardForModal.id, accepted);
+    await authHandleConexaoInteraction(currentConexaoCardForModal.id, accepted);
 
     // Remove a carta do pool de não vistas localmente no hook
     setUnseenConexaoCards(prev => prev.filter(card => card.id !== currentConexaoCardForModal.id));
@@ -217,7 +193,7 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
   // A função handleCreateConexaoCard e o estado showCreateConexaoModal foram removidos
 
   // Calcula o número total de cartas swipeáveis não vistas
-  const unseenCardsCount = prioritizedUnseen.length + generalUnseen.length;
+  const unseenCardsCount = generalUnseen.length; // Agora apenas generalUnseen
 
   return {
     currentCard,

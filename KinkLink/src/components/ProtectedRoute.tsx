@@ -7,14 +7,14 @@ interface ProtectedRouteProps {
 }
 
 function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth(); // Usaremos isAuthenticated diretamente
   const location = useLocation();
 
   if (isLoading) {
     return <div>Carregando...</div>; // Ou um spinner/componente de loading
   }
 
-  return user ? <>{children}</> : <Navigate to="/login" state={{ from: location }} replace />;
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" state={{ from: location }} replace />;
 }
 
 export default ProtectedRoute;

@@ -1,70 +1,107 @@
-// d:\Projetos\Github\app\KinkLink\KinkLink\src\hooks\useCardChat.ts
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { db } from '../firebase'; // Importa a instância do Firestore
+import {
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  Timestamp, // Para timestamps do Firestore
+} from 'firebase/firestore';
 
 export interface ChatMessage {
-  id: string; // ID único da mensagem
-  // cardId: string; // Não é estritamente necessário aqui se o hook é por cardId
+  id: string; // ID do documento Firestore
   userId: string; // ID do usuário que enviou
   username: string; // Nome do usuário que enviou
   text: string;
-  timestamp: number; // Usaremos timestamp numérico para facilitar o armazenamento e ordenação
+  timestamp: Timestamp; // Timestamp do Firestore
 }
-
-const KINKLINK_CHAT_STORAGE_PREFIX = 'kinklink_chat_';
 
 export function useCardChat(cardId: string | null) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [chatRoomId, setChatRoomId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const getStorageKey = useCallback(() => {
-    if (!user || !cardId) return null;
-    return `${KINKLINK_CHAT_STORAGE_PREFIX}${user.id}_${cardId}`;
+  // Determina o chatRoomId com base no usuário, parceiro vinculado e cardId
+  useEffect(() => {
+    if (user && user.id && user.linkedPartnerId && cardId) {
+      // Ordena os IDs para garantir consistência no chatRoomId, independente de quem iniciou
+      const ids = [user.id, user.linkedPartnerId].sort();
+      setChatRoomId(`${cardId}_${ids[0]}_${ids[1]}`);
+    } else {
+      setChatRoomId(null);
+    }
   }, [user, cardId]);
 
-  // Carregar mensagens do localStorage quando o cardId ou user mudar
+  // Carregar mensagens do Firestore quando o chatRoomId mudar
   useEffect(() => {
-    if (!cardId || !user) {
+    if (!chatRoomId) {
       setMessages([]); // Limpa as mensagens se não houver cardId ou usuário
+      setIsLoading(false);
       return;
     }
 
-    const storageKey = getStorageKey();
-    if (!storageKey) return;
+    setIsLoading(true);
+    setError(null);
 
-    try {
-      const storedMessages = localStorage.getItem(storageKey);
-      if (storedMessages) {
-        setMessages(JSON.parse(storedMessages));
-      } else {
-        setMessages([]);
-      }
-    } catch (error) {
-      console.error("Erro ao carregar mensagens do chat do localStorage:", error);
+    const messagesColRef = collection(db, 'cardChats', chatRoomId, 'messages');
+    const q = query(messagesColRef, orderBy('timestamp', 'asc'));
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const fetchedMessages: ChatMessage[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        fetchedMessages.push({
+          id: doc.id,
+          userId: data.userId,
+          username: data.username,
+          text: data.text,
+          timestamp: data.timestamp as Timestamp, // Assume que é um Timestamp do Firestore
+        });
+      });
+      setMessages(fetchedMessages);
+      setIsLoading(false);
+    }, (err) => {
+      console.error("Erro ao carregar mensagens do chat do Firestore:", err);
+      setError("Não foi possível carregar as mensagens.");
       setMessages([]);
-    }
-  }, [cardId, user, getStorageKey]);
+      setIsLoading(false);
+    });
 
-  const sendMessage = useCallback((text: string) => {
-    if (!user || !cardId || !text.trim()) return; // Precisa estar logado, ter um cardId e texto
+    return () => unsubscribe(); // Limpa o listener ao desmontar
 
-    const newMessage: ChatMessage = {
-      id: new Date().toISOString() + Math.random().toString(36).substring(2), // ID simples
+  }, [chatRoomId]);
+
+  const sendMessage = async (text: string) => {
+    if (!user || !user.id || !chatRoomId || !text.trim()) return;
+
+    const senderUsername = user.username || (user.email ? user.email.split('@')[0] : `User-${user.id.substring(0,5)}`);
+
+    const newMessageData = {
       userId: user.id,
-      username: user.username || user.email.split('@')[0],
+      username: senderUsername,
       text: text.trim(),
-      timestamp: Date.now(),
+      timestamp: Timestamp.now(), // Usa o Timestamp do Firestore
     };
 
-    setMessages(prevMessages => {
-      const updatedMessages = [...prevMessages, newMessage];
-      const storageKey = getStorageKey();
-      if (storageKey) {
-        localStorage.setItem(storageKey, JSON.stringify(updatedMessages));
-      }
-      return updatedMessages;
-    });
-  }, [user, cardId, getStorageKey]);
+    try {
+      const messagesColRef = collection(db, 'cardChats', chatRoomId, 'messages');
+      await addDoc(messagesColRef, newMessageData);
+      // Não é necessário setMessages aqui, o onSnapshot cuidará da atualização
+    } catch (err) {
+      console.error("Erro ao enviar mensagem:", err);
+      // Poderia definir um estado de erro para a UI aqui
+    }
+  };
 
-  return { messages, sendMessage };
+  return {
+    messages,
+    sendMessage,
+    isLoading,
+    error,
+    isChatReady: !!chatRoomId && !!user?.linkedPartnerId // Indica se o chat pode ser usado
+  };
 }

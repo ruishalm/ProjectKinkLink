@@ -6,6 +6,9 @@ function HomePage() {
   const { user, isLoading } = useAuth();
   const navigate = useNavigate();
 
+  // Log para debug
+  console.log('[HomePage] isLoading:', isLoading, 'User:', user);
+
   useEffect(() => {
     // Se o usuário está carregando, não faz nada ainda
     if (isLoading) {
@@ -30,6 +33,7 @@ function HomePage() {
     padding: '40px 20px',
     textAlign: 'center',
     fontFamily: '"Trebuchet MS", sans-serif',
+    // backgroundColor: 'darkslateblue', // TESTE: Adicionar um fundo óbvio
     color: '#e0e0e0',
   };
 

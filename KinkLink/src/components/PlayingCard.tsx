@@ -235,8 +235,8 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
                 filter: data.isHot ? 'drop-shadow(0 0 3px #ff6b6b)' : 'grayscale(100%)',
                 opacity: data.isHot ? 1 : 0.6,
               }}
-              aria-label={data.isHot ? "Remover dos Top Matches" : "Adicionar aos Top Matches"}
-              title={data.isHot ? "Remover dos Top Matches" : "Adicionar aos Top Matches"}
+              aria-label={data.isHot ? "Remover dos Top Links" : "Adicionar aos Top Links"}
+              title={data.isHot ? "Remover dos Top Links" : "Adicionar aos Top Links"}
             >
               🔥
             </button>

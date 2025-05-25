@@ -49,6 +49,7 @@
       "Notificações Push (PWA/Capacitor - ex: novo match)",
       "Tela 'Novidades em Breve'",
       "Onboarding visual (GIF/Tutorial pós-vinculação, talvez mini-game)",
+      "Gamificação de Temas/Skins: Liberar personalizações visuais (temas do app, fundos de carta, variações do logo) baseadas em checkpoints de engajamento do casal (nº de matches, interações em cartas 'Conexão', atividade no chat, etc.).",
       "Funcionalidades PWA completas (instalação, offline básico para matches/perfil)",
       "Evolução para Híbrido (Capacitor) se necessário",
       "Desfazer Último Swipe ('Oops!')",
@@ -70,7 +71,7 @@
       "servicesUsed": ["Authentication", "Firestore"],
       "potentialServices": ["Cloud Functions (gerar código único complexo, lógica de backend, limpeza agendada)", "Firebase Hosting", "Firebase Storage (para fotos futuras)"]
     },
-      "database": { // Nota: As coleções e lógica de backend ainda não foram implementadas, apenas simuladas no frontend.
+    "database": {
       "type": "Firestore (NoSQL)",
       "collectionsPlanned": [
         "users (contém partnerId, coupleId, conexaoAccepted: number, conexaoRejected: number)",
@@ -81,265 +82,232 @@
         "userSwipes (registro individual para match, ID: userId_cardId, NÃO usado para 'conexao')",
         "matches (resultado dos likes mútuos, contém status)"
       ],
-      "notes": "Estrutura detalhada definida previamente. Usa coleção `pendingLinks` para gerenciar o fluxo de vínculo temporário. Usa ID composto em `userSwipes`. 'matches' inclui status ('active', 'removed', 'realized' futuro). Post-its movidos para o futuro. Denormaliza 'cardText' em 'matches'. Firebase Storage será usado para arquivos de fotos, Firestore (subcoleção 'photos' em 'couples') para metadados. Requer regras de segurança robustas baseadas em 'userId' e 'coupleId'. Cartas 'Conexão' são identificadas pela categoria e seu swipe incrementa contadores em 'users', não gera 'userSwipes' ou 'matches'."
+      "notes": "Estrutura detalhada definida previamente. Usa coleção `pendingLinks` para gerenciar o fluxo de vínculo temporário. Usa ID composto em `userSwipes`. 'matches' inclui status ('active', 'removed', 'realized' futuro). Post-its movidos para o futuro. Denormaliza 'cardText' em 'matches'. Firebase Storage será usado para arquivos de fotos, Firestore (subcoleção 'photos' em 'couples' para metadados. Requer regras de segurança robustas baseadas em 'userId' e 'coupleId'. Cartas 'Conexão' são identificadas pela categoria e seu swipe incrementa contadores em 'users', não gera 'userSwipes' ou 'matches'."
     },
     "versionControl": "Git",
     "repository": "https://github.com/ruishalm/kinklink.git"
   },
-  {
-    "contentStrategy": {
-      "initialCards": "Baseado no arquivo 'Cartas provisorias.json' (convertido de 'outras ideias.txt') mais as novas cartas 'Conexão'. Necessita revisão e refinamento do conteúdo, especialmente para clareza, tom e adequação NSFW. As cartas 'Conexão' devem ser focadas em pequenos gestos e interações positivas.",
-      "userGeneratedCards": "Casais podem criar suas próprias cartas ('Cartas em Branco') que são privadas para eles. Sem moderação para estas.",
-      "cardCategories": ["Sensorial", "Poder", "Fantasia", "Exposição", "Conexão"],
-      "intensityLevels": "1-5 (sugerido, pode ser ajustado). Cartas 'Conexão' não usam intensidade.",
-      "language": "Português (Brasil)"
-    },
-    "designAndUX": {
-      "theme": "Opção de tema claro e escuro (MVP: escuro como padrão, claro como opção).",
-      "cardAppearance": "Visual de carta de baralho, com cor de fundo baseada na categoria. Texto claro e legível. Intensidade e categoria visíveis.",
-      "animations": "Animações sutis para swipe/interação e transições de tela.",
-      "userFeedback": "Feedback visual claro para ações (loading, sucesso, erro, match).",
-      "accessibility": "Considerar contraste de cores, navegação por teclado (básico), e ARIA labels onde apropriado. Botão 'Crie seu Kink' com atributos de acessibilidade.",
-      "nsfwHandling": "Aviso de conteúdo NSFW na entrada/cadastro. Conteúdo NSFW é parte integral, mas deve ser claro que é opcional interagir com ele."
-    },
-    "developmentWorkflow": {
-      "description": "Fluxo de desenvolvimento detalhado para o KinkLink, dividido em Milestones e Tarefas para o MVP inicial. Foco em entregar valor incrementalmente.",
-      "milestones": [
-        {
-          "id": "M1",
-          "title": "Fundação do Projeto e Autenticação",
-          "goal": "Configurar o ambiente de desenvolvimento, a estrutura básica do app e implementar a autenticação de usuários.",
-          "tasks": [
-            { "id": "M1.T1", "description": "Setup inicial do projeto Vite (React + TypeScript)." },
-            { "id": "M1.T2", "description": "Definir estrutura de pastas inicial." },
-            { "id": "M1.T3", "description": "Configurar Firebase no projeto React." },
-            { "id": "M1.T4", "description": "Configurar Firebase Authentication (escolher provedores: Google, Email/Senha inicialmente)." },
-            { "id": "M1.T5", "description": "Criar estrutura básica de navegação (React Router) com as Tabs (Cartas, Matches, Perfil) e telas placeholder." },
-            { "id": "M1.T6", "description": "Implementar UI de Login/Cadastro (formulários simples)." },
-            { "id": "M1.T7", "description": "Implementar lógica de Cadastro, Login e Logout usando Firebase Auth." },
-            { "id": "M1.T8", "description": "Criar coleção 'users' no Firestore e salvar dados básicos do usuário no cadastro (uid, email, displayName, inicializar conexaoAccepted: 0, conexaoRejected: 0)." },
-            { "id": "M1.T9", "description": "Configurar regras de segurança básicas do Firestore (permitir leitura/escrita apenas para usuário autenticado em seu próprio doc 'users')." }
-          ],
-          "status": "Não iniciado"
-        },
-        {
-          "id": "M2",
-          "title": "Mecanismo de Vinculação de Casais",
-          "goal": "Permitir que dois usuários autenticados vinculem suas contas para formar um casal no app.",
-          "tasks": [
-            { "id": "M2.T1", "description": "Criar coleção 'pendingLinks' no Firestore." },
-            { "id": "M2.T2", "description": "Na UI (Tela 'Vincular'): Adicionar botão 'Criar Vínculo'." },
-            { "id": "M2.T3", "description": "Lógica 'Criar Vínculo': Gerar código único (Cloud Function ou lógica no cliente), criar doc em 'pendingLinks' (initiatorUserId, linkCode, status: 'pending', createdAt)." },
-            { "id": "M2.T4", "description": "Na UI: Exibir código gerado para o usuário." },
-            { "id": "M2.T5", "description": "Na UI: Adicionar campo para inserir código de vínculo e botão 'Vincular'." },
-            { "id": "M2.T6", "description": "Lógica 'Vincular com Código': Buscar doc em 'pendingLinks' pelo código e status 'pending'. Validar (código existe, não expirou, usuários não já vinculados)." },
-            { "id": "M2.T7", "description": "Se válido, em transação Firestore: Criar doc na coleção 'couples' (userAId, userBId, createdAt)." },
-            { "id": "M2.T8", "description": "Continuar transação: Atualizar 'partnerId' e 'coupleId' nos docs 'users' de ambos os usuários." },
-            { "id": "M2.T9", "description": "Continuar transação: Atualizar status do doc em 'pendingLinks' para 'completed' ou deletá-lo." },
-            { "id": "M2.T10", "description": "Implementar feedback visual (loading, sucesso, erros específicos) para o processo de vinculação." },
-            { "id": "M2.T11", "description": "Atualizar estado da aplicação para refletir o status de vinculado (ex: esconder UI de vínculo, mostrar nome do parceiro talvez)." },
-            { "id": "M2.T12", "description": "Refinar regras de segurança do Firestore para 'pendingLinks', 'users' (atualização de partnerId/coupleId) e 'couples'." }
-          ],
-          "status": "Concluído (Frontend UI/Simulação)"
-        },
-        {
-          "id": "M3",
-          "title": "Visualização e Interação com Cartas",
-          "goal": "Permitir que usuários vinculados vejam e interajam (swipe/botões) com as cartas pré-definidas, incluindo as de 'Conexão'.",
-          "tasks": [
-            { "id": "M3.T1a", "description": "Definir e escrever/revisar o conteúdo das cartas pré-definidas (arquivo `Cartas provisorias.json`) E criar conteúdo para as cartas 'Conexão'." },
-            { "id": "M3.T1a.1", "description": "Mover dados das cartas para arquivo local (`src/data/cards.ts`).", "status": "Concluído (Frontend)" },
-            { "id": "M3.T1b", "description": "Criar a coleção 'cards' no Firestore e inserir o conteúdo combinado (provisórias + conexão)." },
-            { "id": "M3.T2", "description": "Criar coleção 'userSwipes' no Firestore (estrutura ID: userId_cardId)." },
-            { "id": "M3.T3", "description": "Na UI (Tela 'Cartas'): Implementar a visualização da pilha de cartas (mostrar uma por vez).", "status": "Concluído (UI)" },
-            { "id": "M3.T3.1", "description": "Criar componente `PlayingCard` para exibir uma carta.", "status": "Concluído (UI)" },
-            { "id": "M3.T3.2", "description": "Refatorar lógica da pilha de cartas para hook customizado `useCardPileLogic`.", "status": "Concluído (Frontend)" },
-            { "id": "M3.T4", "description": "Lógica para buscar cartas: Buscar de 'cards' que o usuário ainda não viu/swipou (incluindo 'conexao').", "status": "Concluído (Simulado Frontend)" },
-            { "id": "M3.T4.1", "description": "Implementar lógica de sorteio de cartas com prioridade (Simulado no Frontend).", "status": "Concluído (Simulado Frontend)" },
-            { "id": "M3.T5", "description": "Implementar detecção de gesto de swipe (direita/esquerda) OU botões (Aceitar/Rejeitar).", "status": "Concluído (Botões)" },
-            { "id": "M3.T5.1", "description": "Implementar lógica para que cartas não se repitam (Simulado no Frontend).", "status": "Concluído (Simulado Frontend)" },
-            { "id": "M3.T5.2", "description": "Implementar feedback visual de Match (Modal).", "status": "Concluído (UI)" },
-            { "id": "M3.T6", "description": "Implementar animação CSS 'Slide Out' ao concluir swipe/clique." },
-            { "id": "M3.T7", "description": "Lógica de Swipe/Botão: Verificar `card.category`. Se 'conexao', incrementar contador `conexaoAccepted`/`conexaoRejected` em `users`. Se NÃO for 'conexao', gravar decisão ('like'/'dislike') em `userSwipes`." },
-            { "id": "M3.T8", "description": "Refinar regras de segurança para 'cards' (leitura para autenticados) e 'userSwipes' (escrita apenas pelo próprio usuário no seu swipe)." }
-          ],
-          "status": "Concluído (Frontend Simulado)"
-        }
-        {
-          "id": "M3.5",
-          "title": "Chat Interno de Cartas (MVP Frontend Simulado)",
-          "goal": "Implementar a interface e lógica básica do chat para cartas que deram match, simulado no frontend com persistência local.",
-          "tasks": [
-            { "id": "M3.5.T1", "description": "Criar hook customizado `useCardChat` para lógica de chat (carregar/salvar no localStorage).", "status": "Concluído (Frontend Simulado)" },
-            { "id": "M3.5.T2", "description": "Criar componente `CardChatModal` para a UI do chat.", "status": "Concluído (UI)" },
-            { "id": "M3.5.T3", "description": "Integrar `CardChatModal` na `MatchesPage` (abrir modal ao clicar no item de match).", "status": "Concluído (UI)" },
-            { "id": "M3.5.T4", "description": "Ajustar exibição dos matches na `MatchesPage` para usar `PlayingCard` e manter formato/proporção.", "status": "Concluído (UI)" }
-          ],
-          "status": "Concluído (Frontend UI/Simulação)"
-        },
-        {
-          "id": "M4",
-          "title": "Detecção e Exibição de Matches",
-          "goal": "Implementar a lógica de backend para detectar matches e exibi-los na UI.",
-          "tasks": [
-            { "id": "M4.T1", "description": "Criar coleção 'matches' no Firestore." },
-            { "id": "M4.T2", "description": "Lógica de Match (Backend/Cloud Function ou Cliente): Ao gravar 'like' em 'userSwipes' (M3.T7), verificar se o parceiro já deu 'like' na mesma carta." },
-            { "id": "M4.T3", "description": "Se match, criar doc em 'matches' (coupleId, cardId, cardText, cardCategory, cardIntensity, createdAt, status: 'active')." },
-            { "id": "M4.T4", "description": "Na UI (Tela 'Matches'): Implementar a exibição da lista de matches (status 'active')." },
-            { "id": "M4.T5", "description": "Lógica para buscar matches: Buscar de 'matches' onde o `coupleId` corresponde ao do usuário e status é 'active'." },
-            { "id": "M4.T6", "description": "Implementar rolagem infinita (ou paginação simples) para a lista de matches." },
-            { "id": "M4.T7", "description": "Na UI: Adicionar botão 'X' ou lixeira em cada match." },
-            { "id": "M4.T8", "description": "Lógica 'Remover Match': Ao clicar, atualizar o status do doc correspondente em 'matches' para 'removed'." },
-            { "id": "M4.T9", "description": "Refinar regras de segurança para 'matches' (leitura/escrita apenas por membros do casal, talvez escrita apenas via lógica de match)." }
-          ],
-          "status": "Não iniciado"
-        },
-        {
-          "id": "M5",
-          "title": "Cartas Personalizadas e Perfil Básico",
-          "goal": "Permitir que casais criem suas próprias cartas e implementar funcionalidades básicas do perfil (tema, desvinculação).",
-          "tasks": [
-            { "id": "M5.T1", "description": "Criar coleção 'userCards' no Firestore." },
-            { "id": "M5.T2", "description": "Na UI: Adicionar interface para criar 'Cartas em Branco' (campo de texto simples, botão Salvar). Local: talvez modal na tela de swipe ou seção no perfil.", "status": "Concluído (UI - CreateUserCardModal)" },
-            { "id": "M5.T3", "description": "Lógica 'Salvar Carta': Criar doc em 'userCards' (coupleId, cardText, createdByUserId, createdAt).", "status": "Concluído (Frontend Simulado - useUserCardInteractions)" },
-            { "id": "M5.T4", "description": "Modificar lógica de busca de cartas (M3.T4) para incluir cartas de 'userCards' pertencentes ao `coupleId` do usuário, além das 'cards' pré-definidas." },
-            { "id": "M5.T5", "description": "Na UI (Tela 'Perfil'): Construir a tela básica de perfil/configurações.", "status": "Concluído (UI - ProfilePage básica)" },
-            { "id": "M5.T6", "description": "Implementar funcionalidade de troca de tema (claro/escuro) e persistir escolha (localStorage ou Firestore)." },
-            { "id": "M5.T7", "description": "Na UI (Tela 'Perfil'): Adicionar botão 'Desvincular'.", "status": "Concluído (UI - ProfilePage básica)" },
-            { "id": "M5.T8", "description": "Implementar Lógica de Desvinculação: Confirmação, Transação/Cloud Function para limpar 'partnerId'/'coupleId' em ambos 'users', deletar doc 'couples'. Decidir e implementar o que fazer com 'matches' e 'userCards' associados." },
-            { "id": "M5.T9", "description": "Refinar regras de segurança para 'userCards' (leitura/escrita apenas por membros do casal) e ajustar regras de 'users'/'couples' para desvinculação." }
-          ],
-          "status": "Em Andamento (Frontend UI/Simulação)"
-        },
-        {
-          "id": "M6",
-          "title": "Polimento MVP e Preparação Inicial",
-          "goal": "Refinar a experiência do usuário do MVP, tratar casos de borda e preparar para testes iniciais.",
-          "tasks": [
-            { "id": "M6.T1", "description": "Revisar e refinar todos os fluxos de usuário implementados." },
-            { "id": "M6.T2", "description": "Adicionar tratamento de erros mais robusto e mensagens claras em toda a aplicação." },
-            { "id": "M6.T3", "description": "Implementar feedback sutil (tátil/sonoro opcional) no swipe, se decidido." },
-            { "id": "M6.T4", "description": "Adicionar aviso de conteúdo NSFW na entrada/cadastro." },
-            { "id": "M6.T5", "description": "Realizar testes manuais completos dos fluxos do MVP (incluindo fluxo 'Conexão')." },
-            { "id": "M6.T6", "description": "Configurar Firebase Hosting para deploy inicial (teste)." },
-            { "id": "M6.T7", "description": "Escrever rascunho inicial da Política de Privacidade e Termos de Serviço (marcar como placeholder até consulta legal)." }
-          ],
-          "status": "Não iniciado"
-        }
-      ],
-      "postMvpFocus": [
-        "Implementação de funcionalidades da lista 'future' (Post-its, Fotos, Filtros, Uso dos contadores 'Conexão', etc.)",
-        "Melhorias de PWA (Offline, Instalação)",
-        "Otimizações de performance e Firestore (incluindo lógica de exibição periódica das cartas 'Conexão')",
-        "Consulta Jurídica e finalização de documentos legais",
-        "Estratégia de lançamento e marketing inicial"
-      ],
-      "communicationNotes": "Explique os passos de forma extremamente detalhada, como se eu fosse um iniciante completo idiota ou tivesse acabado de ter um AVC. Usar linguagem simples e dividir em passos bem pequenos.",
-      "lastUpdated": "2025-05-16T02:00:00Z", // ATUALIZADO
-      "developmentPrinciples": {
-        "modularity": {
-          "goal": "Manter o código organizado, reutilizável e fácil de manter.",
-          "practices": [
-            "Dividir UI em componentes pequenos e focados.",
-            "Utilizar hooks customizados para lógica reutilizável.",
-            "Utilizar Context API para estado compartilhado (ex: AuthContext).",
-            "Definir constantes em arquivos dedicados (`constants/`).",
-            "Manter uma estrutura de pastas clara e lógica."
-          ],
-          "fileSizeGuideline": "Utilizar ~250 linhas por arquivo como um guia para incentivar a refatoração e a divisão de responsabilidades, priorizando a coesão lógica sobre a aderência estrita ao limite."
-        }
-      },
-      "testingStrategy": {
-        "overallApproach": "Foco principal em testes manuais abrangentes dos fluxos de usuário no MVP. Testes unitários/integração serão considerados para lógica crítica (transações, match). Automação E2E é pós-MVP.",
-        "testingTypes": [
-          { "type": "Unitário", "focus": "Funções críticas isoladas (validações, helpers). Ferramentas: Jest." },
-          { "type": "Integração", "focus": "Interação com Firebase (salvar swipe, checar match, incrementar contadores). Ferramentas: React Testing Library, Firebase Emulators (opcional)." },
-          { "type": "Manual E2E", "focus": "Fluxos completos do usuário (cadastro a desvinculação) simulando dois parceiros. Uso de checklists." },
-          { "type": "UI/UX", "focus": "Verificação visual, navegação, temas, responsividade básica, animações." },
-          { "type": "Segurança", "focus": "Validação manual e revisão das Regras de Segurança do Firestore para garantir acesso correto aos dados." }
+  "contentStrategy": {
+    "initialCards": "Baseado no arquivo 'Cartas provisorias.json' (convertido de 'outras ideias.txt') mais as novas cartas 'Conexão'. Necessita revisão e refinamento do conteúdo, especialmente para clareza, tom e adequação NSFW. As cartas 'Conexão' devem ser focadas em pequenos gestos e interações positivas.",
+    "userGeneratedCards": "Casais podem criar suas próprias cartas ('Cartas em Branco') que são privadas para eles. Sem moderação para estas.",
+    "cardCategories": ["Sensorial", "Poder", "Fantasia", "Exposição", "Conexão"],
+    "intensityLevels": "1-5 (sugerido, pode ser ajustado). Cartas 'Conexão' não usam intensidade.",
+    "language": "Português (Brasil)"
+  },
+  "designAndUX": {
+    "theme": "Opção de tema claro e escuro (MVP: escuro como padrão, claro como opção).",
+    "cardAppearance": "Visual de carta de baralho, com cor de fundo baseada na categoria. Texto claro e legível. Intensidade e categoria visíveis.",
+    "animations": "Animações sutis para swipe/interação e transições de tela.",
+    "userFeedback": "Feedback visual claro para ações (loading, sucesso, erro, match).",
+    "accessibility": "Considerar contraste de cores, navegação por teclado (básico), e ARIA labels onde apropriado. Botão 'Crie seu Kink' com atributos de acessibilidade.",
+    "nsfwHandling": "Aviso de conteúdo NSFW na entrada/cadastro. Conteúdo NSFW é parte integral, mas deve ser claro que é opcional interagir com ele."
+  },
+  "developmentWorkflow": {
+    "description": "Fluxo de desenvolvimento detalhado para o KinkLink, dividido em Milestones e Tarefas para o MVP inicial. Foco em entregar valor incrementalmente.",
+    "milestones": [
+      {
+        "id": "M1",
+        "title": "Fundação do Projeto e Autenticação",
+        "goal": "Configurar o ambiente de desenvolvimento, a estrutura básica do app e implementar a autenticação de usuários.",
+        "tasks": [
+          { "id": "M1.T1", "description": "Setup inicial do projeto Vite (React + TypeScript)." },
+          { "id": "M1.T2", "description": "Definir estrutura de pastas inicial." },
+          { "id": "M1.T3", "description": "Configurar Firebase no projeto React." },
+          { "id": "M1.T4", "description": "Configurar Firebase Authentication (escolher provedores: Google, Email/Senha inicialmente)." },
+          { "id": "M1.T5", "description": "Criar estrutura básica de navegação (React Router) com as Tabs (Cartas, Matches, Perfil) e telas placeholder." },
+          { "id": "M1.T6", "description": "Implementar UI de Login/Cadastro (formulários simples)." },
+          { "id": "M1.T7", "description": "Implementar lógica de Cadastro, Login e Logout usando Firebase Auth." },
+          { "id": "M1.T8", "description": "Criar coleção 'users' no Firestore e salvar dados básicos do usuário no cadastro (uid, email, displayName, inicializar conexaoAccepted: 0, conexaoRejected: 0)." },
+          { "id": "M1.T9", "description": "Configurar regras de segurança básicas do Firestore (permitir leitura/escrita apenas para usuário autenticado em seu próprio doc 'users')." }
         ],
-        "keyFlowsToTest": [
-          "Cadastro e Login (Firebase Auth)",
-          "Geração e Inserção de Código de Vínculo",
-          "Visualização e Swipe de Cartas (Pré-definidas, Personalizadas, e 'Conexão')",
-          "Lógica de Match (Ocorre quando esperado para cartas normais, NÃO ocorre para 'Conexão')",
-          "Lógica de Swipe 'Conexão' (Incremento correto dos contadores em 'users')",
-          "Lista de Matches (Exibição, Remoção - mudança de status)",
-          "Criação de Cartas Personalizadas",
-          "Desvinculação (Limpeza de dados, tratamento de matches/cartas existentes)",
-          "Troca de Tema",
-          "Exibição de Aviso NSFW"
+        "status": "Não iniciado"
+      },
+      {
+        "id": "M2",
+        "title": "Mecanismo de Vinculação de Casais",
+        "goal": "Permitir que dois usuários autenticados vinculem suas contas para formar um casal no app.",
+        "tasks": [
+          { "id": "M2.T1", "description": "Criar coleção 'pendingLinks' no Firestore." },
+          { "id": "M2.T2", "description": "Na UI (Tela 'Vincular'): Adicionar botão 'Criar Vínculo'." },
+          { "id": "M2.T3", "description": "Lógica 'Criar Vínculo': Gerar código único (Cloud Function ou lógica no cliente), criar doc em 'pendingLinks' (initiatorUserId, linkCode, status: 'pending', createdAt)." },
+          { "id": "M2.T4", "description": "Na UI: Exibir código gerado para o usuário." },
+          { "id": "M2.T5", "description": "Na UI: Adicionar campo para inserir código de vínculo e botão 'Vincular'." },
+          { "id": "M2.T6", "description": "Lógica 'Vincular com Código': Buscar doc em 'pendingLinks' pelo código e status 'pending'. Validar (código existe, não expirou, usuários não já vinculados)." },
+          { "id": "M2.T7", "description": "Se válido, em transação Firestore: Criar doc na coleção 'couples' (userAId, userBId, createdAt)." },
+          { "id": "M2.T8", "description": "Continuar transação: Atualizar 'partnerId' e 'coupleId' nos docs 'users' de ambos os usuários." },
+          { "id": "M2.T9", "description": "Continuar transação: Atualizar status do doc em 'pendingLinks' para 'completed' ou deletá-lo." },
+          { "id": "M2.T10", "description": "Implementar feedback visual (loading, sucesso, erros específicos) para o processo de vinculação." },
+          { "id": "M2.T11", "description": "Atualizar estado da aplicação para refletir o status de vinculado (ex: esconder UI de vínculo, mostrar nome do parceiro talvez)." },
+          { "id": "M2.T12", "description": "Refinar regras de segurança do Firestore para 'pendingLinks', 'users' (atualização de partnerId/coupleId) e 'couples'." }
         ],
-        "environment": "Ambiente de desenvolvimento Firebase. Considerar projeto Firebase separado para testes pré-lançamento.",
-        "documentation": "Checklists detalhados para testes manuais E2E. Casos de teste específicos podem ser gerenciados em issues do GitHub ou ferramenta similar."
+        "status": "Concluído (Frontend UI/Simulação)"
       },
-      "developerTooling": {
-        "cardCreator": {
-          "toolName": "Card Creator (Local Tool)",
-          "description": "Uma ferramenta auxiliar simples e standalone (HTML/CSS/JS) criada para facilitar a geração do conteúdo JSON das cartas pré-definidas (coleção 'cards'). NOTA: Para o lote inicial de ~200+ cartas do arquivo `outras ideias.txt`, um script de conversão foi usado em vez da entrada manual por eficiência, resultando no arquivo `Cartas provisorias.json`.",
-          "status": "Desenvolvida e finalizada conforme solicitado.",
-          "technology": "HTML, CSS, Vanilla JavaScript. Executada localmente no navegador ao abrir o arquivo 'index.html'.",
-          "features": [
-            "Seleção de categoria ('Sensorial', 'Poder', 'Fantasia', 'Exposição') com preview visual da carta e cor correspondente.",
-            "Entrada de texto da carta e nível de intensidade (com display espelhado).",
-            "Listagem das cartas criadas na sessão atual, organizadas por categoria.",
-            "Geração de um array JSON formatado contendo todas as cartas criadas na sessão."
-          ],
-          "workflow": "Abrir 'index.html' -> Criar cartas usando a interface -> Clicar em 'Gerar JSON' -> Copiar o JSON resultante -> Usar o JSON para popular a coleção 'cards' no Firestore (manualmente ou via script de importação).",
-          "limitations": [
-            "Ferramenta local/offline, sem conexão direta com o Firestore.",
-            "Não persiste dados entre sessões (começa vazia a cada abertura).",
-            "Não permite editar cartas que já existem no banco de dados.",
-            "Focada na criação de lotes de cartas, não no gerenciamento contínuo."
-          ],
-          "relevance": "Suporta a 'contentStrategy' ao fornecer um método dedicado e visual para gerar os dados das 'initialCards'."
-        }
+      {
+        "id": "M3",
+        "title": "Visualização e Interação com Cartas",
+        "goal": "Permitir que usuários vinculados vejam e interajam (swipe/botões) com as cartas pré-definidas, incluindo as de 'Conexão'.",
+        "tasks": [
+          { "id": "M3.T1a", "description": "Definir e escrever/revisar o conteúdo das cartas pré-definidas (arquivo `Cartas provisorias.json`) E criar conteúdo para as cartas 'Conexão'." },
+          { "id": "M3.T1a.1", "description": "Mover dados das cartas para arquivo local (`src/data/cards.ts`).", "status": "Concluído (Frontend)" },
+          { "id": "M3.T1b", "description": "Criar a coleção 'cards' no Firestore e inserir o conteúdo combinado (provisórias + conexão)." },
+          { "id": "M3.T2", "description": "Criar coleção 'userSwipes' no Firestore (estrutura ID: userId_cardId)." },
+          { "id": "M3.T3", "description": "Na UI (Tela 'Cartas'): Implementar a visualização da pilha de cartas (mostrar uma por vez).", "status": "Concluído (UI)" },
+          { "id": "M3.T3.1", "description": "Criar componente `PlayingCard` para exibir uma carta.", "status": "Concluído (UI)" },
+          { "id": "M3.T3.2", "description": "Refatorar lógica da pilha de cartas para hook customizado `useCardPileLogic`.", "status": "Concluído (Frontend)" },
+          { "id": "M3.T4", "description": "Lógica para buscar cartas: Buscar de 'cards' que o usuário ainda não viu/swipou (incluindo 'conexao').", "status": "Concluído (Simulado Frontend)" },
+          { "id": "M3.T4.1", "description": "Implementar lógica de sorteio de cartas com prioridade (Simulado no Frontend).", "status": "Concluído (Simulado Frontend)" },
+          { "id": "M3.T5", "description": "Implementar detecção de gesto de swipe (direita/esquerda) OU botões (Aceitar/Rejeitar).", "status": "Concluído (Botões)" },
+          { "id": "M3.T5.1", "description": "Implementar lógica para que cartas não se repitam (Simulado no Frontend).", "status": "Concluído (Simulado Frontend)" },
+          { "id": "M3.T5.2", "description": "Implementar feedback visual de Match (Modal).", "status": "Concluído (UI)" },
+          { "id": "M3.T6", "description": "Implementar animação CSS 'Slide Out' ao concluir swipe/clique." },
+          { "id": "M3.T7", "description": "Lógica de Swipe/Botão: Verificar `card.category`. Se 'conexao', incrementar contador `conexaoAccepted`/`conexaoRejected` em `users`. Se NÃO for 'conexao', gravar decisão ('like'/'dislike') em `userSwipes`." },
+          { "id": "M3.T8", "description": "Refinar regras de segurança para 'cards' (leitura para autenticados) e 'userSwipes' (escrita apenas pelo próprio usuário no seu swipe)." }
+        ],
+        "status": "Concluído (Frontend Simulado)"
       },
-      "sessionCheckpointNotes": [
-        "SESSION CHECKPOINT & NEXT STEPS FOCUS (Data: 2025-05-23)",
-        "",
-        "STATUS ATUAL (Cloud Functions Setup):",
-        "- O erro de parsing do ESLint no arquivo `functions/.eslintrc.js` (relacionado ao `tsconfig.json` não encontrado no diretório pai) FOI RESOLVIDO com a configuração `eslint.workingDirectories` no arquivo `.vscode/settings.json` e reinicialização do VS Code.",
-        "- PERSISTE um erro de tipo no arquivo `functions/src/index.ts` (linha 28): `Namespace '.../firebase-functions/lib/v2/providers/https' has no exported member 'CallableContext'.ts(2694)`. Este erro aparece e desaparece, indicando instabilidade.",
-        "- O TypeScript Server (TSServer) no VS Code está INSTÁVEL, sendo finalizado com `Signal: SIGTERM`, conforme logs. Isso é a causa provável do erro intermitente do `CallableContext`.",
-        "- Configurações relevantes na pasta `functions`:",
-        "  - `package.json`: `firebase-functions: ^6.0.1`, `typescript: ^4.9.0`, `engines.node: \"22\"`.",
-        "  - `tsconfig.json`: `module: \"commonjs\"`, `moduleResolution: \"node\"` (correto para API v1).",
-        "  - `src/index.ts`: Usa `import * as functions from \"firebase-functions\";` e `functions.https.CallableContext` (correto para API v1).",
-        "",
-        "PRÓXIMOS PASSOS IMEDIATOS (Foco: Estabilizar TSServer e resolver erro do `CallableContext`):",
-        "1. REINICIAR O PC (ação imediata do usuário).",
-        "2. Se o TSServer continuar instável e o erro do `CallableContext` persistir após o reinício do PC:",
-        "   a. **MUDAR A VERSÃO DO NODE.JS:** A versão Node 22 é muito recente. Utilizar `nvm-windows` para instalar e usar uma versão LTS do Node.js (ex: Node 20 ou Node 18). Após mudar a versão do Node, fechar VS Code, deletar `node_modules`, `package-lock.json` e `lib` da pasta `functions`, rodar `npm install` na pasta `functions`, e reabrir o VS Code.",
-        "   b. (Se a mudança do Node não resolver) DESABILITAR EXTENSÕES do VS Code temporariamente para identificar possíveis conflitos.",
-        "3. OBJETIVO FINAL DESTA ETAPA: Ter a Cloud Function `acceptLinkRequestFunction` compilando sem erros para que possa ser integrada ao frontend do KinkLink (para a funcionalidade de matches/vínculo).",
-        "",
-        "SESSION CHECKPOINT & NEXT STEPS FOCUS (Data: 2024-09-07)",
-        "",
-        "STATUS ATUAL (Frontend Simulado - ATUALIZADO 2025-05-16):", // ATUALIZADO
-        "- PlayingCard.tsx: Refinado com tamanho fixo, fonte dinâmica, dimensões ajustadas (maior), e botão/lógica de 'foguinho' (favorito) implementados.",
-        "- CardPilePage.tsx: Layout melhorado com carta principal e botões de interação centralizados. Implementada animação de saída da carta atual, aparecimento da próxima carta de costas e subsequente flip para revelar conteúdo. Adicionada carta de fundo estática para simular baralho. Navegação inferior redesenhada (Em Breve, Matches, Perfil). Botão 'Crie seu Kink' transformado em miniatura da carta de costas com texto sobreposto, posicionado ao lado dos botões de ação.",
-        "- MatchesPage.tsx: Sistema de 'foguinhos' (favoritos) implementado (marcação/desmarcação, seção de destaque). Layout da grade de matches, área de clique, proporção visual e espaçamento das cartas corrigidos. Erros de TypeScript resolvidos. Botão 'Voltar para Cartas' estilizado e link 'Voltar ao Início' removido.",
-        "- Estilo Global: Tema escuro aplicado ao #root. #root centralizado na tela. Centralização do conteúdo DENTRO das páginas individuais (Login, Perfil, Home, LinkCouple) implementada/revisada.",
-        "- Chat (M3.5): UI e lógica local com localStorage para o chat de cartas de match estão funcionais.",
-        "- HomePage.tsx: Estilizada com novo layout e botões de Login/Cadastro. Implementada lógica de redirecionamento para usuários logados e vinculados.",
-        "- App.tsx: Rotas ajustadas para usar `LinkedRoute` para `/cards` e `/matches`. Adicionado placeholder para Header global.",
-        "- CardBack.tsx: Texto 'Kink Link' aumentado e em negrito.",
-        "- Lógica de Cartas 'Conexão' (M3.T7): Implementada no `useCardPileLogic` para tratar interações com cartas de conexão (não geram match, simulam incremento de contadores).",
-        "- UI para Criação de Cartas (M5.T2): `CreateUserCardModal` e botão 'Crie seu Kink' funcionais.",
-        "- UI Básica do Perfil (M5.T5) e Botão de Desvincular (M5.T7): `ProfilePage` acessível com opção de desvincular (simulada).",
-        "",
-        "PRÓXIMOS PASSOS IMEDIATOS:",
-        "1. INICIAR M1/M4 (Backend) - Integração da Autenticação Real com Firebase:",
-        "   - Configurar o Firebase no projeto React (M1.T3).",
-        "   - Substituir o login/cadastro simulado no `AuthContext.tsx` por chamadas reais ao Firebase Authentication (M1.T4, M1.T7).",
-        "   - Ao registrar um novo usuário via Firebase Auth, criar um documento correspondente na coleção `users` no Firestore (M1.T8).",
-        "2. (Após Autenticação Real) INICIAR M2/M4 (Backend) - Vinculação Real de Casais:",
-        "   - Implementar a lógica de vinculação usando o Firestore para as coleções `pendingLinks` e `couples`, e atualizando os documentos dos usuários (M2.T1, M2.T3, M2.T6, M2.T9).",
-        "",
-        "FOCO PÓS-MVP PARA CHAT:",
-        "- O chat interno, embora funcional localmente, precisará de integração com backend (Firestore) para se tornar um chat real entre o casal. Isso será abordado após o MVP inicial com backend para autenticação, vínculo e matches."
-      ]
+      {
+        "id": "M3.5",
+        "title": "Chat Interno de Cartas (MVP Frontend Simulado)",
+        "goal": "Implementar a interface e lógica básica do chat para cartas que deram match, simulado no frontend com persistência local.",
+        "tasks": [
+          { "id": "M3.5.T1", "description": "Criar hook customizado `useCardChat` para lógica de chat (carregar/salvar no localStorage).", "status": "Concluído (Frontend Simulado)" },
+          { "id": "M3.5.T2", "description": "Criar componente `CardChatModal` para a UI do chat.", "status": "Concluído (UI)" },
+          { "id": "M3.5.T3", "description": "Integrar `CardChatModal` na `MatchesPage` (abrir modal ao clicar no item de match).", "status": "Concluído (UI)" },
+          { "id": "M3.5.T4", "description": "Ajustar exibição dos matches na `MatchesPage` para usar `PlayingCard` e manter formato/proporção.", "status": "Concluído (UI)" }
+        ],
+        "status": "Concluído (Frontend UI/Simulação)"
+      },
+      {
+        "id": "M4",
+        "title": "Detecção e Exibição de Matches",
+        "goal": "Implementar a lógica de backend para detectar matches e exibi-los na UI.",
+        "tasks": [
+          { "id": "M4.T1", "description": "Criar coleção 'matches' no Firestore." },
+          { "id": "M4.T2", "description": "Lógica de Match (Backend/Cloud Function ou Cliente): Ao gravar 'like' em 'userSwipes' (M3.T7), verificar se o parceiro já deu 'like' na mesma carta." },
+          { "id": "M4.T3", "description": "Se match, criar doc em 'matches' (coupleId, cardId, cardText, cardCategory, cardIntensity, createdAt, status: 'active')." },
+          { "id": "M4.T4", "description": "Na UI (Tela 'Matches'): Implementar a exibição da lista de matches (status 'active')." },
+          { "id": "M4.T5", "description": "Lógica para buscar matches: Buscar de 'matches' onde o `coupleId` corresponde ao do usuário e status é 'active'." },
+          { "id": "M4.T6", "description": "Implementar rolagem infinita (ou paginação simples) para a lista de matches." },
+          { "id": "M4.T7", "description": "Na UI: Adicionar botão 'X' ou lixeira em cada match." },
+          { "id": "M4.T8", "description": "Lógica 'Remover Match': Ao clicar, atualizar o status do doc correspondente em 'matches' para 'removed'." },
+          { "id": "M4.T9", "description": "Refinar regras de segurança para 'matches' (leitura/escrita apenas por membros do casal, talvez escrita apenas via lógica de match)." }
+        ],
+        "status": "Não iniciado"
+      },
+      {
+        "id": "M5",
+        "title": "Cartas Personalizadas e Perfil Básico",
+        "goal": "Permitir que casais criem suas próprias cartas e implementar funcionalidades básicas do perfil (tema, desvinculação).",
+        "tasks": [
+          { "id": "M5.T1", "description": "Criar coleção 'userCards' no Firestore." },
+          { "id": "M5.T2", "description": "Na UI: Adicionar interface para criar 'Cartas em Branco' (campo de texto simples, botão Salvar). Local: talvez modal na tela de swipe ou seção no perfil.", "status": "Concluído (UI - CreateUserCardModal)" },
+          { "id": "M5.T3", "description": "Lógica 'Salvar Carta': Criar doc em 'userCards' (coupleId, cardText, createdByUserId, createdAt) e registrar 'like' automático do criador.", "status": "Concluído" },
+          { "id": "M5.T4", "description": "Modificar lógica de busca de cartas (M3.T4) para incluir cartas de 'userCards' pertencentes ao `coupleId` do usuário, além das 'cards' pré-definidas." },
+          { "id": "M5.T5", "description": "Na UI (Tela 'Perfil'): Construir a tela básica de perfil/configurações.", "status": "Concluído (UI - ProfilePage básica)" },
+          { "id": "M5.T6", "description": "Implementar funcionalidade de troca de tema (claro/escuro) e persistir escolha (localStorage ou Firestore).", "status": "Adiado/Revisado - Será substituído por gamificação de skins/temas no futuro." },
+          { "id": "M5.T7", "description": "Na UI (Tela 'Perfil'): Adicionar botão 'Desvincular'.", "status": "Concluído (UI - ProfilePage básica)" },
+          { "id": "M5.T8", "description": "Implementar Lógica de Desvinculação: Confirmação, Transação/Cloud Function para limpar 'partnerId'/'coupleId' em ambos 'users', deletar doc 'couples'. Decidir e implementar o que fazer com 'matches' e 'userCards' associados." },
+          { "id": "M5.T9", "description": "Refinar regras de segurança para 'userCards' (leitura/escrita apenas por membros do casal) e ajustar regras de 'users'/'couples' para desvinculação." }
+        ],
+        "status": "Em Andamento (Frontend UI/Simulação)"
+      },
+      {
+        "id": "M6",
+        "title": "Polimento MVP e Preparação Inicial",
+        "goal": "Refinar a experiência do usuário do MVP, tratar casos de borda e preparar para testes iniciais.",
+        "tasks": [
+          { "id": "M6.T1", "description": "Revisar e refinar todos os fluxos de usuário implementados." },
+          { "id": "M6.T2", "description": "Adicionar tratamento de erros mais robusto e mensagens claras em toda a aplicação." },
+          { "id": "M6.T3", "description": "Implementar feedback sutil (tátil/sonoro opcional) no swipe, se decidido." },
+          { "id": "M6.T4", "description": "Adicionar aviso de conteúdo NSFW na entrada/cadastro." },
+          { "id": "M6.T5", "description": "Realizar testes manuais completos dos fluxos do MVP (incluindo fluxo 'Conexão')." },
+          { "id": "M6.T6", "description": "Configurar Firebase Hosting para deploy inicial (teste)." },
+          { "id": "M6.T7", "description": "Escrever rascunho inicial da Política de Privacidade e Termos de Serviço (marcar como placeholder até consulta legal)." }
+        ],
+        "status": "Não iniciado"
+      }
+    ]
+  },
+  "postMvpFocus": [
+    "Implementação de funcionalidades da lista 'future' (Post-its, Fotos, Filtros, Uso dos contadores 'Conexão', etc.)",
+    "Gamificação de Temas/Skins (liberação baseada em engajamento).",
+    "Otimizações de performance e Firestore (incluindo lógica de exibição periódica das cartas 'Conexão')",
+    "Consulta Jurídica e finalização de documentos legais",
+    "Estratégia de lançamento e marketing inicial"
+  ],
+  "communicationNotes": "Explique os passos de forma extremamente detalhada, como se eu fosse um iniciante completo idiota ou tivesse acabado de ter um AVC. Usar linguagem simples e dividir em passos bem pequenos.",
+  "lastUpdated": "2024-05-24T03:00:00Z",
+  "developmentPrinciples": {
+    "modularity": {
+      "goal": "Manter o código organizado, reutilizável e fácil de manter.",
+      "practices": [
+        "Dividir UI em componentes pequenos e focados.",
+        "Utilizar hooks customizados para lógica reutilizável.",
+        "Utilizar Context API para estado compartilhado (ex: AuthContext).",
+        "Definir constantes em arquivos dedicados (`constants/`).",
+        "Manter uma estrutura de pastas clara e lógica."
+      ],
+      "fileSizeGuideline": "Utilizar ~250 linhas por arquivo como um guia para incentivar a refatoração e a divisão de responsabilidades, priorizando a coesão lógica sobre a aderência estrita ao limite."
     }
-  }
-  
+  },
+  "testingStrategy": {
+    "overallApproach": "Foco principal em testes manuais abrangentes dos fluxos de usuário no MVP. Testes unitários/integração serão considerados para lógica crítica (transações, match). Automação E2E é pós-MVP.",
+    "testingTypes": [
+      { "type": "Unitário", "focus": "Funções críticas isoladas (validações, helpers). Ferramentas: Jest." },
+      { "type": "Integração", "focus": "Interação com Firebase (salvar swipe, checar match, incrementar contadores). Ferramentas: React Testing Library, Firebase Emulators (opcional)." },
+      { "type": "Manual E2E", "focus": "Fluxos completos do usuário (cadastro a desvinculação) simulando dois parceiros. Uso de checklists." },
+      { "type": "UI/UX", "focus": "Verificação visual, navegação, temas, responsividade básica, animações." },
+      { "type": "Segurança", "focus": "Validação manual e revisão das Regras de Segurança do Firestore para garantir acesso correto aos dados." }
+    ],
+    "keyFlowsToTest": [
+      "Cadastro e Login (Firebase Auth)",
+      "Geração e Inserção de Código de Vínculo",
+      "Visualização e Swipe de Cartas (Pré-definidas, Personalizadas, e 'Conexão')",
+      "Lógica de Match (Ocorre quando esperado para cartas normais, NÃO ocorre para 'Conexão')",
+      "Lógica de Swipe 'Conexão' (Incremento correto dos contadores em 'users')",
+      "Lista de Matches (Exibição, Remoção - mudança de status)",
+      "Criação de Cartas Personalizadas",
+      "Desvinculação (Limpeza de dados, tratamento de matches/cartas existentes)",
+      "Troca de Tema",
+      "Exibição de Aviso NSFW"
+    ],
+    "environment": "Ambiente de desenvolvimento Firebase. Considerar projeto Firebase separado para testes pré-lançamento.",
+    "documentation": "Checklists detalhados para testes manuais E2E. Casos de teste específicos podem ser gerenciados em issues do GitHub ou ferramenta similar."
+  },
+  "developerTooling": {
+    "cardCreator": {
+      "toolName": "Card Creator (Local Tool)",
+      "description": "Uma ferramenta auxiliar simples e standalone (HTML/CSS/JS) criada para facilitar a geração do conteúdo JSON das cartas pré-definidas (coleção 'cards'). NOTA: Para o lote inicial de ~200+ cartas do arquivo `outras ideias.txt`, um script de conversão foi usado em vez da entrada manual por eficiência, resultando no arquivo `Cartas provisorias.json`.",
+      "status": "Desenvolvida e finalizada conforme solicitado.",
+      "technology": "HTML, CSS, Vanilla JavaScript. Executada localmente no navegador ao abrir o arquivo 'index.html'.",
+      "features": [
+        "Seleção de categoria ('Sensorial', 'Poder', 'Fantasia', 'Exposição') com preview visual da carta e cor correspondente.",
+        "Entrada de texto da carta e nível de intensidade (com display espelhado).",
+        "Listagem das cartas criadas na sessão atual, organizadas por categoria.",
+        "Geração de um array JSON formatado contendo todas as cartas criadas na sessão."
+      ],
+      "workflow": "Abrir 'index.html' -> Criar cartas usando a interface -> Clicar em 'Gerar JSON' -> Copiar o JSON resultante -> Usar o JSON para popular a coleção 'cards' no Firestore (manualmente ou via script de importação).",
+      "limitations": [
+        "Ferramenta local/offline, sem conexão direta com o Firestore.",
+        "Não persiste dados entre sessões (começa vazia a cada abertura).",
+        "Não permite editar cartas que já existem no banco de dados.",
+        "Focada na criação de lotes de cartas, não no gerenciamento contínuo."
+      ],
+      "relevance": "Suporta a 'contentStrategy' ao fornecer um método dedicado e visual para gerar os dados das 'initialCards'."
+    }
+  },
+  "sessionCheckpointNotes": [
+    "SESSION CHECKPOINT & NEXT STEPS FOCUS (Data: 2024-05-24)",
+    "",
+    "STATUS ATUAL (Frontend - Vinculação e Cadastro):",
+    "- Arquivos de configuração do Firebase (`src/firebase.ts`) foram centralizados e corrigidos para evitar erro de 'app duplicado'.",
+    "- `HomePage` estava aparecendo em branco/cinza; o erro de 'app duplicado' do Firebase era a causa provável e foi resolvido.",
+    "- Validação de senha mínima (6 caracteres) foi adicionada à `SignupPage.tsx`.",
+    "- PROBLEMA ATUAL: Criação de novos usuários via `SignupPage.tsx` não está funcionando ('nada acontece'). O usuário não é criado no Firebase Authentication e, consequentemente, nenhum documento é criado na coleção `users` do Firestore.",
+    "",
+    "PRÓXIMOS PASSOS IMEDIATOS (Quando retomarmos):",
+    "1. DEPURAR A FUNÇÃO DE CADASTRO (`signup` no `AuthContext.tsx` e sua chamada na `SignupPage.tsx`): Verificar por que a criação do usuário no Firebase Authentication está falhando ou não está sendo acionada corretamente. Analisar logs do console e a aba 'Network' nas DevTools durante a tentativa de cadastro.",
+    "2. (Após cadastro funcionar) VERIFICAR CRIAÇÃO DO DOCUMENTO `users` no Firestore: Garantir que, após um cadastro bem-sucedido no Firebase Auth, o documento correspondente na coleção `users` seja criado (M1.T8).",
+    "3. (Após os dois acima) TESTAR O FLUXO DE VINCULAÇÃO COMPLETO com duas contas recém-criadas e funcionais."
+  ]
+}

@@ -17,6 +17,9 @@ function MatchesPage() {
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [selectedCardForChat, setSelectedCardForChat] = useState<MatchedCard | null>(null);
 
+  // Log para depurar os matches recebidos
+  console.log('[MatchesPage] matchedCards recebidos do hook:', matchedCards);
+
   const hotMatches = matchedCards.filter(card => card.isHot);
   const otherMatches = matchedCards.filter(card => !card.isHot);
 
@@ -40,7 +43,7 @@ function MatchesPage() {
 
   const sectionTitleStyle: React.CSSProperties = {
     fontSize: '1.8em',
-    color: '#ff6b6b', // Cor de destaque para "Top Matches"
+    color: '#ff6b6b', // Cor de destaque para "Top Links"
     borderBottom: '2px solid #ff6b6b',
     paddingBottom: '10px',
     marginBottom: '25px',
@@ -80,7 +83,7 @@ function MatchesPage() {
   return (
     <div style={pageStyle}>
       <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
-        <h1 style={{color: '#64b5f6', margin: 0}}>Seus Matches! 🎉</h1>
+        <h1 style={{color: '#64b5f6', margin: 0}}>Seus Links! 🎉</h1>
         <Link to="/cards" style={backToCardsButtonStyle}>
           Voltar para as Cartas
         </Link>
@@ -88,13 +91,13 @@ function MatchesPage() {
 
       {noMatchesCondition ? (
         <p style={{ textAlign: 'center', fontSize: '1.1em', color: '#b0b0b0', marginTop: '50px' }}>
-          Você ainda não tem matches. Continue explorando as cartas!
+          Você ainda não tem Links. Continue explorando as cartas!
         </p>
       ) : (
         <>
           {hotMatches.length > 0 && (
             <section>
-              <h2 style={sectionTitleStyle}>🔥 Top Matches</h2>
+              <h2 style={sectionTitleStyle}>🔥 Top Links</h2>
               <div style={matchesGridStyle}>
                 {hotMatches.map((card: MatchedCard) => (
                   <div
@@ -105,7 +108,7 @@ function MatchesPage() {
                     onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                     role="button"
                     tabIndex={0}
-                    aria-label={`Top match: ${card.text.substring(0,30)}...`}
+                    aria-label={`Top Link: ${card.text.substring(0,30)}...`}
                   >
                     <PlayingCard
                       data={card}
@@ -121,7 +124,7 @@ function MatchesPage() {
 
           {otherMatches.length > 0 && (
             <section style={hotMatches.length > 0 ? { marginTop: '40px' } : {}}>
-              <h2 style={{...sectionTitleStyle, borderBottomColor: '#64b5f6', color: '#64b5f6'}}>{hotMatches.length > 0 ? 'Outros Matches' : 'Seus Matches'}</h2>
+              <h2 style={{...sectionTitleStyle, borderBottomColor: '#64b5f6', color: '#64b5f6'}}>{hotMatches.length > 0 ? 'Outros Links' : 'Seus Links'}</h2>
               <div style={matchesGridStyle}>
                 {otherMatches.map((card: MatchedCard) => (
                   <div
@@ -132,7 +135,7 @@ function MatchesPage() {
                     onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                     role="button"
                     tabIndex={0}
-                    aria-label={`Abrir chat para o match: ${card.text.substring(0,30)}...`}
+                    aria-label={`Abrir chat para o Link: ${card.text.substring(0,30)}...`}
                   >
                     <PlayingCard
                       data={card}

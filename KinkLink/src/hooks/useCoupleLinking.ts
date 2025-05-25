@@ -170,15 +170,27 @@ export function useCoupleLinking() {
     try {
       const batch = writeBatch(db);
 
+      // 1. Criar o documento do casal na coleção 'couples'
+      const newCoupleRef = doc(collection(db, 'couples')); // Gera ID automático
+      const newCoupleId = newCoupleRef.id;
+      const coupleDocData = {
+        members: [requesterId, user.id].sort(), // Ordena para consistência
+        createdAt: serverTimestamp(),
+      };
+      batch.set(newCoupleRef, coupleDocData);
+
+      // 2. Atualizar o documento do usuário atual (aceitante)
       const currentUserDocRef = doc(db, 'users', user.id);
       batch.update(currentUserDocRef, {
         linkedPartnerId: requesterId,
+        coupleId: newCoupleId, // Adiciona o coupleId oficial
       });
 
-      // Descomentado: Tenta atualizar o perfil do solicitante também
+      // 3. Atualizar o documento do solicitante
       const requesterUserDocRef = doc(db, 'users', requesterId);
       batch.update(requesterUserDocRef, {
         linkedPartnerId: user.id,
+        coupleId: newCoupleId, // Adiciona o coupleId oficial
       });
 
       const requestDocRef = doc(db, 'linkRequests', requestId);
@@ -190,7 +202,7 @@ export function useCoupleLinking() {
       // A remoção da solicitação também será pega pelo listener de incomingRequests.
       // E o listener de sentRequest do parceiro também deve atualizar.
       // Explicitamente chamamos updateUser para garantir que o estado local reflita imediatamente.
-      await updateUser({ linkedPartnerId: requesterId });
+      await updateUser({ linkedPartnerId: requesterId, coupleId: newCoupleId });
       setSentRequestStatus(null); // Limpa o status da solicitação enviada, pois agora está vinculado
       setSentRequestTargetEmail(null);
       return true;

@@ -1,5 +1,5 @@
 // d:\Projetos\Github\app\KinkLink\KinkLink\src\pages\CardPilePage.tsx
-import React, { useState, useEffect } from 'react'; // Adicionado useEffect
+import React, { useState, useEffect, useMemo } from 'react'; // Adicionado useMemo
 import { Link } from 'react-router-dom';
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
 import MatchModal from '../components/MatchModal';
@@ -7,6 +7,7 @@ import PlayingCard, { type CardData as PlayingCardDataType } from '../components
 import CreateUserCardModal from '../components/CreateUserCardModal';
 import ConexaoCardModal from '../components/ConexaoCardModal';
 import { useCardPileLogic } from '../hooks/useCardPileLogic';
+import CarinhosMimosModal from '../components/CarinhosMimosModal'; // Novo Modal
 import CardBack from '../components/CardBack'; // Importação adicionada
 import type { Card } from '../data/cards'; // Importa o tipo Card
 
@@ -105,13 +106,6 @@ const navButtonStyleBase: React.CSSProperties = {
   textDecoration: 'none', // Para os <Link>
 };
 
-const emBreveButtonStyle: React.CSSProperties = {
-  ...navButtonStyleBase,
-  fontSize: '0.9em',
-  color: '#777', // Cor mais apagada para desabilitado
-  cursor: 'default',
-};
-
 const matchesNavButtonStyle: React.CSSProperties = {
   ...navButtonStyleBase,
   backgroundColor: '#ff6b6b', // Cor de destaque (fogo/match)
@@ -121,6 +115,15 @@ const matchesNavButtonStyle: React.CSSProperties = {
   padding: '12px 25px', // Mais padding para ser chamativo
   flexGrow: 1, // Permite que ele ocupe mais espaço se necessário
   margin: '0 15px', // Margens laterais
+};
+
+const carinhosMimosButtonStyle: React.CSSProperties = { // Estilo para o novo botão de coração
+  ...navButtonStyleBase,
+  fontSize: '1.8em', // Tamanho do ícone de coração
+  color: '#e0e0e0', // Cor do ícone
+  padding: '8px',
+  // backgroundColor: '#4f4f4f', // Opcional: fundo se quiser destacar mais
+  // borderRadius: '50%',
 };
 
 const profileNavButtonStyle: React.CSSProperties = {
@@ -153,6 +156,7 @@ function CardPilePage() {
     showConexaoModal,
     currentConexaoCardForModal,
     handleConexaoInteractionInModal,
+    allConexaoCards, // Precisamos pegar todas as cartas de conexão
   } = useCardPileLogic();
 
   // Estado para controlar a animação de saída da carta atual
@@ -160,8 +164,14 @@ function CardPilePage() {
   const [isCardFlipped, setIsCardFlipped] = useState(true); // Nova carta aparece virada (de costas)
 
   const [showCreateUserCardModal, setShowCreateUserCardModal] = useState(false);
+  const [showCarinhosMimosModal, setShowCarinhosMimosModal] = useState(false); // Estado para o novo modal
   // A função handleCreateUserCard virá do useUserCardInteractions
   const { matchedCards, seenCards, handleCreateUserCard, toggleHotStatus } = useUserCardInteractions();
+
+  // Filtra as cartas de conexão para mostrar apenas as que já foram vistas pelo usuário
+  const seenConexaoCardsForModal = useMemo(() => {
+    return (allConexaoCards || []).filter(card => seenCards.includes(card.id));
+  }, [allConexaoCards, seenCards]);
 
   // Prepara os dados da carta atual para exibição, incluindo o status 'isHot'
   // e garante que currentCard seja do tipo CardData esperado por PlayingCard
@@ -243,6 +253,15 @@ function CardPilePage() {
           }}
         />
       )}
+
+      {showCarinhosMimosModal && (
+        <CarinhosMimosModal
+          isOpen={showCarinhosMimosModal}
+          onClose={() => setShowCarinhosMimosModal(false)}
+          conexaoCards={seenConexaoCardsForModal} // Passa apenas as cartas de conexão vistas
+        />
+      )}
+
 
       {/* O botão "Crie seu Kink" que estava aqui foi movido para junto dos botões de ação abaixo */}
       {cardForDisplay ? ( // Usa cardForDisplay aqui
@@ -365,11 +384,11 @@ function CardPilePage() {
 
       {/* Nova Barra de Navegação Inferior */}
       <div style={bottomNavContainerStyle}>
-        <button style={emBreveButtonStyle} disabled>
-          Em Breve
+        <button style={carinhosMimosButtonStyle} onClick={() => setShowCarinhosMimosModal(true)} title="Carinhos & Mimos">
+          ❤️
         </button>
         <Link to="/matches" style={matchesNavButtonStyle}>
-          Matches ({matchedCards.length})
+          Links ({matchedCards.length})
         </Link>
         <Link to="/profile" style={profileNavButtonStyle} aria-label="Perfil">
           👤 {/* Ícone de perfil Unicode */}

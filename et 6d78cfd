@@ -1,0 +1,26 @@
+* [33m54a0b2a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Update .gitignore to exclude Firebase admin SDK keys
+* [33m7b45631[m Finaliza MVP: Implementa funcionalidades de Links, Chat, Criação/Priorização de Cartas, Perfil e prepara para testes com amigos
+* [33m6d78cfd[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m feat: Configure functions for Node 16 and Spark plan
+* [33m58bbfa0[m[33m ([m[1;31morigin/firestore-legacy[m[33m, [m[1;32mfirestore-legacy[m[33m)[m icones e titulo
+* [33m703da8f[m logo?
+* [33me0b0a4a[m eu sou burro
+* [33m4fd1f42[m üe
+* [33mc22a534[m Integrar conteúdo da pasta kinklink diretamente no repositório
+* [33m94e646f[m first commit
+* [33m8def454[m teste1
+* [33m57f9bde[m M3 completa
+* [33m726113b[m quase funcional
+* [33md152def[m  Startado uhul
+*   [33md641b36[m Merge branch 'main' of https://github.com/ruishalm/kinklink
+[32m|[m[33m\[m  
+[32m|[m * [33m1369445[m novas cartas
+[32m|[m * [33m44b27ac[m minikink funcional
+[32m|[m * [33mef55dd3[m minikink feito
+* [33m|[m [33mf6424e2[m em casa
+[33m|[m[33m/[m  
+* [33ma1b3367[m o card Creator e o inicio do app em si
+* [33mf8e695f[m first commit
+* [33m250de1b[m feat: Setup basic routing with React Router
+* [33mdd33eb1[m Clean up default Vite/React boilerplate files
+* [33mdbf6d13[m Force update .gitignore to ensure node_modules is ignored
+* [33m238732a[m Initial commit: Setup React project with Vite

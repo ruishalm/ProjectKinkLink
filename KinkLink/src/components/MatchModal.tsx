@@ -88,7 +88,7 @@ function MatchModal({ card, onClose }: MatchModalProps) {
   return (
     <div style={modalOverlayStyle} onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="match-modal-title">
       <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
-        <h2 id="match-modal-title" style={titleStyle}>🎉 MATCH! 🎉</h2>
+        <h2 id="match-modal-title" style={titleStyle}>🔗 LINK! 🎉</h2>
         <p style={subTitleStyle}>Vocês dois toparam a carta:</p>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
           {/* Renderiza o PlayingCard com escala um pouco menor para caber bem */}

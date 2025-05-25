@@ -1,13 +1,5 @@
-// d:\Projetos\Github\app\KinkLink\KinkLink\src\data\cards.ts
-
-export interface Card {
-    id: string;
-    category: 'sensorial' | 'poder' | 'fantasia' | 'exposicao' | 'conexao';
-    text: string;
-    intensity?: number;
-  }
-  
-  export const miniKinkCards: Card[] = [
+const allKinkLinkCards = [
+  // 
     { id: 'c1', text: 'Usar venda nos olhos', category: 'sensorial', intensity: 1 },
     { id: 'c2', text: 'Usar brinquedos sexuais na hora H', category: 'sensorial', intensity: 1 },
     { id: 'c3', text: 'Fazer uma massagem com um final feliz', category: 'sensorial', intensity: 1 },
@@ -90,5 +82,7 @@ export interface Card {
       { id: 'c79', text: 'Preparem juntos o café da manhã ou um lanche especial no fim de semana.', category: 'conexao', intensity: 2 },
       { id: 'c80', text: 'Olhem fotos antigas de vocês e conversem sobre as boas lembranças daquele tempo.', category: 'conexao', intensity: 1 },
       { id: 'c81', text: 'Reserve 15 minutos hoje para conversarem sem interrupções, apenas sobre vocês e como se sentem.', category: 'conexao', intensity: 2 }
-    ];
-  
+];
+
+// Exporta o array DIRETAMENTE para que o script de upload possa usá-lo.
+module.exports = allKinkLinkCards;

@@ -17,8 +17,13 @@ function SignupPage() {
     event.preventDefault();
     setError(null); // Limpa erros anteriores
 
+    if (password.length < 6) {
+      setError("A senha deve ter no mínimo 6 caracteres.");
+      return;
+    }
+
     if (password !== confirmPassword) {
-      alert("As senhas não coincidem!");
+      setError("As senhas não coincidem!"); // Usar o estado de erro em vez de alert
       return;
     }
     console.log('Signup attempt com:', { email, password });
@@ -28,7 +33,7 @@ function SignupPage() {
       await signup(email, password); // Chama a função de signup do AuthContext
       navigate(from, { replace: true }); // Redireciona após cadastro bem-sucedido
     } catch (err: unknown) {
-      const errorMessage = 'Falha ao tentar cadastrar. Tente novamente.';
+      const errorMessage = 'Falha ao tentar cadastrar. Tente novamente.'; // Alterado para const
       let errorCode: string | undefined = undefined;
 
       if (typeof err === 'object' && err !== null && 'code' in err) {
@@ -36,6 +41,8 @@ function SignupPage() {
         if (errorCode === 'auth/email-already-in-use') {
           setError('Este e-mail já está em uso. Tente fazer login ou use um e-mail diferente.');
         }
+        // O Firebase já trata 'auth/weak-password' se a senha for curta, mas nossa validação manual é mais amigável.
+        // Poderíamos adicionar mais mapeamentos de erro aqui se necessário.
       } else if (err instanceof Error) {
         setError(err.message || errorMessage);
       } else {
@@ -75,6 +82,11 @@ function SignupPage() {
     return <div style={pageContainerStyle}><p>Carregando...</p></div>;
   }
 
+  const isPasswordTooShort = password.length > 0 && password.length < 6;
+  const isConfirmPasswordTooShort = confirmPassword.length > 0 && confirmPassword.length < 6;
+  const passwordsDontMatch = password.length > 0 && confirmPassword.length > 0 && password !== confirmPassword;
+  const canSubmit = !isPasswordTooShort && !isConfirmPasswordTooShort && !passwordsDontMatch && email.length > 0 && password.length > 0 && confirmPassword.length > 0;
+
   return (
     <div style={pageContainerStyle}>
       <h1>Cadastro</h1>
@@ -102,6 +114,7 @@ function SignupPage() {
             required
             style={inputStyle}
           />
+          {isPasswordTooShort && <p style={{ color: 'orange', fontSize: '0.9em', marginTop: '5px' }}>Senha muito curta (mínimo 6 caracteres).</p>}
         </div>
         <div style={inputGroupStyle}>
           <label htmlFor="confirmPassword" style={labelStyle}>Confirmar Senha:</label>
@@ -114,8 +127,10 @@ function SignupPage() {
             required
             style={inputStyle}
           />
+          {isConfirmPasswordTooShort && <p style={{ color: 'orange', fontSize: '0.9em', marginTop: '5px' }}>Senha muito curta (mínimo 6 caracteres).</p>}
+          {passwordsDontMatch && <p style={{ color: 'orange', fontSize: '0.9em', marginTop: '5px' }}>As senhas não coincidem.</p>}
         </div>
-        <button type="submit" style={buttonStyle} disabled={isLoading}>{isLoading ? 'Cadastrando...' : 'Cadastrar'}</button>
+        <button type="submit" style={buttonStyle} disabled={isLoading || !canSubmit}>{isLoading ? 'Cadastrando...' : 'Cadastrar'}</button>
       </form>
       {error && <p style={errorStyle}>{error}</p>}
       <p style={{ marginTop: '20px' }}>Já tem uma conta? <Link to="/login">Faça login</Link></p>

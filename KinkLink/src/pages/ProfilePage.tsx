@@ -1,10 +1,9 @@
-// d:\Projetos\Github\app\KinkLink\KinkLink\src\pages\ProfilePage.tsx
+// d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\ProfilePage.tsx
 import React, { useState, useEffect, type FormEvent, type CSSProperties, Fragment } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useUserCardInteractions } from '../hooks/useUserCardInteractions'; // Para contadores de conexão
 
-// Estilos (baseados no que tínhamos em LinkCouplePage e adaptados)
+// Estilos
 const pageStyle: CSSProperties = {
   maxWidth: '700px',
   margin: '40px auto',
@@ -33,7 +32,7 @@ const titleStyle: CSSProperties = {
 };
 
 const inputStyle: CSSProperties = {
-  width: 'calc(100% - 22px)', // Ajuste para padding
+  width: 'calc(100% - 22px)',
   padding: '12px',
   marginBottom: '15px',
   border: '1px solid #555',
@@ -81,9 +80,38 @@ const linkStyle: CSSProperties = {
   fontSize: '1em',
 };
 
+const actionButtonStyle: React.CSSProperties = { // Novo estilo para o botão de vínculo
+  display: 'inline-block',
+  padding: '12px 25px',
+  backgroundColor: '#64b5f6', // Azul claro
+  color: 'white',
+  textDecoration: 'none',
+  borderRadius: '8px',
+  textAlign: 'center',
+  cursor: 'pointer',
+  border: '2px solid #4a90e2', // Borda um pouco mais escura que o fundo do botão
+  fontSize: '1em',
+  fontWeight: 'bold',
+  marginTop: '15px',
+  transition: 'background-color 0.2s ease, border-color 0.2s ease',
+};
+
+const smallLinkStyle: CSSProperties = {
+  color: '#aaa',
+  textDecoration: 'underline',
+  fontSize: '0.8em',
+  cursor: 'pointer',
+  display: 'inline-block', // Para permitir margin
+};
+
+const warningTextStyle: CSSProperties = {
+  fontSize: '0.8em',
+  color: '#ffcc80', // Laranja/amarelo para aviso
+  marginTop: '5px',
+};
+
 function ProfilePage() {
-  const { user, logout, updateUser } = useAuth();
-  const { conexaoAcceptedCount, conexaoRejectedCount } = useUserCardInteractions(); // Obtém os contadores
+  const { user, logout, updateUser, isLoading: authIsLoading, resetUserTestData } = useAuth();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [username, setUsername] = useState('');
@@ -93,28 +121,49 @@ function ProfilePage() {
     if (user) {
       setUsername(user.username || '');
       setBio(user.bio || '');
-    } else {
-      // Se não houver usuário (ex: após logout), redireciona para login
+    } else if (!authIsLoading) {
       navigate('/login');
     }
-  }, [user, navigate]);
+  }, [user, authIsLoading, navigate]);
 
-  const handleLogout = () => {
-    logout();
-    // navigate('/login'); // O ProtectedRoute já deve cuidar do redirecionamento
-  };
-
-  const handleProfileUpdate = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (user) {
-      updateUser({ username, bio });
-      setIsEditing(false); // Sai do modo de edição após salvar
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
     }
   };
 
-  if (!user) {
-    return <div style={pageStyle}><p>Carregando perfil...</p></div>; // Ou um spinner
+  const handleProfileUpdate = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (user) {
+      try {
+        await updateUser({ username, bio });
+        setIsEditing(false);
+      } catch (error) {
+        console.error("Erro ao atualizar perfil:", error);
+      }
+    }
+  };
+
+  const handleResetTestData = async () => {
+    if (window.confirm("Tem certeza que deseja resetar TODOS os dados de teste (cartas vistas, interações e matches)? Esta ação é para fins de desenvolvimento.")) {
+      try {
+        await resetUserTestData();
+        alert("Dados de teste (cartas vistas, interações, matches) resetados com sucesso!");
+      } catch (error) {
+        alert("Falha ao resetar os dados de teste. Verifique o console.");
+        console.error("Erro ao resetar dados de teste:", error);
+      }
+    }
+  };
+
+  if (authIsLoading || !user) {
+    return <div style={pageStyle}><p>Carregando perfil...</p></div>;
   }
+
+  // Lógica para nome de usuário padrão
+  const displayName = user.username || (user.email ? user.email.split('@')[0] : 'Usuário KinkLink');
 
   return (
     <div style={pageStyle}>
@@ -149,43 +198,65 @@ function ProfilePage() {
         </form>
       ) : (
         <Fragment>
-          {/* Exibição dos contadores de Conexão para M3.T9 */}
-          <div style={{ ...sectionStyle, backgroundColor: '#383838' }}>
-            <h3 style={{ marginTop: 0, color: '#80cbc4', borderBottom: '1px solid #4a4a4a', paddingBottom: '8px', marginBottom: '15px' }}>Estatísticas de Conexão (Debug M3)</h3>
-            <p style={infoTextStyle}>
-              Gestos de Conexão Aceitos: <strong style={{ color: '#a5d6a7' }}>{conexaoAcceptedCount}</strong>
-            </p>
-            <p style={infoTextStyle}>
-              Gestos de Conexão Rejeitados: <strong style={{ color: '#ef9a9a' }}>{conexaoRejectedCount}</strong>
-            </p>
-          </div>
-
-
+          {/* SEÇÃO DE INFORMAÇÕES DO USUÁRIO (NOME/EMAIL PRIMEIRO) */}
           <div style={sectionStyle}>
             <h2 style={titleStyle}>Suas Informações</h2>
             <p style={infoTextStyle}><strong>Email:</strong> {user.email}</p>
-            <p style={infoTextStyle}><strong>Nome de Usuário:</strong> {user.username || 'Não definido'}</p>
+            <p style={infoTextStyle}><strong>Nome de Usuário:</strong> {displayName}</p>
             <p style={infoTextStyle}><strong>Bio:</strong> {user.bio || 'Não definida'}</p>
             <button onClick={() => setIsEditing(true)} style={buttonStyle}>Editar Perfil</button>
           </div>
         </Fragment>
       )}
 
+      {/* SEÇÃO DE VÍNCULO (AGORA MAIS ACIMA E COM BOTÃO) */}
       <div style={sectionStyle}>
         <h2 style={titleStyle}>Vínculo de Casal</h2>
         {user.linkedPartnerId ? (
-          <p style={infoTextStyle}>Você está vinculado com um parceiro. <Link to="/link-couple" style={linkStyle}>Gerenciar Vínculo</Link></p>
+          <>
+            <p style={infoTextStyle}>Você está vinculado! Explore os Links e converse com seu par.</p>
+            <button 
+              onClick={() => navigate('/link-couple')} 
+              style={actionButtonStyle}
+              onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#4a90e2'; e.currentTarget.style.borderColor = '#357ABD'; }}
+              onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#64b5f6'; e.currentTarget.style.borderColor = '#4a90e2'; }}
+            >
+              Gerenciar Vínculo
+            </button>
+          </>
         ) : (
-          <p style={infoTextStyle}>Você não está vinculado. <Link to="/link-couple" style={linkStyle}>Vincular agora</Link></p>
+          <>
+            <p style={infoTextStyle}>Você ainda não está vinculado. Conecte-se com seu parceiro para começar a diversão!</p>
+            <button 
+              onClick={() => navigate('/link-couple')} 
+              style={actionButtonStyle}
+              onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#4a90e2'; e.currentTarget.style.borderColor = '#357ABD'; }}
+              onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#64b5f6'; e.currentTarget.style.borderColor = '#4a90e2'; }}
+            >
+              Vincular Agora
+            </button>
+          </>
         )}
       </div>
-
-      <div style={{ ...sectionStyle, textAlign: 'center' }}>
+      
+      <div style={{ ...sectionStyle, textAlign: 'center', marginTop: '30px' }}>
         <button onClick={handleLogout} style={destructiveButtonStyle}>Logout</button>
       </div>
 
       <div style={{ marginTop: '30px', textAlign: 'center' }}>
         <Link to="/cards" style={linkStyle}>&larr; Voltar para as Cartas</Link>
+      </div>
+
+      {/* Seção de Teste/Debug - Movida para o final e minimizada */}
+      <div style={{ textAlign: 'center', marginTop: '50px', paddingTop: '20px', borderTop: '1px solid #444' }}>
+        <a 
+          onClick={handleResetTestData} 
+          style={smallLinkStyle}
+          role="button" // Para acessibilidade, já que não é um link de navegação
+          tabIndex={0} // Para ser focável
+          onKeyPress={(e) => { if (e.key === 'Enter' || e.key === ' ') handleResetTestData();}} // Para ativação com teclado
+        >Resetar Dados de Teste (Dev)</a>
+        <p style={warningTextStyle}>Atenção: Para correta sincronização, esta opção deve ser usada pelos dois usuários do casal simultaneamente.</p>
       </div>
     </div>
   );

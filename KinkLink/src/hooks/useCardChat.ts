@@ -1,3 +1,4 @@
+// d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\hooks\useCardChat.ts
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase'; // Importa a instância do Firestore
@@ -21,34 +22,28 @@ export interface ChatMessage {
 export function useCardChat(cardId: string | null) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [chatRoomId, setChatRoomId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Determina o chatRoomId com base no usuário, parceiro vinculado e cardId
+  // Carregar mensagens do Firestore
   useEffect(() => {
-    if (user && user.id && user.linkedPartnerId && cardId) {
-      // Ordena os IDs para garantir consistência no chatRoomId, independente de quem iniciou
-      const ids = [user.id, user.linkedPartnerId].sort();
-      setChatRoomId(`${cardId}_${ids[0]}_${ids[1]}`);
-    } else {
-      setChatRoomId(null);
-    }
-  }, [user, cardId]);
-
-  // Carregar mensagens do Firestore quando o chatRoomId mudar
-  useEffect(() => {
-    if (!chatRoomId) {
+    if (!user || !user.coupleId || !cardId) {
       setMessages([]); // Limpa as mensagens se não houver cardId ou usuário
       setIsLoading(false);
+      if (user && !user.coupleId && cardId) {
+        console.warn("[useCardChat] Usuário não possui coupleId. Não é possível carregar o chat.");
+      }
       return;
     }
+
+    console.log(`[useCardChat] Setting up listener for couple ${user.coupleId}, card ${cardId}`);
 
     setIsLoading(true);
     setError(null);
 
-    const messagesColRef = collection(db, 'cardChats', chatRoomId, 'messages');
-    const q = query(messagesColRef, orderBy('timestamp', 'asc'));
+    // Caminho para a coleção de mensagens dentro da subcoleção do casal
+    const messagesPath = `couples/${user.coupleId}/cardChats/${cardId}/messages`;
+    const q = query(collection(db, messagesPath), orderBy('timestamp', 'asc'));
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const fetchedMessages: ChatMessage[] = [];
@@ -65,7 +60,7 @@ export function useCardChat(cardId: string | null) {
       setMessages(fetchedMessages);
       setIsLoading(false);
     }, (err) => {
-      console.error("Erro ao carregar mensagens do chat do Firestore:", err);
+      console.error(`Erro ao carregar mensagens de ${messagesPath}:`, err);
       setError("Não foi possível carregar as mensagens.");
       setMessages([]);
       setIsLoading(false);
@@ -73,10 +68,13 @@ export function useCardChat(cardId: string | null) {
 
     return () => unsubscribe(); // Limpa o listener ao desmontar
 
-  }, [chatRoomId]);
+  }, [user, cardId]); // Depende do user (para coupleId) e cardId
 
   const sendMessage = async (text: string) => {
-    if (!user || !user.id || !chatRoomId || !text.trim()) return;
+    if (!user || !user.id || !user.coupleId || !cardId || !text.trim()) {
+      console.warn("[useCardChat] Não é possível enviar mensagem: dados incompletos.", { userId: user?.id, coupleId: user?.coupleId, cardId });
+      return;
+    }
 
     const senderUsername = user.username || (user.email ? user.email.split('@')[0] : `User-${user.id.substring(0,5)}`);
 
@@ -88,7 +86,8 @@ export function useCardChat(cardId: string | null) {
     };
 
     try {
-      const messagesColRef = collection(db, 'cardChats', chatRoomId, 'messages');
+      const messagesPath = `couples/${user.coupleId}/cardChats/${cardId}/messages`;
+      const messagesColRef = collection(db, messagesPath);
       await addDoc(messagesColRef, newMessageData);
       // Não é necessário setMessages aqui, o onSnapshot cuidará da atualização
     } catch (err) {
@@ -102,6 +101,6 @@ export function useCardChat(cardId: string | null) {
     sendMessage,
     isLoading,
     error,
-    isChatReady: !!chatRoomId && !!user?.linkedPartnerId // Indica se o chat pode ser usado
+    isChatReady: !!user?.coupleId && !!cardId // Indica se o chat pode ser usado
   };
 }

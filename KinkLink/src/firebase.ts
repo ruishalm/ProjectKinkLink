@@ -1,7 +1,7 @@
 // Importe as funções que você precisa dos SDKs que você precisa
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app"; // Adicionado getApps, getApp, FirebaseApp
+import { getAuth, type Auth } from "firebase/auth"; // Adicionado Auth
+import { getFirestore, type Firestore } from "firebase/firestore"; // Adicionado Firestore
 // Se for usar Analytics (opcional, não está no plano MVP inicial)
 // import { getAnalytics } from "firebase/analytics";
 
@@ -17,12 +17,17 @@ const firebaseConfig = {
   measurementId: "G-J1KE1CDEPF" // Adicionado o measurementId
 };
 
-// Inicialize o Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase - Verifica se já existe uma instância
+let app: FirebaseApp;
+if (getApps().length === 0) {
+  app = initializeApp(firebaseConfig);
+} else {
+  app = getApp(); // Pega a instância existente
+}
 
 // Inicialize os serviços do Firebase que você vai usar (Auth e Firestore para o MVP)
-const auth = getAuth(app);
-const db = getFirestore(app);
+const auth: Auth = getAuth(app);
+const db: Firestore = getFirestore(app);
 // const analytics = getAnalytics(app); // Descomente se for usar Analytics
 
 // Exporte as instâncias para usar em outras partes do seu app

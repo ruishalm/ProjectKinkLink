@@ -75,17 +75,29 @@ function SignupPage() {
   const labelStyle: CSSProperties = { display: 'block', marginBottom: '5px' };
   const inputStyle: CSSProperties = { width: '100%', padding: '10px', boxSizing: 'border-box', borderRadius: '4px', border: '1px solid #555' };
   const buttonStyle: CSSProperties = { width: '100%', padding: '12px', marginTop: '10px', cursor: 'pointer' };
-  const errorStyle: CSSProperties = { color: 'red', marginTop: '10px', textAlign: 'center' };
+  const errorStyle: CSSProperties = { color: '#ff7b7b', marginTop: '10px', textAlign: 'center', fontSize: '0.9em' };
+  const successBorderStyle: CSSProperties = { borderColor: '#4CAF50', borderWidth: '2px' }; // Verde para sucesso
+  const warningBorderStyle: CSSProperties = { borderColor: '#ff9800', borderWidth: '2px' }; // Laranja para aviso
 
   // Se o AuthContext ainda está carregando o estado inicial do usuário, pode mostrar um loader
   if (authIsLoading) {
     return <div style={pageContainerStyle}><p>Carregando...</p></div>;
   }
 
-  const isPasswordTooShort = password.length > 0 && password.length < 6;
-  const isConfirmPasswordTooShort = confirmPassword.length > 0 && confirmPassword.length < 6;
-  const passwordsDontMatch = password.length > 0 && confirmPassword.length > 0 && password !== confirmPassword;
-  const canSubmit = !isPasswordTooShort && !isConfirmPasswordTooShort && !passwordsDontMatch && email.length > 0 && password.length > 0 && confirmPassword.length > 0;
+  const isPasswordValidLength = password.length >= 6;
+  const doPasswordsMatch = password === confirmPassword;
+
+  // Condições para feedback visual e habilitação do botão
+  const passwordFieldStyle = {
+    ...inputStyle,
+    ...(password.length > 0 && (isPasswordValidLength ? successBorderStyle : warningBorderStyle)),
+  };
+  const confirmPasswordFieldStyle = {
+    ...inputStyle,
+    ...(confirmPassword.length > 0 && password.length > 0 && (doPasswordsMatch && isPasswordValidLength ? successBorderStyle : warningBorderStyle)),
+  };
+
+  const canSubmit = email.length > 0 && isPasswordValidLength && doPasswordsMatch && !isLoading;
 
   return (
     <div style={pageContainerStyle}>
@@ -100,7 +112,7 @@ function SignupPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            style={inputStyle}
+            style={inputStyle} // Email não precisa de borda dinâmica por enquanto
           />
         </div>
         <div style={inputGroupStyle}>
@@ -112,9 +124,9 @@ function SignupPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            style={inputStyle}
+            style={passwordFieldStyle}
           />
-          {isPasswordTooShort && <p style={{ color: 'orange', fontSize: '0.9em', marginTop: '5px' }}>Senha muito curta (mínimo 6 caracteres).</p>}
+          {password.length > 0 && !isPasswordValidLength && <p style={{ color: '#ffcc80', fontSize: '0.9em', marginTop: '5px' }}>Senha muito curta (mínimo 6 caracteres).</p>}
         </div>
         <div style={inputGroupStyle}>
           <label htmlFor="confirmPassword" style={labelStyle}>Confirmar Senha:</label>
@@ -125,10 +137,10 @@ function SignupPage() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            style={inputStyle}
+            style={confirmPasswordFieldStyle}
           />
-          {isConfirmPasswordTooShort && <p style={{ color: 'orange', fontSize: '0.9em', marginTop: '5px' }}>Senha muito curta (mínimo 6 caracteres).</p>}
-          {passwordsDontMatch && <p style={{ color: 'orange', fontSize: '0.9em', marginTop: '5px' }}>As senhas não coincidem.</p>}
+          {confirmPassword.length > 0 && password.length > 0 && !doPasswordsMatch && <p style={{ color: '#ffcc80', fontSize: '0.9em', marginTop: '5px' }}>As senhas não coincidem.</p>}
+          {confirmPassword.length > 0 && password.length > 0 && doPasswordsMatch && !isPasswordValidLength && <p style={{ color: '#ffcc80', fontSize: '0.9em', marginTop: '5px' }}>A senha original ainda é muito curta.</p>}
         </div>
         <button type="submit" style={buttonStyle} disabled={isLoading || !canSubmit}>{isLoading ? 'Cadastrando...' : 'Cadastrar'}</button>
       </form>

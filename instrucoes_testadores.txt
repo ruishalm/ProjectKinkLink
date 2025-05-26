@@ -63,7 +63,7 @@ Por favor, anote qualquer coisa que:
 Você pode nos enviar seu feedback por [defina aqui como você quer receber o feedback: email, WhatsApp, um formulário Google Forms, etc.].
 
 **Link para o App:**
-[COLOQUE AQUI O LINK DO NETLIFY QUANDO ESTIVER NO AR]
+https://kinklink.netlify.app
 
 Mais uma vez, muito obrigado! Divirtam-se explorando!
 

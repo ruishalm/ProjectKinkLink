@@ -3,7 +3,7 @@
   "projectSummary": "App para casais descobrirem interesses mútuos (dates, desejos, atividades, incluindo NSFW) anonimamente via swipe de cartas. Match revelado apenas em concordância mútua, criando uma lista compartilhada. Frontend simulado para M3 concluído, foco agora na integração com backend Firebase.",
   "coreConcept": {
     "userLinking": "Login individual (Firebase Auth). User A clica em 'Criar Vínculo', gerando um código único temporário ('linkCode'). App cria um doc na coleção `pendingLinks` com `initiatorUserId: userA.uid`, `linkCode`, `status: 'pending'`, `createdAt`. User A compartilha o código manualmente com User B. User B insere o código. App busca em `pendingLinks` pelo código com status 'pending'. Se encontrado e válido (não expirado, usuários não vinculados), app (em transação) cria doc em `couples`, atualiza `partnerId` e `coupleId` nos docs `users` de A e B, e atualiza/deleta o doc em `pendingLinks`. Desvinculação via perfil.",
-    "cardMechanism": "Pilha de cartas apresentada individualmente. Interação via swipe simplificado (detecta fim do gesto) ou botões.",
+    "cardMechanism": "Pilha de cartas apresentada individualmente. Interação via botões ('Topo!'/'Passo').",
     "cardAnimation": "Animação CSS 'Slide Out' (via `transform: translateX`) acionada no fim do swipe/clique. Opcional overlay X/✓.",
     "matchLogic": "Ideia 2: Quando User A curte Card X (que não seja 'Conexão'), grava seu swipe em 'userSwipes'. Em seguida, verifica se o parceiro (User B) já tem um swipe 'like' para a mesma Card X em 'userSwipes'. Se sim, um documento é criado na coleção 'matches'.",
     "matchList": "Tela dedicada exibindo as cartas que receberam match (rolagem infinita inicial), visível para ambos. Funcionalidade para Remover matches da lista principal (mudando status)."
@@ -12,20 +12,20 @@
   "features": {
     "mvp": [
       "Autenticação Firebase (Google, Facebook, Email/Senha)",
-      "Geração/Exibição de Código Curto e Amigável para vinculação (criado via 'Criar Vínculo', armazenado em `pendingLinks`)",
-      "Campo para Inserir Código de Vínculo e Lógica de Vinculação (busca em `pendingLinks`, validação, transação para criar `couples` e atualizar `users`) - Frontend Simulado",
+      "Geração/Exibição de Código Curto para vinculação (armazenado em `pendingLinks`)",
+      "Campo para Inserir Código de Vínculo e Lógica de Vinculação (busca em `pendingLinks`, validação, transação para criar `couples` e atualizar `users`)",
       "Desvinculação de Contas",
       "Exibição da Pilha de Cartas (uma por vez, incluindo cartas 'Conexão' misturadas)",
-      "Mecanismo de Swipe Simplificado/Botões (Aceitar/Rejeitar)",
+      "Mecanismo de Botões (Topo!/Passo)",
       "Animação CSS 'Slide Out'",
       "Animação da próxima carta aparecendo de costas e virando para revelar conteúdo.",
       "Carta de fundo estática para simular baralho na pilha principal.",
-      "Navegação inferior na tela de cartas redesenhada (Botões: Em Breve, Matches, Perfil com ícone).",
+      "Navegação inferior na tela de cartas redesenhada (Botões: Carinhos & Mimos, Links, Perfil com ícone).",
       "Botão 'Crie seu Kink' como miniatura da carta de costas, integrado aos botões de ação.",
-      "Registro de Swipes ('like'/'dislike') na coleção 'userSwipes' (APENAS para cartas que não são 'Conexão')",
-      "Detecção de Match (Lógica 'Ideia 2' ao dar 'like' em cartas que não são 'Conexão')",
-      "Exibição da Lista de Matches (status 'active', rolagem infinita inicial)",
-      "Funcionalidade de Remover Matches (botão 'X' ou lixeira para mudar status para 'removed')",
+      "Registro de Interações ('like'/'dislike') na subcoleção `couples/{coupleId}/likedInteractions` (APENAS para cartas que não são 'Conexão')",
+      "Detecção de 'Link' (Match) ao dar 'like' em cartas que não são 'Conexão', atualizando `likedInteractions`",
+      "Exibição da Lista de 'Links' (Matches) ativos",
+      "Funcionalidade de 'Desfazer Link' (Remover Match) no modal do chat, deletando a interação e removendo de 'seenCards'",
       "Conteúdo de Cartas Pré-definido (incluindo NSFW e 'Conexão') - *Baseado no arquivo 'Cartas provisorias.json' e novas cartas 'Conexão', necessita revisão*",
       "Criação de Cartas Personalizadas ('Cartas em Branco', coleção 'userCards', visíveis apenas ao casal)",
       "Estrutura básica de navegação (Tabs: Cartas, Matches, Perfil)",
@@ -34,7 +34,8 @@
         "id": "F1-MVP",
         "name": "Cartas 'Conexão' (Instantâneas)",
         "description": "Incluir um quinto tipo de carta ('Conexão', category: 'conexao') misturada às outras na pilha. Essas cartas contêm sugestões de pequenos gestos, carinhos ou ações positivas para o parceiro. Elas **não geram match**. O aceite ou rejeição da sugestão é registrado internamente em contadores (`conexaoAccepted`, `conexaoRejected`) no documento do usuário na coleção `users` (contadores ocultos do usuário no MVP).",
-        "category": "Engagement/Relationship Nurturing"
+        "category": "Engagement/Relationship Nurturing",
+        "implementationNotes": "Gatilho de exibição baseado em contadores de likes/matches (resetam por sessão no MVP). Modal 'Carinhos & Mimos' lista cartas de conexão vistas com checklist individual (localStorage)."
       }
     ],
     "future": [
@@ -49,10 +50,10 @@
       "Notificações Push (PWA/Capacitor - ex: novo match)",
       "Tela 'Novidades em Breve'",
       "Onboarding visual (GIF/Tutorial pós-vinculação, talvez mini-game)",
-      "Gamificação de Temas/Skins: Liberar personalizações visuais (temas do app, fundos de carta, variações do logo) baseadas em checkpoints de engajamento do casal (nº de matches, interações em cartas 'Conexão', atividade no chat, etc.).",
+      "Gamificação de Temas/Skins: Liberar personalizações visuais (temas do app, fundos de carta, variações do logo) baseadas em checkpoints de engajamento do casal (nº de 'Links', interações em cartas 'Conexão', atividade no chat, etc.).",
       "Funcionalidades PWA completas (instalação, offline básico para matches/perfil)",
-      "Evolução para Híbrido (Capacitor) se necessário",
       "Desfazer Último Swipe ('Oops!')",
+      "Transformar em App de Celular (iOS/Android) usando Capacitor para distribuição em lojas e acesso a funcionalidades nativas.",
       "Gerenciamento/Limpeza automática de `pendingLinks` expirados (via Cloud Function agendada, se necessário)",
       "Exibição/Uso dos contadores de Cartas 'Conexão' (relatórios, badges, insights para o casal)"
     ]
@@ -77,10 +78,10 @@
         "users (contém partnerId, coupleId, conexaoAccepted: number, conexaoRejected: number)",
         "pendingLinks (armazena tentativas de vínculo: initiatorUserId, linkCode, status, createdAt)",
         "cards (pré-definidas, incluindo category: 'conexao')",
-        "userCards (criadas pelo casal, ligadas a coupleId)",
-        "couples (liga userIds, contém subcoleção 'photos' futura)",
-        "userSwipes (registro individual para match, ID: userId_cardId, NÃO usado para 'conexao')",
-        "matches (resultado dos likes mútuos, contém status)"
+        "userCards (criadas pelo casal, ligadas a coupleId, com 'like' automático do criador)",
+        "couples (liga userIds, contém subcoleção `likedInteractions` para likes/matches, subcoleção `cardChats` para chats, e campo `nextCardForPartner` para priorização de cartas criadas)",
+        "~~userSwipes~~ (Substituído pela subcoleção `likedInteractions` em `couples`)",
+        "~~matches~~ (Substituído pela subcoleção `likedInteractions` em `couples` onde `isMatch: true`)"
       ],
       "notes": "Estrutura detalhada definida previamente. Usa coleção `pendingLinks` para gerenciar o fluxo de vínculo temporário. Usa ID composto em `userSwipes`. 'matches' inclui status ('active', 'removed', 'realized' futuro). Post-its movidos para o futuro. Denormaliza 'cardText' em 'matches'. Firebase Storage será usado para arquivos de fotos, Firestore (subcoleção 'photos' em 'couples' para metadados. Requer regras de segurança robustas baseadas em 'userId' e 'coupleId'. Cartas 'Conexão' são identificadas pela categoria e seu swipe incrementa contadores em 'users', não gera 'userSwipes' ou 'matches'."
     },
@@ -120,7 +121,7 @@
           { "id": "M1.T8", "description": "Criar coleção 'users' no Firestore e salvar dados básicos do usuário no cadastro (uid, email, displayName, inicializar conexaoAccepted: 0, conexaoRejected: 0)." },
           { "id": "M1.T9", "description": "Configurar regras de segurança básicas do Firestore (permitir leitura/escrita apenas para usuário autenticado em seu próprio doc 'users')." }
         ],
-        "status": "Não iniciado"
+        "status": "Concluído"
       },
       {
         "id": "M2",
@@ -140,7 +141,7 @@
           { "id": "M2.T11", "description": "Atualizar estado da aplicação para refletir o status de vinculado (ex: esconder UI de vínculo, mostrar nome do parceiro talvez)." },
           { "id": "M2.T12", "description": "Refinar regras de segurança do Firestore para 'pendingLinks', 'users' (atualização de partnerId/coupleId) e 'couples'." }
         ],
-        "status": "Concluído (Frontend UI/Simulação)"
+        "status": "Concluído"
       },
       {
         "id": "M3",
@@ -149,50 +150,50 @@
         "tasks": [
           { "id": "M3.T1a", "description": "Definir e escrever/revisar o conteúdo das cartas pré-definidas (arquivo `Cartas provisorias.json`) E criar conteúdo para as cartas 'Conexão'." },
           { "id": "M3.T1a.1", "description": "Mover dados das cartas para arquivo local (`src/data/cards.ts`).", "status": "Concluído (Frontend)" },
-          { "id": "M3.T1b", "description": "Criar a coleção 'cards' no Firestore e inserir o conteúdo combinado (provisórias + conexão)." },
+          { "id": "M3.T1b", "description": "Criar a coleção 'cards' no Firestore e inserir o conteúdo combinado (provisórias + conexão).", "status": "Concluído" },
           { "id": "M3.T2", "description": "Criar coleção 'userSwipes' no Firestore (estrutura ID: userId_cardId)." },
           { "id": "M3.T3", "description": "Na UI (Tela 'Cartas'): Implementar a visualização da pilha de cartas (mostrar uma por vez).", "status": "Concluído (UI)" },
           { "id": "M3.T3.1", "description": "Criar componente `PlayingCard` para exibir uma carta.", "status": "Concluído (UI)" },
           { "id": "M3.T3.2", "description": "Refatorar lógica da pilha de cartas para hook customizado `useCardPileLogic`.", "status": "Concluído (Frontend)" },
-          { "id": "M3.T4", "description": "Lógica para buscar cartas: Buscar de 'cards' que o usuário ainda não viu/swipou (incluindo 'conexao').", "status": "Concluído (Simulado Frontend)" },
-          { "id": "M3.T4.1", "description": "Implementar lógica de sorteio de cartas com prioridade (Simulado no Frontend).", "status": "Concluído (Simulado Frontend)" },
+          { "id": "M3.T4", "description": "Lógica para buscar cartas: Buscar de 'cards' e 'userCards' que o usuário ainda não viu (incluindo 'conexao').", "status": "Concluído" },
+          { "id": "M3.T4.1", "description": "Implementar lógica de sorteio de cartas com prioridade (likes do parceiro, carta nova do parceiro).", "status": "Concluído" },
           { "id": "M3.T5", "description": "Implementar detecção de gesto de swipe (direita/esquerda) OU botões (Aceitar/Rejeitar).", "status": "Concluído (Botões)" },
-          { "id": "M3.T5.1", "description": "Implementar lógica para que cartas não se repitam (Simulado no Frontend).", "status": "Concluído (Simulado Frontend)" },
+          { "id": "M3.T5.1", "description": "Implementar lógica para que cartas não se repitam (usando `seenCards`).", "status": "Concluído" },
           { "id": "M3.T5.2", "description": "Implementar feedback visual de Match (Modal).", "status": "Concluído (UI)" },
           { "id": "M3.T6", "description": "Implementar animação CSS 'Slide Out' ao concluir swipe/clique." },
           { "id": "M3.T7", "description": "Lógica de Swipe/Botão: Verificar `card.category`. Se 'conexao', incrementar contador `conexaoAccepted`/`conexaoRejected` em `users`. Se NÃO for 'conexao', gravar decisão ('like'/'dislike') em `userSwipes`." },
           { "id": "M3.T8", "description": "Refinar regras de segurança para 'cards' (leitura para autenticados) e 'userSwipes' (escrita apenas pelo próprio usuário no seu swipe)." }
         ],
-        "status": "Concluído (Frontend Simulado)"
+        "status": "Concluído"
       },
       {
         "id": "M3.5",
         "title": "Chat Interno de Cartas (MVP Frontend Simulado)",
         "goal": "Implementar a interface e lógica básica do chat para cartas que deram match, simulado no frontend com persistência local.",
         "tasks": [
-          { "id": "M3.5.T1", "description": "Criar hook customizado `useCardChat` para lógica de chat (carregar/salvar no localStorage).", "status": "Concluído (Frontend Simulado)" },
+          { "id": "M3.5.T1", "description": "Criar hook customizado `useCardChat` para lógica de chat (carregar/salvar no Firestore).", "status": "Concluído" },
           { "id": "M3.5.T2", "description": "Criar componente `CardChatModal` para a UI do chat.", "status": "Concluído (UI)" },
           { "id": "M3.5.T3", "description": "Integrar `CardChatModal` na `MatchesPage` (abrir modal ao clicar no item de match).", "status": "Concluído (UI)" },
           { "id": "M3.5.T4", "description": "Ajustar exibição dos matches na `MatchesPage` para usar `PlayingCard` e manter formato/proporção.", "status": "Concluído (UI)" }
         ],
-        "status": "Concluído (Frontend UI/Simulação)"
+        "status": "Concluído"
       },
       {
         "id": "M4",
         "title": "Detecção e Exibição de Matches",
         "goal": "Implementar a lógica de backend para detectar matches e exibi-los na UI.",
         "tasks": [
-          { "id": "M4.T1", "description": "Criar coleção 'matches' no Firestore." },
-          { "id": "M4.T2", "description": "Lógica de Match (Backend/Cloud Function ou Cliente): Ao gravar 'like' em 'userSwipes' (M3.T7), verificar se o parceiro já deu 'like' na mesma carta." },
-          { "id": "M4.T3", "description": "Se match, criar doc em 'matches' (coupleId, cardId, cardText, cardCategory, cardIntensity, createdAt, status: 'active')." },
-          { "id": "M4.T4", "description": "Na UI (Tela 'Matches'): Implementar a exibição da lista de matches (status 'active')." },
-          { "id": "M4.T5", "description": "Lógica para buscar matches: Buscar de 'matches' onde o `coupleId` corresponde ao do usuário e status é 'active'." },
-          { "id": "M4.T6", "description": "Implementar rolagem infinita (ou paginação simples) para a lista de matches." },
-          { "id": "M4.T7", "description": "Na UI: Adicionar botão 'X' ou lixeira em cada match." },
-          { "id": "M4.T8", "description": "Lógica 'Remover Match': Ao clicar, atualizar o status do doc correspondente em 'matches' para 'removed'." },
-          { "id": "M4.T9", "description": "Refinar regras de segurança para 'matches' (leitura/escrita apenas por membros do casal, talvez escrita apenas via lógica de match)." }
+          { "id": "M4.T1", "description": "Utilizar subcoleção `couples/{coupleId}/likedInteractions` para armazenar interações e matches.", "status": "Concluído" },
+          { "id": "M4.T2", "description": "Lógica de Match (Cliente): Ao dar 'like', verificar `likedInteractions` do parceiro e atualizar para `isMatch: true`.", "status": "Concluído" },
+          { "id": "M4.T3", "description": "Documento em `likedInteractions` com `isMatch: true` e `cardData` representa o match.", "status": "Concluído" },
+          { "id": "M4.T4", "description": "Na UI (Tela 'Links'): Implementar a exibição da lista de 'Links' (matches ativos).", "status": "Concluído" },
+          { "id": "M4.T5", "description": "Lógica para buscar 'Links': Listener em `likedInteractions` com `isMatch: true`.", "status": "Concluído" },
+          { "id": "M4.T6", "description": "Implementar rolagem infinita (ou paginação simples) para a lista de matches.", "status": "Adiado/Removido do MVP" },
+          { "id": "M4.T7", "description": "Na UI (Modal do Chat): Adicionar botão 'Desfazer Link'.", "status": "Concluído" },
+          { "id": "M4.T8", "description": "Lógica 'Desfazer Link': Deletar doc em `likedInteractions` e remover de `seenCards` de ambos.", "status": "Concluído" },
+          { "id": "M4.T9", "description": "Refinar regras de segurança para `likedInteractions` (leitura/escrita apenas por membros do casal).", "status": "Concluído" }
         ],
-        "status": "Não iniciado"
+        "status": "Concluído"
       },
       {
         "id": "M5",
@@ -200,31 +201,31 @@
         "goal": "Permitir que casais criem suas próprias cartas e implementar funcionalidades básicas do perfil (tema, desvinculação).",
         "tasks": [
           { "id": "M5.T1", "description": "Criar coleção 'userCards' no Firestore." },
-          { "id": "M5.T2", "description": "Na UI: Adicionar interface para criar 'Cartas em Branco' (campo de texto simples, botão Salvar). Local: talvez modal na tela de swipe ou seção no perfil.", "status": "Concluído (UI - CreateUserCardModal)" },
+          { "id": "M5.T2", "description": "Na UI: Adicionar interface para criar 'Cartas em Branco' (modal na tela de swipe).", "status": "Concluído" },
           { "id": "M5.T3", "description": "Lógica 'Salvar Carta': Criar doc em 'userCards' (coupleId, cardText, createdByUserId, createdAt) e registrar 'like' automático do criador.", "status": "Concluído" },
-          { "id": "M5.T4", "description": "Modificar lógica de busca de cartas (M3.T4) para incluir cartas de 'userCards' pertencentes ao `coupleId` do usuário, além das 'cards' pré-definidas." },
-          { "id": "M5.T5", "description": "Na UI (Tela 'Perfil'): Construir a tela básica de perfil/configurações.", "status": "Concluído (UI - ProfilePage básica)" },
+          { "id": "M5.T4", "description": "Modificar lógica de busca de cartas para incluir 'userCards' e priorizar carta nova do parceiro.", "status": "Concluído" },
+          { "id": "M5.T5", "description": "Na UI (Tela 'Perfil'): Construir e refinar a tela de perfil/configurações.", "status": "Concluído" },
           { "id": "M5.T6", "description": "Implementar funcionalidade de troca de tema (claro/escuro) e persistir escolha (localStorage ou Firestore).", "status": "Adiado/Revisado - Será substituído por gamificação de skins/temas no futuro." },
-          { "id": "M5.T7", "description": "Na UI (Tela 'Perfil'): Adicionar botão 'Desvincular'.", "status": "Concluído (UI - ProfilePage básica)" },
-          { "id": "M5.T8", "description": "Implementar Lógica de Desvinculação: Confirmação, Transação/Cloud Function para limpar 'partnerId'/'coupleId' em ambos 'users', deletar doc 'couples'. Decidir e implementar o que fazer com 'matches' e 'userCards' associados." },
-          { "id": "M5.T9", "description": "Refinar regras de segurança para 'userCards' (leitura/escrita apenas por membros do casal) e ajustar regras de 'users'/'couples' para desvinculação." }
+          { "id": "M5.T7", "description": "Na UI (Tela 'Perfil'): Adicionar botão 'Desvincular'.", "status": "Concluído" },
+          { "id": "M5.T8", "description": "Implementar Lógica de Desvinculação: Confirmação, limpar 'partnerId'/'coupleId' em ambos 'users', deletar doc 'couples'.", "status": "Concluído" },
+          { "id": "M5.T9", "description": "Refinar regras de segurança para 'userCards' e ajustar regras de 'users'/'couples' para desvinculação.", "status": "Concluído" }
         ],
-        "status": "Em Andamento (Frontend UI/Simulação)"
+        "status": "Concluído"
       },
       {
         "id": "M6",
         "title": "Polimento MVP e Preparação Inicial",
         "goal": "Refinar a experiência do usuário do MVP, tratar casos de borda e preparar para testes iniciais.",
         "tasks": [
-          { "id": "M6.T1", "description": "Revisar e refinar todos os fluxos de usuário implementados." },
-          { "id": "M6.T2", "description": "Adicionar tratamento de erros mais robusto e mensagens claras em toda a aplicação." },
-          { "id": "M6.T3", "description": "Implementar feedback sutil (tátil/sonoro opcional) no swipe, se decidido." },
-          { "id": "M6.T4", "description": "Adicionar aviso de conteúdo NSFW na entrada/cadastro." },
-          { "id": "M6.T5", "description": "Realizar testes manuais completos dos fluxos do MVP (incluindo fluxo 'Conexão')." },
-          { "id": "M6.T6", "description": "Configurar Firebase Hosting para deploy inicial (teste)." },
-          { "id": "M6.T7", "description": "Escrever rascunho inicial da Política de Privacidade e Termos de Serviço (marcar como placeholder até consulta legal)." }
+          { "id": "M6.T1", "description": "Revisar e refinar todos os fluxos de usuário implementados.", "status": "Concluído (Testes com esposa bem-sucedidos)" },
+          { "id": "M6.T2", "description": "Adicionar tratamento de erros mais robusto e mensagens claras para o usuário em toda a aplicação (ex: falha de rede, erro ao salvar dados).", "status": "A Fazer" },
+          { "id": "M6.T3", "description": "Implementar gesto de swipe na tela (direita/esquerda) para interagir com as cartas ('Topo!'/'Passo'), otimizando para experiência mobile, e adicionar feedback visual/tátil sutil. Manter botões como alternativa.", "status": "A Fazer" },
+          { "id": "M6.T4", "description": "Adicionar aviso de conteúdo NSFW na entrada/cadastro.", "status": "A Fazer" },
+          { "id": "M6.T5", "description": "Realizar testes manuais completos dos fluxos do MVP com grupo de amigos.", "status": "Próximo Passo" },
+          { "id": "M6.T6", "description": "Configurar Firebase Hosting para deploy inicial (teste via Netlify).", "status": "Concluído" },
+          { "id": "M6.T7", "description": "Escrever rascunho inicial da Política de Privacidade e Termos de Serviço (marcar como placeholder até consulta legal).", "status": "Em Andamento (Advogado trabalhando)" }
         ],
-        "status": "Não iniciado"
+        "status": "Em Andamento"
       }
     ]
   },
@@ -236,7 +237,7 @@
     "Estratégia de lançamento e marketing inicial"
   ],
   "communicationNotes": "Explique os passos de forma extremamente detalhada, como se eu fosse um iniciante completo idiota ou tivesse acabado de ter um AVC. Usar linguagem simples e dividir em passos bem pequenos.",
-  "lastUpdated": "2024-05-24T03:00:00Z",
+  "lastUpdated": "2024-05-25T20:30:00Z", # Atualizado
   "developmentPrinciples": {
     "modularity": {
       "goal": "Manter o código organizado, reutilizável e fácil de manter.",
@@ -266,7 +267,7 @@
       "Lógica de Match (Ocorre quando esperado para cartas normais, NÃO ocorre para 'Conexão')",
       "Lógica de Swipe 'Conexão' (Incremento correto dos contadores em 'users')",
       "Lista de Matches (Exibição, Remoção - mudança de status)",
-      "Criação de Cartas Personalizadas",
+      "Criação e Priorização de Cartas Personalizadas",
       "Desvinculação (Limpeza de dados, tratamento de matches/cartas existentes)",
       "Troca de Tema",
       "Exibição de Aviso NSFW"

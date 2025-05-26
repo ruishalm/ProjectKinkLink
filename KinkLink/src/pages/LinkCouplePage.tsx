@@ -198,11 +198,6 @@ const LinkCouplePage: React.FC = () => {
           >
             Tenho um Código para Inserir
           </button>
-          {/* Botão de Voltar Adicional */}
-          <button
-            onClick={() => navigate('/')} // Ou navigate(-1) para voltar à página anterior
-            style={{ ...buttonStyle, backgroundColor: '#555', marginTop: '20px', width: '200px' }}
-          >Voltar para Home</button>
         </div>
       )}
 

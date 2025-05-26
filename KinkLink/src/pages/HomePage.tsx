@@ -14,13 +14,14 @@ function HomePage() {
     if (isLoading) {
       return;
     }
-    // Se o usuário está logado E vinculado, redireciona para /cards
-    if (user && user.linkedPartnerId) {
-      navigate('/cards');
+    if (user) { // Usuário está logado
+      if (user.linkedPartnerId) {
+        navigate('/cards'); // Logado e vinculado, vai para as cartas
+      } else {
+        navigate('/link-couple'); // Logado mas não vinculado, vai para a página de vínculo
+      }
     }
-    // Se o usuário está logado mas NÃO vinculado, o LinkedRoute em /cards cuidará disso,
-    // mas idealmente ele nem deveria ver opções de "Ver Cartas" aqui.
-    // Se não está logado, permanece na HomePage.
+    // Se !user (não logado), permanece na HomePage, que é o comportamento desejado.
   }, [user, isLoading, navigate]);
 
   const pageContainerStyle: CSSProperties = {

@@ -62,6 +62,12 @@ const buttonStyle: CSSProperties = {
   marginRight: '10px',
 };
 
+const disabledButtonStyle: CSSProperties = {
+  ...buttonStyle,
+  backgroundColor: '#757575', // Cinza para desabilitado
+  cursor: 'not-allowed',
+};
+
 const destructiveButtonStyle: CSSProperties = {
   ...buttonStyle,
   backgroundColor: '#f44336',
@@ -116,6 +122,8 @@ function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
+  const [initialUsername, setInitialUsername] = useState(''); // Para rastrear o valor inicial
+  const [initialBio, setInitialBio] = useState(''); // Para rastrear o valor inicial
 
   useEffect(() => {
     if (user) {
@@ -146,6 +154,13 @@ function ProfilePage() {
     }
   };
 
+  const handleEditClick = () => {
+    setInitialUsername(user?.username || ''); // Guarda os valores atuais antes de editar
+    setInitialBio(user?.bio || '');
+    setUsername(user?.username || ''); // Garante que os campos de edição comecem com os valores atuais
+    setBio(user?.bio || '');
+    setIsEditing(true);
+  };
   const handleResetTestData = async () => {
     if (window.confirm("Tem certeza que deseja resetar TODOS os dados de teste (cartas vistas, interações e matches)? Esta ação é para fins de desenvolvimento.")) {
       try {
@@ -164,6 +179,9 @@ function ProfilePage() {
 
   // Lógica para nome de usuário padrão
   const displayName = user.username || (user.email ? user.email.split('@')[0] : 'Usuário KinkLink');
+
+  // Verifica se houve alguma mudança nos campos para habilitar o botão Salvar
+  const hasProfileChanged = username !== initialUsername || bio !== initialBio;
 
   return (
     <div style={pageStyle}>
@@ -192,7 +210,11 @@ function ProfilePage() {
             />
           </div>
           <div style={{ marginTop: '20px' }}>
-            <button type="submit" style={buttonStyle}>Salvar Alterações</button>
+            <button 
+              type="submit" 
+              style={!hasProfileChanged ? disabledButtonStyle : buttonStyle} 
+              disabled={!hasProfileChanged}
+            >Salvar Alterações</button>
             <button type="button" onClick={() => setIsEditing(false)} style={{...buttonStyle, backgroundColor: '#757575'}}>Cancelar</button>
           </div>
         </form>
@@ -204,7 +226,7 @@ function ProfilePage() {
             <p style={infoTextStyle}><strong>Email:</strong> {user.email}</p>
             <p style={infoTextStyle}><strong>Nome de Usuário:</strong> {displayName}</p>
             <p style={infoTextStyle}><strong>Bio:</strong> {user.bio || 'Não definida'}</p>
-            <button onClick={() => setIsEditing(true)} style={buttonStyle}>Editar Perfil</button>
+            <button onClick={handleEditClick} style={buttonStyle}>Editar Perfil</button>
           </div>
         </Fragment>
       )}

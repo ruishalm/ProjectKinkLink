@@ -15,11 +15,8 @@ function HomePage() {
       return;
     }
     if (user) { // Usuário está logado
-      if (user.linkedPartnerId) {
-        navigate('/cards'); // Logado e vinculado, vai para as cartas
-      } else {
-        navigate('/link-couple'); // Logado mas não vinculado, vai para a página de vínculo
-      }
+      // Se o usuário está logado, sempre redireciona para o perfil primeiro.
+      navigate('/profile', { replace: true });
     }
     // Se !user (não logado), permanece na HomePage, que é o comportamento desejado.
   }, [user, isLoading, navigate]);

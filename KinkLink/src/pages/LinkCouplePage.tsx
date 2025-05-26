@@ -1,6 +1,6 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\LinkCouplePage.tsx
-import React, { useState, useEffect, type CSSProperties } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, type CSSProperties, Fragment } from 'react';
+import { useNavigate,Link } from 'react-router-dom';
 import { useAuth, type User } from '../contexts/AuthContext';
 import CreateLink from '../components/CreateLink';
 import AcceptLink from '../components/AcceptLink';
@@ -184,28 +184,35 @@ const LinkCouplePage: React.FC = () => {
       </p>
 
       {!showCreateLinkUI && !showAcceptLinkUI && (
-        <div style={{ margin: '30px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
-          <button
-            onClick={() => { setShowCreateLinkUI(true); setShowAcceptLinkUI(false); }}
-            style={{ ...buttonStyle, padding: '15px 25px', fontSize: '1.1em', width: '250px' }}
-          >
-            Quero Gerar um Código
-          </button>
-          <p style={{ color: '#888' }}>OU</p>
-          <button
-            onClick={() => { setShowAcceptLinkUI(true); setShowCreateLinkUI(false); }}
-            style={{ ...buttonStyle, padding: '15px 25px', fontSize: '1.1em', width: '250px' }}
-          >
-            Tenho um Código para Inserir
-          </button>
-        </div>
+        <Fragment>
+          <div style={{ margin: '30px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+            <button
+              onClick={() => { setShowCreateLinkUI(true); setShowAcceptLinkUI(false); }}
+              style={{ ...buttonStyle, padding: '15px 25px', fontSize: '1.1em', width: '250px' }}
+            >
+              Quero Gerar um Código
+            </button>
+            <p style={{ color: '#888' }}>OU</p>
+            <button
+              onClick={() => { setShowAcceptLinkUI(true); setShowCreateLinkUI(false); }}
+              style={{ ...buttonStyle, padding: '15px 25px', fontSize: '1.1em', width: '250px' }}
+            >
+              Tenho um Código para Inserir
+            </button>
+          </div>
+          <div style={{ marginTop: '30px', textAlign: 'center' }}>
+            <Link to="/profile" style={{ color: '#64b5f6', textDecoration: 'none', fontSize: '1em' }}>
+              &larr; Voltar para o Perfil
+            </Link>
+          </div>
+        </Fragment>
       )}
 
       {showCreateLinkUI && <CreateLink onLinkCreated={handleLinkCreated} onCancel={handleCancelAction} />}
       {showAcceptLinkUI && <AcceptLink onLinkAccepted={handleLinkAccepted} onCancel={handleCancelAction} />}
 
       {(showCreateLinkUI || showAcceptLinkUI) && (
-        <div style={{ marginTop: '30px' }}>
+        <div style={{ marginTop: '30px', textAlign: 'center' }}>
           <button
             onClick={handleCancelAction} // Usa a nova função
             style={{ ...buttonStyle, backgroundColor: '#757575', padding: '10px 20px' }}

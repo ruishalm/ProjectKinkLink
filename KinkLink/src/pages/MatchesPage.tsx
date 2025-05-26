@@ -5,6 +5,7 @@ import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
 import type { MatchedCard } from '../contexts/AuthContext'; // Alterada a fonte da importação
 import PlayingCard from '../components/PlayingCard';
 import CardChatModal from '../components/CardChatModal';
+import styles from './MatchesPage.module.css'; // Importa os CSS Modules
 
 // Constantes para dimensões e escala das cartas
 const BASE_CARD_WIDTH = 250; // Dimensão base original do PlayingCard
@@ -13,12 +14,10 @@ const HOT_MATCH_SCALE_FACTOR = 0.55; // Fator de escala para Top Matches
 const OTHER_MATCH_SCALE_FACTOR = 0.5; // Fator de escala para Outros Matches
 
 function MatchesPage() {
-  const { matchedCards, toggleHotStatus } = useUserCardInteractions(); // Removido clearUserMatchesAndSeenCards e navigate
+  // Hooks e Estados
+  const { matchedCards, toggleHotStatus } = useUserCardInteractions();
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [selectedCardForChat, setSelectedCardForChat] = useState<MatchedCard | null>(null);
-
-  // Log para depurar os matches recebidos
-  console.log('[MatchesPage] matchedCards recebidos do hook:', matchedCards);
 
   const hotMatches = matchedCards.filter(card => card.isHot);
   const otherMatches = matchedCards.filter(card => !card.isHot);
@@ -33,76 +32,32 @@ function MatchesPage() {
     setSelectedCardForChat(null);
   };
 
-  // Estilos da página
-  const pageStyle: React.CSSProperties = {
-    padding: '20px',
-    fontFamily: '"Trebuchet MS", sans-serif',
-    color: '#e0e0e0', // Cor de texto clara para tema escuro
-    // A altura dinâmica da página é melhor controlada pelo CSS global (index.css)
-  };
-
-  const sectionTitleStyle: React.CSSProperties = {
-    fontSize: '1.8em',
-    color: '#ff6b6b', // Cor de destaque para "Top Links"
-    borderBottom: '2px solid #ff6b6b',
-    paddingBottom: '10px',
-    marginBottom: '25px',
-    textAlign: 'center',
-  };
-
-  const matchesGridStyle: React.CSSProperties = {
-    display: 'flex',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: '15px', // Espaçamento entre as cartas
-  };
-
-  // Estilo para o wrapper de cada carta (o item do grid que será clicável)
-  const cardItemWrapperStyle: React.CSSProperties = {
-    display: 'inline-block', // Faz o wrapper se ajustar ao conteúdo (PlayingCard escalado)
-    cursor: 'pointer',
-    transition: 'transform 0.15s ease-out', // Para um leve efeito de hover
-    // NENHUMA width ou height explícita aqui.
-  };
-
-  const backToCardsButtonStyle: React.CSSProperties = {
-    border: 'none',
-    backgroundColor: '#ff6b6b',
-    color: 'white',
-    cursor: 'pointer',
-    padding: '10px 20px',
-    borderRadius: '8px',
-    transition: 'background-color 0.2s ease, transform 0.1s ease',
-    textDecoration: 'none',
-    fontWeight: 'bold',
-    fontSize: '0.9em',
-  };
-
+  // Lógica de Renderização e Variáveis Auxiliares
   const noMatchesCondition = hotMatches.length === 0 && otherMatches.length === 0;
 
   return (
-    <div style={pageStyle}>
-      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
-        <h1 style={{color: '#64b5f6', margin: 0}}>Seus Links! 🎉</h1>
-        <Link to="/cards" style={backToCardsButtonStyle}>
+    <div className={styles.page}>
+      <div className={styles.header}>
+        <h1 className={styles.pageTitle}>Seus Links! 🎉</h1>
+        <Link to="/cards" className={styles.backToCardsButton}>
           Voltar para as Cartas
         </Link>
       </div>
 
       {noMatchesCondition ? (
-        <p style={{ textAlign: 'center', fontSize: '1.1em', color: '#b0b0b0', marginTop: '50px' }}>
+        <p className={styles.noMatchesText}>
           Você ainda não tem Links. Continue explorando as cartas!
         </p>
       ) : (
         <>
           {hotMatches.length > 0 && (
             <section>
-              <h2 style={sectionTitleStyle}>🔥 Top Links</h2>
-              <div style={matchesGridStyle}>
+              <h2 className={styles.sectionTitle}>🔥 Top Links</h2>
+              <div className={styles.matchesGrid}>
                 {hotMatches.map((card: MatchedCard) => (
                   <div
                     key={card.id}
-                    style={cardItemWrapperStyle} // Aplica apenas o estilo base do wrapper
+                    className={styles.cardItemWrapper}
                     onClick={() => handleOpenChat(card)}
                     onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
                     onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
@@ -123,13 +78,15 @@ function MatchesPage() {
           )}
 
           {otherMatches.length > 0 && (
-            <section style={hotMatches.length > 0 ? { marginTop: '40px' } : {}}>
-              <h2 style={{...sectionTitleStyle, borderBottomColor: '#64b5f6', color: '#64b5f6'}}>{hotMatches.length > 0 ? 'Outros Links' : 'Seus Links'}</h2>
-              <div style={matchesGridStyle}>
+            <section className={styles.section} style={hotMatches.length > 0 ? { marginTop: '40px' } : {}}>
+              <h2 className={`${styles.sectionTitle} ${styles.sectionTitleOthers}`}>
+                {hotMatches.length > 0 ? 'Outros Links' : 'Seus Links'}
+              </h2>
+              <div className={styles.matchesGrid}>
                 {otherMatches.map((card: MatchedCard) => (
                   <div
                     key={card.id}
-                    style={cardItemWrapperStyle} // Aplica apenas o estilo base do wrapper
+                    className={styles.cardItemWrapper}
                     onClick={() => handleOpenChat(card)}
                     onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
                     onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
@@ -158,8 +115,6 @@ function MatchesPage() {
           onClose={handleCloseChat}
         />
       )}
-
-      {/* Botão de Debug removido pois clearUserMatchesAndSeenCards não está disponível no hook */}
     </div>
   );
 }

@@ -1,0 +1,70 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\MatchesPage.module.css */
+.page {
+  padding: 20px;
+  font-family: "Trebuchet MS", sans-serif;
+  color: #e0e0e0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.pageTitle {
+  color: #64b5f6;
+  margin: 0;
+}
+
+.backToCardsButton {
+  border: none;
+  background-color: #ff6b6b;
+  color: white;
+  cursor: pointer;
+  padding: 10px 20px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+.noMatchesText {
+  text-align: center;
+  font-size: 1.1em;
+  color: #b0b0b0;
+  margin-top: 50px;
+}
+
+.section {
+  /* Estilo base para seções, pode ser usado para marginTop se necessário */
+}
+
+.sectionTitle {
+  font-size: 1.8em;
+  color: #ff6b6b;
+  border-bottom: 2px solid #ff6b6b;
+  padding-bottom: 10px;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.sectionTitleOthers {
+  composes: sectionTitle;
+  border-bottom-color: #64b5f6;
+  color: #64b5f6;
+}
+
+.matchesGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+}
+
+.cardItemWrapper {
+  display: inline-block;
+  cursor: pointer;
+  transition: transform 0.15s ease-out;
+}

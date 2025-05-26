@@ -1,0 +1,106 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\LoginPage.module.css */
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  background-color: #2c2c2c;
+  position: relative;
+  overflow: 'hidden'; /* Note: In CSS, 'hidden' should not be a string. Corrected below. */
+  overflow: hidden;
+  font-family: "Trebuchet MS", sans-serif; /* Added for consistency */
+  color: #e0e0e0; /* Added for consistency */
+  text-align: center; /* Added for consistency */
+}
+
+.formContainer {
+  width: 100%;
+  max-width: 400px;
+  padding: 25px;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  z-index: 1;
+  text-align: left;
+}
+
+.inputGroup {
+  margin-bottom: 15px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.input {
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background-color: #3a3f47; /* Added for consistency */
+  color: #e0e0e0; /* Added for consistency */
+}
+
+.button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  cursor: pointer;
+  background-color: #64b5f6; /* Added default button color */
+  color: #2c2c2c; /* Added default button text color */
+  border: none; /* Added for consistency */
+  border-radius: 4px; /* Added for consistency */
+  font-weight: bold; /* Added for consistency */
+}
+
+.errorText {
+  color: #ff7b7b; /* Adjusted from 'red' for consistency with SignupPage */
+  margin-top: 10px;
+  text-align: center;
+  font-size: 0.9em; /* Added for consistency */
+  z-index: 1;
+  position: relative;
+}
+
+.watermarkContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.watermarkEmoji {
+  position: absolute;
+  user-select: none;
+  color: #888;
+}
+
+.pageTitle {
+  z-index: 1;
+  position: relative;
+  color: #64b5f6; /* Added for consistency */
+  margin-bottom: 20px; /* Added for consistency */
+}
+
+.navigationText {
+  margin-top: 20px;
+  z-index: 1;
+  position: relative;
+}
+
+.navigationLink {
+  margin-top: 10px;
+  display: inline-block;
+  z-index: 1;
+  position: relative;
+  color: #64b5f6; /* Added for consistency */
+  text-decoration: none; /* Added for consistency */
+}

@@ -1,54 +1,12 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\LinkCouplePage.tsx
-import React, { useState, useEffect, type CSSProperties, Fragment } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import { useNavigate,Link } from 'react-router-dom';
 import { useAuth, type User } from '../contexts/AuthContext';
 import CreateLink from '../components/CreateLink';
 import AcceptLink from '../components/AcceptLink';
 import { db } from '../firebase'; // Import db
 import { doc, getDoc, writeBatch } from 'firebase/firestore'; // Import firestore functions, removido deleteDoc
-
-// Estilos (mantidos e adaptados do seu código original)
-const pageStyle: CSSProperties = {
-  maxWidth: '600px',
-  margin: '40px auto',
-  padding: '30px',
-  backgroundColor: '#2c2c2c',
-  borderRadius: '12px',
-  boxShadow: '0 6px 20px rgba(0, 0, 0, 0.3)',
-  color: '#e0e0e0',
-  fontFamily: '"Trebuchet MS", sans-serif',
-  textAlign: 'center',
-};
-
-// sectionStyle não é mais diretamente usado pelos componentes CreateLink/AcceptLink,
-// mas pode ser útil se você adicionar mais seções a esta página.
-// const sectionStyle: CSSProperties = {
-//   marginBottom: '30px',
-//   padding: '20px',
-//   backgroundColor: '#353535',
-//   borderRadius: '8px',
-//   border: '1px solid #444',
-//   textAlign: 'left',
-// };
-
-const buttonStyle: CSSProperties = {
-  padding: '12px 20px',
-  backgroundColor: '#64b5f6',
-  color: 'white',
-  border: 'none',
-  borderRadius: '6px',
-  cursor: 'pointer',
-  fontSize: '1em',
-  fontWeight: 'bold',
-  transition: 'background-color 0.2s ease, transform 0.1s ease',
-  margin: '5px',
-};
-
-const destructiveButtonStyle: CSSProperties = {
-  ...buttonStyle,
-  backgroundColor: '#f44336', // Vermelho para ações destrutivas
-  marginTop: '15px',
-};
+import styles from './LinkCouplePage.module.css';
 
 const LinkCouplePage: React.FC = () => {
   const { user, isLoading: authIsLoading, updateUser: updateAuthContextUser } = useAuth();
@@ -83,15 +41,11 @@ const LinkCouplePage: React.FC = () => {
   }, [user, user?.linkedPartnerId, partnerInfo]);
 
   if (authIsLoading) {
-    return <div style={pageStyle}><p>Carregando informações do usuário...</p></div>;
+    return <div className={styles.page}><p className={styles.loadingText}>Carregando informações do usuário...</p></div>;
   }
 
   if (!user) {
-    // O useEffect acima não será chamado se user for null, então está ok.
-    // Se houvesse um useEffect que dependesse de algo que só existe após o login,
-    // ele precisaria de uma guarda interna ou ser movido para após esta verificação.
-    // Neste caso, o useEffect para partnerInfo já verifica 'user'.
-    return <div style={pageStyle}><p>Por favor, faça login para vincular sua conta.</p></div>;
+    return <div className={styles.page}><p className={styles.loadingText}>Por favor, faça login para vincular sua conta.</p></div>;
   }
 
   const handleUnlink = async () => {
@@ -113,11 +67,6 @@ const LinkCouplePage: React.FC = () => {
         // 2. Deleta o documento do casal
         // A regra de segurança permite que um membro delete o documento do casal.
         batch.delete(coupleDocRef);
-
-        // Nota: O documento do parceiro(a) ficará com coupleId e linkedPartnerId "órfãos".
-        // A lógica no app do parceiro(a) precisará lidar com isso (ex: se coupleId não existe, considerar desvinculado).
-        // Uma solução mais robusta envolveria Cloud Functions para garantir consistência.
-
         await batch.commit();
         await updateAuthContextUser({ linkedPartnerId: null, coupleId: null }); // Atualiza o AuthContext localmente
         alert("Vínculo desfeito com sucesso!");
@@ -143,12 +92,12 @@ const LinkCouplePage: React.FC = () => {
 
   if (user.linkedPartnerId) {
     return (
-      <div style={pageStyle}>
-        <h1>Você já está Vinculado!</h1>
-        <p>Seu parceiro(a) é: {partnerInfo?.username || partnerInfo?.email || user.linkedPartnerId.substring(0, 8) + "..."}</p>
-        <p>Agora vocês podem começar a usar o KinkLink juntos!</p>
-        <button onClick={() => navigate('/cards')} style={{ ...buttonStyle, marginTop: '20px' }}>Ir para as Cartas</button>
-        <button onClick={handleUnlink} style={destructiveButtonStyle} disabled={isUnlinking}>{isUnlinking ? "Desfazendo..." : "Desfazer Vínculo"}</button>
+      <div className={styles.page}>
+        <h1 className={styles.title}>Você já está Vinculado!</h1>
+        <p className={styles.partnerInfoText}>Seu parceiro(a) é: {partnerInfo?.username || partnerInfo?.email || user.linkedPartnerId.substring(0, 8) + "..."}</p>
+        <p className={styles.subText}>Agora vocês podem começar a usar o KinkLink juntos!</p>
+        <button onClick={() => navigate('/cards')} className={styles.button} style={{ marginTop: '20px' }}>Ir para as Cartas</button>
+        <button onClick={handleUnlink} className={styles.destructiveButton} disabled={isUnlinking}>{isUnlinking ? "Desfazendo..." : "Desfazer Vínculo"}</button>
       </div>
     );
   }
@@ -161,47 +110,42 @@ const LinkCouplePage: React.FC = () => {
 
   const handleLinkAccepted = (coupleId: string, partnerId: string) => {
     console.log(`LinkCouplePage: Link aceito! CoupleID: ${coupleId}, PartnerID: ${partnerId}`);
-    // O AuthContext (via listener no App.tsx ou no próprio AuthContext)
-    // deve atualizar o estado 'user.linkedPartnerId'.
-    // Quando isso acontecer, este componente será re-renderizado e mostrará a mensagem "Você já está Vinculado!".
     setShowCreateLinkUI(false);
     setShowAcceptLinkUI(false);
-    // Opcional: redirecionar ou mostrar mensagem de sucesso mais proeminente.
-    // navigate('/'); // Poderia redirecionar para a home ou para /cards
   };
 
   const handleCancelAction = () => {
     setShowCreateLinkUI(false);
     setShowAcceptLinkUI(false);
   };
-
+  
   return (
-    <div style={pageStyle}>
-      <h1 style={{ color: '#64b5f6', marginBottom: '20px' }}>Vincular Casal</h1>
-      <p style={{ marginBottom: '30px', fontSize: '1.1em', color: '#b0b0b0' }}>
+    <div className={styles.page}>
+      <h1 className={styles.title}>Vincular Casal</h1>
+      <p className={styles.subText}>
         Para usar o KinkLink e compartilhar experiências com seu parceiro(a),
         vocês precisam vincular suas contas.
       </p>
 
       {!showCreateLinkUI && !showAcceptLinkUI && (
         <Fragment>
-          <div style={{ margin: '30px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+          <div className={styles.optionsContainer}>
             <button
               onClick={() => { setShowCreateLinkUI(true); setShowAcceptLinkUI(false); }}
-              style={{ ...buttonStyle, padding: '15px 25px', fontSize: '1.1em', width: '250px' }}
+              className={styles.actionButton}
             >
               Quero Gerar um Código
             </button>
-            <p style={{ color: '#888' }}>OU</p>
+            <p className={styles.orText}>OU</p>
             <button
               onClick={() => { setShowAcceptLinkUI(true); setShowCreateLinkUI(false); }}
-              style={{ ...buttonStyle, padding: '15px 25px', fontSize: '1.1em', width: '250px' }}
+              className={styles.actionButton}
             >
               Tenho um Código para Inserir
             </button>
           </div>
-          <div style={{ marginTop: '30px', textAlign: 'center' }}>
-            <Link to="/profile" style={{ color: '#64b5f6', textDecoration: 'none', fontSize: '1em' }}>
+          <div className={styles.backLinkContainer}>
+            <Link to="/profile" className={styles.backLink}>
               &larr; Voltar para o Perfil
             </Link>
           </div>
@@ -212,10 +156,10 @@ const LinkCouplePage: React.FC = () => {
       {showAcceptLinkUI && <AcceptLink onLinkAccepted={handleLinkAccepted} onCancel={handleCancelAction} />}
 
       {(showCreateLinkUI || showAcceptLinkUI) && (
-        <div style={{ marginTop: '30px', textAlign: 'center' }}>
+        <div className={styles.backLinkContainer}>
           <button
             onClick={handleCancelAction} // Usa a nova função
-            style={{ ...buttonStyle, backgroundColor: '#757575', padding: '10px 20px' }}
+            className={styles.secondaryButton}
           >
             Voltar / Cancelar
           </button>

@@ -217,15 +217,15 @@
         "title": "Polimento MVP e Preparação Inicial",
         "goal": "Refinar a experiência do usuário do MVP, tratar casos de borda e preparar para testes iniciais.",
         "tasks": [
-          { "id": "M6.T1", "description": "Revisar e refinar todos os fluxos de usuário implementados.", "status": "Concluído (Testes com esposa bem-sucedidos)" },
-          { "id": "M6.T2", "description": "Adicionar tratamento de erros mais robusto e mensagens claras para o usuário em toda a aplicação (ex: falha de rede, erro ao salvar dados).", "status": "A Fazer" },
-          { "id": "M6.T3", "description": "Implementar gesto de swipe na tela (direita/esquerda) para interagir com as cartas ('Topo!'/'Passo'), otimizando para experiência mobile, e adicionar feedback visual/tátil sutil. Manter botões como alternativa.", "status": "A Fazer" },
-          { "id": "M6.T4", "description": "Adicionar aviso de conteúdo NSFW na entrada/cadastro.", "status": "A Fazer" },
-          { "id": "M6.T5", "description": "Realizar testes manuais completos dos fluxos do MVP com grupo de amigos.", "status": "Próximo Passo" },
+          { "id": "M6.T1", "description": "Revisar e refinar todos os fluxos de usuário implementados.", "status": "Concluído" },
+          { "id": "M6.T2", "description": "Adicionar tratamento de erros mais robusto e mensagens claras para o usuário em toda a aplicação.", "status": "Concluído (Terceirizado)" },
+          { "id": "M6.T3", "description": "Implementar gesto de swipe na tela com feedback visual/tátil para interagir com as cartas.", "status": "Concluído" },
+          { "id": "M6.T4", "description": "Adicionar aviso de conteúdo NSFW na entrada/cadastro.", "status": "Concluído" },
+          { "id": "M6.T5", "description": "Realizar testes manuais completos dos fluxos do MVP com grupo de amigos e coletar feedback.", "status": "Concluído" },
           { "id": "M6.T6", "description": "Configurar Firebase Hosting para deploy inicial (teste via Netlify).", "status": "Concluído" },
-          { "id": "M6.T7", "description": "Escrever rascunho inicial da Política de Privacidade e Termos de Serviço (marcar como placeholder até consulta legal).", "status": "Em Andamento (Advogado trabalhando)" }
+          { "id": "M6.T7", "description": "Elaborar rascunhos da Política de Privacidade e Termos de Serviço e iniciar revisão legal.", "status": "Concluído (Rascunhos prontos, revisão legal em andamento)" }
         ],
-        "status": "Em Andamento"
+        "status": "Concluído"
       }
     ]
   },

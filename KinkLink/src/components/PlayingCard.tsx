@@ -1,4 +1,4 @@
-// d:\Projetos\Github\app\KinkLink\KinkLink\src\components\PlayingCard.tsx
+// d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\PlayingCard.tsx
 import React, { useEffect, useRef, useState, type CSSProperties } from 'react';
 
 // Defina a interface para os dados do card, conforme seu projeto
@@ -19,6 +19,11 @@ interface PlayingCardProps {
   onAnimationComplete?: () => void;
   isFlipped?: boolean; // Controla se a carta está mostrando o verso
   onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
+  dragVisuals?: { // Novas props para feedback visual do swipe
+    x: number;      // Deslocamento horizontal do drag
+    active: boolean;// Se o drag está ativo
+    dir: number;    // Direção horizontal do drag (-1 esquerda, 0 neutro, 1 direita)
+  };
 }
 
 // Estilos base para o container que lida com opacidade de saída e perspectiva
@@ -28,7 +33,7 @@ const getFlipperContainerBaseStyle = (targetWidth?: number, targetHeight?: numbe
   transformOrigin: 'center',
   position: 'relative',
   transition: 'opacity 0.5s ease-out, transform 0.5s ease-out', // 'transform' aqui é para o exitDirection
-  overflow: 'hidden',
+  overflow: 'hidden', // Garante que o conteúdo não vaze durante animações ou rotações
 });
 
 // Estilos para o container interno que faz o flip
@@ -55,6 +60,8 @@ const getCategoryStyles = (category: string): { backgroundColor: string; color: 
     case 'fantasia': return { backgroundColor: '#5E35B1', color: '#FFFFFF', borderColor: '#311B92' };
     case 'exposicao': return { backgroundColor: '#43A047', color: '#FFFFFF', borderColor: '#1B5E20' };
     case 'conexao': return { backgroundColor: '#FFFFFF', color: '#333333', borderColor: '#696969' };
+    case 'usercard': // Adicionado para consistência com o modal de criação
+    case 'userCard': return { backgroundColor: '#0b5351', color: '#FFFFFF', borderColor: '#073e3c' };
     default: return { backgroundColor: '#ECEFF1', color: '#263238', borderColor: '#B0BEC5' };
   }
 };
@@ -72,7 +79,7 @@ const cardBackDiagonalLinesStyle: CSSProperties = {
 };
 
 const PlayingCard: React.FC<PlayingCardProps> = ({
-  data, targetWidth, targetHeight, onToggleHot, exitDirection, onAnimationComplete, isFlipped, onClick
+  data, targetWidth = 250, targetHeight = 350, onToggleHot, exitDirection, onAnimationComplete, isFlipped, onClick, dragVisuals
 }) => {
   const textContentRef = useRef<HTMLParagraphElement>(null);
   const textAreaRef = useRef<HTMLDivElement>(null);
@@ -80,7 +87,7 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
 
   // Calcular um fator de escala visual para os elementos internos
   const baseCardWidthForScaling = 250; // Largura base para a qual os valores fixos foram desenhados
-  const visualScaleFactor = targetWidth ? targetWidth / baseCardWidthForScaling : 1;
+  const visualScaleFactor = targetWidth / baseCardWidthForScaling;
 
   useEffect(() => {
     if (textContentRef.current && textAreaRef.current) {
@@ -99,7 +106,7 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
       setCurrentFontSize(bestFitSize);
       textElement.style.fontSize = `${bestFitSize}px`;
     }
-  }, [data.text, targetWidth, targetHeight, visualScaleFactor]);
+  }, [data.text, targetWidth, targetHeight, visualScaleFactor, isFlipped]); // Adicionado isFlipped para recalcular se a carta virar
 
   const categoryStyles = getCategoryStyles(data.category);
   const flipperContainerEffectiveStyle = getFlipperContainerBaseStyle(targetWidth, targetHeight);
@@ -110,24 +117,30 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
   } else if (exitDirection === 'right') {
     exitMotionTransform = `translateX(150%) rotateZ(15deg)`;
   }
+  
+  let dragRotationTransform = '';
+  if (dragVisuals && dragVisuals.active) {
+    const rotationFactor = 0.05; // graus por pixel de drag
+    const maxRotation = 10; // max graus
+    let rotation = dragVisuals.x * rotationFactor;
+    rotation = Math.max(-maxRotation, Math.min(maxRotation, rotation)); // Limita a rotação
+    dragRotationTransform = `rotateZ(${rotation}deg)`;
+  }
+
   const flipTransformValue = isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
   
-  const flipperDynamicTransform = [flipTransformValue, exitMotionTransform].filter(Boolean).join(' ').trim() || 'none';
+  // Combina as transformações: flip, depois rotação do drag, depois movimento de saída
+  const flipperDynamicTransform = [flipTransformValue, dragRotationTransform, exitMotionTransform].filter(Boolean).join(' ').trim() || 'none';
+  
   const flipperDynamicTransition = exitMotionTransform 
-    ? `transform 0.5s ease-out, ${flipperStyleBase.transition}` // Combina transições
-    : (flipperStyleBase.transition as string);
+    ? `transform 0.5s ease-out, ${flipperStyleBase.transition}` // Combina transições se estiver saindo
+    : (dragVisuals && dragVisuals.active ? 'none' : flipperStyleBase.transition as string); // Sem transição de transform durante o drag ativo, senão usa a de flip
 
 
   const flipperContainerDynamicStyle: CSSProperties = {
     ...flipperContainerEffectiveStyle,
     opacity: exitDirection ? 0 : 1,
     perspective: '1000px',
-    // A transformação de saída (translateX/rotateZ) é aplicada ao flipper interno
-    // para que a perspectiva do flip não seja afetada pelo movimento de saída.
-    // No entanto, a transição de opacity e a transição de transform (para o exit)
-    // estão no container externo. O flipper interno só transiciona o rotateY.
-    // Se o exitMotionTransform for aplicado aqui, a transição de opacity pode não sincronizar bem.
-    // Vamos manter o exitMotionTransform no flipper interno.
   };
 
   // --- Estilos Dinâmicos Baseados na Escala ---
@@ -167,6 +180,7 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
     backgroundColor: categoryStyles.backgroundColor,
     color: categoryStyles.color,
     borderColor: categoryStyles.borderColor,
+    position: 'relative', // Para o z-index do overlay funcionar
   };
 
   const cardBackFaceStyleConfigDynamic: CSSProperties = {
@@ -188,6 +202,22 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
   const categoryAbbreviation = data.category.substring(0, 3).toUpperCase();
   const textContentFinalStyle: CSSProperties = { margin: 0, fontSize: `${currentFontSize}px`, lineHeight: '1.4' };
 
+  // Estilo para o overlay de feedback visual do swipe
+  const swipeFeedbackOverlayStyle: CSSProperties = {
+    position: 'absolute',
+    top: `${10 * visualScaleFactor}px`, // Posicionamento escalado
+    padding: `${5 * visualScaleFactor}px ${10 * visualScaleFactor}px`,
+    borderRadius: `${5 * visualScaleFactor}px`,
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: `${1.2 * visualScaleFactor}em`,
+    textTransform: 'uppercase',
+    zIndex: 3, // Acima do conteúdo da frente
+    pointerEvents: 'none',
+    transition: 'opacity 0.1s ease-in-out', // Suave transição de opacidade
+  };
+
+
   return (
     <div 
       style={flipperContainerDynamicStyle} 
@@ -199,12 +229,27 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
         className="playing-card-flipper"
         style={{
           ...flipperStyleBase,
-          transform: flipperDynamicTransform, // Contém o flip e o exit motion
-          transition: flipperDynamicTransition, // Controla a transição para flip e/ou exit
+          transform: flipperDynamicTransform,
+          transition: flipperDynamicTransition,
         }}
       >
         {/* Frente da Carta */}
         <div style={cardFrontFaceDynamicStyle} className="card-face card-front">
+          {/* Overlay de Feedback Visual do Swipe */}
+          {dragVisuals && dragVisuals.active && dragVisuals.dir !== 0 && (
+            <div style={{
+              ...swipeFeedbackOverlayStyle,
+              left: dragVisuals.dir > 0 ? 'auto' : `${10 * visualScaleFactor}px`,
+              right: dragVisuals.dir < 0 ? 'auto' : `${10 * visualScaleFactor}px`,
+              backgroundColor: dragVisuals.dir > 0 ? 'rgba(76, 175, 80, 0.7)' : 'rgba(244, 67, 54, 0.7)',
+              opacity: Math.min(Math.abs(dragVisuals.x) / (targetWidth * 0.3), 0.9),
+              transform: dragVisuals.dir > 0 ? 'rotate(10deg)' : 'rotate(-10deg)',
+              transformOrigin: dragVisuals.dir > 0 ? 'bottom left' : 'bottom right',
+            }}>
+              {dragVisuals.dir > 0 ? 'Topo!' : 'Passo'}
+            </div>
+          )}
+
           <div style={{ ...dynamicTopLeftCornerStyle, color: categoryStyles.color }}>
             <span style={dynamicCornerNumberStyle}>{displayIntensity}</span>
             <span style={dynamicCornerSuitStyle}>{categoryAbbreviation}</span>
@@ -223,17 +268,18 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
               onClick={(e) => { e.stopPropagation(); onToggleHot(data.id); }}
               style={{
                 position: 'absolute', 
-                top: dynamicCardFacePadding, // Usa o padding dinâmico para posicionamento
-                right: dynamicCardFacePadding, // Usa o padding dinâmico para posicionamento
+                top: dynamicCardFacePadding,
+                right: dynamicCardFacePadding,
                 background: 'transparent',
                 border: 'none', 
-                fontSize: `${1.8 * visualScaleFactor}em`, // Escala o tamanho do ícone
+                fontSize: `${1.8 * visualScaleFactor}em`,
                 cursor: 'pointer', 
                 padding: '0',
                 lineHeight: '1', 
                 color: data.isHot ? '#ff6b6b' : '#888888',
                 filter: data.isHot ? 'drop-shadow(0 0 3px #ff6b6b)' : 'grayscale(100%)',
                 opacity: data.isHot ? 1 : 0.6,
+                zIndex: 4, // Acima do overlay de swipe
               }}
               aria-label={data.isHot ? "Remover dos Top Links" : "Adicionar aos Top Links"}
               title={data.isHot ? "Remover dos Top Links" : "Adicionar aos Top Links"}

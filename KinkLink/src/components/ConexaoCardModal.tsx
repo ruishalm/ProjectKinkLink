@@ -1,78 +1,17 @@
-import React, { type CSSProperties, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import type { Card } from '../data/cards';
+import styles from './ConexaoCardModal.module.css'; // Importa os CSS Modules
 
 interface ConexaoCardModalProps {
   card: Card | null;
   onAccept: (cardId: string) => void;
   onReject: (cardId: string) => void;
-  onClose: () => void; // onClose é chamado por onAccept/onReject internamente
+  onClose: () => void;
   isOpen: boolean;
 }
 
-const modalOverlayStyle: CSSProperties = {
-  position: 'fixed',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: 'rgba(0, 0, 0, 0.75)', // Um pouco mais escuro para destaque
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  zIndex: 1050, // Acima de outros modais se houver
-};
-
-const modalContentStyle: CSSProperties = {
-  backgroundColor: '#2c2c2c', // Um cinza escuro, mas não preto total
-  color: '#e0e0e0', // Cinza claro para texto
-  padding: '30px 35px',
-  borderRadius: '15px', // Bordas mais arredondadas
-  textAlign: 'center',
-  maxWidth: '450px',
-  width: '90%',
-  boxShadow: '0 8px 25px rgba(0,0,0,0.5)',
-  border: '1px solid #444',
-  fontFamily: '"Trebuchet MS", sans-serif',
-};
-
-const cardTextStyle: CSSProperties = {
-  fontSize: '1.4em', // Texto da carta um pouco maior
-  margin: '25px 0',
-  lineHeight: '1.7',
-  minHeight: '70px',
-  color: '#ffffff', // Texto da carta branco para contraste
-};
-
-const buttonContainerStyle: CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-around',
-  marginTop: '30px',
-};
-
-const buttonBaseStyle: CSSProperties = {
-  padding: '14px 28px',
-  fontSize: '1.1em',
-  borderRadius: '10px',
-  border: 'none',
-  cursor: 'pointer',
-  fontWeight: 'bold',
-  transition: 'background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease',
-  boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-};
-
-const acceptButtonStyle: CSSProperties = {
-  ...buttonBaseStyle,
-  backgroundColor: '#5cb85c', // Verde mais vibrante
-  color: 'white',
-};
-
-const rejectButtonStyle: CSSProperties = {
-  ...buttonBaseStyle,
-  backgroundColor: '#d9534f', // Vermelho mais vibrante
-  color: 'white',
-};
-
 function ConexaoCardModal({ card, onAccept, onReject, onClose, isOpen }: ConexaoCardModalProps) {
+  // Efeitos
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -85,14 +24,26 @@ function ConexaoCardModal({ card, onAccept, onReject, onClose, isOpen }: Conexao
 
   if (!isOpen || !card) return null;
 
+  // Funções Manipuladoras
+  const handleAccept = () => {
+    onAccept(card.id);
+    onClose();
+  };
+
+  const handleReject = () => {
+    onReject(card.id);
+    onClose();
+  };
+
+  // Lógica de Renderização e JSX
   return (
-    <div style={modalOverlayStyle} onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="conexao-modal-title">
-      <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
-        <h2 id="conexao-modal-title" style={{ marginTop: 0, color: '#64b5f6', fontSize: '1.8em' }}>💌 Um Gesto de Conexão! 💌</h2>
-        <p style={cardTextStyle}>{card.text}</p>
-        <div style={buttonContainerStyle}>
-          <button style={acceptButtonStyle} onClick={() => { onAccept(card.id); onClose(); }} onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.96)'} onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}>Topar!</button>
-          <button style={rejectButtonStyle} onClick={() => { onReject(card.id); onClose(); }} onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.96)'} onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}>Agora não</button>
+    <div className={styles.modalOverlay} onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="conexao-modal-title">
+      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        <h2 id="conexao-modal-title" className={styles.title}>💌 Um Gesto de Conexão! 💌</h2>
+        <p className={styles.cardText}>{card.text}</p>
+        <div className={styles.buttonContainer}>
+          <button className={styles.acceptButton} onClick={handleAccept} onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.96)'} onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}>Topar!</button>
+          <button className={styles.rejectButton} onClick={handleReject} onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.96)'} onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}>Agora não</button>
         </div>
       </div>
     </div>

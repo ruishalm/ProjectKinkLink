@@ -1,5 +1,6 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\PlayingCard.tsx
-import React, { useEffect, useRef, useState, type CSSProperties } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import styles from './PlayingCard.module.css'; // Importa os CSS Modules
 
 // Defina a interface para os dados do card, conforme seu projeto
 export interface CardData {
@@ -26,33 +27,6 @@ interface PlayingCardProps {
   };
 }
 
-// Estilos base para o container que lida com opacidade de saída e perspectiva
-const getFlipperContainerBaseStyle = (targetWidth?: number, targetHeight?: number): CSSProperties => ({
-  width: targetWidth ? `${targetWidth}px` : '250px',
-  height: targetHeight ? `${targetHeight}px` : '350px',
-  transformOrigin: 'center',
-  position: 'relative',
-  transition: 'opacity 0.5s ease-out, transform 0.5s ease-out', // 'transform' aqui é para o exitDirection
-  overflow: 'hidden', // Garante que o conteúdo não vaze durante animações ou rotações
-});
-
-// Estilos para o container interno que faz o flip
-const flipperStyleBase: CSSProperties = {
-  width: '100%',
-  height: '100%',
-  position: 'relative',
-  transformStyle: 'preserve-3d',
-  transition: 'transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1)', // Transição para o flip
-};
-
-// Estilos base que não dependem da escala dinâmica inicialmente
-const cornerStyleBase: CSSProperties = {
-  position: 'absolute',
-  textAlign: 'center',
-  lineHeight: '1',
-  fontWeight: 'bold',
-};
-
 const getCategoryStyles = (category: string): { backgroundColor: string; color: string; borderColor: string } => {
   switch (category.toLowerCase()) {
     case 'sensorial': return { backgroundColor: '#FFD700', color: '#4A3B00', borderColor: '#B8860B' };
@@ -66,25 +40,15 @@ const getCategoryStyles = (category: string): { backgroundColor: string; color: 
   }
 };
 
-const cardBackDiagonalTextStyle: CSSProperties = {
-  position: 'absolute', fontSize: '2.8em', fontWeight: 'bold',
-  color: '#e53935', opacity: 0.8, transform: 'rotate(-45deg)',
-  whiteSpace: 'nowrap', userSelect: 'none', pointerEvents: 'none',
-};
-const cardBackDiagonalLinesStyle: CSSProperties = {
-  position: 'absolute', width: '200%', height: '200%',
-  background: 'repeating-linear-gradient(-45deg, #e53935, #e53935 5px, #1a1a1a 5px, #1a1a1a 15px)',
-  opacity: 0.1, transform: 'translate(-25%, -25%) rotate(-45deg)',
-  userSelect: 'none', pointerEvents: 'none',
-};
-
 const PlayingCard: React.FC<PlayingCardProps> = ({
   data, targetWidth = 250, targetHeight = 350, onToggleHot, exitDirection, onAnimationComplete, isFlipped, onClick, dragVisuals
 }) => {
+  // Refs e Estados
   const textContentRef = useRef<HTMLParagraphElement>(null);
   const textAreaRef = useRef<HTMLDivElement>(null);
   const [currentFontSize, setCurrentFontSize] = useState(16);
 
+  // Variáveis e Lógica de Cálculo
   // Calcular um fator de escala visual para os elementos internos
   const baseCardWidthForScaling = 250; // Largura base para a qual os valores fixos foram desenhados
   const visualScaleFactor = targetWidth / baseCardWidthForScaling;
@@ -109,7 +73,6 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
   }, [data.text, targetWidth, targetHeight, visualScaleFactor, isFlipped]); // Adicionado isFlipped para recalcular se a carta virar
 
   const categoryStyles = getCategoryStyles(data.category);
-  const flipperContainerEffectiveStyle = getFlipperContainerBaseStyle(targetWidth, targetHeight);
 
   let exitMotionTransform = '';
   if (exitDirection === 'left') {
@@ -131,156 +94,138 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
   
   // Combina as transformações: flip, depois rotação do drag, depois movimento de saída
   const flipperDynamicTransform = [flipTransformValue, dragRotationTransform, exitMotionTransform].filter(Boolean).join(' ').trim() || 'none';
-  
+
+  // Base transition for flip
+  const baseFlipTransition = 'transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1)';
   const flipperDynamicTransition = exitMotionTransform 
-    ? `transform 0.5s ease-out, ${flipperStyleBase.transition}` // Combina transições se estiver saindo
-    : (dragVisuals && dragVisuals.active ? 'none' : flipperStyleBase.transition as string); // Sem transição de transform durante o drag ativo, senão usa a de flip
+    ? `transform 0.5s ease-out, ${baseFlipTransition}` // Combina transições se estiver saindo
+    : (dragVisuals && dragVisuals.active ? 'none' : baseFlipTransition); // Sem transição de transform durante o drag ativo, senão usa a de flip
 
-
-  const flipperContainerDynamicStyle: CSSProperties = {
-    ...flipperContainerEffectiveStyle,
+  // Estilos dinâmicos que dependem de props ou estado
+  const flipperContainerDynamicStyle: React.CSSProperties = {
+    width: `${targetWidth}px`,
+    height: `${targetHeight}px`,
     opacity: exitDirection ? 0 : 1,
-    perspective: '1000px',
   };
 
-  // --- Estilos Dinâmicos Baseados na Escala ---
   const dynamicCardFacePadding = `${15 * visualScaleFactor}px`;
   const dynamicCardBorderWidth = `${Math.max(1, 8 * visualScaleFactor)}px`;
   const dynamicCardBorderRadius = `${12 * visualScaleFactor}px`;
 
-  const cardFaceBaseStyleDynamic: CSSProperties = {
-    position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-    backfaceVisibility: 'hidden',
+  const cardFaceDynamicInlineStyle: React.CSSProperties = {
     borderRadius: dynamicCardBorderRadius,
     padding: dynamicCardFacePadding,
-    display: 'flex', flexDirection: 'column',
     boxShadow: `0 ${Math.max(1, 4 * visualScaleFactor)}px ${Math.max(1, 8 * visualScaleFactor)}px rgba(0,0,0,0.1)`,
-    boxSizing: 'border-box',
-    fontFamily: '"Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", Arial, sans-serif',
-    color: '#333',
-    overflow: 'hidden',
     border: `${dynamicCardBorderWidth} solid`,
   };
 
   const dynamicCornerOffset = `${10 * visualScaleFactor}px`;
-  const dynamicTopLeftCornerStyle: CSSProperties = { ...cornerStyleBase, top: dynamicCornerOffset, left: dynamicCornerOffset };
-  const dynamicBottomRightCornerStyle: CSSProperties = { ...cornerStyleBase, bottom: dynamicCornerOffset, right: dynamicCornerOffset, transform: 'rotate(180deg)' };
-  const dynamicCornerNumberStyle: CSSProperties = { fontSize: `${2.5 * visualScaleFactor}em`, display: 'block' };
-  const dynamicCornerSuitStyle: CSSProperties = { fontSize: `${0.95 * visualScaleFactor}em`, textTransform: 'uppercase', letterSpacing: `${0.5 * visualScaleFactor}px` };
+  const dynamicTopLeftCornerStyle: React.CSSProperties = {
+    top: dynamicCornerOffset,
+    left: dynamicCornerOffset,
+    color: categoryStyles.color,
+  };
+  const dynamicBottomRightCornerStyle: React.CSSProperties = {
+    bottom: dynamicCornerOffset,
+    right: dynamicCornerOffset,
+    transform: 'rotate(180deg)',
+    color: categoryStyles.color,
+  };
+  const dynamicCornerNumberStyle: React.CSSProperties = { fontSize: `${2.5 * visualScaleFactor}em` };
+  const dynamicCornerSuitStyle: React.CSSProperties = { fontSize: `${0.95 * visualScaleFactor}em`, letterSpacing: `${0.5 * visualScaleFactor}px` };
 
-  const dynamicTextAreaMargin = `${10 * visualScaleFactor}px 0`;
-  const textAreaStyleDynamic: CSSProperties = {
-    flexGrow: 1, width: '100%', overflow: 'hidden', display: 'flex',
-    alignItems: 'center', justifyContent: 'center', textAlign: 'center',
-    margin: dynamicTextAreaMargin,
+  const textAreaDynamicStyle: React.CSSProperties = {
+    margin: `${10 * visualScaleFactor}px 0`,
   };
 
-  const cardFrontFaceDynamicStyle: CSSProperties = {
-    ...cardFaceBaseStyleDynamic,
+  const cardFrontFaceDynamicInlineStyle: React.CSSProperties = {
+    ...cardFaceDynamicInlineStyle,
     backgroundColor: categoryStyles.backgroundColor,
     color: categoryStyles.color,
     borderColor: categoryStyles.borderColor,
-    position: 'relative', // Para o z-index do overlay funcionar
   };
 
-  const cardBackFaceStyleConfigDynamic: CSSProperties = {
-    ...cardFaceBaseStyleDynamic,
-    backgroundColor: '#1a1a1a',
+  const cardBackFaceDynamicInlineStyle: React.CSSProperties = {
+    ...cardFaceDynamicInlineStyle,
     borderColor: '#b71c1c',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transform: 'rotateY(180deg)',
   };
   
+  const textContentFinalStyle: React.CSSProperties = { fontSize: `${currentFontSize}px` };
+
+  const swipeFeedbackOverlayDynamicStyle: React.CSSProperties = dragVisuals && dragVisuals.active && dragVisuals.dir !== 0 ? {
+    top: `${10 * visualScaleFactor}px`,
+    padding: `${5 * visualScaleFactor}px ${10 * visualScaleFactor}px`,
+    borderRadius: `${5 * visualScaleFactor}px`,
+    fontSize: `${1.2 * visualScaleFactor}em`,
+    left: dragVisuals.dir > 0 ? 'auto' : `${10 * visualScaleFactor}px`,
+    right: dragVisuals.dir < 0 ? 'auto' : `${10 * visualScaleFactor}px`,
+    backgroundColor: dragVisuals.dir > 0 ? 'rgba(76, 175, 80, 0.7)' : 'rgba(244, 67, 54, 0.7)',
+    opacity: Math.min(Math.abs(dragVisuals.x) / (targetWidth * 0.3), 0.9),
+    transform: dragVisuals.dir > 0 ? 'rotate(10deg)' : 'rotate(-10deg)',
+    transformOrigin: dragVisuals.dir > 0 ? 'bottom left' : 'bottom right',
+  } : {};
+
+  const hotButtonDynamicStyle: React.CSSProperties = onToggleHot ? {
+    top: dynamicCardFacePadding,
+    right: dynamicCardFacePadding,
+    fontSize: `${1.8 * visualScaleFactor}em`,
+    color: data.isHot ? '#ff6b6b' : '#888888',
+    filter: data.isHot ? 'drop-shadow(0 0 3px #ff6b6b)' : 'grayscale(100%)',
+    opacity: data.isHot ? 1 : 0.6,
+  } : {};
+
+  // Funções Manipuladoras
   const handleOuterTransitionEnd = () => {
     if (exitDirection && onAnimationComplete) {
       onAnimationComplete();
     }
   };
   
+  // Variáveis para Display
   const displayIntensity = typeof data.intensity === 'number' && !isNaN(data.intensity) ? data.intensity : '-';
   const categoryAbbreviation = data.category.substring(0, 3).toUpperCase();
-  const textContentFinalStyle: CSSProperties = { margin: 0, fontSize: `${currentFontSize}px`, lineHeight: '1.4' };
-
-  // Estilo para o overlay de feedback visual do swipe
-  const swipeFeedbackOverlayStyle: CSSProperties = {
-    position: 'absolute',
-    top: `${10 * visualScaleFactor}px`, // Posicionamento escalado
-    padding: `${5 * visualScaleFactor}px ${10 * visualScaleFactor}px`,
-    borderRadius: `${5 * visualScaleFactor}px`,
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: `${1.2 * visualScaleFactor}em`,
-    textTransform: 'uppercase',
-    zIndex: 3, // Acima do conteúdo da frente
-    pointerEvents: 'none',
-    transition: 'opacity 0.1s ease-in-out', // Suave transição de opacidade
-  };
-
 
   return (
     <div 
-      style={flipperContainerDynamicStyle} 
-      className="playing-card-flipper-container" 
+      style={flipperContainerDynamicStyle}
+      className={`${styles.flipperContainer} ${styles.flipperContainerOuter}`}
       onTransitionEnd={handleOuterTransitionEnd}
       onClick={onClick}
     >
       <div
-        className="playing-card-flipper"
+        className={styles.flipper}
         style={{
-          ...flipperStyleBase,
           transform: flipperDynamicTransform,
           transition: flipperDynamicTransition,
         }}
       >
         {/* Frente da Carta */}
-        <div style={cardFrontFaceDynamicStyle} className="card-face card-front">
+        <div style={cardFrontFaceDynamicInlineStyle} className={styles.cardFront}>
           {/* Overlay de Feedback Visual do Swipe */}
           {dragVisuals && dragVisuals.active && dragVisuals.dir !== 0 && (
-            <div style={{
-              ...swipeFeedbackOverlayStyle,
-              left: dragVisuals.dir > 0 ? 'auto' : `${10 * visualScaleFactor}px`,
-              right: dragVisuals.dir < 0 ? 'auto' : `${10 * visualScaleFactor}px`,
-              backgroundColor: dragVisuals.dir > 0 ? 'rgba(76, 175, 80, 0.7)' : 'rgba(244, 67, 54, 0.7)',
-              opacity: Math.min(Math.abs(dragVisuals.x) / (targetWidth * 0.3), 0.9),
-              transform: dragVisuals.dir > 0 ? 'rotate(10deg)' : 'rotate(-10deg)',
-              transformOrigin: dragVisuals.dir > 0 ? 'bottom left' : 'bottom right',
-            }}>
+            <div className={styles.swipeFeedbackOverlay} style={swipeFeedbackOverlayDynamicStyle}>
               {dragVisuals.dir > 0 ? 'Topo!' : 'Passo'}
             </div>
           )}
 
-          <div style={{ ...dynamicTopLeftCornerStyle, color: categoryStyles.color }}>
-            <span style={dynamicCornerNumberStyle}>{displayIntensity}</span>
-            <span style={dynamicCornerSuitStyle}>{categoryAbbreviation}</span>
+          <div className={styles.corner} style={dynamicTopLeftCornerStyle}>
+            <span className={styles.cornerNumber} style={dynamicCornerNumberStyle}>{displayIntensity}</span>
+            <span className={styles.cornerSuit} style={dynamicCornerSuitStyle}>{categoryAbbreviation}</span>
           </div>
-          <div style={{ ...dynamicBottomRightCornerStyle, color: categoryStyles.color }}>
-            <span style={dynamicCornerNumberStyle}>{displayIntensity}</span>
-            <span style={dynamicCornerSuitStyle}>{categoryAbbreviation}</span>
+          <div className={styles.corner} style={dynamicBottomRightCornerStyle}>
+            <span className={styles.cornerNumber} style={dynamicCornerNumberStyle}>{displayIntensity}</span>
+            <span className={styles.cornerSuit} style={dynamicCornerSuitStyle}>{categoryAbbreviation}</span>
           </div>
-          <div ref={textAreaRef} style={textAreaStyleDynamic} className="card-text-area">
-            <p ref={textContentRef} style={textContentFinalStyle} className="card-text-content">
+          <div ref={textAreaRef} className={styles.textArea} style={textAreaDynamicStyle}>
+            <p ref={textContentRef} className={styles.textContent} style={textContentFinalStyle}>
               {data.text}
             </p>
           </div>
           {onToggleHot && (
             <button
               onClick={(e) => { e.stopPropagation(); onToggleHot(data.id); }}
-              style={{
-                position: 'absolute', 
-                top: dynamicCardFacePadding,
-                right: dynamicCardFacePadding,
-                background: 'transparent',
-                border: 'none', 
-                fontSize: `${1.8 * visualScaleFactor}em`,
-                cursor: 'pointer', 
-                padding: '0',
-                lineHeight: '1', 
-                color: data.isHot ? '#ff6b6b' : '#888888',
-                filter: data.isHot ? 'drop-shadow(0 0 3px #ff6b6b)' : 'grayscale(100%)',
-                opacity: data.isHot ? 1 : 0.6,
-                zIndex: 4, // Acima do overlay de swipe
-              }}
+              className={styles.hotButton}
+              style={hotButtonDynamicStyle}
               aria-label={data.isHot ? "Remover dos Top Links" : "Adicionar aos Top Links"}
               title={data.isHot ? "Remover dos Top Links" : "Adicionar aos Top Links"}
             >
@@ -290,9 +235,9 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
         </div>
 
         {/* Verso da Carta */}
-        <div style={cardBackFaceStyleConfigDynamic} className="card-face card-back">
-          <div style={cardBackDiagonalLinesStyle}></div>
-          <div style={cardBackDiagonalTextStyle}>
+        <div style={cardBackFaceDynamicInlineStyle} className={styles.cardBack}>
+          <div className={styles.cardBackDiagonalLines}></div>
+          <div className={styles.cardBackDiagonalText}>
             Kink 🔗 Link
           </div>
         </div>

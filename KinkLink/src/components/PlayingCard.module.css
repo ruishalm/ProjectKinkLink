@@ -1,0 +1,133 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\PlayingCard.module.css */
+.flipperContainer {
+  /* width and height will be set inline based on targetWidth/Height */
+  transform-origin: center;
+  position: relative;
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out; /* for exitDirection */
+  overflow: hidden;
+  perspective: 1000px;
+}
+
+.flipper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  /* transition for flip is set inline based on drag state */
+}
+
+.cardFace {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", Arial, sans-serif;
+  overflow: hidden;
+  /* borderRadius, padding, boxShadow, border, backgroundColor, color will be set inline due to dynamic scaling and category */
+}
+
+.cardFront {
+  composes: cardFace;
+  position: relative; /* For z-index of overlays */
+}
+
+.cardBack {
+  composes: cardFace;
+  background-color: #1a1a1a;
+  /* borderColor for back is set inline */
+  align-items: center;
+  justify-content: center;
+  transform: rotateY(180deg);
+}
+
+.corner {
+  position: absolute;
+  text-align: center;
+  line-height: 1;
+  font-weight: bold;
+  /* top, left, bottom, right, fontSize, color will be set inline */
+}
+
+.cornerNumber {
+  display: block;
+  /* fontSize will be set inline */
+}
+
+.cornerSuit {
+  display: block;
+  text-transform: uppercase;
+  /* fontSize, letterSpacing will be set inline */
+}
+
+.textArea {
+  flex-grow: 1;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  /* margin will be set inline */
+}
+
+.textContent {
+  margin: 0;
+  line-height: 1.4;
+  /* fontSize will be set inline */
+}
+
+.cardBackDiagonalText {
+  position: absolute;
+  font-size: 2.8em; /* This can be scaled with visualScaleFactor if needed, or kept static */
+  font-weight: bold;
+  color: #e53935;
+  opacity: 0.8;
+  transform: rotate(-45deg);
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: none;
+}
+
+.cardBackDiagonalLines {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background: repeating-linear-gradient(-45deg, #e53935, #e53935 5px, #1a1a1a 5px, #1a1a1a 15px);
+  opacity: 0.1;
+  transform: translate(-25%, -25%) rotate(-45deg);
+  user-select: none;
+  pointer-events: none;
+}
+
+.swipeFeedbackOverlay {
+  position: absolute;
+  color: white;
+  font-weight: bold;
+  text-transform: uppercase;
+  z-index: 3;
+  pointer-events: none;
+  transition: opacity 0.1s ease-in-out;
+  /* top, padding, borderRadius, fontSize, left, right, backgroundColor, opacity, transform, transformOrigin will be set inline */
+}
+
+.hotButton {
+  position: absolute;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  z-index: 4; /* Above swipe overlay */
+  /* top, right, fontSize, color, filter, opacity will be set inline */
+}
+
+/* Class for the main container to attach transitionend listener */
+.flipperContainerOuter {
+  /* This class is mainly for semantic targeting in JS if needed,
+     or can hold styles if getFlipperContainerBaseStyle is fully moved */
+}

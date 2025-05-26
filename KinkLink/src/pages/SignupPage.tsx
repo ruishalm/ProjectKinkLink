@@ -6,6 +6,7 @@ function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false); // Novo estado para o checkbox
   const [error, setError] = useState<string | null>(null); // Para exibir mensagens de erro
   const [isLoading, setIsLoading] = useState(false); // Para feedback de carregamento
   const { signup, isLoading: authIsLoading } = useAuth(); // Pega signup e isLoading do AuthContext
@@ -16,6 +17,11 @@ function SignupPage() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null); // Limpa erros anteriores
+
+    if (!agreedToTerms) {
+      setError("Você precisa concordar com os Termos de Serviço para se cadastrar.");
+      return;
+    }
 
     if (password.length < 6) {
       setError("A senha deve ter no mínimo 6 caracteres.");
@@ -119,7 +125,7 @@ function SignupPage() {
     ...(confirmPassword.length > 0 && password.length > 0 && (doPasswordsMatch && isPasswordValidLength ? successBorderStyle : warningBorderStyle)),
   };
 
-  const canSubmit = email.length > 0 && isPasswordValidLength && doPasswordsMatch && !isLoading;
+  const canSubmit = email.length > 0 && isPasswordValidLength && doPasswordsMatch && agreedToTerms && !isLoading;
 
   return (
     <div style={pageContainerStyle}>
@@ -182,6 +188,24 @@ function SignupPage() {
           />
           {confirmPassword.length > 0 && password.length > 0 && !doPasswordsMatch && <p style={{ color: '#ffcc80', fontSize: '0.9em', marginTop: '5px' }}>As senhas não coincidem.</p>}
           {confirmPassword.length > 0 && password.length > 0 && doPasswordsMatch && !isPasswordValidLength && <p style={{ color: '#ffcc80', fontSize: '0.9em', marginTop: '5px' }}>A senha original ainda é muito curta.</p>}
+        </div>
+        {/* Checkbox para Termos de Serviço */}
+        <div style={{ marginTop: '15px', marginBottom: '15px', fontSize: '0.9em', textAlign: 'left' }}>
+          <input
+            type="checkbox"
+            id="terms"
+            checked={agreedToTerms}
+            onChange={(e) => setAgreedToTerms(e.target.checked)}
+            style={{ marginRight: '8px', verticalAlign: 'middle' }}
+          />
+          <label htmlFor="terms" style={{ verticalAlign: 'middle' }}>
+            Eu li e concordo com os{' '}
+            <Link to="/termos-de-servico" target="_blank" rel="noopener noreferrer" style={{ color: '#64b5f6', textDecoration: 'underline' }}>
+              Termos de Serviço
+            </Link>
+            {/* Adicionar link para Política de Privacidade quando tiver */}
+            {/* e a <Link to="/politica-de-privacidade" target="_blank" rel="noopener noreferrer" style={{color: '#64b5f6', textDecoration: 'underline'}}>Política de Privacidade</Link> */}
+          </label>
         </div>
         <button type="submit" style={buttonStyle} disabled={isLoading || !canSubmit}>{isLoading ? 'Cadastrando...' : 'Cadastrar'}</button>
       </form>

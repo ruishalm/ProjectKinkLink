@@ -1,5 +1,6 @@
 // d:\Projetos\Github\app\KinkLink\KinkLink\src\pages\CardPilePage.tsx
 import React, { useState, useEffect, useMemo } from 'react'; // Adicionado useMemo
+import { useDrag } from '@use-gesture/react'; // Importa o hook para gestos
 import { Link } from 'react-router-dom';
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
 import MatchModal from '../components/MatchModal';
@@ -201,6 +202,33 @@ function CardPilePage() {
     }
   }, [cardForDisplay, exitingCard, isCardFlipped]);
 
+  // Configuração do gesto de arrastar (swipe)
+  const bindCardDrag = useDrag(({ down, movement: [mx], direction: [dx], velocity: [vx] }) => {
+    // down: true se o usuário está pressionando, false ao soltar
+    // movement: [mx, my] - deslocamento total do gesto
+    // direction: [dx, dy] - direção do último movimento (-1, 0 ou 1)
+    // velocity: [vx, vy] - velocidade do movimento
+
+    if (!down && cardForDisplay && !exitingCard) { // Ao soltar o dedo, se houver carta e não estiver saindo
+      const SWIPE_THRESHOLD = 0.3; // Quão "forte" o swipe precisa ser (ajuste conforme necessário)
+      const SWIPE_VELOCITY_THRESHOLD = 0.2; // Velocidade mínima para considerar um swipe (ajuste)
+
+      // Verifica se o swipe horizontal foi significativo
+      if (Math.abs(vx) > SWIPE_VELOCITY_THRESHOLD || Math.abs(mx) > targetWidth * SWIPE_THRESHOLD) {
+        if (dx > 0) { // Swipe para a direita
+          console.log("Swipe Direita detectado");
+          setExitingCard({ id: cardForDisplay.id, direction: 'right' });
+        } else if (dx < 0) { // Swipe para a esquerda
+          console.log("Swipe Esquerda detectado");
+          setExitingCard({ id: cardForDisplay.id, direction: 'left' });
+        }
+      }
+    }
+    // Poderíamos adicionar feedback visual enquanto arrasta (mx), mas o pedido foi simular o clique.
+  });
+
+  const targetWidth = 250; // Largura padrão da carta, para o cálculo do threshold do swipe
+
   if (!currentCard && unseenCardsCount === 0) {
     return (
       <div style={pageStyle}>
@@ -273,26 +301,29 @@ function CardPilePage() {
                 <CardBack />
               </div>
             )}
-            <div style={{ position: 'relative', zIndex: 2 }}> {/* PlayingCard na frente */}
-            <PlayingCard
-                key={cardForDisplay.id}
-                data={cardForDisplay}
-                isFlipped={exitingCard && exitingCard.id === cardForDisplay.id ? false : isCardFlipped} // Carta saindo mostra a frente, nova carta respeita isCardFlipped
-                exitDirection={exitingCard && exitingCard.id === cardForDisplay.id ? exitingCard.direction : null}
-              onAnimationComplete={() => {
-                if (exitingCard) {
-                  handleInteraction(exitingCard.direction === 'right');
-                  setIsCardFlipped(true); // Prepara a próxima carta para aparecer de costas
-                  setExitingCard(null); // Reseta o estado da animação
-                }
-              }}
-                onToggleHot={(cardId) => {
-                  if (toggleHotStatus) {
-                    toggleHotStatus(cardId);
+            {/* Aplicamos o {...bindCardDrag()} ao div que contém a carta para capturar o gesto */}
+            <div {...bindCardDrag()} style={{ position: 'relative', zIndex: 2, touchAction: 'pan-y' }}> {/* touchAction: 'pan-y' permite rolagem vertical da página se necessário */}
+              <PlayingCard
+                  key={cardForDisplay.id}
+                  data={cardForDisplay}
+                  targetWidth={targetWidth} // Passa a largura para o PlayingCard
+                  isFlipped={exitingCard && exitingCard.id === cardForDisplay.id ? false : isCardFlipped} // Carta saindo mostra a frente, nova carta respeita isCardFlipped
+                  exitDirection={exitingCard && exitingCard.id === cardForDisplay.id ? exitingCard.direction : null}
+                onAnimationComplete={() => {
+                  if (exitingCard) {
+                    handleInteraction(exitingCard.direction === 'right');
+                    setIsCardFlipped(true); // Prepara a próxima carta para aparecer de costas
+                    setExitingCard(null); // Reseta o estado da animação
                   }
                 }}
-            />
-          </div> {/* Closes div for PlayingCard wrapper (zIndex: 2) */}
+                  onToggleHot={(cardId) => {
+                    if (toggleHotStatus) {
+                      toggleHotStatus(cardId);
+                    }
+                  }}
+              />
+            </div> {/* Closes div for PlayingCard wrapper (zIndex: 2) */}
+
           </div> {/* THIS IS THE CORRECTED CLOSING TAG for cardStackContainerStyle */}
 
           <div style={buttonContainerStyle}>

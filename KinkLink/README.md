@@ -1,54 +1,91 @@
-# React + TypeScript + Vite
+# KinkLink (Aplicativo Frontend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este diretório contém o código-fonte do frontend do aplicativo KinkLink, desenvolvido com React, TypeScript e Vite.
 
-Currently, two official plugins are available:
+## Visão Geral
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+KinkLink é um Progressive Web App (PWA) projetado para casais explorarem e descobrirem interesses e desejos mútuos (incluindo atividades cotidianas, românticas e NSFW) de forma anônima e gamificada. A interação principal ocorre através do swipe (aceitar/rejeitar) em cartas. Um "match" só é revelado quando ambos os parceiros expressam interesse na mesma carta, criando uma lista compartilhada.
 
-## Expanding the ESLint configuration
+## Tecnologias Utilizadas
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+* **Framework:** React.js
+* **Linguagem:** TypeScript
+* **Build Tool:** Vite
+* **Backend (Serviços):** Firebase (Authentication, Firestore, Cloud Functions, Firebase Hosting, Firebase Storage)
+* **Gerenciamento de Estado:** React Context/useState (inicialmente), com avaliação futura de Jotai ou Zustand.
+* **Roteamento:** React Router
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+## Estrutura de Pastas (Simplificada)
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+KinkLink/
+├── public/                 # Arquivos estáticos públicos
+├── src/
+│   ├── assets/             # Imagens, fontes, etc.
+│   ├── components/         # Componentes React reutilizáveis
+│   ├── contexts/           # Contextos React (ex: AuthContext)
+│   ├── data/               # Dados estáticos (ex: definições de cartas)
+│   ├── hooks/              # Hooks customizados React
+│   ├── pages/              # Componentes de página (rotas principais)
+│   ├── services/           # Lógica de interação com Firebase (além de Auth/Hooks)
+│   ├── App.tsx             # Componente principal da aplicação e roteamento
+│   ├── main.tsx            # Ponto de entrada da aplicação React
+│   ├── firebase.ts         # Configuração e inicialização do Firebase
+│   ├── index.css           # Estilos globais
+│   └── ...                 # Outros arquivos e pastas de configuração
+├── .eslintrc.cjs           # Configuração do ESLint (ou eslint.config.js)
+├── index.html              # Ponto de entrada HTML
+├── package.json            # Dependências e scripts do projeto
+├── tsconfig.json           # Configuração principal do TypeScript
+├── tsconfig.node.json      # Configuração do TypeScript para o ambiente Node (Vite)
+└── vite.config.ts          # Configuração do Vite
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+## Scripts Disponíveis
+
+No diretório do projeto, você pode executar:
+
+### `npm install`
+
+Instala todas as dependências do projeto.
+
+### `npm run dev`
+
+Executa o aplicativo no modo de desenvolvimento.
+Abra [http://localhost:5173](http://localhost:5173) (ou a porta indicada pelo Vite) para visualizá-lo no navegador.
+
+A página será recarregada se você fizer edições.
+Você também verá quaisquer erros de lint no console.
+
+### `npm run build`
+
+Compila o aplicativo para produção na pasta `dist`.
+Ele agrupa corretamente o React no modo de produção e otimiza a compilação para o melhor desempenho.
+
+### `npm run lint`
+
+Executa o ESLint para verificar erros de linting no código.
+
+### `npm run preview`
+
+Inicia um servidor local para pré-visualizar a build de produção contida na pasta `dist`.
+
+## Funcionalidades Principais (MVP)
+
+* Autenticação de usuários via Firebase (Email/Senha, Google, Facebook).
+* Vinculação de contas entre parceiros usando um código único temporário.
+* Visualização e interação (swipe/botões) com cartas pré-definidas e personalizadas.
+* Cartas especiais de "Conexão" que não geram matches, mas registram interações para o casal.
+* Criação de cartas personalizadas pelo casal, visíveis apenas para eles.
+* Detecção de "match" quando ambos os parceiros curtem a mesma carta (exceto "Conexão").
+* Lista de matches compartilhada.
+* Chat básico para cartas que deram match (simulado no frontend no MVP).
+* Desvinculação de contas.
+* Tela de perfil básica com opção de troca de tema.
+* Aviso de conteúdo NSFW.
+
+## Próximos Passos (Desenvolvimento)
+
+O desenvolvimento seguirá os marcos definidos no arquivo `project_context.json`, focando na integração com o backend Firebase e na implementação completa das funcionalidades do MVP.
+
+---
+

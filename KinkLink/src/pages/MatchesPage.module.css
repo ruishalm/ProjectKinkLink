@@ -6,15 +6,24 @@
 }
 
 .header {
+  position: relative; /* Necessário para o posicionamento absoluto do título */
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: flex-end; /* Alinha o botão "Voltar" à direita */
+  align-items: flex-start; /* Alinha o botão "Cartas" ao topo */
   margin-bottom: 20px;
+  /* padding-top: 10px; Removed to allow button to be at the very top of the header content box */
+  padding-bottom: 10px; /* Adiciona um pouco de espaço se o título for alto */
 }
 
 .pageTitle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   color: #64b5f6;
-  margin: 0;
+  margin: 0; /* Remove margens para não afetar o posicionamento absoluto */
+  /* Fonte dinâmica: min, preferido (baseado na largura da tela), max */
+  font-size: clamp(1.6em, 5vw, 2.2em); 
 }
 
 .backToCardsButton {
@@ -22,12 +31,14 @@
   background-color: #ff6b6b;
   color: white;
   cursor: pointer;
-  padding: 10px 20px;
   border-radius: 8px;
   transition: background-color 0.2s ease, transform 0.1s ease;
   text-decoration: none;
   font-weight: bold;
-  font-size: 0.9em;
+  /* Padding dinâmico: min, preferido (baseado na largura da tela), max */
+  padding: clamp(8px, 1.8vw, 12px) clamp(15px, 3.5vw, 25px);
+  /* Fonte dinâmica para o botão */
+  font-size: clamp(0.8em, 2.2vw, 1em);
 }
 
 .noMatchesText {
@@ -57,14 +68,36 @@
 }
 
 .matchesGrid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 15px;
+  display: grid;
+  gap: 16px; /* Espaçamento entre as cartas */
+  /* Por padrão (mobile), 3 colunas como solicitado */
+  grid-template-columns: repeat(3, 1fr);
+  justify-items: center; /* Centraliza os itens nas células do grid */
 }
 
 .cardItemWrapper {
   display: inline-block;
   cursor: pointer;
   transition: transform 0.15s ease-out;
+}
+
+/* Para telas um pouco maiores, como tablets ou celulares em paisagem */
+@media (min-width: 600px) {
+  .matchesGrid {
+    grid-template-columns: repeat(4, 1fr); /* 4 colunas */
+  }
+}
+
+/* Para tablets em modo paisagem e desktops pequenos */
+@media (min-width: 900px) {
+  .matchesGrid {
+    grid-template-columns: repeat(5, 1fr); /* 5 colunas */
+  }
+}
+
+/* Para desktops maiores */
+@media (min-width: 1200px) {
+  .matchesGrid {
+    grid-template-columns: repeat(6, 1fr); /* 6 colunas */
+  }
 }

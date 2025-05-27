@@ -1,8 +1,10 @@
 /* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\TermsOfServicePage.module.css */
 @font-face {
   font-family: 'Pixelated MS Sans Serif';
-  src: url('https://unpkg.com/pixelated-ms-sans-serif@1.0.6/fonts/WebPixelatedMS Sans Serif.woff2') format('woff2'),
-       url('https://unpkg.com/pixelated-ms-sans-serif@1.0.6/fonts/WebPixelatedMS Sans Serif.woff') format('woff');
+  /* Atualize estes caminhos para onde você hospedar os arquivos da fonte localmente, 
+     por exemplo, dentro da sua pasta 'public/fonts/' */
+  src: url('/fonts/WebPixelatedMSSansSerif.woff2') format('woff2'), /* Exemplo de caminho local */
+       url('/fonts/WebPixelatedMSSansSerif.woff') format('woff');   /* Exemplo de caminho local */
   font-weight: normal;
   font-style: normal;
 }
@@ -87,4 +89,12 @@
 
 .markdownContent em {
   font-style: italic;
+}
+
+.markdownContent code {
+  font-family: 'Courier New', Courier, monospace; /* Fonte monoespaçada para código */
+  background-color: #b0b0b0; /* Um cinza um pouco mais escuro que o fundo */
+  padding: 1px 3px;
+  border: 1px solid #808080;
+  font-size: 0.9em; /* Ligeiramente menor para se destacar */
 }

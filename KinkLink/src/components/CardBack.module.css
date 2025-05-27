@@ -1,49 +1,55 @@
 /* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\CardBack.module.css */
 .cardBack {
-  width: 250px; /* Dimensões padrão, podem ser ajustadas pelo componente pai via transform ou classes */
-  height: 350px;
+  /* width e height, border, borderRadius são definidos via props no componente CardBack.tsx */
   background-color: #1a1a1a; /* Cor de fundo escura */
-  border: 8px solid #b71c1c; /* Borda vermelha escura, similar ao verso do PlayingCard */
-  border-radius: 12px; /* Bordas arredondadas */
+  position: relative; /* Para posicionar elementos internos, se necessário no futuro */
+  overflow: hidden; /* Garante que o conteúdo fique dentro das bordas */
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative; /* Necessário para o posicionamento absoluto dos elementos internos */
-  overflow: hidden; /* Garante que os elementos internos não vazem */
-  box-sizing: border-box; /* Para que padding/border não aumentem o tamanho total */
-  font-family: "Trebuchet MS", sans-serif;
-  color: #e0e0e0; /* Cor de texto padrão, caso haja algum texto direto */
+  box-sizing: border-box; /* Garante que padding e border não aumentem o tamanho total */
+}
+
+.cardBackLogo {
+  max-width: 70%; /* O logo ocupará no máximo 70% da largura da carta */
+  max-height: 60%; /* E no máximo 60% da altura */
+  width: auto; /* Mantém a proporção da imagem */
+  height: auto; /* Mantém a proporção da imagem */
+  object-fit: contain; /* Garante que a imagem inteira caiba sem cortar, mantendo a proporção */
+  opacity: 0.85; /* Uma leve transparência para integrar melhor com o fundo */
+}
+
+/* Estilos antigos para diagonalLines e diagonalText podem ser removidos 
+   se não forem mais usados em nenhum lugar, ou mantidos comentados.
+   Eles não são usados pelo CardBack.tsx atual que mostra o logo.
+*/
+/*
+.diagonalLines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%; 
+  height: 200%;
+  background: repeating-linear-gradient(
+    -45deg,
+    #e53935,
+    #e53935 5px,
+    #1a1a1a 5px,
+    #1a1a1a 15px
+  );
+  opacity: 0.1;
+  transform: translate(-25%, -25%) rotate(-45deg);
+  user-select: none;
+  pointer-events: none;
 }
 
 .diagonalText {
   position: absolute;
-  font-size: 2.8em; /* Tamanho do texto "Kink Link" */
+  font-size: 2.8em;
   font-weight: bold;
-  color: #e53935; /* Vermelho vibrante para o texto */
+  color: #e53935;
   opacity: 0.8;
-  transform: rotate(-45deg); /* Rotação do texto */
-  white-space: nowrap; /* Impede que o texto quebre linha */
-  user-select: none; /* Impede que o usuário selecione o texto */
-  pointer-events: none; /* O texto não interfere com cliques */
-  z-index: 2; /* Garante que o texto fique acima das linhas */
+  transform: rotate(-30deg) translate(-50%, -50%);
+  white-space: nowrap;
 }
-
-.diagonalLines {
-  position: absolute;
-  width: 200%; /* Linhas maiores que a carta para cobrir a área após rotação */
-  height: 200%;
-  top: -50%; /* Centraliza o padrão de linhas */
-  left: -50%;
-  background: repeating-linear-gradient(
-    -45deg,
-    #e53935 0px, /* Cor da linha */
-    #e53935 5px, /* Espessura da linha */
-    #1a1a1a 5px, /* Cor de fundo entre as linhas (mesma do cardBack) */
-    #1a1a1a 15px /* Espaçamento entre as linhas */
-  );
-  opacity: 0.1; /* Linhas sutis */
-  transform: rotate(-45deg); /* Alinha com a rotação do texto */
-  user-select: none;
-  pointer-events: none;
-  z-index: 1; /* Linhas abaixo do texto */
-}
+*/

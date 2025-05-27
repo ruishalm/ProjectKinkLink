@@ -236,7 +236,10 @@ function CardPilePage() {
             {/* Carta de fundo estática */}
             {cardForDisplay && ( /* Só mostra se houver uma carta principal */
               <div className={styles.staticCardBack}>
-                <CardBack />
+                <CardBack
+                  targetWidth={cardDimensions.width}
+                  targetHeight={cardDimensions.height}
+                />
               </div>
             )}
             {/* Aplicamos o {...bindCardDrag()} ao div que contém a carta para capturar o gesto */}

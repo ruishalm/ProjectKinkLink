@@ -38,9 +38,9 @@ function MatchesPage() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h1 className={styles.pageTitle}>Seus Links! 🎉</h1>
+        <h1 className={styles.pageTitle}>Seus Links</h1>
         <Link to="/cards" className={styles.backToCardsButton}>
-          Voltar para as Cartas
+          Cartas
         </Link>
       </div>
 

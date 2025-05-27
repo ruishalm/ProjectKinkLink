@@ -44,11 +44,11 @@
 }
 
 .corner {
-  position: absolute; 
+  position: absolute;
   text-align: center;
   line-height: 1;
   font-weight: bold;
-  z-index: 2; 
+  z-index: 2;
 }
 
 .cornerNumber {
@@ -57,60 +57,27 @@
 
 .cornerSuit {
   display: block;
-  /* text-transform: uppercase; */ 
+  /* text-transform: uppercase; */
 }
 
 .textArea {
   /* flex-grow: 1;  REMOVIDO - A altura será definida explicitamente no TSX */
-  width: 100%;   
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  text-align: center; 
-  overflow: hidden; 
-  box-sizing: border-box; 
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  box-sizing: border-box;
   /* min-height: 0; Não é mais tão crítico se a altura é fixa */
-  position: relative; 
+  position: relative;
 }
 
 .textContent {
-  margin: 0; 
-  max-width: 100%; 
-  overflow-wrap: break-word; 
-  word-wrap: break-word; 
-}
-
-.cardBackDiagonalText {
-  position: absolute;
-  font-size: 2.8em;
-  font-weight: bold;
-  color: #e53935;
-  opacity: 0.8;
-  transform: rotate(-45deg);
-  white-space: nowrap;
-  user-select: none;
-  pointer-events: none;
-  z-index: 2;
-}
-
-.cardBackDiagonalLines {
-  position: absolute;
-  width: 200%;
-  height: 200%;
-  top: -50%;
-  left: -50%;
-  background: repeating-linear-gradient(
-    -45deg,
-    #e53935 0px,
-    #e53935 5px,
-    #1a1a1a 5px,
-    #1a1a1a 15px
-  );
-  opacity: 0.1;
-  transform: rotate(-45deg);
-  user-select: none;
-  pointer-events: none;
-  z-index: 1;
+  margin: 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 .swipeFeedbackOverlay {
@@ -118,17 +85,26 @@
   color: white;
   font-weight: bold;
   text-transform: uppercase;
-  z-index: 3; 
+  z-index: 3;
   pointer-events: none;
   transition: opacity 0.1s ease-in-out;
 }
 
 .hotButton {
-  position: absolute; 
+  position: absolute;
   background: transparent;
   border: none;
   cursor: pointer;
   padding: 0;
   line-height: 1;
-  z-index: 2; 
+  z-index: 2;
+}
+
+.cardBackLogo {
+  max-width: 70%; /* O logo ocupará no máximo 70% da largura da carta */
+  max-height: 60%; /* E no máximo 60% da altura */
+  width: auto; /* Mantém a proporção da imagem */
+  height: auto; /* Mantém a proporção da imagem */
+  object-fit: contain; /* Garante que a imagem inteira caiba sem cortar, mantendo a proporção */
+  opacity: 0.85; /* Uma leve transparência para integrar melhor com o fundo */
 }

@@ -203,3 +203,77 @@
 .shakeAnimation {
   animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
 }
+
+/* --- Media Queries para Responsividade --- */
+
+/* Telas menores (ex: celulares) */
+@media (max-width: 480px) {
+  .page {
+    padding: 10px; /* Reduz o padding geral da página */
+    min-height: calc(100vh - 100px); /* Ajusta altura considerando header e bottomNav menores */
+  }
+
+  .cardStackContainer {
+    min-height: 340px; /* Reduz a altura mínima para acomodar cartas menores */
+    margin-bottom: 15px; /* Menos espaço abaixo da pilha de cartas */
+  }
+
+  .staticCardBack {
+    /* Ajusta a escala e posição da carta de fundo para telas menores */
+    /* Se a carta principal pode ir até ~220px de largura, e CardBack é 250px,
+       uma escala de ~0.8 faria o CardBack ter ~200px */
+    transform: translateX(6px) translateY(6px) scale(0.8) rotate(2deg);
+  }
+
+  .buttonContainer {
+    gap: 10px; /* Reduz o espaço entre os botões de ação */
+    margin-top: 15px;
+    margin-bottom: 10px; /* Menos espaço abaixo dos botões de ação */
+  }
+
+  .likeButton,
+  .dislikeButton {
+    padding: 12px 15px; /* Diminui um pouco o padding dos botões */
+    font-size: 1.1em; /* Ajusta o tamanho da fonte dos botões */
+    min-width: 100px; /* Reduz a largura mínima */
+  }
+
+  .createKinkMiniButton {
+    width: 60px; /* Ajusta o tamanho do botão miniatura */
+    height: 84px; /* Mantém proporção aproximada */
+  }
+
+  .createKinkMiniTextOverlay {
+    font-size: 0.6em; /* Diminui o texto no botão miniatura */
+  }
+
+  .bottomNavContainer {
+    padding: 8px 0; /* Menos padding vertical na barra de navegação */
+    margin-top: 15px;
+  }
+
+  .matchesNavButton,
+  .carinhosMimosButton,
+  .profileNavButton {
+    font-size: 0.9em; /* Diminui um pouco os botões da barra de navegação */
+    padding: 8px 10px;
+  }
+  .matchesNavButton { /* Ajuste específico para o botão de matches se necessário */
+    padding: 10px 20px;
+    font-size: 1em;
+  }
+
+  .noCardsMessage,
+  .cardCounters {
+    font-size: 0.9em; /* Diminui textos informativos */
+  }
+
+  .noCardsCreateButton {
+    padding: 10px 18px;
+    font-size: 0.95em;
+    width: 130px; /* Ajusta largura */
+    height: 90px;  /* Ajusta altura */
+  }
+}
+
+/* Você pode adicionar mais breakpoints se necessário, ex: para tablets (max-width: 768px) */

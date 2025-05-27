@@ -1,55 +1,78 @@
 /* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\ProfilePage.module.css */
 .page {
-  max-width: 700px;
+  max-width: 800px;
   margin: 40px auto;
-  padding: 30px;
-  background-color: #2c2c2c;
-  border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-  color: #e0e0e0;
+  padding: 20px;
+  background-color: #2c2c2c; /* Fundo escuro para a página */
+  border-radius: 8px;
+  color: #e0e0e0; /* Texto claro */
   font-family: "Trebuchet MS", sans-serif;
 }
 
-.section {
-  margin-bottom: 30px;
-  padding: 25px;
-  background-color: #353535;
-  border-radius: 8px;
-  border: 1px solid #444;
-}
-
 .title {
+  color: #64b5f6; /* Azul claro para títulos */
   margin-top: 0;
-  color: #64b5f6;
-  margin-bottom: 20px;
-  border-bottom: 1px solid #4a4a4a;
+  margin-bottom: 15px;
   padding-bottom: 10px;
+  border-bottom: 1px solid #4a4a4a; /* Linha sutil abaixo do título */
+  font-size: 1.6em; /* Ajustado para ser um título de seção */
 }
 
-.input {
-  width: calc(100% - 22px);
-  padding: 12px;
-  margin-bottom: 15px;
-  border: 1px solid #555;
-  border-radius: 6px;
-  background-color: #404040;
-  color: #e0e0e0;
+.textCenter {
+  text-align: center;
+}
+
+.section {
+  background-color: #383838; /* Fundo um pouco mais claro para seções */
+  padding: 20px;
+  margin-bottom: 25px;
+  border-radius: 8px;
+  border: 1px solid #4a4a4a;
+}
+
+.infoText {
   font-size: 1em;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.infoText strong {
+  color: #81c784; /* Verde para destacar os labels */
+}
+
+.formLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #64b5f6;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  background-color: #252525;
+  border: 1px solid #555;
+  border-radius: 4px;
+  color: #e0e0e0;
   box-sizing: border-box;
+  font-size: 1em;
 }
 
 .textarea {
-  composes: input; /* Herda estilos da classe 'input' */
   min-height: 100px;
   resize: vertical;
 }
 
-.button {
-  padding: 12px 20px;
-  background-color: #64b5f6;
-  color: white;
+.button,
+.actionButton,
+.buttonDestructive,
+.buttonCancel,
+.buttonDisabled {
+  padding: 10px 15px;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
   font-size: 1em;
   font-weight: bold;
@@ -57,91 +80,161 @@
   margin-right: 10px;
 }
 
-.buttonDisabled {
-  composes: button;
-  background-color: #757575;
-  cursor: not-allowed;
+.button:last-child,
+.actionButton:last-child,
+.buttonDestructive:last-child,
+.buttonCancel:last-child {
+  margin-right: 0;
+}
+
+.button {
+  background-color: #64b5f6;
+  color: #2c2c2c;
+}
+
+.button:hover {
+  background-color: #81d4fa;
+}
+
+.actionButton {
+  background-color: #4caf50; /* Verde para ações positivas */
+  color: white;
+}
+.actionButton:hover {
+  background-color: #66bb6a;
 }
 
 .buttonDestructive {
-  composes: button;
-  background-color: #f44336;
+  background-color: #d9534f;
+  color: white;
+}
+.buttonDestructive:hover {
+  background-color: #e57373;
 }
 
 .buttonCancel {
-  composes: button;
-  background-color: #757575;
+  background-color: #757575; /* Cinza para cancelar */
+  color: white;
+}
+.buttonCancel:hover {
+  background-color: #9e9e9e;
 }
 
-.infoText {
-  font-size: 1.1em;
-  line-height: 1.6;
-  margin-bottom: 10px;
-  color: #c0c0c0;
+.buttonDisabled {
+  background-color: #555;
+  color: #888;
+  cursor: not-allowed;
 }
 
 .link {
   color: #64b5f6;
   text-decoration: none;
-  font-size: 1em;
 }
-
-.actionButton {
-  composes: button; /* Herda estilos de .button mas remove marginRight e adiciona outros */
-  margin-right: 0;
-  display: inline-block;
-  padding: 12px 25px;
-  text-decoration: none;
-  text-align: center;
-  border: 2px solid #4a90e2;
-  margin-top: 15px;
-}
-
-.actionButton:hover {
-  background-color: #4a90e2;
-  border-color: #357abd;
+.link:hover {
+  text-decoration: underline;
 }
 
 .smallLink {
-  color: #aaa;
+  color: #9e9e9e;
+  font-size: 0.9em;
   text-decoration: underline;
-  font-size: 0.8em;
   cursor: pointer;
-  display: inline-block;
 }
+.smallLink:hover {
+  color: #bdbdbd;
+}
+
+.marginTop30 { margin-top: 30px; }
+.marginTop50 { margin-top: 50px; }
+.paddingTop20 { padding-top: 20px; }
+.borderTopSolid444 { border-top: 1px solid #4a4a4a; }
 
 .warningText {
-  font-size: 0.8em;
-  color: #ffcc80;
-  margin-top: 5px;
-}
-
-.textCenter {
-  text-align: center;
-}
-
-.marginTop30 {
-  margin-top: 30px;
-}
-
-.marginTop50 {
-  margin-top: 50px;
-}
-
-.paddingTop20 {
-  padding-top: 20px;
-}
-
-.borderTopSolid444 {
-  border-top: 1px solid #444;
-}
-
-.formLabel {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
+  color: #ef9a9a; /* Um vermelho claro para avisos */
+  font-size: 0.85em;
 }
 
 .formActions {
   margin-top: 20px;
+}
+
+/* Estilos para Seção Expansível/Recolhível */
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  /* O padding e a borda inferior virão do .sectionTitleInHeader que herda de .title */
+}
+
+.sectionTitleInHeader {
+  composes: title; /* Herda estilos base do .title */
+  margin-bottom: 0 !important; /* Remove margem inferior original do .title */
+  /* A borda e o padding-bottom do .title original são mantidos aqui,
+     o que ajuda a criar o espaço visual para o header da seção expansível */
+}
+
+.toggleIcon {
+  font-size: 1.2em; /* Tamanho do ícone */
+  transition: transform 0.3s ease;
+  margin-left: 10px; /* Espaço entre o título e o ícone */
+  color: #64b5f6; /* Cor do ícone, pode ser ajustada */
+}
+
+.toggleIconClosed {
+  composes: toggleIcon;
+  transform: rotate(-90deg); /* Seta para a direita quando fechado */
+}
+
+.sectionContent {
+  overflow: hidden;
+  transition: max-height 0.4s ease-out, opacity 0.3s ease-out,
+              padding-top 0.4s ease-out, padding-bottom 0.4s ease-out,
+              margin-top 0.4s ease-out; /* Adicionado margin-top para transição */
+  max-height: 1000px; /* Um valor alto o suficiente para o conteúdo caber */
+  opacity: 1;
+  /* Adiciona padding que estava no .section original, mas só quando aberto */
+  /* O padding da seção original é de 20px. O header já ocupa parte disso.
+     Vamos adicionar um padding-top para o conteúdo quando aberto. */
+  padding-top: 20px;
+  /* margin-top: 15px; /* Espaço entre o header e o conteúdo quando aberto */
+}
+
+.sectionContentCollapsed {
+  composes: sectionContent;
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important; /* Garante que não haja padding quando colapsado */
+  margin-top: 0 !important; /* Garante que não haja margem quando colapsado */
+  /* border-top: none !important; // Removido, pois o conteúdo não deve ter borda por padrão */
+}
+
+/* --- Media Queries para Responsividade --- */
+@media (max-width: 768px) {
+  .page {
+    padding: 15px; /* Reduz o padding da página */
+    margin: 20px auto; /* Reduz a margem superior/inferior em telas menores */
+  }
+
+  .title, .sectionTitleInHeader { /* Aplica a todos os títulos */
+    font-size: 1.4em; /* Diminui o tamanho dos títulos de seção */
+  }
+
+  .section {
+    padding: 15px; /* Reduz o padding das seções */
+    margin-bottom: 20px; /* Ajusta a margem inferior das seções */
+  }
+
+  .formLabel,
+  .infoText,
+  .button, /* Afeta todos os botões que compõem .button */
+  .actionButton {
+    font-size: 0.95em; /* Leve ajuste no tamanho da fonte para melhor leitura */
+  }
+
+  .input,
+  .textarea {
+    font-size: 0.95em;
+  }
 }

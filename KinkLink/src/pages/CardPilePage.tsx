@@ -36,6 +36,7 @@ function CardPilePage() {
   const [showCreateUserCardModal, setShowCreateUserCardModal] = useState(false);
   const [showCarinhosMimosModal, setShowCarinhosMimosModal] = useState(false); // Estado para o novo modal
   const [dragVisuals, setDragVisuals] = useState({ x: 0, active: false, dir: 0 }); // Estado para feedback visual do swipe
+  const [cardDimensions, setCardDimensions] = useState({ width: 250, height: 350 }); // Estado para dimensões responsivas da carta
   const [hasUnseenMatches, setHasUnseenMatches] = useState(false);
 
   // Filtra as cartas de conexão para mostrar apenas as que já foram vistas pelo usuário
@@ -71,6 +72,41 @@ function CardPilePage() {
     navigate('/matches'); // Navega para a página de matches
   };
 
+  // Efeito para calcular dimensões responsivas da carta
+  useEffect(() => {
+    const calculateCardDimensions = () => {
+      const screenWidth = window.innerWidth;
+      const screenHeight = window.innerHeight;
+      const aspectRatio = 350 / 250; // Altura / Largura base
+
+      // Define uma largura baseada na tela, com limites
+      let newCardWidth = screenWidth * 0.8; // Tenta ocupar 80% da largura da tela
+      if (screenWidth > 600) { // Em telas maiores, não precisa ser tão largo percentualmente
+        newCardWidth = screenWidth * 0.5;
+      }
+      newCardWidth = Math.max(220, Math.min(newCardWidth, 320)); // Limites: min 220px, max 320px
+
+      let newCardHeight = newCardWidth * aspectRatio;
+
+      // Considera a altura da tela para não cortar a carta e os botões
+      // Deixa espaço para a barra de navegação inferior (aprox 60-80px) e botões de ação (aprox 80-100px)
+      const availableHeightForCard = screenHeight * 0.9 - 180; // 90% da tela menos espaço para UI
+      
+      if (newCardHeight > availableHeightForCard) {
+        newCardHeight = availableHeightForCard;
+        newCardWidth = newCardHeight / aspectRatio;
+      }
+      // Re-garante o mínimo após ajuste de altura
+      newCardWidth = Math.max(220, newCardWidth);
+      newCardHeight = newCardWidth * aspectRatio;
+
+      setCardDimensions({ width: Math.round(newCardWidth), height: Math.round(newCardHeight) });
+    };
+    calculateCardDimensions();
+    window.addEventListener('resize', calculateCardDimensions);
+    return () => window.removeEventListener('resize', calculateCardDimensions);
+  }, []);
+
   // Efeito para "virar" a carta após ela aparecer de costas
   useEffect(() => {
     if (cardForDisplay && !exitingCard && isCardFlipped) {
@@ -86,8 +122,6 @@ function CardPilePage() {
         // setIsCardFlipped(true); // Comentado por enquanto, pode causar loop se mal posicionado
     }
   }, [cardForDisplay, exitingCard, isCardFlipped]);
-
-  const targetWidth = 250; // Largura padrão da carta, para o cálculo do threshold do swipe
 
   // Função para feedback tátil
   const triggerHapticFeedback = (pattern: number | number[] = 30) => { // Duração padrão de 30ms
@@ -117,7 +151,7 @@ function CardPilePage() {
 
       if (cardForDisplay && !exitingCard) { // Se houver carta e não estiver já saindo
         // Thresholds para confirmar o swipe ao soltar
-        const SWIPE_CONFIRM_DISTANCE_THRESHOLD = targetWidth * 0.35; // Precisa arrastar ~35% da largura
+        const SWIPE_CONFIRM_DISTANCE_THRESHOLD = cardDimensions.width * 0.35; // Usa a largura dinâmica
         const SWIPE_VELOCITY_THRESHOLD = 0.3; // Velocidade mínima do gesto
 
         // Verifica se o swipe foi intencional (distância OU velocidade)
@@ -210,7 +244,8 @@ function CardPilePage() {
               <PlayingCard
                   key={cardForDisplay.id}
                   data={cardForDisplay}
-                  targetWidth={targetWidth} // Passa a largura para o PlayingCard
+                  targetWidth={cardDimensions.width} // Passa a largura dinâmica
+                  targetHeight={cardDimensions.height} // Passa a altura dinâmica
                   dragVisuals={dragVisuals} // Passa informações do drag para feedback visual
                   isFlipped={exitingCard && exitingCard.id === cardForDisplay.id ? false : isCardFlipped} // Carta saindo mostra a frente, nova carta respeita isCardFlipped
                   exitDirection={exitingCard && exitingCard.id === cardForDisplay.id ? exitingCard.direction : null}

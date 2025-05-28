@@ -214,30 +214,30 @@
       },
       {
         "id": "M6",
-        "title": "Polimento MVP e Preparação Inicial",
-        "goal": "Refinar a experiência do usuário do MVP, tratar casos de borda e preparar para testes iniciais.",
+      "title": "Polimento MVP, Responsividade e Preparação Inicial",
+      "goal": "Refinar a experiência do usuário do MVP, incluindo responsividade básica, integração do logo, tratar casos de borda e preparar para testes iniciais.",
         "tasks": [
           { "id": "M6.T1", "description": "Revisar e refinar todos os fluxos de usuário implementados.", "status": "Concluído" },
           { "id": "M6.T2", "description": "Adicionar tratamento de erros mais robusto e mensagens claras para o usuário em toda a aplicação.", "status": "Concluído (Terceirizado)" },
           { "id": "M6.T3", "description": "Implementar gesto de swipe na tela com feedback visual/tátil para interagir com as cartas.", "status": "Concluído" },
           { "id": "M6.T4", "description": "Adicionar aviso de conteúdo NSFW na entrada/cadastro.", "status": "Concluído" },
           { "id": "M6.T5", "description": "Realizar testes manuais completos dos fluxos do MVP com grupo de amigos e coletar feedback.", "status": "Concluído" },
-          { "id": "M6.T6", "description": "Configurar Firebase Hosting para deploy inicial (teste via Netlify).", "status": "Concluído" },
-          { "id": "M6.T7", "description": "Elaborar rascunhos da Política de Privacidade e Termos de Serviço e iniciar revisão legal.", "status": "Concluído (Rascunhos prontos, revisão legal em andamento)" }
+        { "id": "M6.T6", "description": "Configurar Firebase Hosting para deploy inicial (teste via Netlify).", "status": "Concluído"},
+        { "id": "M6.T7", "description": "Elaborar rascunhos da Política de Privacidade e Termos de Serviço e iniciar revisão legal.", "status": "Concluído (Conteúdo dos Termos de Serviço implementado na página, revisão legal pendente)" }
         ],
         "status": "Concluído"
       }
     ]
   },
   "postMvpFocus": [
-    "Implementação de funcionalidades da lista 'future' (Post-its, Fotos, Filtros, Uso dos contadores 'Conexão', etc.)",
+  "Implementação de funcionalidades da lista 'future' (Post-its, Fotos, Filtros, Uso dos contadores 'Conexão', etc.).",
     "Gamificação de Temas/Skins (liberação baseada em engajamento).",
     "Otimizações de performance e Firestore (incluindo lógica de exibição periódica das cartas 'Conexão')",
     "Consulta Jurídica e finalização de documentos legais",
     "Estratégia de lançamento e marketing inicial"
   ],
   "communicationNotes": "Explique os passos de forma extremamente detalhada, como se eu fosse um iniciante completo idiota ou tivesse acabado de ter um AVC. Usar linguagem simples e dividir em passos bem pequenos.",
-  "lastUpdated": "2024-05-25T20:30:00Z", # Atualizado
+"lastUpdated": "2024-05-26T22:30:00Z",
   "developmentPrinciples": {
     "modularity": {
       "goal": "Manter o código organizado, reutilizável e fácil de manter.",

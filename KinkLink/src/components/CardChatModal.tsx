@@ -1,9 +1,10 @@
-// d:\Projetos\Github\app\KinkLink\KinkLink\src\components\CardChatModal.tsx
-import React, { useState, useEffect, useRef } from 'react'; // Removido CSSProperties
+// d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\CardChatModal.tsx
+import React, { useState, useEffect, useRef } from 'react';
 import { useCardChat, type ChatMessage } from '../hooks/useCardChat';
 import { useAuth } from '../contexts/AuthContext'; // Para pegar o ID do usuário atual
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions'; // Para a função deleteMatch
-import styles from './CardChatModal.module.css'; // Importa os CSS Modules
+import styles from './CardChatModal.module.css'; // Estilos para o Modal (overlay, content box)
+import chatStyles from './CardChat.module.css'; // Estilos para o conteúdo do Chat (mensagens, input, etc.)
 
 interface CardChatModalProps {
   cardId: string;
@@ -55,39 +56,44 @@ function CardChatModal({ cardId, cardTitle, onClose }: CardChatModalProps) {
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.header}>
-          <h3 className={styles.headerTitle}>Conversa sobre:</h3>
-          <p className={styles.headerCardTitle}>
-            {cardTitle}
-          </p>
-        </div>
-        <div className={styles.messagesContainer}>
-          {messages.map((msg: ChatMessage) => (
-            <div 
-              key={msg.id} 
-              className={msg.userId === user?.id ? styles.myMessageWrapper : styles.theirMessageWrapper}
-            >
-              <div className={msg.userId === user?.id ? styles.myMessageBubble : styles.theirMessageBubble}>
-                <strong className={styles.messageUsername}>
-                  {msg.userId === user?.id ? "Você" : msg.username}
-                </strong>
-                {msg.text}
-                <div className={styles.messageTimestamp}>
-                  {msg.timestamp && msg.timestamp.toDate ? 
-                    msg.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 
-                    'agora'}
+        {/* Botão de fechar do modal, estilizado por CardChatModal.module.css */}
+        <button className={styles.closeButton} onClick={onClose} aria-label="Fechar chat">X</button>
+        
+        {/* Envolve todo o conteúdo do chat com chatStyles.chatContainer */}
+        <div className={chatStyles.chatContainer}>
+          <div className={chatStyles.chatHeader}>
+            <h3 className={chatStyles.chatHeaderName}>Conversa sobre:</h3>
+            <p className={chatStyles.chatHeaderName} style={{opacity: 0.8, fontSize: '0.9em'}}>
+              {cardTitle}
+            </p>
+          </div>
+          <div className={chatStyles.messagesList}> {/* O logo de fundo será aplicado aqui via CSS */}
+            {messages.map((msg: ChatMessage) => (
+              <div 
+                key={msg.id} 
+                className={msg.userId === user?.id ? chatStyles.messageSent : chatStyles.messageReceived}
+              >
+                <div className={chatStyles.messageContent}>{msg.text}</div>
+                <div className={chatStyles.messageInfo}>
+                  <span>{msg.userId === user?.id ? "Você" : (msg.username || "Parceiro(a)")}</span>
+                  <span style={{ marginLeft: '8px' }}>
+                    {msg.timestamp && msg.timestamp.toDate ? 
+                      msg.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 
+                      'agora'}
+                  </span>
                 </div>
               </div>
-            </div>
-          ))}
-          <div ref={messagesEndRef} />
-        </div>
-        <div className={styles.inputArea}>
-          <input type="text" className={styles.input} value={newMessage} onChange={(e) => setNewMessage(e.target.value)} placeholder="Escreva no verso da carta..." onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()} />
-          <button className={styles.sendButton} onClick={handleSendMessage}>Enviar</button>
-        </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+          <div className={chatStyles.chatInputArea}>
+            <input type="text" className={chatStyles.chatInput} value={newMessage} onChange={(e) => setNewMessage(e.target.value)} placeholder="Escreva no verso da carta..." onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()} />
+            <button className={chatStyles.sendButton} onClick={handleSendMessage} disabled={!newMessage.trim()}>Enviar</button>
+          </div>
+        </div> {/* Fecha o chatStyles.chatContainer */}
+
         <button className={styles.destructiveButton} onClick={handleDesfazerLink}>
-          Desfazer Link com esta Carta
+          Desfazer Link
         </button>
       </div>
     </div>

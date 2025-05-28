@@ -30,21 +30,29 @@ function CreateUserCardModal({ isOpen, onClose, onSubmit }: CreateUserCardModalP
   const [selectedCategory, setSelectedCategory] = useState<Exclude<Card['category'], 'conexao'>>('sensorial');
   const [intensity, setIntensity] = useState<number>(1);
 
+  // Efeito para resetar os campos quando o modal é aberto
   useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
       // Limpa os campos ao abrir o modal
       setCardText('');
       setSelectedCategory('sensorial');
       setIntensity(1);
     }
+  }, [isOpen]); // Este efeito depende apenas de isOpen
+
+  // Efeito para adicionar e remover o listener da tecla Escape
+  useEffect(() => {
+    if (!isOpen) {
+      return; // Não faz nada se o modal não estiver aberto
+    }
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose]); // Este efeito depende de isOpen e da função onClose
 
   if (!isOpen) return null;
 

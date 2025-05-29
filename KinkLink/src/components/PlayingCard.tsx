@@ -14,7 +14,7 @@ interface PlayingCardProps {
   data: CardData;
   targetWidth?: number;
   targetHeight?: number;
-  onToggleHot?: (cardId: string) => void;
+  onToggleHot?: (cardId: string, event: React.MouseEvent<HTMLButtonElement>) => void; // Modificado para incluir o evento
   exitDirection?: 'left' | 'right' | null;
   onAnimationComplete?: () => void;
   isFlipped?: boolean;
@@ -196,7 +196,10 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
 
           {onToggleHot && (
             <button
-              onClick={(e) => { e.stopPropagation(); onToggleHot(data.id); }}
+              onClick={(e: React.MouseEvent<HTMLButtonElement>) => { // Adicionado tipo de evento
+                e.stopPropagation(); 
+                onToggleHot(data.id, e); // Passa o evento
+              }}
               className={styles.hotButton}
               style={hotButtonDynamicStyle}
               aria-label={data.isHot ? "Remover dos Top Links" : "Adicionar aos Top Links"}

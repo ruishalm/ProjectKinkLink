@@ -4,11 +4,13 @@ import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase'; // Importa a instância do Firestore
 import {
   collection,
-  addDoc,
   query,
   orderBy,
   onSnapshot,
   Timestamp, // Para timestamps do Firestore
+  doc,       // Para referenciar o documento do chat
+  writeBatch,// Para operações atômicas
+  // setDoc, // Alternativa ao updateDoc se usarmos set com merge
 } from 'firebase/firestore';
 
 export interface ChatMessage {
@@ -86,12 +88,27 @@ export function useCardChat(cardId: string | null) {
     };
 
     try {
+      const batch = writeBatch(db);
+
+      // 1. Adicionar a nova mensagem
       const messagesPath = `couples/${user.coupleId}/cardChats/${cardId}/messages`;
       const messagesColRef = collection(db, messagesPath);
-      await addDoc(messagesColRef, newMessageData);
-      // Não é necessário setMessages aqui, o onSnapshot cuidará da atualização
+      const newMessageRef = doc(messagesColRef); // Gera uma referência para a nova mensagem
+      batch.set(newMessageRef, newMessageData);
+
+      // 2. Atualizar o documento pai do chat com os detalhes da última mensagem
+      const chatDocPath = `couples/${user.coupleId}/cardChats/${cardId}`;
+      const chatDocRef = doc(db, chatDocPath);
+      batch.set(chatDocRef, { // Usar set com merge:true para criar/atualizar
+        lastMessageSenderId: user.id,
+        lastMessageTimestamp: newMessageData.timestamp,
+        lastMessageTextSnippet: newMessageData.text.substring(0, 50), // Snippet da mensagem
+      }, { merge: true });
+
+      await batch.commit();
+      console.log(`[useCardChat - sendMessage] Message sent and chat doc updated for ${cardId}.`);
     } catch (err) {
-      console.error("Erro ao enviar mensagem:", err);
+      console.error(`[useCardChat - sendMessage] Error sending message or updating chat doc for ${cardId}:`, err);
       // Poderia definir um estado de erro para a UI aqui
     }
   };

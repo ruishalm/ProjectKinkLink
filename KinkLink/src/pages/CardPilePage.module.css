@@ -193,6 +193,22 @@
   line-height: 1.2;
 }
 
+/* Adicionado para a tela de "Fim das Cartas!" */
+.noCardsViewContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex-grow: 1; /* Para ocupar o espaço disponível se a pilha de cartas não estiver lá */
+  padding: 20px;
+}
+
+.centeredCreateKinkButton {
+  margin-top: 20px; /* Espaçamento do texto acima */
+  /* Estilos adicionais para centralização podem ser colocados aqui se necessário, */
+  /* mas o flex container pai (noCardsViewContainer) já deve centralizar. */
+}
 /* Animação de tremor para o botão de matches */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }

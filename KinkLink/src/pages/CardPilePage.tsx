@@ -168,24 +168,6 @@ function CardPilePage() {
     }
   });
 
-  if (!currentCard && unseenCardsCount === 0) {
-    return (
-      <div className={styles.page}>
-        <h2 style={{color: '#64b5f6'}}>Fim das Cartas!</h2>
-        <p className={styles.noCardsMessage}>
-          Você viu todas as cartas disponíveis por enquanto.
-          <br />
-          Volte mais tarde para novas sugestões ou crie as suas!
-        </p>
-        <button 
-          className={styles.noCardsCreateButton}
-          onClick={() => setShowCreateUserCardModal(true)}
-        >Crie seu Kink</button>
-      </div>
-    );
-  }
-
-
   return (
     <div className={styles.page}>
       {showMatchModal && currentMatchCard && (
@@ -228,8 +210,7 @@ function CardPilePage() {
         />
       )}
 
-
-      {/* O botão "Crie seu Kink" que estava aqui foi movido para junto dos botões de ação abaixo */}
+      {/* Conteúdo Principal: Pilha de Cartas ou Mensagem de Fim */}
       {cardForDisplay ? ( // Usa cardForDisplay aqui
         <>
           <div className={styles.cardStackContainer}>
@@ -324,7 +305,34 @@ function CardPilePage() {
           </div>
         </>
       ) : (
-        <p className={styles.noCardsMessage}>Carregando próxima carta...</p>
+        // Se não há cardForDisplay, verificamos se acabaram as cartas ou se está carregando
+        unseenCardsCount === 0 ? (
+          <div className={styles.noCardsViewContainer}> {/* Novo container para centralizar */}
+            <h2 style={{color: '#64b5f6'}}>Fim das Cartas!</h2>
+            <p className={styles.noCardsMessage}>
+              Você viu todas as cartas disponíveis por enquanto.
+              <br />
+              Volte mais tarde para novas sugestões ou crie as suas!
+            </p>
+            {/* Botão "Crie seu Kink" estilizado como o mini-botão */}
+            <div
+              onClick={() => setShowCreateUserCardModal(true)}
+              className={`${styles.createKinkMiniButton} ${styles.centeredCreateKinkButton}`} // Adiciona classe para centralização
+              title="Criar novo Kink"
+              role="button"
+              aria-label="Criar novo Kink"
+              tabIndex={0}
+              onKeyPress={(e) => { if (e.key === 'Enter' || e.key === ' ') setShowCreateUserCardModal(true); }}
+            >
+              <div className={styles.createKinkMiniCardBackWrapper}>
+                <CardBack />
+              </div>
+              <div className={styles.createKinkMiniTextOverlay}>Crie<br/>seu Kink</div>
+            </div>
+          </div>
+        ) : (
+          <p className={styles.noCardsMessage}>Carregando próxima carta...</p>
+        )
       )}
 
       {/* Nova Barra de Navegação Inferior */}

@@ -1,36 +1,247 @@
-/* Adicionar em MatchesPage.module.css */
-.unreadMatch .cardItemWrapper { /* Se você quiser um estilo específico para o wrapper */
-  /* Exemplo: border: 2px solid gold; */
+/* Estilos para CardPilePage */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Mantém o alinhamento horizontal centralizado para o conteúdo */
+  justify-content: flex-start; /* Alinha todo o conteúdo ao topo */
+  min-height: 100vh;
+  width: 100%; 
+  padding-top: 5px; /* Reduzido o padding superior */
+  padding-left: 15px; padding-right: 15px; padding-bottom: 15px; /* Mantém os outros paddings */
+  box-sizing: border-box;
+  background-color: #2c2c2c; /* Cor de fundo padrão */
+  color: #e0e0e0;
+  font-family: "Trebuchet MS", sans-serif;
+  overflow-x: hidden; /* Evita scroll horizontal desnecessário */
 }
-.unreadIndicator {
+
+.cardStackContainer {
+  /* flex-grow: 1; */ /* Removido para que o container não ocupe espaço vertical desnecessário */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* Alinha a carta na parte de baixo do container */
+  align-items: center;
+  position: relative; /* Para o posicionamento absoluto da carta de fundo */
+  margin-top: 30px; /* Adiciona espaço acima do container das cartas */
+  width: 100%;
+  margin-bottom: 20px; /* Aumenta o espaço abaixo das cartas */
+}
+
+.staticCardBack {
   position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 10px;
-  height: 10px;
-  background-color: #ff4757; /* Vermelho para notificação */
-  border-radius: 50%;
-  z-index: 10; /* Para ficar sobre a carta */
-  box-shadow: 0 0 5px #ff4757;
+  z-index: 1; /* Atrás da carta principal */
+  transform: rotate(-2deg) translateY(3px) translateX(-3px);
+  filter: brightness(0.85);
 }
-.matchCardSnippet {
-  font-size: 0.7em;
-  color: #ccc;
-  margin-top: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 90%; /* Ajuste conforme necessário */
+
+.playingCardWrapper {
+  position: relative; /* Para o z-index funcionar corretamente */
+  z-index: 2; /* Na frente da carta de fundo */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* O cursor grab/grabbing é geralmente aplicado pelo use-gesture */
 }
+
+.buttonContainer {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+  padding-top: 0; /* Remove completamente o padding superior */
+  padding-bottom: 15px; /* Mantém o padding inferior ou ajusta conforme necessário */
+  margin-bottom: 10px; /* Espaço antes da barra de navegação inferior */
+}
+
+.likeButton,
+.dislikeButton {
+  /* background-color: #64b5f6; */ /* Removido azul padrão */
+  /* color: #2c2c2c; */ /* Removido texto escuro padrão */
+  /* Cores específicas serão definidas abaixo */
+  /* Texto será branco para bom contraste com verde/vermelho */
+  color: white;
+  border: none;
+  border-radius: 6px; /* Bordas arredondadas, não circulares */
+  /* width: 60px; */ /* Removido para largura automática baseada no padding */
+  /* height: 60px; */ /* Removido para altura automática baseada no padding */
+  padding: 12px 20px; /* Padding para dar tamanho ao botão */
+  font-size: 1em; /* Tamanho de fonte padrão para texto */
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.1s ease-out, background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  min-width: 100px; /* Largura mínima para não ficarem muito pequenos */
+}
+
+.likeButton { /* Botão "Topo!" */
+  background-color: #4CAF50; /* Verde */
+}
+
+.likeButton:hover {
+  background-color: #45a049; /* Verde mais escuro no hover */
+}
+
+.dislikeButton { /* Botão "Passo" */
+  background-color: #f44336; /* Vermelho */
+}
+
+.dislikeButton:hover {
+  background-color: #e53935; /* Vermelho mais escuro no hover */
+}
+
+
+.createKinkMiniButton {
+  background-color: #3a3f47;
+  color: #fff;
+  border-radius: 8px;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-align: center;
+  transition: transform 0.1s ease-out;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+.createKinkMiniCardBackWrapper {
+ /* O CardBack interno já tem tamanho, não precisa definir aqui se o CardBack tem defaults */
+ /* Se precisar forçar: width: 30px; height: 42px; */
+  margin-bottom: 2px;
+}
+
+.createKinkMiniTextOverlay {
+  font-size: 0.6em;
+  font-weight: bold;
+  line-height: 1.1;
+  color: #fff;
+}
+
+.bottomNavContainer {
+  display: flex;
+  justify-content: center; /* Centraliza os botões */
+  gap: clamp(20px, 5vw, 40px); /* Espaçamento responsivo */
+  align-items: center;
+  width: 100%;
+  padding: 10px 0;
+  margin-top: 10px; /* Reduz o espaço acima da barra de navegação */
+}
+
+/* Estilos para os botões da navegação (carinhosMimosButton, matchesNavButton, profileNavButton) */
+/* ... (adicionar os estilos que definimos antes para eles, com círculos e bordas arredondadas) ... */
+
+/* Ponto de notificação para a barra de navegação (ex: botão Links) */
 .navNotificationDot {
   height: 8px;
   width: 8px;
-  background-color: #ff4757;
+  background-color: #ff4757; /* Vermelho para notificação */
   border-radius: 50%;
   display: inline-block;
   margin-right: 5px;
   vertical-align: middle;
 }
-.backToCardsButton.shakeAnimation { /* Para garantir que a animação do botão de cartas funcione */
-  /* ... estilos existentes do backToCardsButton ... */
+
+/* Animação de "shake" usada, por exemplo, no botão de Links */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.shakeAnimation {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* Estilos para a tela de "Fim das Cartas" */
+.noCardsViewContainer {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+}
+
+.pageTitle { /* Para o h2 "Fim das Cartas!" */
+  color: #64b5f6;
+  margin-bottom: 20px;
+}
+
+.noCardsMessage {
+  font-size: 1.1em;
+  color: #b0b0b0;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.centeredCreateKinkButton {
+  /* Se precisar de ajustes específicos para centralizar ou dar margem */
+  margin-top: 20px;
+}
+
+.cardCounters {
+  font-size: 0.8em;
+  color: #888;
+  text-align: center;
+  padding-bottom: 5px;
+  width: 100%; 
+  margin-top: 10px; /* Espaço fixo acima dos contadores, em vez de auto */
+  margin-bottom: 10px;
+}
+
+/* Adicione aqui os estilos para .carinhosMimosButton, .matchesNavButton, .profileNavButton */
+/* Exemplo (você já tem esses estilos mais detalhados): */
+/* Common base for bottom navigation buttons */
+.carinhosMimosButton, .matchesNavButton, .profileNavButton {
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: clamp(45px, 10vw, 55px); /* Common height for alignment */
+  box-sizing: border-box;
+  text-decoration: none; /* For Link components styled as buttons */
+}
+
+/* Text button: Links */
+.matchesNavButton {
+  background-color: #ffeb3b; /* Amarelo */
+  color: #333; /* Texto escuro para contraste com amarelo */
+  border: none; /* No border, similar to Topo/Nao Topo */
+  border-radius: 8px; /* Standard button rounding */
+  padding: 0 45px; /* Aumentado ainda mais o padding horizontal */
+  font-size: 1em;     /* Standard text size */
+  font-weight: bold;
+}
+
+/* Icon buttons: Carinhos & Mimos, Perfil */
+.carinhosMimosButton, .profileNavButton {
+  border: 2px solid #555;
+  color: #b0b0b0;
+  background: none; /* Mantém sem fundo */
+  width: clamp(45px, 10vw, 55px); /* Width equal to height for circular shape */
+  border-radius: 50%;
+  padding: 0;
+  line-height: 1; /* Ajuda a centralizar ícones baseados em texto/emoji */
+  font-size: clamp(1.2em, 4.5vw, 1.6em); /* Levemente reduzido para melhor encaixe dos ícones */
+}
+.carinhosMimosButton:hover, .matchesNavButton:hover, .profileNavButton:hover {
+  color: #64b5f6;
+  border-color: #64b5f6;
+}
+
+.matchesNavButton:hover {
+  background-color: #fdd835; /* Amarelo mais escuro no hover */
+  color: #333; /* Mantém texto escuro */
+  /* No border-color change as border is none */
 }

@@ -1,0 +1,75 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\CategoryCarousel.module.css */
+.carouselSection {
+  /* background-color: rgba(255, 255, 255, 0.03); */ /* Um fundo sutil se desejar */
+  /* border-radius: 8px; */
+  /* padding: 15px; */
+  margin-bottom: 20px; /* Espaço entre seções de carrossel */
+}
+
+.categoryTitle {
+  font-size: 1.5em; /* Ajuste conforme necessário */
+  color: #64b5f6; /* Cor similar aos títulos de seção em MatchesPage */
+  margin-bottom: 15px;
+  text-align: center;
+  /* border-bottom: 1px solid #4a4a4a; */ /* Opcional */
+  /* padding-bottom: 8px; */ /* Opcional */
+}
+
+.emptyStateContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 190px; /* Altura aproximada de uma carta no carrossel + um pouco de margem */
+  /* border: 1px dashed #555; */ /* Para visualização durante o desenvolvimento */
+}
+
+.emptyCard {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  filter: grayscale(100%) opacity(0.6); /* Efeito acinzentado e opaco */
+}
+
+.emptyCardText {
+  position: absolute;
+  font-size: 1.8em; /* Ajuste conforme necessário */
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.7);
+  transform: rotate(-30deg);
+  user-select: none;
+}
+
+/* Container para a instância do Swiper */
+.swiperContainer {
+  padding: 10px;
+  /* border: 1px solid #444; */ /* Opcional: se quiser uma borda */
+  min-height: 200px; /* Altura mínima para acomodar uma carta e evitar saltos de layout */
+  position: relative; /* Para posicionamento correto das setas de navegação */
+}
+
+/* Estilo para cada slide do Swiper */
+.swiperSlide {
+  width: auto !important; /* Permite que o MatchCardItem defina sua própria largura */
+  display: flex;
+  justify-content: center; /* Centraliza o MatchCardItem no slide */
+  align-items: center;
+}
+
+/* Estilização opcional para as setas de navegação do Swiper */
+.swiperContainer :global(.swiper-button-next),
+.swiperContainer :global(.swiper-button-prev) {
+  color: #64b5f6; /* Cor das setas, combine com seu tema */
+  top: 50%; /* Alinha verticalmente ao centro */
+  transform: translateY(-50%);
+}
+
+.swiperContainer :global(.swiper-button-next::after),
+.swiperContainer :global(.swiper-button-prev::after) {
+  font-size: 1.8rem; /* Tamanho dos ícones das setas */
+}
+
+.swiperInstance {
+  /* Se precisar de estilos específicos para a instância do Swiper, adicione aqui */
+  /* Ex: overflow: visible; se as cartas tiverem efeitos de hover que saem do limite */
+}

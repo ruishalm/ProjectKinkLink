@@ -104,6 +104,7 @@ function MatchesPage() {
     // console.log("[useEffect-UnreadCheck] Proceeding to check unread status for ALL cards.");
     // console.log("[useEffect-UnreadCheck] Current user.id for comparison:", user.id);
 
+    
     const newUnreadStatuses: { [key: string]: boolean } = {};
 
     userMatchedCards.forEach(card => {

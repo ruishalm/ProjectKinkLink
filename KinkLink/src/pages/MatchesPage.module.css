@@ -79,7 +79,54 @@
   display: inline-block;
   cursor: pointer;
   transition: transform 0.15s ease-out;
+  position: relative; /* Necessário para o posicionamento absoluto do snippet */
+  overflow: hidden; /* Para que o snippet não ultrapasse as bordas arredondadas da carta, se houver */
 }
+
+.unreadMatch .cardItemWrapper { 
+  /* Exemplo: border: 2px solid gold; */
+}
+.unreadIndicator {
+  position: absolute;
+  bottom: 18px; /* Subindo metade do incremento anterior (16px + 2px) */
+  left: 12px;   /* Aumentado para mover mais para direita (longe da borda esquerda) */
+  width: 6px;    /* Tamanho ainda menor */
+  height: 6px;   /* Tamanho ainda menor */
+  background-color: #ff4757; /* Vermelho para notificação */
+  border-radius: 50%;
+  z-index: 10; /* Para ficar sobre a carta */
+  box-shadow: 0 0 3px #ff4757; 
+}
+.matchCardSnippet {
+  position: absolute;
+  bottom: 5px; /* Ajuste conforme necessário para o posicionamento vertical */
+  left: 5px;   /* Ajuste para o posicionamento horizontal */
+  right: 5px;  /* Garante que ele não ultrapasse a largura */
+  background-color: rgba(0, 0, 0, 0.65); /* Fundo semi-transparente para legibilidade */
+  color: white; /* Cor do texto do snippet */
+  padding: 4px 7px; /* Espaçamento interno */
+  border-radius: 4px; /* Bordas levemente arredondadas */
+  font-size: 0.65em; /* Tamanho da fonte menor */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  z-index: 1; /* Para garantir que fique sobre a imagem da carta */
+  text-align: left; /* Ou center, como preferir */
+  box-sizing: border-box; /* Para que o padding não aumente a largura total */
+}
+.navNotificationDot {
+  height: 8px;
+  width: 8px;
+  background-color: #ff4757;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+.backToCardsButton.shakeAnimation { /* Para garantir que a animação do botão de cartas funcione */
+  /* ... estilos existentes do backToCardsButton ... */
+}
+
 
 /* Para telas um pouco maiores, como tablets ou celulares em paisagem */
 @media (min-width: 600px) {

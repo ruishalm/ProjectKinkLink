@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom'; // useNavigate importado, Link removido
 import { useAuth, type MatchedCard } from '../contexts/AuthContext'; // MatchedCard importado de AuthContext
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
-import { useCoupleCardChats } from '../hooks/useCoupleCardChats'; // Novo hook, CardChatData removido
+import { useCoupleCardChats } from '../hooks/useCoupleCardChats'; // Novo hook
 import PlayingCard, { type CardData as PlayingCardDataType } from '../components/PlayingCard';
 import CardChatModal from '../components/CardChatModal';
 import { getLastSeenTimestampForCard, markChatAsSeen } from '../utils/chatNotificationStore'; // Helpers do localStorage
@@ -44,7 +44,7 @@ function MatchCardItem({ card, onClick, isHot, isUnread, onToggleHot, lastMessag
       />
       {isUnread && lastMessageSnippet && (
         <div className={styles.matchCardSnippet}>
-          {lastMessageSnippet}
+          <span>✉️ {lastMessageSnippet}</span>
         </div>
       )}
     </div>
@@ -63,6 +63,11 @@ function MatchesPage() {
   const [unreadStatuses, setUnreadStatuses] = useState<{ [key: string]: boolean }>({});
   const [forceUpdateUnreadKey, setForceUpdateUnreadKey] = useState(0); // Para forçar re-cálculo
   const [hasUnseenGlobalMatches, setHasUnseenGlobalMatches] = useState(false);
+
+  // Helper para verificar se um objeto é um Timestamp do Firestore (duck-typing)
+  const isFirestoreTimestamp = (value: unknown): value is Timestamp => {
+    return !!value && typeof (value as Timestamp).toDate === 'function' && typeof (value as Timestamp).seconds === 'number' && typeof (value as Timestamp).nanoseconds === 'number';
+  };
 
 
   // Efeito para verificar matches não visualizados globalmente (para o botão da nav)
@@ -107,23 +112,43 @@ function MatchesPage() {
 
       if (chatData && chatData.lastMessageSenderId && chatData.lastMessageTimestamp) {
         if (chatData.lastMessageSenderId !== user.id) {
-          const lastSeenByClientISO = getLastSeenTimestampForCard(card.id);
-          const lastMessageTimestamp = chatData.lastMessageTimestamp instanceof Timestamp 
-                                        ? chatData.lastMessageTimestamp.toDate() 
-                                        : new Date(chatData.lastMessageTimestamp); // Lida com possível formato diferente se não for Timestamp
-          const lastMessageISO = lastMessageTimestamp.toISOString();
-          
-          // console.log(`[useEffect-UnreadCheck] Card ${card.id}: lastMsgSender=${chatData.lastMessageSenderId}, lastMsgTime=${lastMessageISO}, clientLastSeen=${lastSeenByClientISO}`);
+          let lastMessageDate: Date | null = null;
+          const ts = chatData.lastMessageTimestamp;
 
-          if (!lastSeenByClientISO || new Date(lastSeenByClientISO) < new Date(lastMessageISO)) {
-            isUnread = true;
-            // Se o modal deste chat estiver aberto, marca como visto imediatamente
-            // Esta lógica é mais para o caso de uma mensagem chegar enquanto o modal já está aberto.
-            // A principal marcação de "visto" ocorre quando o modal é aberto.
-            if (isChatModalOpen && selectedCardForChat?.id === card.id) {
-              // console.log(`[useEffect-UnreadCheck] Card ${card.id} chat is open, marking as read inside useEffect.`);
-              markChatAsSeen(card.id, chatData.lastMessageTimestamp);
-              isUnread = false; // Já considera lido se o modal estiver aberto
+          if (ts) { // Ensure ts is truthy before proceeding
+            try {
+              if (ts instanceof Date) { // Check if it's already a Date object first
+                lastMessageDate = ts;
+              } else if (isFirestoreTimestamp(ts)) { // Then check if it's a Firestore Timestamp
+                lastMessageDate = ts.toDate();
+              } else if (typeof ts === 'string' || typeof ts === 'number') { // Depois tenta converter string/number
+                lastMessageDate = new Date(ts);
+              } else {
+                // Se não for nenhum dos tipos esperados, loga e define como nulo
+                console.warn("[MatchesPage] lastMessageTimestamp não é um tipo reconhecido (Date, Firestore Timestamp, string, or number):", ts);
+                lastMessageDate = null;
+              }
+
+              // Verifica se lastMessageDate foi definido e se é uma data válida
+              if (lastMessageDate && isNaN(lastMessageDate.getTime())) {
+                lastMessageDate = null;
+              }
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            } catch (_e: unknown) { 
+              lastMessageDate = null;
+            }
+          }
+
+          if (lastMessageDate) {
+            const lastSeenByClientISO = getLastSeenTimestampForCard(card.id);
+            // const lastMessageISO = lastMessageDate.toISOString(); // Removido pois não é usado
+
+            if (!lastSeenByClientISO || new Date(lastSeenByClientISO) < lastMessageDate) {
+              isUnread = true;
+              if (isChatModalOpen && selectedCardForChat?.id === card.id && isFirestoreTimestamp(ts)) {
+                markChatAsSeen(card.id, ts); 
+                isUnread = false; 
+              }
             }
           }
         }
@@ -135,8 +160,7 @@ function MatchesPage() {
     setUnreadStatuses(newUnreadStatuses);
   }, [user, userMatchedCards, cardChatsData, isLoadingCardChats, isChatModalOpen, selectedCardForChat, forceUpdateUnreadKey]);
 
-  const handleCardClick = (card: MatchedCard) => { // MatchedCard é o tipo correto aqui
-    // Convertendo MatchedCard para PlayingCardDataType se necessário, ou ajustando props
+  const handleCardClick = (card: MatchedCard) => { 
     const cardForModal: PlayingCardDataType = {
         id: card.id,
         text: card.text,
@@ -146,23 +170,24 @@ function MatchesPage() {
     };
     setSelectedCardForChat(cardForModal);
     setIsChatModalOpen(true);
-    // A lógica de marcar como visto será acionada pelo CardChatModal ao receber as props
-    // e chamar onChatSeen, que por sua vez atualiza forceUpdateUnreadKey.
   };
 
-  const handleChatSeen = useCallback(() => { // Parâmetro _seenCardId removido
-    // console.log(`[MatchesPage] Chat seen for card ${seenCardId}, forcing unread status re-check.`);
-    setForceUpdateUnreadKey(prev => prev + 1);
-  }, []);
+  const handleChatSeen = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    (_seenCardId: string) => { 
+      setForceUpdateUnreadKey(prev => prev + 1);
+    }, 
+    [] 
+  );
 
   const handleToggleHot = async (cardId: string, event: React.MouseEvent) => {
-    event.stopPropagation(); // Impede que o clique no coração abra o chat
+    event.stopPropagation(); 
     if (user && user.coupleId) {
       await toggleHotStatus(cardId);
     }
   };
 
-  if (!user || isLoadingCardChats && !Object.keys(cardChatsData).length) { // Mostra carregando se user não existe OU se está carregando chats e ainda não tem nenhum dado de chat
+  if (!user || isLoadingCardChats && !Object.keys(cardChatsData).length) { 
     return <div className={styles.page}><p>Carregando seus links...</p></div>;
   }
   if (cardChatsError) {
@@ -196,11 +221,11 @@ function MatchesPage() {
                 {hotMatches.map((card: MatchedCard) => (
                   <MatchCardItem
                     key={card.id}
-                    card={card} // Passa o objeto card completo
+                    card={card} 
                     onClick={() => handleCardClick(card)}
                     isHot={true}
                     isUnread={unreadStatuses[card.id] || false}
-                    onToggleHot={handleToggleHot} // Passa a função handleToggleHot
+                    onToggleHot={handleToggleHot} 
                     lastMessageSnippet={unreadStatuses[card.id] ? cardChatsData[card.id]?.lastMessageTextSnippet : undefined}                  
                   />
                 ))}
@@ -217,11 +242,11 @@ function MatchesPage() {
                 {otherMatches.map((card: MatchedCard) => (
                   <MatchCardItem
                     key={card.id}
-                    card={card} // Passa o objeto card completo
+                    card={card} 
                     onClick={() => handleCardClick(card)}
                     isHot={false}
                     isUnread={unreadStatuses[card.id] || false}
-                    onToggleHot={handleToggleHot} // Passa a função handleToggleHot
+                    onToggleHot={handleToggleHot} 
                     lastMessageSnippet={unreadStatuses[card.id] ? cardChatsData[card.id]?.lastMessageTextSnippet : undefined}                  
                   />
                 ))}
@@ -233,11 +258,16 @@ function MatchesPage() {
 
       {isChatModalOpen && selectedCardForChat && user && (
         <CardChatModal
-          isOpen={isChatModalOpen} // Passa o estado de abertura
+          isOpen={isChatModalOpen} 
           onClose={() => { setIsChatModalOpen(false); setSelectedCardForChat(null); }}
           cardId={selectedCardForChat.id}
-          cardTitle={selectedCardForChat.text} // Passa o título da carta
-          currentChatLastMessageTimestamp={cardChatsData?.[selectedCardForChat.id]?.lastMessageTimestamp || null}
+          cardTitle={selectedCardForChat.text} 
+          currentChatLastMessageTimestamp={
+            cardChatsData?.[selectedCardForChat.id]?.lastMessageTimestamp &&
+            isFirestoreTimestamp(cardChatsData[selectedCardForChat.id].lastMessageTimestamp)
+              ? cardChatsData[selectedCardForChat.id].lastMessageTimestamp
+              : null
+          }
           onChatSeen={handleChatSeen}
         />
       )}

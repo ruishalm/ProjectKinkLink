@@ -11,18 +11,20 @@ import RegisterPage from './pages/RegisterPage';
 import LinkCouplePage from './pages/LinkCouplePage';
 import MatchesPage from './pages/MatchesPage';
 import LinkedRoute from './components/LinkedRoute';
-import ProtectedRoute from './components/ProtectedRoute'; // Importar ProtectedRoute
+import ProtectedRoute from './components/ProtectedRoute';
 import TermsOfServicePage from './pages/TermsOfServicePage';
+import SkinsPage from './pages/SkinsPage';
+import { SkinProvider } from './contexts/SkinContext'; // Importar SkinProvider
 import { useLinkCompletionListener } from './hooks/useLinkCompletionListener';
 
 const HeaderPlaceholder = () => (
   <header style={{
-    padding: '10px 0', // Ajustado padding vertical, removido horizontal pois o logo centraliza
-    backgroundColor: '#222', // Fundo escuro para contraste
+    padding: '10px 0',
+    backgroundColor: '#222',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center', // Centraliza o logo
-    height: '60px', // Altura definida para o header
+    justifyContent: 'center',
+    height: '60px',
     marginBottom: '20px'
   }}>
     <img src="/kinklogo.png" alt="KinkLink Logo" style={{ height: '80%', maxHeight: '45px' }} />
@@ -49,61 +51,71 @@ function App() {
   console.log('Dev log - App states: User loaded, isUserLinked:', isUserLinked);
 
   return (
-    <>
-      <HeaderPlaceholder />
-      <main>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route
-            path="/profile"
-            element={
-              <LinkedRoute>
-                <ProfilePage />
-              </LinkedRoute>
-            }
-          />
-          <Route
-            path="/link-couple"
-            element={
-              <ProtectedRoute> {/* Alterado para ProtectedRoute */}
-                <LinkCouplePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/cards"
-            element={
-              <LinkedRoute>
-                <CardPilePage />
-              </LinkedRoute>
-            }
-          />
-          <Route
-            path="/matches"
-            element={
-              <LinkedRoute>
-                <MatchesPage />
-              </LinkedRoute>
-            }
-          />
-          <Route path="/termos-de-servico" element={<TermsOfServicePage />} />
-          <Route path="*" element={<div>Página não encontrada</div>} />
-        </Routes>
-        {location.pathname === '/cards' && (
-          <div className="actionButtons">
-            {/* <button
-              className="actionButton dislikeButton"
-            >Passo</button> */}
-            {/* <button
-              className="actionButton likeButton"
-            >Topo!</button> */}
-          </div>
-        )}
-      </main>
-    </>
+    <SkinProvider> {/* SkinProvider envolve todo o conteúdo que precisa do contexto */}
+      <>
+        <HeaderPlaceholder />
+        <main>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route
+              path="/profile"
+              element={
+                <LinkedRoute>
+                  <ProfilePage />
+                </LinkedRoute>
+              }
+            />
+            <Route
+              path="/link-couple"
+              element={
+                <ProtectedRoute>
+                  <LinkCouplePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/cards"
+              element={
+                <LinkedRoute>
+                  <CardPilePage />
+                </LinkedRoute>
+              }
+            />
+            <Route
+              path="/matches"
+              element={
+                <LinkedRoute>
+                  <MatchesPage />
+                </LinkedRoute>
+              }
+            />
+            <Route
+              path="/skins"
+              element={
+                <LinkedRoute>
+                  <SkinsPage />
+                </LinkedRoute>
+              }
+            />
+            <Route path="/termos-de-servico" element={<TermsOfServicePage />} />
+            <Route path="*" element={<div>Página não encontrada</div>} />
+          </Routes>
+          {location.pathname === '/cards' && (
+            <div className="actionButtons">
+              {/* <button
+                className="actionButton dislikeButton"
+              >Passo</button> */}
+              {/* <button
+                className="actionButton likeButton"
+              >Topo!</button> */}
+            </div>
+          )}
+        </main>
+      </>
+    </SkinProvider>
   );
 }
 export default App;

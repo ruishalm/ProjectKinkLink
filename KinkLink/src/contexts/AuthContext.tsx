@@ -8,7 +8,9 @@ import {
   signOut as firebaseSignOut
 } from 'firebase/auth';
 import { auth, db } from '../firebase';
-import type { Card } from '../data/cards';
+// Importando SkinDefinition para a função de desbloqueio
+import type { SkinDefinition } from '../pages/SkinsPage'; // Ajuste o caminho se SkinsPage não estiver em ../pages/
+import type { Card } from '../data/cards'; // Mantém a importação de Card
 import {
   doc,
   setDoc,
@@ -41,6 +43,7 @@ export interface User {
   conexaoRejected?: number;
   userCreatedCards?: Card[];
   matchedCards?: MatchedCard[];
+  unlockedSkinIds?: string[]; // Skins que o usuário desbloqueou
   createdAt?: Timestamp;
 }
 
@@ -53,6 +56,7 @@ interface AuthContextData {
   signup: (email: string, password: string) => Promise<void>;
   updateUser: (updatedData: Partial<User>) => Promise<void>;
   resetUserTestData: () => Promise<void>;
+  checkAndUnlockSkins: (allSkinsData: SkinDefinition[]) => Promise<string[] | null>; // Nova função
 }
 
 const AuthContext = createContext<AuthContextData | undefined>(undefined);
@@ -79,6 +83,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
               ...firestoreData,
               linkedPartnerId: firestoreData.linkedPartnerId || firestoreData.partnerId || null,
               coupleId: firestoreData.coupleId || null,
+              unlockedSkinIds: firestoreData.unlockedSkinIds || [], // Inicializa se não existir
             });
           } else {
             setUser(baseUserData);
@@ -127,6 +132,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         conexaoAccepted: 0,
         conexaoRejected: 0,
         userCreatedCards: [],
+        unlockedSkinIds: ['bg_pile_default', 'bg_match_default', 'palette_default', 'font_default', 'pack_default'], // Skins padrão desbloqueadas
         createdAt: serverTimestamp(),
       };
       await setDoc(newUserDocRef, userData);
@@ -171,6 +177,56 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     }
   };
 
+  const checkAndUnlockSkins = async (allSkinsData: SkinDefinition[]): Promise<string[] | null> => {
+    if (!user) {
+      console.warn("[AuthContext] checkAndUnlockSkins chamado sem usuário logado.");
+      return null;
+    }
+
+    const newlyUnlockedSkinIds: string[] = [];
+    const currentUnlockedIds = user.unlockedSkinIds || [];
+
+    allSkinsData.forEach(skin => {
+      // Se a skin já está desbloqueada ou não tem critério de desbloqueio, pula
+      if (currentUnlockedIds.includes(skin.id) || !skin.unlockCriteria) {
+        return;
+      }
+
+      let conditionMet = false;
+      const criteria = skin.unlockCriteria;
+
+      switch (criteria.type) {
+        case 'matches':
+          conditionMet = (user.matchedCards?.length || 0) >= criteria.count;
+          break;
+        case 'seenCards':
+          conditionMet = (user.seenCards?.length || 0) >= criteria.count;
+          break;
+        case 'userCreatedCards':
+          conditionMet = (user.userCreatedCards?.length || 0) >= criteria.count;
+          break;
+        default:
+          break;
+      }
+
+      if (conditionMet) {
+        newlyUnlockedSkinIds.push(skin.id);
+      }
+    });
+
+    if (newlyUnlockedSkinIds.length > 0) {
+      const updatedUnlockedIds = [...currentUnlockedIds, ...newlyUnlockedSkinIds];
+      try {
+        await updateUser({ unlockedSkinIds: updatedUnlockedIds }); // updateUser já lida com Firestore e estado local
+        console.log(`[AuthContext] Novas skins desbloqueadas para ${user.id}:`, newlyUnlockedSkinIds);
+        return newlyUnlockedSkinIds;
+      } catch (error) {
+        console.error(`[AuthContext] Erro ao atualizar skins desbloqueadas para ${user.id}:`, error);
+      }
+    }
+    return null;
+  };
+
   const resetUserTestData = async () => {
     if (!user || !user.id) {
       console.warn("resetUserTestData chamado sem usuário logado.");
@@ -185,12 +241,14 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     batch.update(userDocRef, {
       seenCards: [],
       matchedCards: [],
-      conexaoAccepted: 0, // Adicionado
-      conexaoRejected: 0  // Adicionado
+      conexaoAccepted: 0,
+      conexaoRejected: 0,
+      // Resetar as skins desbloqueadas para o padrão
+      unlockedSkinIds: ['bg_pile_default', 'bg_match_default', 'palette_default', 'font_default', 'pack_default']
     });
-    console.log(`[AuthContext] seenCards e matchedCards do usuário ${user.id} marcados para reset.`);
+    console.log(`[AuthContext] Dados do usuário ${user.id} (incluindo skins desbloqueadas) marcados para reset.`);
 
-    // 2. Deletar interações antigas do usuário atual (da coleção cardInteractions, se ainda existir)
+    // 2. Deletar interações antigas do usuário atual
     const userInteractionsQuery = query(collection(db, 'cardInteractions'), where('userId', '==', user.id));
     try {
       const userInteractionsSnap = await getDocs(userInteractionsQuery);
@@ -202,7 +260,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       console.error(`[AuthContext] Erro ao buscar interações antigas do usuário ${user.id} para deleção:`, error);
     }
 
-    // Se o usuário estiver vinculado (tem coupleId)
+    // Se o usuário estiver vinculado
     if (user.coupleId) {
       // 3. Deletar documentos da subcoleção 'likedInteractions' do casal
       const likedInteractionsPath = `couples/${user.coupleId}/likedInteractions`;
@@ -255,11 +313,17 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     try {
       await batch.commit();
       console.log(`[AuthContext] Reset de dados de teste para ${user.id} (e parceiro, se aplicável) concluído no Firestore.`);
-      updateUser({ // Atualiza o estado local também
+      // Atualiza o estado local para refletir o reset, incluindo as skins
+      setUser(currentUser => {
+        if (!currentUser) return null;
+        return {
+          ...currentUser,
         seenCards: [],
         matchedCards: [],
         conexaoAccepted: 0,
-        conexaoRejected: 0
+        conexaoRejected: 0,
+          unlockedSkinIds: ['bg_pile_default', 'bg_match_default', 'palette_default', 'font_default', 'pack_default']
+        };
       });
     } catch (error) {
       console.error(`[AuthContext] Erro ao commitar o batch de reset para ${user.id}:`, error);
@@ -276,7 +340,8 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       logout,
       signup,
       updateUser,
-      resetUserTestData
+      resetUserTestData,
+      checkAndUnlockSkins
     }}>
       {children}
     </AuthContext.Provider>

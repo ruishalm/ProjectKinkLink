@@ -11,6 +11,7 @@ import { useCardPileLogic } from '../hooks/useCardPileLogic';
 import CarinhosMimosModal from '../components/CarinhosMimosModal';
 import CardBack from '../components/CardBack';
 import type { Card } from '../data/cards';
+import { useSkin } from '../contexts/SkinContext'; // Importar o hook useSkin
 import SideTipMessages from '../components/SideTipMessages'; // Importar o novo componente
 import styles from './CardPilePage.module.css';
 
@@ -27,6 +28,7 @@ function CardPilePage() {
     handleConexaoInteractionInModal,
     allConexaoCards,
   } = useCardPileLogic();
+  const { activeSkins, isLoadingSkins } = useSkin(); // Usar o contexto de skin
 
   const { matchedCards, seenCards, handleCreateUserCard, toggleHotStatus } = useUserCardInteractions();
   const navigate = useNavigate();
@@ -403,8 +405,21 @@ function CardPilePage() {
     }
   });
 
+  const pageStyle: React.CSSProperties = {};
+  if (!isLoadingSkins && activeSkins.backgroundPileUrl) {
+    pageStyle.backgroundImage = `url(${activeSkins.backgroundPileUrl})`;
+    // Adicione outras propriedades de background se necessário, como:
+    // pageStyle.backgroundSize = 'cover';
+    // pageStyle.backgroundPosition = 'center';
+    // pageStyle.backgroundRepeat = 'no-repeat';
+  }
+
+  if (isLoadingSkins) {
+    return <div className={styles.page}><p>Carregando...</p></div>;
+  }
+
   return (
-    <div className={styles.page}>
+    <div className={styles.page} style={pageStyle}>
       {showMatchModal && currentMatchCard && (
         <MatchModal
           card={currentMatchCard}

@@ -158,6 +158,14 @@ function ProfilePage() {
         )}
       </div>
       
+      {/* SEÇÃO DE SKINS */}
+      <div className={styles.section}>
+        <h2 className={styles.title}>Personalização</h2>
+        <Link to="/skins" className={styles.actionButton} style={{display: 'block', textAlign: 'center', textDecoration: 'none'}}>
+          Minhas Skins
+        </Link>
+      </div>
+
       <div className={`${styles.section} ${styles.textCenter} ${styles.marginTop30}`}>
         <button onClick={handleLogout} className={styles.buttonDestructive}>Logout</button>
       </div>

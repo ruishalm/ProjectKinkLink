@@ -1,23 +1,24 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\MatchesPage.tsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom'; // useNavigate importado, Link removido
-import { useAuth, type MatchedCard } from '../contexts/AuthContext'; // MatchedCard importado de AuthContext
+import { useNavigate } from 'react-router-dom';
+import { useAuth, type MatchedCard } from '../contexts/AuthContext';
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
-import { useCoupleCardChats } from '../hooks/useCoupleCardChats'; // Novo hook
+import { useCoupleCardChats } from '../hooks/useCoupleCardChats';
 import PlayingCard, { type CardData as PlayingCardDataType } from '../components/PlayingCard';
 import CardChatModal from '../components/CardChatModal';
-import CategoryCarousel from '../components/CategoryCarousel'; // Importar o CategoryCarousel
-import { getLastSeenTimestampForCard, markChatAsSeen } from '../utils/chatNotificationStore'; // Helpers do localStorage
+import CategoryCarousel from '../components/CategoryCarousel';
+import { getLastSeenTimestampForCard, markChatAsSeen } from '../utils/chatNotificationStore';
+import { useSkin } from '../contexts/SkinContext'; // Importar o hook useSkin
 import styles from './MatchesPage.module.css';
 import { Timestamp } from 'firebase/firestore';
 
 
 interface MatchCardItemProps {
-  card: PlayingCardDataType; // Usando PlayingCardDataType para consistência
+  card: PlayingCardDataType;
   onClick: () => void;
   isHot: boolean;
   isUnread: boolean;
-  onToggleHot?: (cardId: string, event: React.MouseEvent) => void; // Atualizado para incluir o evento
+  onToggleHot?: (cardId: string, event: React.MouseEvent) => void;
   lastMessageSnippet?: string;
 }
 
@@ -40,8 +41,8 @@ function MatchCardItem({ card, onClick, isHot, isUnread, onToggleHot, lastMessag
         data={card}
         targetWidth={cardWidth}
         targetHeight={cardHeight}
-        isFlipped={false} // Sempre mostrar a frente na lista de matches
-        onToggleHot={onToggleHot} // Passa o handler para PlayingCard
+        isFlipped={false}
+        onToggleHot={onToggleHot}
       />
       {isUnread && lastMessageSnippet && (
         <div className={styles.matchCardSnippet}>
@@ -57,21 +58,19 @@ function MatchesPage() {
   const { user } = useAuth();
   const { matchedCards: userMatchedCards, toggleHotStatus } = useUserCardInteractions();
   const navigate = useNavigate();
+  const { activeSkins, isLoadingSkins } = useSkin(); // Usar o contexto de skin
   const { cardChatsData, isLoading: isLoadingCardChats, error: cardChatsError } = useCoupleCardChats(user?.coupleId);
 
   const [selectedCardForChat, setSelectedCardForChat] = useState<PlayingCardDataType | null>(null);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [unreadStatuses, setUnreadStatuses] = useState<{ [key: string]: boolean }>({});
-  const [forceUpdateUnreadKey, setForceUpdateUnreadKey] = useState(0); // Para forçar re-cálculo
+  const [forceUpdateUnreadKey, setForceUpdateUnreadKey] = useState(0);
   const [hasUnseenGlobalMatches, setHasUnseenGlobalMatches] = useState(false);
 
-  // Helper para verificar se um objeto é um Timestamp do Firestore (duck-typing)
   const isFirestoreTimestamp = (value: unknown): value is Timestamp => {
     return !!value && typeof (value as Timestamp).toDate === 'function' && typeof (value as Timestamp).seconds === 'number' && typeof (value as Timestamp).nanoseconds === 'number';
   };
 
-
-  // Efeito para verificar matches não visualizados globalmente (para o botão da nav)
   useEffect(() => {
     if (userMatchedCards) {
       const lastSeenMatchesCount = parseInt(localStorage.getItem('kinklink_lastSeenMatchesCount') || '0', 10);
@@ -88,23 +87,15 @@ function MatchesPage() {
       localStorage.setItem('kinklink_lastSeenMatchesCount', String(userMatchedCards.length));
     }
     setHasUnseenGlobalMatches(false);
-    navigate('/cards'); // Navega para a página de cartas (ou /matches se preferir)
+    navigate('/cards');
   };
 
 
   useEffect(() => {
-    // console.log("[useEffect-UnreadCheck] Effect triggered. Dependencies:", { userExists: !!user, coupleId: user?.coupleId, matchedCardsLength: userMatchedCards?.length, isLoadingCardChats, forceUpdateUnreadKey });
-    // console.log("[useEffect-UnreadCheck] cardChatsData:", cardChatsData);
-
     if (!user || !user.id || !user.coupleId || !userMatchedCards || userMatchedCards.length === 0 || isLoadingCardChats) {
-      // console.log("[useEffect-UnreadCheck] Condition guard met. Returning early.");
       setUnreadStatuses({});
       return;
     }
-
-    // console.log("[useEffect-UnreadCheck] Proceeding to check unread status for ALL cards.");
-    // console.log("[useEffect-UnreadCheck] Current user.id for comparison:", user.id);
-
     
     const newUnreadStatuses: { [key: string]: boolean } = {};
 
@@ -117,21 +108,19 @@ function MatchesPage() {
           let lastMessageDate: Date | null = null;
           const ts = chatData.lastMessageTimestamp;
 
-          if (ts) { // Ensure ts is truthy before proceeding
+          if (ts) {
             try {
-              if (ts instanceof Date) { // Check if it's already a Date object first
+              if (ts instanceof Date) {
                 lastMessageDate = ts;
-              } else if (isFirestoreTimestamp(ts)) { // Then check if it's a Firestore Timestamp
+              } else if (isFirestoreTimestamp(ts)) {
                 lastMessageDate = ts.toDate();
-              } else if (typeof ts === 'string' || typeof ts === 'number') { // Depois tenta converter string/number
+              } else if (typeof ts === 'string' || typeof ts === 'number') {
                 lastMessageDate = new Date(ts);
               } else {
-                // Se não for nenhum dos tipos esperados, loga e define como nulo
-                console.warn("[MatchesPage] lastMessageTimestamp não é um tipo reconhecido (Date, Firestore Timestamp, string, or number):", ts);
+                console.warn("[MatchesPage] lastMessageTimestamp não é um tipo reconhecido:", ts);
                 lastMessageDate = null;
               }
 
-              // Verifica se lastMessageDate foi definido e se é uma data válida
               if (lastMessageDate && isNaN(lastMessageDate.getTime())) {
                 lastMessageDate = null;
               }
@@ -143,8 +132,6 @@ function MatchesPage() {
 
           if (lastMessageDate) {
             const lastSeenByClientISO = getLastSeenTimestampForCard(card.id);
-            // const lastMessageISO = lastMessageDate.toISOString(); // Removido pois não é usado
-
             if (!lastSeenByClientISO || new Date(lastSeenByClientISO) < lastMessageDate) {
               isUnread = true;
               if (isChatModalOpen && selectedCardForChat?.id === card.id && isFirestoreTimestamp(ts)) {
@@ -157,8 +144,6 @@ function MatchesPage() {
       }
       newUnreadStatuses[card.id] = isUnread;
     });
-
-    // console.log("[useEffect-UnreadCheck] Setting new unread statuses:", newUnreadStatuses);
     setUnreadStatuses(newUnreadStatuses);
   }, [user, userMatchedCards, cardChatsData, isLoadingCardChats, isChatModalOpen, selectedCardForChat, forceUpdateUnreadKey]);
 
@@ -189,21 +174,29 @@ function MatchesPage() {
     }
   };
 
-  if (!user || isLoadingCardChats && !Object.keys(cardChatsData).length) { 
-    return <div className={styles.page}><p>Carregando seus links...</p></div>;
+  const pageStyle: React.CSSProperties = {};
+  if (!isLoadingSkins && activeSkins.backgroundMatchesUrl) {
+    pageStyle.backgroundImage = `url(${activeSkins.backgroundMatchesUrl})`;
+    // Adicione outras propriedades de background se necessário, como:
+    // pageStyle.backgroundSize = 'cover';
+    // pageStyle.backgroundPosition = 'center';
+    // pageStyle.backgroundRepeat = 'no-repeat';
+  }
+
+  if (isLoadingSkins || (!user || (isLoadingCardChats && !Object.keys(cardChatsData).length))) { 
+    return <div className={styles.page} style={pageStyle}><p>Carregando seus links...</p></div>;
   }
   if (cardChatsError) {
-    return <div className={styles.page}><p>Erro ao carregar dados dos chats: {cardChatsError}</p></div>;
+    return <div className={styles.page} style={pageStyle}><p>Erro ao carregar dados dos chats: {cardChatsError}</p></div>;
   }
 
   const hotMatches = userMatchedCards.filter(card => card.isHot);
   const otherMatches = userMatchedCards.filter(card => !card.isHot);
   const noMatchesCondition = hotMatches.length === 0 && otherMatches.length === 0;
 
-  // Agrupar 'otherMatches' por categoria
   const groupCardsByCategory = (cards: MatchedCard[]) => {
     return cards.reduce((acc, card) => {
-      const category = card.category || 'Outros'; // Fallback para categoria 'Outros'
+      const category = card.category || 'Outros';
       if (!acc[category]) {
         acc[category] = [];
       }
@@ -212,10 +205,10 @@ function MatchesPage() {
     }, {} as Record<string, MatchedCard[]>);
   };
   const otherCardsByCategory = groupCardsByCategory(otherMatches);
-  const categoryOrder = ['Exposição', 'Fantasia', 'Poder', 'Sensorial', 'Conexão', 'Persona', 'Limites', 'UserCreated']; // Ordem preferencial
+  const categoryOrder = ['Exposição', 'Fantasia', 'Poder', 'Sensorial', 'Conexão', 'Persona', 'Limites', 'UserCreated'];
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} style={pageStyle}>
       <div className={styles.header}>
         <h1 className={styles.pageTitle}>Seus Links</h1>
         <button onClick={handleMatchesButtonClick} className={`${styles.backToCardsButton} ${hasUnseenGlobalMatches ? styles.shakeAnimation : ''}`}>
@@ -254,7 +247,7 @@ function MatchesPage() {
               <h2 className={`${styles.sectionTitle} ${styles.sectionTitleOthers}`}>
                 {hotMatches.length > 0 ? 'Outros Links por Categoria' : 'Seus Links por Categoria'}
               </h2>
-              <div className={styles.categoryCarouselsGrid}> {/* Novo container para o grid 2x2 */}
+              <div className={styles.categoryCarouselsGrid}>
                 {categoryOrder.map(categoryName => {
                   const cardsForCategory = otherCardsByCategory[categoryName];
                   if (cardsForCategory && cardsForCategory.length > 0) {
@@ -272,7 +265,6 @@ function MatchesPage() {
                   }
                   return null;
                 })}
-                {/* Renderizar categorias que não estão em categoryOrder, se houver */}
                 {Object.entries(otherCardsByCategory)
                   .filter(([categoryName]) => !categoryOrder.includes(categoryName))
                   .map(([categoryName, cardsForCategory]) => (

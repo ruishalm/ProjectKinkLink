@@ -1,0 +1,211 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\SkinsPage.module.css */
+.page {
+  padding: 20px;
+  background-color: var(--cor-fundo-pagina, #1e1e1e); /* Cor de fundo padrão */
+  color: var(--cor-texto-primario, #f0f0f0);
+  min-height: calc(100vh - 60px - 40px); /* Considerando header e padding */
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--cor-borda-sutil, #444);
+}
+
+.header h1 {
+  margin: 0;
+  margin-left: 20px; /* Espaço após o botão de voltar */
+  font-size: 2em;
+  color: var(--cor-titulo, #64b5f6);
+}
+
+.backButton {
+  background-color: var(--cor-botao-secundario, #4a4a4a);
+  color: var(--cor-texto-botao-secundario, #fff);
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.backButton:hover {
+  background-color: var(--cor-botao-secundario-hover, #5a5a5a);
+}
+
+.content {
+  flex-grow: 1;
+}
+
+.skinSection {
+  margin-bottom: 40px;
+}
+
+.sectionTitle {
+  font-size: 1.5em;
+  color: var(--cor-subtitulo, #e0e0e0);
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--cor-borda-sutil, #383838);
+}
+
+.skinItemsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.skinItem {
+  background-color: var(--cor-fundo-item, #2a2a2a);
+  border: 1px solid var(--cor-borda-item, #3f3f3f);
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  position: relative; /* Para o ícone de cadeado */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Para alinhar o botão no final */
+  min-height: 220px; /* Altura mínima para consistência */
+}
+
+.skinItem:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.skinName {
+  font-size: 1.1em;
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: var(--cor-texto-item-titulo, #ccc);
+  flex-grow: 0; /* Não deixa o nome crescer demais */
+}
+
+.skinDescription {
+  font-size: 0.85em;
+  color: var(--cor-texto-item-descricao, #aaa);
+  margin-bottom: 15px;
+  flex-grow: 1; /* Permite que a descrição ocupe espaço */
+  overflow-y: auto; /* Caso a descrição seja muito longa */
+  max-height: 60px; /* Limita altura da descrição */
+}
+
+.texturePreview {
+  width: 100%;
+  height: 100px; /* Altura fixa para preview de textura */
+  object-fit: cover; /* Garante que a imagem cubra a área sem distorcer */
+  border-radius: 4px;
+  margin-bottom: 10px;
+  border: 1px solid var(--cor-borda-preview, #555);
+}
+
+.palettePreview {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+  height: 30px; /* Altura fixa para preview de paleta */
+}
+
+.colorSwatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%; /* Círculos para as cores */
+  margin: 0 3px;
+  border: 1px solid var(--cor-borda-swatch, #666);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.fontPreview {
+  font-size: 1.2em; /* Tamanho maior para preview de fonte */
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: var(--cor-fundo-preview-fonte, #333);
+  border-radius: 4px;
+  color: var(--cor-texto-preview-fonte, #f0f0f0);
+  height: 50px; /* Altura fixa para preview de fonte */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.activateButton {
+  background-color: var(--cor-botao-primario, #64b5f6);
+  color: var(--cor-texto-botao-primario, #111);
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+  width: 100%; /* Botão ocupa toda a largura */
+  margin-top: auto; /* Empurra o botão para baixo */
+}
+
+.activateButton:hover:not(:disabled) {
+  background-color: var(--cor-botao-primario-hover, #81c784);
+}
+
+.activateButton:disabled {
+  background-color: var(--cor-botao-desabilitado, #555);
+  color: var(--cor-texto-botao-desabilitado, #888);
+  cursor: not-allowed;
+}
+
+.activeSkin {
+  border-color: var(--cor-borda-ativa, #81c784); /* Verde para skin ativa */
+  box-shadow: 0 0 15px var(--cor-sombra-ativa, rgba(129, 199, 132, 0.5));
+}
+
+.activeSkin .activateButton {
+  background-color: var(--cor-botao-ativo, #4caf50); /* Verde mais escuro para botão de skin ativa */
+  color: var(--cor-texto-botao-ativo, #fff);
+}
+
+.lockedSkin {
+  filter: grayscale(100%);
+  cursor: not-allowed;
+  /* opacity: 0.7; */ /* Opcional, se grayscale não for suficiente */
+}
+
+.lockedSkin .activateButton {
+  background-color: var(--cor-botao-bloqueado, #888);
+  color: var(--cor-texto-botao-bloqueado, #ccc);
+  /* cursor: not-allowed; já coberto pelo :disabled */
+}
+
+.lockedSkin .skinName {
+  color: var(--cor-texto-nome-bloqueado, #777);
+}
+
+.lockedIcon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1.2em;
+  color: var(--cor-icone-cadeado, rgba(255, 255, 255, 0.7)); /* Ajustado para melhor visibilidade em fundo escuro */
+  filter: none; /* Garante que o ícone em si não fique cinza se for colorido */
+  z-index: 1;
+  text-shadow: 0 0 3px rgba(0,0,0,0.5); /* Sombra para destacar */
+}
+
+.unlockHint {
+  font-size: 0.8em;
+  color: var(--cor-texto-dica-desbloqueio, #aaa);
+  margin-top: 5px;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+/* Estilo para destacar skins forçadamente desbloqueadas (para testes) */
+.forceUnlockedHighlight {
+  outline: 2px dashed var(--cor-aviso, orange);
+  outline-offset: 2px;
+}

@@ -21,9 +21,10 @@ import {
   increment,
   arrayRemove, // Importar arrayRemove
 } from 'firebase/firestore';
+import { exampleSkinsData } from '../pages/SkinsPage'; // Importar dados das skins para verificação
 
 export function useUserCardInteractions() {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, checkAndUnlockSkins } = useAuth(); // Adicionar checkAndUnlockSkins
 
   const matchedCards = user?.matchedCards || [];
   const seenCards = user?.seenCards || [];
@@ -110,6 +111,17 @@ export function useUserCardInteractions() {
     await updateUserProfileInFirestore(user.id, {
       seenCards: arrayUnion(cardId)
     });
+
+    // Verificar desbloqueio de skins após marcar como vista (embora o principal gatilho de seenCards esteja em useCardPileLogic)
+    // Esta chamada aqui é mais uma garantia caso a lógica de seenCards seja alterada.
+    // A chamada principal para 'seenCards' deve estar no hook que efetivamente incrementa o contador de 'seenCards' para o usuário.
+    if (user && checkAndUnlockSkins) {
+      try {
+        await checkAndUnlockSkins(exampleSkinsData);
+      } catch (error) {
+        console.error("[useUserCardInteractions] Erro ao verificar skins após markCardAsSeen:", error);
+      }
+    }
   };
 
   const toggleHotStatus = async (cardId: string) => {
@@ -177,6 +189,17 @@ export function useUserCardInteractions() {
               lastActivity: Timestamp.now(),
             });
             console.log(`[MATCH!] Card ${card.id} is now a match for couple ${user.coupleId}`);
+            // Verificar desbloqueio de skins após um match
+            if (user && checkAndUnlockSkins) {
+              try {
+                const newlyUnlocked = await checkAndUnlockSkins(exampleSkinsData);
+                if (newlyUnlocked && newlyUnlocked.length > 0) {
+                  console.log("[useUserCardInteractions] Novas skins desbloqueadas por matches:", newlyUnlocked);
+                }
+              } catch (error) {
+                console.error("[useUserCardInteractions] Erro ao verificar skins após match:", error);
+              }
+            }
             return true;
           } else {
             console.warn(`[Interaction] Card ${card.id} in couple ${user.coupleId} already has two likers but wasn't marked as match? Data:`, data);
@@ -249,6 +272,17 @@ export function useUserCardInteractions() {
       });
       console.log(`[UserCardCreation] Sinalizado para parceiro ${user.linkedPartnerId.substring(0,5)} ver a carta ${docRef.id}`);
 
+      // Verificar desbloqueio de skins após criar uma carta
+      if (user && checkAndUnlockSkins) {
+        try {
+          const newlyUnlocked = await checkAndUnlockSkins(exampleSkinsData);
+          if (newlyUnlocked && newlyUnlocked.length > 0) {
+            console.log("[useUserCardInteractions] Novas skins desbloqueadas por criação de carta:", newlyUnlocked);
+          }
+        } catch (error) {
+          console.error("[useUserCardInteractions] Erro ao verificar skins após criar carta:", error);
+        }
+      }
     } catch (error) {
       console.error("Firestore: Erro ao criar carta personalizada:", error);
     }

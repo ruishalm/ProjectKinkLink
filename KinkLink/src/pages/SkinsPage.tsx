@@ -20,7 +20,7 @@ export interface SkinDefinition {
 }
 
 // Dados de exemplo (mais tarde viriam do Firestore ou config)
-const exampleSkinsData: SkinDefinition[] = [
+export const exampleSkinsData: SkinDefinition[] = [
   { id: 'bg_pile_default', name: 'Padrão (Pilha)', type: 'backgroundPile' },
   { id: 'bg_pile_azul_nipes', name: 'Azul Naipes (Pilha)', type: 'backgroundPile', preview: '/assets/skins/textures/azulNipes.jpg', unlockCriteria: { type: 'matches', count: 5, description: 'Consiga 5 Links' } },
   { id: 'bg_pile_madeira', name: 'Madeira (Pilha)', type: 'backgroundPile', preview: '/assets/skins/textures/madeira.jpg', unlockCriteria: { type: 'seenCards', count: 50, description: 'Veja 50 cartas' } },

@@ -15,6 +15,7 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { useUserCardInteractions } from './useUserCardInteractions';
+import { exampleSkinsData } from '../pages/SkinsPage'; // Importar dados das skins
 
 // Interface para o tipo de retorno do hook
 interface UseCardPileLogicReturn {
@@ -38,7 +39,7 @@ interface NextCardForPartnerData {
 }
 
 export function useCardPileLogic(): UseCardPileLogicReturn {
-  const { user } = useAuth();
+  const { user, checkAndUnlockSkins } = useAuth(); // Adicionar checkAndUnlockSkins
   const {
     matchedCards,
     seenCards,
@@ -293,6 +294,18 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
       }
     }
     selectNextCard(interactedCardId);
+
+    // Verificar desbloqueio de skins após a interação (principalmente para 'seenCards')
+    if (user && checkAndUnlockSkins) {
+      try {
+        const newlyUnlocked = await checkAndUnlockSkins(exampleSkinsData);
+        if (newlyUnlocked && newlyUnlocked.length > 0) {
+          console.log("[useCardPileLogic] Novas skins desbloqueadas (provavelmente por cartas vistas):", newlyUnlocked);
+        }
+      } catch (error) {
+        console.error("[useCardPileLogic] Erro ao verificar skins após interação com carta:", error);
+      }
+    }
   };
 
   // Lida com a interação no modal de "Conexão"

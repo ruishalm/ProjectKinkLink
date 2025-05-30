@@ -16,20 +16,7 @@ import TermsOfServicePage from './pages/TermsOfServicePage';
 import SkinsPage from './pages/SkinsPage';
 import { SkinProvider } from './contexts/SkinContext'; // Importar SkinProvider
 import { useLinkCompletionListener } from './hooks/useLinkCompletionListener';
-
-const HeaderPlaceholder = () => (
-  <header style={{
-    padding: '10px 0',
-    backgroundColor: '#222',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '60px',
-    marginBottom: '20px'
-  }}>
-    <img src="/kinklogo.png" alt="KinkLink Logo" style={{ height: '80%', maxHeight: '45px' }} />
-  </header>
-);
+import UnlockNotificationModal from './components/UnlockNotificationModal'; // Importar o novo modal
 
 function App() {
   const { user, isLoading } = useAuth();
@@ -52,9 +39,12 @@ function App() {
 
   return (
     <SkinProvider> {/* SkinProvider envolve todo o conteúdo que precisa do contexto */}
-      <>
-        <HeaderPlaceholder />
-        <main>
+      <div className="appContainer"> {/* Contêiner principal para flex layout */}
+        <UnlockNotificationModal /> {/* Renderiza o modal aqui */}
+        <header className="appHeader">
+          <img src="/kinklogo.png" alt="KinkLink Logo" className="appLogo" />
+        </header>
+        <main className="appMainContent">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
@@ -114,7 +104,7 @@ function App() {
             </div>
           )}
         </main>
-      </>
+      </div>
     </SkinProvider>
   );
 }

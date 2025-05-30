@@ -32,9 +32,130 @@ export const exampleSkinsData: SkinDefinition[] = [
   { id: 'bg_match_verde_claro', name: 'Verde Claro (Matches)', type: 'backgroundMatches', preview: '/assets/skins/textures/verdeClaro.jpg', unlockCriteria: { type: 'seenCards', count: 100, description: 'Veja 100 cartas' } },
 
 
-  { id: 'palette_default', name: 'KinkLink Padrão', type: 'colorPalette', preview: ['#FF69B4', '#333333', '#FFFFFF', '#64b5f6', '#4caf50'] },
-  { id: 'palette_ocean_deep', name: 'Oceano Profundo', type: 'colorPalette', preview: ['#1E90FF', '#000033', '#E0FFFF', '#00BFFF', '#90CAF9'], unlockCriteria: { type: 'seenCards', count: 25, description: 'Veja 25 cartas' } },
-  { id: 'palette_forest_mist', name: 'Névoa da Floresta', type: 'colorPalette', preview: ['#2E7D32', '#1B5E20', '#A5D6A7', '#81C784', '#66BB6A'], unlockCriteria: { type: 'matches', count: 20, description: 'Consiga 20 Links' } },
+  {
+    id: 'palette_default',
+    name: 'KinkLink Padrão',
+    type: 'colorPalette',
+    preview: [ // Agora com 17 cores
+      '#FF69B4', // --cor-primaria (Rosa KinkLink)
+      '#5C5C5C', // --cor-secundaria (Cinza Médio Escuro)
+      '#1e1e1e', // --cor-fundo-pagina (Cinza Muito Escuro)
+      '#2a2a2a', // --cor-fundo-elemento (Cinza Escuro)
+      '#f0f0f0', // --cor-texto-primario (Branco Suave)
+      '#b0b0b0', // --cor-texto-secundario (Cinza Claro)
+      '#FFFFFF', // --cor-texto-sobre-primaria (Branco)
+      '#FFFFFF', // --cor-texto-sobre-secundaria (Branco)
+      '#3f3f3f', // --cor-borda (Cinza Escuro para Bordas)
+      '#4CAF50', // --cor-acao-positiva (Verde)
+      '#FFFFFF', // --cor-texto-acao-positiva (Branco)
+      '#F44336', // --cor-acao-negativa (Vermelho)
+      '#FFFFFF', // --cor-texto-acao-negativa (Branco)
+      '#FFC107', // --cor-aviso (Âmbar)
+      '#64b5f6', // --cor-destaque (Azul Claro)
+      '#111111', // --cor-texto-sobre-destaque (Preto/Cinza Muito Escuro)
+      'rgba(0, 0, 0, 0.7)' // --cor-overlay
+    ]
+  },
+  {
+    id: 'palette_ocean_deep',
+    name: 'Oceano Profundo',
+    type: 'colorPalette',
+    preview: [
+      '#1E90FF', // --cor-primaria (Azul Dodger)
+      '#1976D2', // --cor-secundaria (Azul Escuro)
+      '#000033', // --cor-fundo-pagina (Azul Marinho Muito Escuro)
+      '#0D47A1', // --cor-fundo-elemento (Azul Mais Escuro)
+      '#E0FFFF', // --cor-texto-primario (Azul Claro Quase Branco)
+      '#ADD8E6', // --cor-texto-secundario (Azul Claro)
+      '#FFFFFF', // --cor-texto-sobre-primaria (Branco)
+      '#E0FFFF', // --cor-texto-sobre-secundaria (Azul Claro Quase Branco)
+      '#00BFFF', // --cor-borda (Azul Céu Profundo)
+      '#32CD32', // --cor-acao-positiva (Verde Lima)
+      '#FFFFFF', // --cor-texto-acao-positiva (Branco)
+      '#FF6347', // --cor-acao-negativa (Tomate)
+      '#FFFFFF', // --cor-texto-acao-negativa (Branco)
+      '#FFD700', // --cor-aviso (Dourado)
+      '#90CAF9', // --cor-destaque (Azul Bebê)
+      '#000033', // --cor-texto-sobre-destaque (Azul Marinho Muito Escuro)
+      'rgba(0,0,51,0.85)' // --cor-overlay (Overlay Azul Escuro Transparente)
+    ],
+    unlockCriteria: { type: 'seenCards', count: 25, description: 'Veja 25 cartas' }
+  },
+  { // Exemplo para Névoa da Floresta - você precisará preencher com 16 cores
+    id: 'palette_forest_mist',
+    name: 'Névoa da Floresta',
+    type: 'colorPalette',
+    preview: [
+      '#2E7D32', // --cor-primaria (Verde Escuro)
+      '#1B5E20', // --cor-secundaria (Verde Mais Escuro)
+      '#0A1F08', // --cor-fundo-pagina (Verde Quase Preto)
+      '#10350E', // --cor-fundo-elemento (Verde Bem Escuro)
+      '#A5D6A7', // --cor-texto-primario (Verde Claro)
+      '#81C784', // --cor-texto-secundario (Verde Médio Claro)
+      '#FFFFFF', // --cor-texto-sobre-primaria
+      '#E8F5E9', // --cor-texto-sobre-secundaria
+      '#66BB6A', // --cor-borda (Verde Médio)
+      '#69F0AE', // --cor-acao-positiva (Verde Água Brilhante)
+      '#000000', // --cor-texto-acao-positiva
+      '#FF8A80', // --cor-acao-negativa (Vermelho Salmão Claro)
+      '#000000', // --cor-texto-acao-negativa
+      '#FFEB3B', // --cor-aviso (Amarelo)
+      '#C8E6C9', // --cor-destaque (Verde Muito Claro)
+      '#0A1F08', // --cor-texto-sobre-destaque (Verde Quase Preto para contraste com o destaque claro)
+      'rgba(10, 31, 8, 0.9)' // --cor-overlay
+    ],
+    unlockCriteria: { type: 'matches', count: 20, description: 'Consiga 20 Links' }
+  },
+  {
+    id: 'palette_vamp_night',
+    name: 'Vamp Noturno',
+    type: 'colorPalette',
+    preview: [
+      '#D32F2F', // --cor-primaria (Vermelho Escuro)
+      '#424242', // --cor-secundaria (Cinza Escuro)
+      '#121212', // --cor-fundo-pagina (Preto)
+      '#212121', // --cor-fundo-elemento (Cinza Quase Preto)
+      '#E0E0E0', // --cor-texto-primario (Cinza Muito Claro)
+      '#9E9E9E', // --cor-texto-secundario (Cinza Médio)
+      '#FFFFFF', // --cor-texto-sobre-primaria (Branco)
+      '#E0E0E0', // --cor-texto-sobre-secundaria (Cinza Muito Claro)
+      '#616161', // --cor-borda (Cinza Escuro para Bordas)
+      '#7B1FA2', // --cor-acao-positiva (Roxo Escuro)
+      '#FFFFFF', // --cor-texto-acao-positiva (Branco)
+      '#5E35B1', // --cor-acao-negativa (Roxo Médio Escuro)
+      '#FFFFFF', // --cor-texto-acao-negativa (Branco)
+      '#FF6F00', // --cor-aviso (Laranja Escuro/Âmbar)
+      '#E91E63', // --cor-destaque (Magenta/Pink Escuro)
+      '#FFFFFF', // --cor-texto-sobre-destaque (Branco)
+      'rgba(10, 0, 20, 0.85)' // --cor-overlay (Overlay Roxo Escuro Transparente)
+    ],
+    unlockCriteria: { type: 'seenCards', count: 75, description: 'Veja 75 cartas' }
+  },
+  {
+    id: 'palette_candy_sky',
+    name: 'Algodão Doce Celestial',
+    type: 'colorPalette',
+    preview: [
+      '#FFC0CB', // --cor-primaria (Rosa Pastel)
+      '#ADD8E6', // --cor-secundaria (Azul Bebê Claro)
+      '#FAF3F7', // --cor-fundo-pagina (Branco com tom Rosa)
+      '#FFFFFF', // --cor-fundo-elemento (Branco Puro)
+      '#5D5463', // --cor-texto-primario (Roxo Acinzentado Escuro)
+      '#A89FAC', // --cor-texto-secundario (Cinza Lavanda)
+      '#4A4A4A', // --cor-texto-sobre-primaria (Cinza Escuro)
+      '#4A4A4A', // --cor-texto-sobre-secundaria (Cinza Escuro)
+      '#E0D8E0', // --cor-borda (Lavanda Muito Claro)
+      '#98FB98', // --cor-acao-positiva (Verde Menta Pastel)
+      '#2F4F4F', // --cor-texto-acao-positiva (DarkSlateGray)
+      '#FFB6C1', // --cor-acao-negativa (Rosa Claro)
+      '#2F4F4F', // --cor-texto-acao-negativa (DarkSlateGray)
+      '#FFFACD', // --cor-aviso (Amarelo Limão Pastel)
+      '#D8BFD8', // --cor-destaque (Lilás Pastel)
+      '#2F4F4F', // --cor-texto-sobre-destaque (DarkSlateGray)
+      'rgba(240, 248, 255, 0.7)' // --cor-overlay (Overlay Azul Alice Transparente)
+    ],
+    unlockCriteria: { type: 'matches', count: 30, description: 'Consiga 30 Links' }
+  },
 
   { id: 'font_default', name: 'Padrão App', type: 'font' },
   { id: 'font_roboto', name: 'Roboto', type: 'font', preview: 'Roboto, sans-serif', unlockCriteria: { type: 'userCreatedCards', count: 1, description: 'Crie sua primeira carta' } },
@@ -68,12 +189,11 @@ function SkinsPage() {
     }
 
     const skinDefinition = exampleSkinsData.find(s => s.id === skinId);
-    // Passa a URL de preview para o contexto, se for uma string (textura ou fonte)
-    // Para paletas, o preview é um array de cores, que não precisamos passar como URL aqui.
-    // O contexto pode ter lógica para lidar com paletas de forma diferente.
-    const previewUrl = (typeof skinDefinition?.preview === 'string') ? skinDefinition.preview : undefined;
-    setActiveSkin(skinType, skinId, previewUrl);
-    console.log(`Skin ativada via contexto: Tipo=${skinType}, ID=${skinId}, PreviewURL=${previewUrl}, Desbloqueada=${isUnlocked}`);
+    // Para texturas e fontes, passamos a string de preview (URL ou nome da fonte).
+    // Para paletas, o SkinContext buscará as cores usando o skinId.
+    const valueToPass = (skinType !== 'colorPalette' && typeof skinDefinition?.preview === 'string') ? skinDefinition.preview : undefined;
+    setActiveSkin(skinType, skinId, valueToPass);
+    console.log(`Skin ativada via contexto: Tipo=${skinType}, ID=${skinId}, ValorPreview=${valueToPass}, Desbloqueada=${isUnlocked}`);
   };
 
   const handleForceUnlock = (e: React.MouseEvent<HTMLDivElement>, skinId: string, isCurrentlyUnlocked: boolean) => {

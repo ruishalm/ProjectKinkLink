@@ -1,3 +1,4 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\CardPilePage.module.css */
 /* Estilos para CardPilePage */
 
 .page {
@@ -6,14 +7,14 @@
   align-items: center; /* Mantém o alinhamento horizontal centralizado para o conteúdo */
   justify-content: flex-start; /* Alinha todo o conteúdo ao topo */
   min-height: 100vh;
-  width: 100%; 
+  width: 100%;
   padding-top: 5px; /* Reduzido o padding superior */
   padding-left: 15px; padding-right: 15px; padding-bottom: 15px; /* Mantém os outros paddings */
   box-sizing: border-box;
-  background-color: #2c2c2c; /* Cor de fundo padrão */
+  background-color: var(--cor-fundo-pagina); /* Usa variável de paleta */
   position: relative; /* Necessário para o posicionamento absoluto das SideTipMessages */
-  color: #e0e0e0;
-  font-family: "Trebuchet MS", sans-serif;
+  color: var(--cor-texto-primario); /* Usa variável de paleta */
+  font-family: var(--font-family-main, "Trebuchet MS", sans-serif); /* Usa variável de paleta */
   overflow-x: hidden; /* Evita scroll horizontal desnecessário */
 }
 
@@ -59,15 +60,9 @@
 
 .likeButton,
 .dislikeButton {
-  /* background-color: #64b5f6; */ /* Removido azul padrão */
-  /* color: #2c2c2c; */ /* Removido texto escuro padrão */
-  /* Cores específicas serão definidas abaixo */
-  /* Texto será branco para bom contraste com verde/vermelho */
-  color: white;
+  /* color agora vem das variáveis de ação */
   border: none;
   border-radius: 6px; /* Bordas arredondadas, não circulares */
-  /* width: 60px; */ /* Removido para largura automática baseada no padding */
-  /* height: 60px; */ /* Removido para altura automática baseada no padding */
   padding: 12px 20px; /* Padding para dar tamanho ao botão */
   font-size: 1em; /* Tamanho de fonte padrão para texto */
   font-weight: bold;
@@ -81,25 +76,27 @@
 }
 
 .likeButton { /* Botão "Topo!" */
-  background-color: #4CAF50; /* Verde */
+  background-color: var(--cor-acao-positiva);
+  color: var(--cor-texto-acao-positiva);
 }
 
 .likeButton:hover {
-  background-color: #45a049; /* Verde mais escuro no hover */
+  filter: brightness(90%);
 }
 
 .dislikeButton { /* Botão "Passo" */
-  background-color: #f44336; /* Vermelho */
+  background-color: var(--cor-acao-negativa);
+  color: var(--cor-texto-acao-negativa);
 }
 
 .dislikeButton:hover {
-  background-color: #e53935; /* Vermelho mais escuro no hover */
+  filter: brightness(90%);
 }
 
 
 .createKinkMiniButton {
-  background-color: #3a3f47;
-  color: #fff;
+  background-color: var(--cor-primaria);
+  color: var(--cor-texto-sobre-primaria);
   border-radius: 8px;
   width: 60px;
   height: 60px;
@@ -109,11 +106,15 @@
   justify-content: center;
   cursor: pointer;
   text-align: center;
-  transition: transform 0.1s ease-out;
+  transition: transform 0.1s ease-out, filter 0.2s ease; /* Adicionado filter à transição */
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   padding: 5px;
   box-sizing: border-box;
 }
+.createKinkMiniButton:hover {
+  filter: brightness(90%);
+}
+
 
 .createKinkMiniCardBackWrapper {
  /* O CardBack interno já tem tamanho, não precisa definir aqui se o CardBack tem defaults */
@@ -125,7 +126,7 @@
   font-size: 0.6em;
   font-weight: bold;
   line-height: 1.1;
-  color: #fff;
+  color: var(--cor-texto-sobre-primaria); /* Garante que o texto use a cor da paleta */
 }
 
 .bottomNavContainer {
@@ -136,6 +137,7 @@
   width: 100%;
   padding: 10px 0;
   margin-top: 10px; /* Reduz o espaço acima da barra de navegação */
+  border-top: 1px solid var(--cor-borda); /* Linha sutil no topo */
 }
 
 /* Estilos para os botões da navegação (carinhosMimosButton, matchesNavButton, profileNavButton) */
@@ -145,7 +147,7 @@
 .navNotificationDot {
   height: 8px;
   width: 8px;
-  background-color: #ff4757; /* Vermelho para notificação */
+  background-color: var(--cor-aviso); /* Usa cor de aviso da paleta */
   border-radius: 50%;
   display: inline-block;
   margin-right: 5px;
@@ -175,30 +177,33 @@
 }
 
 .pageTitle { /* Para o h2 "Fim das Cartas!" */
-  color: #64b5f6;
+  color: var(--cor-primaria); /* Usa cor primária da paleta */
   margin-bottom: 20px;
 }
 
 .noCardsMessage {
   font-size: 1.1em;
-  color: #b0b0b0;
+  color: var(--cor-texto-secundario); /* Usa cor de texto secundário */
   margin-bottom: 30px;
   line-height: 1.6;
 }
 
 .centeredCreateKinkButton {
   /* Se precisar de ajustes específicos para centralizar ou dar margem */
+  /* Herda os estilos de .createKinkMiniButton, incluindo as cores da paleta */
   margin-top: 20px;
 }
 
 .cardCounters {
   font-size: 0.8em;
-  color: #888;
+  color: var(--cor-texto-sobre-primaria, #111111); /* Texto escuro para contraste em fundos claros */
   text-align: center;
   padding-bottom: 5px;
-  width: 100%; 
+  width: 100%;
   margin-top: 10px; /* Espaço fixo acima dos contadores, em vez de auto */
   margin-bottom: 10px;
+  background-color: var(--cor-fundo-elemento, rgba(255,255,255,0.8)); /* Fundo claro, com fallback branco translúcido */
+  padding: 4px 8px; border-radius: 4px; /* Ajuste visual */
 }
 
 /* Adicione aqui os estilos para .carinhosMimosButton, .matchesNavButton, .profileNavButton */
@@ -206,7 +211,7 @@
 /* Common base for bottom navigation buttons */
 .carinhosMimosButton, .matchesNavButton, .profileNavButton {
   cursor: pointer;
-  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, filter 0.2s ease; /* Adicionado filter */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -217,19 +222,22 @@
 
 /* Text button: Links */
 .matchesNavButton {
-  background-color: #ffeb3b; /* Amarelo */
-  color: #333; /* Texto escuro para contraste com amarelo */
+  background-color: var(--cor-destaque);
+  color: var(--cor-texto-sobre-destaque, var(--cor-texto-primario)); /* Fallback para texto primário */
   border: none; /* No border, similar to Topo/Nao Topo */
   border-radius: 8px; /* Standard button rounding */
   padding: 0 45px; /* Aumentado ainda mais o padding horizontal */
   font-size: 1em;     /* Standard text size */
   font-weight: bold;
 }
+.matchesNavButton:hover {
+  filter: brightness(90%);
+}
 
 /* Icon buttons: Carinhos & Mimos, Perfil */
 .carinhosMimosButton, .profileNavButton {
-  border: 2px solid #555;
-  color: #b0b0b0;
+  border: 2px solid var(--cor-borda);
+  color: var(--cor-texto-secundario);
   background: none; /* Mantém sem fundo */
   width: clamp(45px, 10vw, 55px); /* Width equal to height for circular shape */
   border-radius: 50%;
@@ -237,13 +245,8 @@
   line-height: 1; /* Ajuda a centralizar ícones baseados em texto/emoji */
   font-size: clamp(1.2em, 4.5vw, 1.6em); /* Levemente reduzido para melhor encaixe dos ícones */
 }
-.carinhosMimosButton:hover, .matchesNavButton:hover, .profileNavButton:hover {
-  color: #64b5f6;
-  border-color: #64b5f6;
-}
-
-.matchesNavButton:hover {
-  background-color: #fdd835; /* Amarelo mais escuro no hover */
-  color: #333; /* Mantém texto escuro */
-  /* No border-color change as border is none */
+.carinhosMimosButton:hover, .profileNavButton:hover {
+  color: var(--cor-primaria);
+  border-color: var(--cor-primaria);
+  background-color: var(--cor-fundo-elemento-transparente, rgba(0,0,0,0.05)); /* Fundo sutil no hover */
 }

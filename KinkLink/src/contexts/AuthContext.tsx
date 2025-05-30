@@ -56,7 +56,9 @@ interface AuthContextData {
   signup: (email: string, password: string) => Promise<void>;
   updateUser: (updatedData: Partial<User>) => Promise<void>;
   resetUserTestData: () => Promise<void>;
-  checkAndUnlockSkins: (allSkinsData: SkinDefinition[]) => Promise<string[] | null>; // Nova função
+  checkAndUnlockSkins: (allSkinsData: SkinDefinition[]) => Promise<SkinDefinition[] | null>; // Retorna SkinDefinition[]
+  newlyUnlockedSkinsForModal: SkinDefinition[] | null; // Estado para o modal
+  clearNewlyUnlockedSkinsForModal: () => void; // Função para limpar o estado do modal
 }
 
 const AuthContext = createContext<AuthContextData | undefined>(undefined);
@@ -64,6 +66,7 @@ const AuthContext = createContext<AuthContextData | undefined>(undefined);
 export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [newlyUnlockedSkinsForModal, setNewlyUnlockedSkinsForModal] = useState<SkinDefinition[] | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
@@ -132,7 +135,15 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         conexaoAccepted: 0,
         conexaoRejected: 0,
         userCreatedCards: [],
-        unlockedSkinIds: ['bg_pile_default', 'bg_match_default', 'palette_default', 'font_default', 'pack_default'], // Skins padrão desbloqueadas
+        unlockedSkinIds: [
+          'bg_pile_default',
+          'bg_match_default',
+          'palette_default',
+          'font_default',
+          'pack_default',
+          'palette_vamp_night',      // Adicionada
+          'palette_candy_sky'        // Adicionada
+        ], // Skins padrão desbloqueadas
         createdAt: serverTimestamp(),
       };
       await setDoc(newUserDocRef, userData);
@@ -177,13 +188,13 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     }
   };
 
-  const checkAndUnlockSkins = async (allSkinsData: SkinDefinition[]): Promise<string[] | null> => {
+  const checkAndUnlockSkins = async (allSkinsData: SkinDefinition[]): Promise<SkinDefinition[] | null> => {
     if (!user) {
       console.warn("[AuthContext] checkAndUnlockSkins chamado sem usuário logado.");
       return null;
     }
 
-    const newlyUnlockedSkinIds: string[] = [];
+    const newlyUnlockedSkins: SkinDefinition[] = [];
     const currentUnlockedIds = user.unlockedSkinIds || [];
 
     allSkinsData.forEach(skin => {
@@ -210,21 +221,27 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       }
 
       if (conditionMet) {
-        newlyUnlockedSkinIds.push(skin.id);
+        newlyUnlockedSkins.push(skin);
       }
     });
 
-    if (newlyUnlockedSkinIds.length > 0) {
-      const updatedUnlockedIds = [...currentUnlockedIds, ...newlyUnlockedSkinIds];
+    if (newlyUnlockedSkins.length > 0) {
+      const newIdsToUnlock = newlyUnlockedSkins.map(s => s.id);
+      const updatedUnlockedIds = [...new Set([...currentUnlockedIds, ...newIdsToUnlock])]; // Usa Set para evitar duplicatas
       try {
         await updateUser({ unlockedSkinIds: updatedUnlockedIds }); // updateUser já lida com Firestore e estado local
-        console.log(`[AuthContext] Novas skins desbloqueadas para ${user.id}:`, newlyUnlockedSkinIds);
-        return newlyUnlockedSkinIds;
+        console.log(`[AuthContext] Novas skins desbloqueadas para ${user.id}:`, newlyUnlockedSkins.map(s => s.name));
+        setNewlyUnlockedSkinsForModal(newlyUnlockedSkins); // Define as skins para o modal
+        return newlyUnlockedSkins;
       } catch (error) {
         console.error(`[AuthContext] Erro ao atualizar skins desbloqueadas para ${user.id}:`, error);
       }
     }
     return null;
+  };
+
+  const clearNewlyUnlockedSkinsForModal = () => {
+    setNewlyUnlockedSkinsForModal(null);
   };
 
   const resetUserTestData = async () => {
@@ -243,8 +260,15 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       matchedCards: [],
       conexaoAccepted: 0,
       conexaoRejected: 0,
-      // Resetar as skins desbloqueadas para o padrão
-      unlockedSkinIds: ['bg_pile_default', 'bg_match_default', 'palette_default', 'font_default', 'pack_default']
+      unlockedSkinIds: [
+        'bg_pile_default',
+        'bg_match_default',
+        'palette_default',
+        'font_default',
+        'pack_default',
+        'palette_vamp_night',      // Adicionada
+        'palette_candy_sky'        // Adicionada
+      ]
     });
     console.log(`[AuthContext] Dados do usuário ${user.id} (incluindo skins desbloqueadas) marcados para reset.`);
 
@@ -322,7 +346,15 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         matchedCards: [],
         conexaoAccepted: 0,
         conexaoRejected: 0,
-          unlockedSkinIds: ['bg_pile_default', 'bg_match_default', 'palette_default', 'font_default', 'pack_default']
+          unlockedSkinIds: [
+            'bg_pile_default',
+            'bg_match_default',
+            'palette_default',
+            'font_default',
+            'pack_default',
+            'palette_vamp_night',      // Adicionada
+            'palette_candy_sky'        // Adicionada
+          ]
         };
       });
     } catch (error) {
@@ -341,7 +373,9 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       signup,
       updateUser,
       resetUserTestData,
-      checkAndUnlockSkins
+      checkAndUnlockSkins,
+      newlyUnlockedSkinsForModal,
+      clearNewlyUnlockedSkinsForModal
     }}>
       {children}
     </AuthContext.Provider>

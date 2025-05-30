@@ -516,7 +516,7 @@ function CardPilePage() {
               onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
               aria-label="Rejeitar carta"
             >
-              Nao Topo!
+          👎 Nao Topo!
             </button>
 
             <button
@@ -531,7 +531,7 @@ function CardPilePage() {
               onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
               aria-label="Aceitar carta"
             >
-              Topo!
+          ❤️ Topo!
             </button>
 
             <div

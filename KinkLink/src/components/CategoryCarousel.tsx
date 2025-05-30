@@ -10,8 +10,9 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, A11y } from 'swiper/modules'; // A11y para acessibilidade
 
 // Import Swiper styles
-
+// @ts-expect-error ts eh doido
 import 'swiper/css';
+// @ts-expect-error ts eh doido
 import 'swiper/css/navigation';
 
 interface CategoryCarouselProps {

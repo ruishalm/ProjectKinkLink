@@ -1,75 +1,127 @@
 /* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\CategoryCarousel.module.css */
 .carouselSection {
-  /* background-color: rgba(255, 255, 255, 0.03); */ /* Um fundo sutil se desejar */
-  /* border-radius: 8px; */
-  /* padding: 15px; */
   margin-bottom: 20px; /* Espaço entre seções de carrossel */
+  /* 
+    max-width para acomodar:
+    - Carta central: 125px (7.8125rem)
+    - "Espiadinhas" laterais: ~40px de cada lado (2 * 2.5rem = 5rem)
+    - spaceBetween (16px = 1rem) entre a central e cada espiadinha: 2 * 1rem = 2rem
+    - Padding para setas no swiperInstance: 2 * 0.3125rem = 0.625rem
+    Total aproximado: 7.8125 + 5 + 2 + 0.625 = ~15.4375rem. Vamos usar 15.5rem ou 16rem para folga.
+  */
+  max-width: 16rem; /* (equivale a 256px) Ajustado para o efeito de "espiar" */
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .categoryTitle {
-  font-size: 1.5em; /* Ajuste conforme necessário */
-  color: #64b5f6; /* Cor similar aos títulos de seção em MatchesPage */
+  font-size: 1.5em;
+  color: #64b5f6;
   margin-bottom: 15px;
   text-align: center;
-  /* border-bottom: 1px solid #4a4a4a; */ /* Opcional */
-  /* padding-bottom: 8px; */ /* Opcional */
+  text-transform: capitalize; /* Primeira letra maiúscula */
 }
 
 .emptyStateContainer {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 190px; /* Altura aproximada de uma carta no carrossel + um pouco de margem */
-  /* border: 1px dashed #555; */ /* Para visualização durante o desenvolvimento */
+  min-height: calc(10.9375rem + 1rem + 2px + 20px); /* Altura do swiperInstance + padding do swiperContainer */
+  /* O carrossel (swiperInstance) tem altura de ~190px. O swiperContainer tem padding de 10px.
+     Então, min-height: 210px para o estado vazio. */
+  width: 100%; /* Para ocupar a largura do .carouselSection */
+  box-sizing: border-box;
 }
 
 .emptyCard {
   position: relative;
   display: flex;
+  flex-direction: column; /* Para o texto ficar abaixo da carta */
   justify-content: center;
   align-items: center;
-  filter: grayscale(100%) opacity(0.6); /* Efeito acinzentado e opaco */
+  opacity: 0.6; /* Efeito um pouco opaco para a carta de fundo */
 }
 
 .emptyCardText {
-  position: absolute;
-  font-size: 1.8em; /* Ajuste conforme necessário */
-  font-weight: bold;
+  /* Não mais position:absolute, será posicionado pelo flex-direction do .emptyCard */
+  margin-top: 10px; /* Espaço entre a carta e o texto "Vazio" */
+  font-size: 1.1em;
+  font-weight: normal; /* Não precisa ser bold se a carta já é um CardBack */
   color: rgba(255, 255, 255, 0.7);
-  transform: rotate(-30deg);
   user-select: none;
 }
 
 /* Container para a instância do Swiper */
 .swiperContainer {
-  padding: 10px;
-  /* border: 1px solid #444; */ /* Opcional: se quiser uma borda */
-  min-height: 200px; /* Altura mínima para acomodar uma carta e evitar saltos de layout */
+  padding: 10px 0; /* Padding vertical, horizontal será cuidado pelo swiperInstance e setas */
+  min-height: calc(10.9375rem + 1rem + 2px); /* Mesma altura do swiperInstance para consistência */
   position: relative; /* Para posicionamento correto das setas de navegação */
 }
 
 /* Estilo para cada slide do Swiper */
 .swiperSlide {
-  width: auto !important; /* Permite que o MatchCardItem defina sua própria largura */
   display: flex;
-  justify-content: center; /* Centraliza o MatchCardItem no slide */
+  justify-content: center;
   align-items: center;
+  height: 100%;
+  box-sizing: border-box;
+  pointer-events: none; /* Por padrão, o slide não é clicável */
+
+  /* Para slidesPerView: 'auto', cada slide precisa de uma largura definida */
+  width: 7.8125rem !important; /* (125px) Largura EXATA da MatchCardItem */
+  
+  /* Efeito para slides não ativos (os que estão "espiando") */
+  transform: scale(0.85);
+  opacity: 0.6;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Transição suave */
+  will-change: transform, opacity; /* Otimização para transições */
 }
+
+/* Estilo para o slide ativo (visível) - o conteúdo dentro dele */
+/* Usamos o seletor que funcionou para o clique para garantir a aplicação dos estilos de "ativo" */
+.swiperContainer :global(.swiper-slide-active) {
+  /* Este seletor aplica ao DIV que o Swiper marca como ativo */
+  pointer-events: auto !important;
+  /* O position:relative já estava aqui, pode ser útil para ::after se necessário no futuro */
+  position: relative !important; 
+}
+
+/* Estilos para o CONTEÚDO DENTRO do slide ativo (o nosso .swiperSlide que contém o MatchCardItem) */
+.swiperContainer :global(.swiper-slide-active) > .swiperSlide, /* Para quando o .swiperSlide é filho direto */
+.swiperContainer :global(.swiper-slide-active).swiperSlide { /* Para quando o .swiperSlide é o próprio elemento ativo */
+  transform: scale(1) !important; /* Tamanho normal */
+  opacity: 1 !important;          /* Totalmente opaco */
+  z-index: 1 !important;          /* Garante que o slide ativo fique por cima */
+  /* pointer-events: auto !important;  Já está no container global acima */
+}
+
 
 /* Estilização opcional para as setas de navegação do Swiper */
 .swiperContainer :global(.swiper-button-next),
 .swiperContainer :global(.swiper-button-prev) {
-  color: #64b5f6; /* Cor das setas, combine com seu tema */
-  top: 50%; /* Alinha verticalmente ao centro */
+  color: #64b5f6;
+  top: 50%; 
   transform: translateY(-50%);
+  /* Ajuste para as setas não ficarem muito para fora com o padding do swiperInstance */
+  /* Se o padding do swiperInstance for 0.3125rem (5px), e a seta tiver ~24px (1.5rem),
+     um offset negativo pequeno pode ajudar a centralizá-las melhor visualmente no espaço do padding.
+     Ex: --swiper-navigation-sides-offset: -8px; (teste este valor)
+  */
 }
 
 .swiperContainer :global(.swiper-button-next::after),
 .swiperContainer :global(.swiper-button-prev::after) {
-  font-size: 1.8rem; /* Tamanho dos ícones das setas */
+  font-size: 1.5rem; /* Setas maiores */
 }
 
 .swiperInstance {
-  /* Se precisar de estilos específicos para a instância do Swiper, adicione aqui */
-  /* Ex: overflow: visible; se as cartas tiverem efeitos de hover que saem do limite */
+  width: 100%;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  /* O padding lateral é importante para dar espaço às setas e para o efeito de "espiar" não colar nas bordas do .carouselSection */
+  padding-left: 0.3125rem;  /* (5px) */
+  padding-right: 0.3125rem; /* (5px) */
+  box-sizing: border-box;
+  height: calc(10.9375rem + 1rem + 2px); /* Altura da carta (175px = 10.9375rem) + padding vertical total (1rem) + 2px para evitar corte de borda */
+  overflow: hidden !important; /* Essencial para o slidesPerView: 'auto' cortar os slides laterais */
 }

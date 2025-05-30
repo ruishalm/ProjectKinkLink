@@ -127,6 +127,26 @@
   /* ... estilos existentes do backToCardsButton ... */
 }
 
+/* Grid para os carrosséis de categoria */
+.categoryCarouselsGrid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr); /* Começa com 1 coluna para mobile */
+  gap: 20px; /* Espaçamento entre os carrosséis */
+  justify-items: center; /* Centraliza os carrosséis nas células do grid */
+  align-items: start; /* Alinha os carrosséis ao topo da célula */
+  margin-top: 20px;
+}
+
+/* Para telas um pouco maiores, como tablets pequenos ou celulares em paisagem */
+@media (min-width: 500px) { /* Ajuste este breakpoint conforme necessário */
+  .categoryCarouselsGrid {
+    grid-template-columns: repeat(2, 1fr); /* 2 colunas */
+  }
+}
+
+/* Se quiser mais colunas em telas ainda maiores, adicione mais media queries aqui.
+   Por exemplo, para 3 colunas:
+@media (min-width: 1000px) { .categoryCarouselsGrid { grid-template-columns: repeat(3, 1fr); } } */
 
 /* Para telas um pouco maiores, como tablets ou celulares em paisagem */
 @media (min-width: 600px) {

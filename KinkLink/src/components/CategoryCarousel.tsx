@@ -10,6 +10,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, A11y } from 'swiper/modules'; // A11y para acessibilidade
 
 // Import Swiper styles
+
 import 'swiper/css';
 import 'swiper/css/navigation';
 
@@ -44,9 +45,16 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCar
       <div className={styles.swiperContainer}>
         <Swiper
           modules={[Navigation, A11y]}
-          spaceBetween={10} // Espaço entre os slides
-          slidesPerView={'auto'} // Mostra quantos slides couberem, baseado no tamanho deles
+          spaceBetween={16} // Espaço entre os slides (1rem)
+          slidesPerView={'auto'} // Para o efeito de "espiar"
+          centeredSlides={true} // Centraliza o slide ativo
+          loop={true} // Permite loop infinito, bom para carrosséis de "espiar"
+          // slidesPerGroup={1} // Com slidesPerView: 'auto' e loop, slidesPerGroup pode não ser necessário ou desejado
           navigation // Habilita as setas de navegação
+          preventClicks={false} // Tenta garantir que cliques nas cartas funcionem
+          preventClicksPropagation={false} // Ajuda a propagar o clique para os elementos filhos
+          simulateTouch={false} // Impede o Swiper de simular eventos de toque para o mouse
+          allowTouchMove={false} // DESABILITA o arrastar para priorizar o clique
           className={styles.swiperInstance} // Classe para estilização customizada se necessário
         >
           {cards.map(card => {
@@ -62,7 +70,10 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCar
               <SwiperSlide key={card.id} className={styles.swiperSlide}>
                 <MatchCardItem
                   card={cardForDisplay}
-                  onClick={() => onCardClick(card)}
+                  onClick={() => {
+                    console.log(`CategoryCarousel: MatchCardItem clicado! Card ID: ${card.id}, Texto: "${card.text.substring(0,30)}..."`);
+                    onCardClick(card);
+                  }}
                   isHot={card.isHot || false}
                   onToggleHot={onToggleHot}
                   isUnread={unreadStatuses[card.id] || false}

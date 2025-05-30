@@ -6,6 +6,7 @@ import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
 import { useCoupleCardChats } from '../hooks/useCoupleCardChats'; // Novo hook
 import PlayingCard, { type CardData as PlayingCardDataType } from '../components/PlayingCard';
 import CardChatModal from '../components/CardChatModal';
+import CategoryCarousel from '../components/CategoryCarousel'; // Importar o CategoryCarousel
 import { getLastSeenTimestampForCard, markChatAsSeen } from '../utils/chatNotificationStore'; // Helpers do localStorage
 import styles from './MatchesPage.module.css';
 import { Timestamp } from 'firebase/firestore';
@@ -199,6 +200,20 @@ function MatchesPage() {
   const otherMatches = userMatchedCards.filter(card => !card.isHot);
   const noMatchesCondition = hotMatches.length === 0 && otherMatches.length === 0;
 
+  // Agrupar 'otherMatches' por categoria
+  const groupCardsByCategory = (cards: MatchedCard[]) => {
+    return cards.reduce((acc, card) => {
+      const category = card.category || 'Outros'; // Fallback para categoria 'Outros'
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(card);
+      return acc;
+    }, {} as Record<string, MatchedCard[]>);
+  };
+  const otherCardsByCategory = groupCardsByCategory(otherMatches);
+  const categoryOrder = ['Exposição', 'Fantasia', 'Poder', 'Sensorial', 'Conexão', 'Persona', 'Limites', 'UserCreated']; // Ordem preferencial
+
   return (
     <div className={styles.page}>
       <div className={styles.header}>
@@ -234,22 +249,42 @@ function MatchesPage() {
             </section>
           )}
 
-          {otherMatches.length > 0 && (
+          {Object.keys(otherCardsByCategory).length > 0 && (
             <section className={styles.section} style={hotMatches.length > 0 ? { marginTop: '40px' } : {}}>
               <h2 className={`${styles.sectionTitle} ${styles.sectionTitleOthers}`}>
-                {hotMatches.length > 0 ? 'Outros Links' : 'Seus Links'}
+                {hotMatches.length > 0 ? 'Outros Links por Categoria' : 'Seus Links por Categoria'}
               </h2>
-              <div className={styles.matchesGrid}>
-                {otherMatches.map((card: MatchedCard) => (
-                  <MatchCardItem
-                    key={card.id}
-                    card={card} 
-                    onClick={() => handleCardClick(card)}
-                    isHot={false}
-                    isUnread={unreadStatuses[card.id] || false}
-                    onToggleHot={handleToggleHot} 
-                    lastMessageSnippet={unreadStatuses[card.id] ? cardChatsData[card.id]?.lastMessageTextSnippet : undefined}                  
-                  />
+              <div className={styles.categoryCarouselsGrid}> {/* Novo container para o grid 2x2 */}
+                {categoryOrder.map(categoryName => {
+                  const cardsForCategory = otherCardsByCategory[categoryName];
+                  if (cardsForCategory && cardsForCategory.length > 0) {
+                    return (
+                      <CategoryCarousel
+                        key={categoryName}
+                        title={categoryName}
+                        cards={cardsForCategory}
+                        onCardClick={handleCardClick}
+                        onToggleHot={handleToggleHot}
+                        unreadStatuses={unreadStatuses}
+                        cardChatsData={cardChatsData}
+                      />
+                    );
+                  }
+                  return null;
+                })}
+                {/* Renderizar categorias que não estão em categoryOrder, se houver */}
+                {Object.entries(otherCardsByCategory)
+                  .filter(([categoryName]) => !categoryOrder.includes(categoryName))
+                  .map(([categoryName, cardsForCategory]) => (
+                    <CategoryCarousel
+                      key={categoryName}
+                      title={categoryName}
+                      cards={cardsForCategory}
+                      onCardClick={handleCardClick}
+                      onToggleHot={handleToggleHot}
+                      unreadStatuses={unreadStatuses}
+                      cardChatsData={cardChatsData}
+                    />
                 ))}
               </div>
             </section>

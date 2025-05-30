@@ -11,6 +11,7 @@
   padding-left: 15px; padding-right: 15px; padding-bottom: 15px; /* Mantém os outros paddings */
   box-sizing: border-box;
   background-color: #2c2c2c; /* Cor de fundo padrão */
+  position: relative; /* Necessário para o posicionamento absoluto das SideTipMessages */
   color: #e0e0e0;
   font-family: "Trebuchet MS", sans-serif;
   overflow-x: hidden; /* Evita scroll horizontal desnecessário */
@@ -22,7 +23,8 @@
   flex-direction: column;
   justify-content: flex-end; /* Alinha a carta na parte de baixo do container */
   align-items: center;
-  position: relative; /* Para o posicionamento absoluto da carta de fundo */
+  position: relative; /* Para o posicionamento absoluto da carta de fundo e controle de z-index */
+  z-index: 5; /* Garante que a pilha de cartas fique acima das SideTipMessages (que têm z-index: 1) */
   margin-top: 30px; /* Adiciona espaço acima do container das cartas */
   width: 100%;
   margin-bottom: 20px; /* Aumenta o espaço abaixo das cartas */

@@ -48,13 +48,15 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCar
           spaceBetween={16} // Espaço entre os slides (1rem)
           slidesPerView={'auto'} // Para o efeito de "espiar"
           centeredSlides={true} // Centraliza o slide ativo
-          loop={true} // Permite loop infinito, bom para carrosséis de "espiar"
+          // Ativar o loop apenas se houver cartas suficientes para uma boa experiência de "peek"
+          // Ex: 3 ou mais cartas. Ajuste o número conforme necessário.
+          loop={cards.length > 2}
           // slidesPerGroup={1} // Com slidesPerView: 'auto' e loop, slidesPerGroup pode não ser necessário ou desejado
           navigation // Habilita as setas de navegação
           preventClicks={false} // Tenta garantir que cliques nas cartas funcionem
           preventClicksPropagation={false} // Ajuda a propagar o clique para os elementos filhos
-          simulateTouch={false} // Impede o Swiper de simular eventos de toque para o mouse
-          allowTouchMove={false} // DESABILITA o arrastar para priorizar o clique
+          simulateTouch={true} // HABILITA a simulação de toque para mouse (opcional, mas bom para desktop)
+          allowTouchMove={true} // HABILITA o arrastar/swipe
           className={styles.swiperInstance} // Classe para estilização customizada se necessário
         >
           {cards.map(card => {

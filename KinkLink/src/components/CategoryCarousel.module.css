@@ -12,6 +12,8 @@
   max-width: 16rem; /* (equivale a 256px) Ajustado para o efeito de "espiar" */
   margin-left: auto;
   margin-right: auto;
+  position: relative; /* Cria um contexto de empilhamento para o carrossel */
+  z-index: 1; /* Garante que o carrossel fique acima das bordas do .carouselCell */
 }
 
 .categoryTitle {
@@ -80,9 +82,8 @@
 /* Estilo para o slide ativo (visível) - o conteúdo dentro dele */
 /* Usamos o seletor que funcionou para o clique para garantir a aplicação dos estilos de "ativo" */
 .swiperContainer :global(.swiper-slide-active) {
-  /* Este seletor aplica ao DIV que o Swiper marca como ativo */
-  pointer-events: auto !important;
   /* O position:relative já estava aqui, pode ser útil para ::after se necessário no futuro */
+  /* pointer-events: auto !important; foi movido para o seletor abaixo para maior especificidade */
   position: relative !important; 
 }
 
@@ -92,7 +93,7 @@
   transform: scale(1) !important; /* Tamanho normal */
   opacity: 1 !important;          /* Totalmente opaco */
   z-index: 1 !important;          /* Garante que o slide ativo fique por cima */
-  /* pointer-events: auto !important;  Já está no container global acima */
+  pointer-events: auto !important;  /* Garante que o slide ativo seja clicável */
 }
 
 
@@ -124,4 +125,13 @@
   box-sizing: border-box;
   height: calc(10.9375rem + 1rem + 2px); /* Altura da carta (175px = 10.9375rem) + padding vertical total (1rem) + 2px para evitar corte de borda */
   overflow: hidden !important; /* Essencial para o slidesPerView: 'auto' cortar os slides laterais */
+}
+
+.singleActiveSlideOverride {
+  /* Força os estilos de ativo se for o único slide,
+     caso o Swiper não aplique swiper-slide-active corretamente neste cenário. */
+  transform: scale(1) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 1 !important; /* Para garantir que fique na frente se houver outros elementos */
 }

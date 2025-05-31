@@ -93,11 +93,13 @@ const LinkCouplePage: React.FC = () => {
   if (user.linkedPartnerId) {
     return (
       <div className={styles.page}>
-        <h1 className={styles.title}>Você já está Vinculado!</h1>
-        <p className={styles.partnerInfoText}>Seu parceiro(a) é: {partnerInfo?.username || partnerInfo?.email || user.linkedPartnerId.substring(0, 8) + "..."}</p>
-        <p className={styles.subText}>Agora vocês podem começar a usar o KinkLink juntos!</p>
-        <button onClick={() => navigate('/cards')} className={styles.button} style={{ marginTop: '20px' }}>Ir para as Cartas</button>
-        <button onClick={handleUnlink} className={styles.destructiveButton} disabled={isUnlinking}>{isUnlinking ? "Desfazendo..." : "Desfazer Vínculo"}</button>
+        <main className={styles.mainContent}> {/* Envolve o conteúdo principal */}
+          <h1 className={styles.title}>Você já está Vinculado!</h1>
+          <p className={styles.partnerInfoText}>Seu parceiro(a) é: {partnerInfo?.username || partnerInfo?.email || user.linkedPartnerId.substring(0, 8) + "..."}</p>
+          <p className={styles.subText}>Agora vocês podem começar a usar o KinkLink juntos!</p>
+          <button onClick={() => navigate('/cards')} className={styles.button} style={{ marginTop: '20px' }}>Ir para as Cartas</button>
+          <button onClick={handleUnlink} className={styles.destructiveButton} disabled={isUnlinking}>{isUnlinking ? "Desfazendo..." : "Desfazer Vínculo"}</button>
+        </main>
       </div>
     );
   }
@@ -121,50 +123,52 @@ const LinkCouplePage: React.FC = () => {
   
   return (
     <div className={styles.page}>
-      <h1 className={styles.title}>Vincular Casal</h1>
-      <p className={styles.subText}>
-        Para usar o KinkLink e compartilhar experiências com seu parceiro(a),
-        vocês precisam vincular suas contas.
-      </p>
+      <main className={styles.mainContent}> {/* Envolve o conteúdo principal */}
+        <h1 className={styles.title}>Vincular Casal</h1>
+        <p className={styles.subText}>
+          Para usar o KinkLink e compartilhar experiências com seu parceiro(a),
+          vocês precisam vincular suas contas.
+        </p>
 
-      {!showCreateLinkUI && !showAcceptLinkUI && (
-        <Fragment>
-          <div className={styles.optionsContainer}>
-            <button
-              onClick={() => { setShowCreateLinkUI(true); setShowAcceptLinkUI(false); }}
-              className={styles.actionButton}
-            >
-              Quero Gerar um Código
-            </button>
-            <p className={styles.orText}>OU</p>
-            <button
-              onClick={() => { setShowAcceptLinkUI(true); setShowCreateLinkUI(false); }}
-              className={styles.actionButton}
-            >
-              Tenho um Código para Inserir
-            </button>
-          </div>
+        {!showCreateLinkUI && !showAcceptLinkUI && (
+          <Fragment>
+            <div className={styles.optionsContainer}>
+              <button
+                onClick={() => { setShowCreateLinkUI(true); setShowAcceptLinkUI(false); }}
+                className={styles.actionButton}
+              >
+                Quero Gerar um Código
+              </button>
+              <p className={styles.orText}>OU</p>
+              <button
+                onClick={() => { setShowAcceptLinkUI(true); setShowCreateLinkUI(false); }}
+                className={styles.actionButton}
+              >
+                Tenho um Código para Inserir
+              </button>
+            </div>
+            <div className={styles.backLinkContainer}>
+              <Link to="/profile" className={styles.backLink}>
+                &larr; Voltar para o Perfil
+              </Link>
+            </div>
+          </Fragment>
+        )}
+
+        {showCreateLinkUI && <CreateLink onLinkCreated={handleLinkCreated} onCancel={handleCancelAction} />}
+        {showAcceptLinkUI && <AcceptLink onLinkAccepted={handleLinkAccepted} onCancel={handleCancelAction} />}
+
+        {(showCreateLinkUI || showAcceptLinkUI) && (
           <div className={styles.backLinkContainer}>
-            <Link to="/profile" className={styles.backLink}>
-              &larr; Voltar para o Perfil
-            </Link>
+            <button
+              onClick={handleCancelAction} // Usa a nova função
+              className={styles.secondaryButton}
+            >
+              Voltar / Cancelar
+            </button>
           </div>
-        </Fragment>
-      )}
-
-      {showCreateLinkUI && <CreateLink onLinkCreated={handleLinkCreated} onCancel={handleCancelAction} />}
-      {showAcceptLinkUI && <AcceptLink onLinkAccepted={handleLinkAccepted} onCancel={handleCancelAction} />}
-
-      {(showCreateLinkUI || showAcceptLinkUI) && (
-        <div className={styles.backLinkContainer}>
-          <button
-            onClick={handleCancelAction} // Usa a nova função
-            className={styles.secondaryButton}
-          >
-            Voltar / Cancelar
-          </button>
-        </div>
-      )}
+        )}
+      </main>
     </div>
   );
 };

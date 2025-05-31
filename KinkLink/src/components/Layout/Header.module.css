@@ -1,0 +1,58 @@
+.appHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 25px; /* Aumentei o padding lateral um pouco */
+  background-color: var(--cor-fundo-elemento, #2a2a2a);
+  border-bottom: 1px solid var(--cor-borda, #3f3f3f);
+  width: 100%;
+  box-sizing: border-box;
+  /* Descomente abaixo se quiser o header fixo no topo ao rolar */
+  /*
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  */
+}
+
+.logoContainer {
+  /* Flex para centralizar o logo se necessário, ou apenas para conter */
+}
+
+.logoLink {
+  display: inline-block; /* Para que o link se ajuste ao tamanho da imagem */
+}
+
+.logoImage {
+  height: 60px; /* Tamanho do logo aumentado. Ajuste conforme necessário. */
+  width: auto; /* Mantém a proporção da imagem */
+  display: block; /* Remove espaço extra abaixo da imagem */
+  transition: transform 0.2s ease-in-out;
+}
+
+.logoImage:hover {
+  transform: scale(1.05); /* Efeito sutil no hover */
+}
+
+.supportContainer {
+  /* O flexbox no .appHeader já cuida do alinhamento */
+}
+
+.supportButton {
+  background-color: transparent;
+  color: var(--cor-texto-secundario, #b0b0b0);
+  border: 1px solid var(--cor-texto-secundario, #b0b0b0);
+  padding: 8px 15px;
+  border-radius: 20px; /* Bordas mais arredondadas para um visual discreto */
+  text-decoration: none;
+  font-size: 0.85rem; /* Fonte um pouco menor para discrição */
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.supportButton:hover {
+  background-color: var(--cor-secundaria, #5C5C5C);
+  color: var(--cor-texto-sobre-secundaria, #FFFFFF);
+  border-color: var(--cor-secundaria, #5C5C5C);
+}

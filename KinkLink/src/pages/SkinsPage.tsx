@@ -231,11 +231,12 @@ function SkinsPage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <Link to="/profile" className={styles.backButton}>&larr; Voltar</Link>
-        <h1>Minhas Skins</h1>
-      </header>
-      <main className={styles.content}>
+      <main className={styles.mainContent}> {/* Conteúdo principal da página */}
+        <div className={styles.pageHeaderControls}> {/* Novo container para título e botão de voltar */}
+          <Link to="/profile" className={styles.backButton}>&larr; Voltar</Link>
+          <h1 className={styles.pageTitle}>Minhas Skins</h1>
+        </div>
+
         {(Object.keys(skinsByType) as Array<SkinDefinition['type']>).map(skinType => {
           let currentActiveSkinId: string | undefined;
           switch (skinType) {

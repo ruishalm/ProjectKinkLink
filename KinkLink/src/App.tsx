@@ -13,9 +13,11 @@ import MatchesPage from './pages/MatchesPage';
 import LinkedRoute from './components/LinkedRoute';
 import ProtectedRoute from './components/ProtectedRoute';
 import TermsOfServicePage from './pages/TermsOfServicePage';
+import SupportPage from './pages/SupportPage'; // Importar a SupportPage
 import SkinsPage from './pages/SkinsPage';
 import { SkinProvider } from './contexts/SkinContext'; // Importar SkinProvider
 import { useLinkCompletionListener } from './hooks/useLinkCompletionListener';
+import Header from './components/Layout/Header'; // Importar o Header global
 import UnlockNotificationModal from './components/UnlockNotificationModal'; // Importar o novo modal
 
 function App() {
@@ -40,10 +42,8 @@ function App() {
   return (
     <SkinProvider> {/* SkinProvider envolve todo o conteúdo que precisa do contexto */}
       <div className="appContainer"> {/* Contêiner principal para flex layout */}
-        <UnlockNotificationModal /> {/* Renderiza o modal aqui */}
-        <header className="appHeader">
-          <img src="/kinklogo.png" alt="KinkLink Logo" className="appLogo" />
-        </header>
+        <UnlockNotificationModal /> {/* Renderiza o modal de notificação de desbloqueio aqui */}
+        <Header /> {/* Header global adicionado aqui */}
         <main className="appMainContent">
           <Routes>
             <Route path="/" element={<HomePage />} />
@@ -91,6 +91,7 @@ function App() {
               }
             />
             <Route path="/termos-de-servico" element={<TermsOfServicePage />} />
+            <Route path="/suporte" element={<SupportPage />} /> {/* Adicionar a rota para SupportPage */}
             <Route path="*" element={<div>Página não encontrada</div>} />
           </Routes>
           {location.pathname === '/cards' && (

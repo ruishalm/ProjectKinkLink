@@ -23,14 +23,17 @@ function HomePage() {
 
   return (
     <div className={styles.pageContainer}>
-      <h1 className={styles.title}>Bem-vindo(a) ao KinkLink!</h1>
-      <p className={styles.subTitle}>
-        Descubra, explore e conecte-se com seu parceiro(a) de uma maneira totalmente nova.
-      </p>
-      <div className={styles.buttonContainer}>
-        <Link to="/login" className={styles.primaryButton}>Login</Link>
-        <Link to="/signup" className={styles.secondaryButton}>Cadastre-se</Link>
-      </div>
+      {/* Envolve o conteúdo principal para melhor organização e estilização se o header for sticky */}
+      <main className={styles.mainContent}>
+        <h1 className={styles.title}>Bem-vindo(a) ao KinkLink!</h1>
+        <p className={styles.subTitle}>
+          Descubra, explore e conecte-se com seu parceiro(a) de uma maneira totalmente nova.
+        </p>
+        <div className={styles.buttonContainer}>
+          <Link to="/login" className={styles.primaryButton}>Login</Link>
+          <Link to="/signup" className={styles.secondaryButton}>Cadastre-se</Link>
+        </div>
+      </main>
     </div>
   );
 }

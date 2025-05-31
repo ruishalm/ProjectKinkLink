@@ -51,7 +51,7 @@
       "Tela 'Novidades em Breve'",
       "Onboarding visual (GIF/Tutorial pós-vinculação, talvez mini-game)",
       "Gamificação de Temas/Skins: Liberar personalizações visuais (temas do app, fundos de carta, variações do logo) baseadas em checkpoints de engajamento do casal (nº de 'Links', interações em cartas 'Conexão', atividade no chat, etc.).",
-      "Funcionalidades PWA completas (instalação, offline básico para matches/perfil)",
+      "Funcionalidades PWA completas (instalação, offline básico para matches/perfil). Nota: A célula que envolve cada carrossel de categoria na tela de 'Links' (`.carouselCell`) será um alvo para aplicação de skins ('paninhos').",
       "Desfazer Último Swipe ('Oops!')",
       "Transformar em App de Celular (iOS/Android) usando Capacitor para distribuição em lojas e acesso a funcionalidades nativas.",
       "Gerenciamento/Limpeza automática de `pendingLinks` expirados (via Cloud Function agendada, se necessário)",
@@ -237,7 +237,7 @@
     "Estratégia de lançamento e marketing inicial"
   ],
   "communicationNotes": "Explique os passos de forma extremamente detalhada, como se eu fosse um iniciante completo idiota ou tivesse acabado de ter um AVC. Usar linguagem simples e dividir em passos bem pequenos.",
-"lastUpdated": "2024-05-26T22:30:00Z",
+"lastUpdated": "2024-05-27T18:00:00Z",
   "developmentPrinciples": {
     "modularity": {
       "goal": "Manter o código organizado, reutilizável e fácil de manter.",

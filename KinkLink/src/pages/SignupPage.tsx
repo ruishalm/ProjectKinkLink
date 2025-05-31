@@ -7,6 +7,10 @@ import styles from './SignupPage.module.css'; // Importa os CSS Modules
 function SignupPage() {
   // Hooks e Estados
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState(''); // Novo estado para o nome de usuário
+  const [birthDate, setBirthDate] = useState(''); // Data de Nascimento (YYYY-MM-DD)
+  const [sex, setSex] = useState(''); // Sexo biológico
+  const [gender, setGender] = useState(''); // Identidade de gênero
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -16,13 +20,37 @@ function SignupPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Funções Auxiliares
+  const calculateAge = (dateString: string): number => {
+    const today = new Date();
+    const birthDateObj = new Date(dateString);
+    let age = today.getFullYear() - birthDateObj.getFullYear();
+    const m = today.getMonth() - birthDateObj.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDateObj.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
   // Funções Manipuladoras
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
 
+    if (birthDate) {
+      const age = calculateAge(birthDate);
+      if (age < 18) {
+        setError("Você precisa ter pelo menos 18 anos para se cadastrar.");
+        return;
+      }
+    }
+
     if (!agreedToTerms) {
       setError("Você precisa concordar com os Termos de Serviço para se cadastrar.");
+      return;
+    }
+    if (!username.trim()) {
+      setError("Por favor, insira um nome de usuário.");
       return;
     }
     if (password.length < 6) {
@@ -37,7 +65,8 @@ function SignupPage() {
     setIsSubmitting(true);
     const from = location.state?.from?.pathname || '/profile';
     try {
-      await signup(email, password);
+      // Passamos os novos campos para a função signup
+      await signup(email, password, username.trim(), birthDate, sex, gender);
       navigate(from, { replace: true });
     } catch (err: unknown) {
       const errorMessage = 'Falha ao tentar cadastrar. Tente novamente.';
@@ -94,83 +123,169 @@ function SignupPage() {
     return `${styles.input} ${(doPasswordsMatch && isPasswordValidLength) ? styles.successBorder : styles.warningBorder}`;
   };
 
-  const canSubmit = email.length > 0 && isPasswordValidLength && doPasswordsMatch && agreedToTerms && !isSubmitting;
+  const canSubmit =
+    email.length > 0 &&
+    username.trim().length > 0 &&
+    birthDate.length > 0 && // Garante que a data de nascimento foi preenchida
+    sex.length > 0 && // Agora obrigatório
+    gender.length > 0 && // Agora obrigatório
+    isPasswordValidLength &&
+    doPasswordsMatch &&
+    agreedToTerms &&
+    !isSubmitting;
 
   return (
     <div className={styles.pageContainer}>
-      <div className={styles.watermarkContainer}>
-        {emojiWatermarkStyles.map((style, index) => (
-          <span key={index} className={styles.watermarkEmoji} style={style}>
-            🚫🔞
-          </span>
-        ))}
-      </div>
+      <main className={styles.mainContent}> {/* Envolve o conteúdo principal */}
+        <div className={styles.watermarkContainer}>
+          {emojiWatermarkStyles.map((style, index) => (
+            <span key={index} className={styles.watermarkEmoji} style={style}>
+              🚫🔞
+            </span>
+          ))}
+        </div>
 
-      <h1 className={styles.pageTitle}>Cadastro</h1>
-      <form onSubmit={handleSubmit} className={styles.formContainer}>
-        <div className={styles.inputGroup}>
-          <label htmlFor="email" className={styles.label}>Email:</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className={styles.input}
-          />
-        </div>
-        <div className={styles.inputGroup}>
-          <label htmlFor="password" className={styles.label}>Senha:</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className={getPasswordFieldClassName()}
-          />
-          {password.length > 0 && !isPasswordValidLength && <p className={styles.validationMessage}>Senha muito curta (mínimo 6 caracteres).</p>}
-        </div>
-        <div className={styles.inputGroup}>
-          <label htmlFor="confirmPassword" className={styles.label}>Confirmar Senha:</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            name="confirmPassword"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            className={getConfirmPasswordFieldClassName()}
-          />
-          {confirmPassword.length > 0 && password.length > 0 && !doPasswordsMatch && <p className={styles.validationMessage}>As senhas não coincidem.</p>}
-          {confirmPassword.length > 0 && password.length > 0 && doPasswordsMatch && !isPasswordValidLength && <p className={styles.validationMessage}>A senha original ainda é muito curta.</p>}
-        </div>
-        <div className={styles.termsContainer}>
-          <input
-            type="checkbox"
-            id="terms"
-            checked={agreedToTerms}
-            onChange={(e) => setAgreedToTerms(e.target.checked)}
-            className={styles.termsCheckbox}
-          />
-          <label htmlFor="terms" className={styles.termsLabel}>
-            Eu li e concordo com os{' '}
-            <Link to="/termos-de-servico" target="_blank" rel="noopener noreferrer" className={styles.termsLink}>
-              Termos de Serviço
-            </Link>
-          </label>
-        </div>
-        <button type="submit" className={styles.button} disabled={isSubmitting || authIsLoading || !canSubmit}>
-          {isSubmitting ? 'Cadastrando...' : 'Cadastrar'}
-        </button>
-      </form>
-      {error && <p className={styles.errorText}>{error}</p>}
-      <p className={styles.navigationText}>
-        Já tem uma conta? <Link to="/login" className={styles.navigationLink}>Faça login</Link>
-      </p>
-      <Link to="/" className={styles.navigationLink}>Voltar para a Página Inicial</Link>
+        <h1 className={styles.pageTitle}>Cadastro</h1>
+        <p className={styles.requiredInfoText}>
+          Todos os campos marcados com <span className={styles.requiredAsterisk}>*</span> são obrigatórios.
+        </p>
+        <form onSubmit={handleSubmit} className={styles.formContainer}>
+          <div className={styles.inputGroup}>
+            <label htmlFor="email" className={styles.label}>Email:
+              <span className={styles.requiredAsterisk}>*</span></label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className={styles.input}
+            />
+          </div>
+          <div className={styles.inputGroup}>
+            <label htmlFor="username" className={styles.label}>Nome de Usuário:
+              <span className={styles.requiredAsterisk}>*</span></label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              className={styles.input}
+              minLength={3} // Exemplo de validação básica
+            />
+          </div>
+          <div className={styles.inputGroup}>
+            <label htmlFor="birthDate" className={styles.label}>Data de Nascimento:
+              <span className={styles.requiredAsterisk}>*</span></label>
+            <input
+              type="date"
+              id="birthDate"
+              name="birthDate"
+              value={birthDate}
+              onChange={(e) => setBirthDate(e.target.value)}
+              required
+              className={styles.input}
+            />
+          </div>
+          <div className={styles.inputGroup}>
+            <label htmlFor="sex" className={styles.label}>Sexo Atribuído ao Nascer:
+              <span className={styles.requiredAsterisk}>*</span></label>
+            <select
+              id="sex"
+              name="sex"
+              value={sex}
+              onChange={(e) => setSex(e.target.value)}
+              className={styles.select} // Estilo para select
+              required
+            >
+              <option value="">Selecione...</option>
+              <option value="masculino">Masculino</option>
+              <option value="feminino">Feminino</option>
+              {/* <option value="intersexo">Intersexo</option> Removido */}
+              <option value="naoinformar_sexo">Prefiro não informar</option>
+            </select>
+          </div>
+          <div className={styles.inputGroup}>
+            <label htmlFor="gender" className={styles.label}>Identidade de Gênero:
+              <span className={styles.requiredAsterisk}>*</span></label>
+            <select
+              id="gender"
+              name="gender"
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+              className={styles.select} // Estilo para select
+              required
+            >
+              <option value="">Selecione...</option>
+              <option value="homem_cis">Homem Cisgênero</option>
+              <option value="mulher_cis">Mulher Cisgênero</option>
+              <option value="homem_trans">Homem Transgênero</option>
+              <option value="mulher_trans">Mulher Transgênero</option>
+              <option value="nao_binario">Não-binário</option>
+              <option value="outro_genero">Outro</option>
+              <option value="naoinformar_genero">Prefiro não informar</option>
+            </select>
+          </div>
+          <div className={styles.inputGroup}>
+            <label htmlFor="password" className={styles.label}>Senha:
+              <span className={styles.requiredAsterisk}>*</span></label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className={getPasswordFieldClassName()}
+            />
+            {password.length > 0 && !isPasswordValidLength && <p className={styles.validationMessage}>Senha muito curta (mínimo 6 caracteres).</p>}
+          </div>
+          <div className={styles.inputGroup}>
+            <label htmlFor="confirmPassword" className={styles.label}>Confirmar Senha:
+              <span className={styles.requiredAsterisk}>*</span></label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              className={getConfirmPasswordFieldClassName()}
+            />
+            {confirmPassword.length > 0 && password.length > 0 && !doPasswordsMatch && <p className={styles.validationMessage}>As senhas não coincidem.</p>}
+            {confirmPassword.length > 0 && password.length > 0 && doPasswordsMatch && !isPasswordValidLength && <p className={styles.validationMessage}>A senha original ainda é muito curta.</p>}
+          </div>
+          <div className={styles.termsContainer}>
+            <input
+              type="checkbox"
+              id="terms"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              className={styles.termsCheckbox}
+            />
+            <label htmlFor="terms" className={styles.termsLabel}> {/* Não é obrigatório por asterisco, mas é pela lógica */}
+              Eu li e concordo com os{' '}
+              <Link to="/termos-de-servico" target="_blank" rel="noopener noreferrer" className={styles.termsLink}>
+                Termos de Serviço
+              </Link>
+            </label>
+          </div>
+          <p className={styles.infoTextSmall}>
+            Importante: Utilize um endereço de e-mail ao qual você tenha acesso. Ele será usado para recuperação de senha caso necessário.
+          </p>
+          <button type="submit" className={styles.button} disabled={isSubmitting || authIsLoading || !canSubmit}>
+            {isSubmitting ? 'Cadastrando...' : 'Cadastrar'}
+          </button>
+        </form>
+        {error && <p className={styles.errorText}>{error}</p>}
+        <p className={styles.navigationText}>
+          Já tem uma conta? <Link to="/login" className={styles.navigationLink}>Faça login</Link>
+        </p>
+        <Link to="/" className={styles.navigationLink}>Voltar para a Página Inicial</Link>
+      </main>
     </div>
   );
 }

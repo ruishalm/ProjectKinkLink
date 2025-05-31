@@ -38,13 +38,15 @@ const TermsOfServicePage: React.FC = () => {
 
   return (
     <div className={styles.pageContainer}>
-      <div className={styles.contentWrapper}>
-        <div className={styles.markdownContent}>
-          {isLoading && <p>Carregando Termos de Serviço...</p>}
-          {error && <p style={{ color: 'red' }}>{error}</p>}
-          {!isLoading && !error && <ReactMarkdown>{markdownContent}</ReactMarkdown>}
+      <main className={styles.mainContentWrapper}> {/* Renomeado para evitar conflito se mainContent for usado no Header */}
+        <div className={styles.contentWrapper}>
+          <div className={styles.markdownContent}>
+            {isLoading && <p>Carregando Termos de Serviço...</p>}
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {!isLoading && !error && <ReactMarkdown>{markdownContent}</ReactMarkdown>}
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

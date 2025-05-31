@@ -11,11 +11,8 @@
   padding-top: 5px; /* Reduzido o padding superior */
   padding-left: 15px; padding-right: 15px; padding-bottom: 15px; /* Mantém os outros paddings */
   box-sizing: border-box;
-  background-color: var(--cor-fundo-pagina); /* Usa variável de paleta */
-  background-image: var(--bg-pile-url); /* Usa a variável CSS para a textura */
-  background-size: cover; /* Faz a imagem cobrir toda a área, mantendo proporção */
-  background-position: center center; /* Centraliza a imagem */
-  background-repeat: no-repeat; /* Evita que a imagem se repita */
+  background-color: var(--cor-fundo-pagina); /* Mantém a cor de fundo da página */
+  /* A textura da pilha foi movida para .cardStackContainer */
   position: relative; /* Necessário para o posicionamento absoluto das SideTipMessages */
   color: var(--cor-texto-primario); /* Usa variável de paleta */
   font-family: var(--font-family-main, "Trebuchet MS", sans-serif); /* Usa variável de paleta */
@@ -32,7 +29,18 @@
   z-index: 5; /* Garante que a pilha de cartas fique acima das SideTipMessages (que têm z-index: 1) */
   margin-top: 30px; /* Adiciona espaço acima do container das cartas */
   width: 100%;
+  padding: 20px; /* Espaçamento interno para a textura não colar nas bordas das cartas e dar um respiro */
   margin-bottom: 20px; /* Aumenta o espaço abaixo das cartas */
+  box-sizing: border-box;
+
+  /* Aplica a textura da skin da pilha de cartas aqui */
+  background-image: var(--bg-pile-url);
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-color: var(--cor-fundo-elemento, #2a2a2a); /* Cor de fallback caso a textura não carregue ou não esteja definida */
+  border-radius: 15px; /* Opcional: para arredondar as bordas do container da textura */
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2); /* Opcional: para destacar um pouco o container */
 }
 
 .staticCardBack {

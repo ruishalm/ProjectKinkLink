@@ -27,7 +27,9 @@ const RegisterPage: React.FC = () => {
   // Se o usuário for redirecionado, este return não será alcançado.
   return (
     <div className={styles.pageContainer}>
-      <p className={styles.messageText}>Página de Cadastro (Conteúdo a ser implementado ou esta página será removida se SignupPage for suficiente)</p>
+      <main className={styles.mainContent}> {/* Envolve o conteúdo principal */}
+        <p className={styles.messageText}>Página de Cadastro (Conteúdo a ser implementado ou esta página será removida se SignupPage for suficiente)</p>
+      </main>
     </div>
   );
 };

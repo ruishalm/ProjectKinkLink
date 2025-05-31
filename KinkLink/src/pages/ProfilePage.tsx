@@ -83,6 +83,45 @@ function ProfilePage() {
     }
   };
 
+  // Funções auxiliares para formatação
+  const formatBirthDate = (dateString?: string): string => {
+    if (!dateString) return 'Não informada';
+    try {
+      const [year, month, day] = dateString.split('-');
+      if (year && month && day) {
+        return `${day}/${month}/${year}`;
+      }
+      return dateString; 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (e) {
+      return dateString; // Em caso de erro, retorna o original
+    }
+  };
+
+  const getSexLabel = (sexValue?: string): string => {
+    if (!sexValue) return 'Não informado';
+    const labels: Record<string, string> = {
+      'masculino': 'Masculino',
+      'feminino': 'Feminino',
+      'naoinformar_sexo': 'Prefiro não informar',
+    };
+    return labels[sexValue] || sexValue;
+  };
+
+  const getGenderLabel = (genderValue?: string): string => {
+    if (!genderValue) return 'Não informada';
+    const labels: Record<string, string> = {
+      'homem_cis': 'Homem Cisgênero',
+      'mulher_cis': 'Mulher Cisgênero',
+      'homem_trans': 'Homem Transgênero',
+      'mulher_trans': 'Mulher Transgênero',
+      'nao_binario': 'Não-binário',
+      'outro_genero': 'Outro',
+      'naoinformar_genero': 'Prefiro não informar',
+    };
+    return labels[genderValue] || genderValue;
+  };
+
   if (authIsLoading || !user) {
     // Mostra uma mensagem de carregamento mais genérica que cobre ambos os casos
     return <div className={styles.page}><p className={styles.infoText}>Carregando perfil...</p></div>;
@@ -93,135 +132,140 @@ function ProfilePage() {
 
   return (
     <div className={styles.page}>
-      {/* Removido o estilo inline de cor, será controlado pelo CSS Module e variáveis */}
-      <h1 className={`${styles.title} ${styles.textCenter}`} style={{borderBottom: 'none', marginBottom: '30px'}}>
-        Meu Perfil
-      </h1>
+      <main className={styles.mainContent}> {/* Envolve o conteúdo principal */}
+        {/* Removido o estilo inline de cor, será controlado pelo CSS Module e variáveis */}
+        <h1 className={`${styles.title} ${styles.textCenter}`} style={{borderBottom: 'none', marginBottom: '30px'}}>
+          Meu Perfil
+        </h1>
 
-      {/* SEÇÃO DE DADOS PESSOAIS (EXPANSÍVEL/RECOLHÍVEL) */}
-      <div className={styles.section}>
-        <div
-          className={styles.sectionHeader}
-          onClick={() => setIsPersonalInfoOpen(!isPersonalInfoOpen)}
-          role="button"
-          tabIndex={0}
-          onKeyPress={(e) => (e.key === 'Enter' || e.key === ' ') && setIsPersonalInfoOpen(!isPersonalInfoOpen)}
-          aria-expanded={isPersonalInfoOpen}
-          aria-controls="personal-info-content"
-        >
-          <h2 className={styles.sectionTitleInHeader}>
-            {isEditing ? 'Editar Dados Pessoais' : 'Seus Dados Pessoais'}
-          </h2>
-          <span className={`${styles.toggleIcon} ${!isPersonalInfoOpen ? styles.toggleIconClosed : ''}`}>
-            ▼
-          </span>
+        {/* SEÇÃO DE DADOS PESSOAIS (EXPANSÍVEL/RECOLHÍVEL) */}
+        <div className={styles.section}>
+          <div
+            className={styles.sectionHeader}
+            onClick={() => setIsPersonalInfoOpen(!isPersonalInfoOpen)}
+            role="button"
+            tabIndex={0}
+            onKeyPress={(e) => (e.key === 'Enter' || e.key === ' ') && setIsPersonalInfoOpen(!isPersonalInfoOpen)}
+            aria-expanded={isPersonalInfoOpen}
+            aria-controls="personal-info-content"
+          >
+            <h2 className={styles.sectionTitleInHeader}>
+              {isEditing ? 'Editar Dados Pessoais' : 'Seus Dados Pessoais'}
+            </h2>
+            <span className={`${styles.toggleIcon} ${!isPersonalInfoOpen ? styles.toggleIconClosed : ''}`}>
+              ▼
+            </span>
+          </div>
+
+          <div
+            id="personal-info-content"
+            className={`${styles.sectionContent} ${!isPersonalInfoOpen ? styles.sectionContentCollapsed : ''}`}
+          >
+            {isEditing ? (
+              <form onSubmit={handleProfileUpdate}>
+                <div>
+                  <label htmlFor="username" className={styles.formLabel}>Nome de Usuário:</label>
+                  <input
+                    type="text"
+                    id="username"
+                    className={styles.input}
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Como você quer ser chamado(a)?"
+                  />
+                </div>
+                <div style={{ marginTop: '15px' }}>
+                  <label htmlFor="bio" className={styles.formLabel}>Bio:</label>
+                  <textarea
+                    id="bio"
+                    className={styles.textarea}
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    placeholder="Conte um pouco sobre você..."
+                    rows={4}
+                  />
+                </div>
+                <div className={styles.formActions}>
+                  <button
+                    type="submit"
+                    className={!hasProfileChanged ? styles.buttonDisabled : styles.button}
+                    disabled={!hasProfileChanged}
+                  >
+                    Salvar Alterações
+                  </button>
+                  <button type="button" onClick={handleCancelEdit} className={styles.buttonCancel}>
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div>
+                <p className={styles.infoText}><strong>Email:</strong> {user.email}</p>
+                <p className={styles.infoText}><strong>Nome de Usuário:</strong> {displayName}</p>
+                <p className={styles.infoText}><strong>Bio:</strong> {user.bio || 'Não definida'}</p>
+                <p className={styles.infoText}><strong>Data de Nascimento:</strong> {formatBirthDate(user.birthDate)}</p>
+                <p className={styles.infoText}><strong>Sexo Atribuído ao Nascer:</strong> {getSexLabel(user.sex)}</p>
+                <p className={styles.infoText}><strong>Identidade de Gênero:</strong> {getGenderLabel(user.gender)}</p>
+                <button onClick={handleEditClick} className={styles.button} style={{ marginTop: '20px' }}>
+                  Editar Perfil
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div
-          id="personal-info-content"
-          className={`${styles.sectionContent} ${!isPersonalInfoOpen ? styles.sectionContentCollapsed : ''}`}
-        >
-          {isEditing ? (
-            <form onSubmit={handleProfileUpdate}>
-              <div>
-                <label htmlFor="username" className={styles.formLabel}>Nome de Usuário:</label>
-                <input
-                  type="text"
-                  id="username"
-                  className={styles.input}
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Como você quer ser chamado(a)?"
-                />
-              </div>
-              <div style={{ marginTop: '15px' }}>
-                <label htmlFor="bio" className={styles.formLabel}>Bio:</label>
-                <textarea
-                  id="bio"
-                  className={styles.textarea}
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  placeholder="Conte um pouco sobre você..."
-                  rows={4}
-                />
-              </div>
-              <div className={styles.formActions}>
-                <button
-                  type="submit"
-                  className={!hasProfileChanged ? styles.buttonDisabled : styles.button}
-                  disabled={!hasProfileChanged}
-                >
-                  Salvar Alterações
-                </button>
-                <button type="button" onClick={handleCancelEdit} className={styles.buttonCancel}>
-                  Cancelar
-                </button>
-              </div>
-            </form>
-          ) : (
-            <div>
-              <p className={styles.infoText}><strong>Email:</strong> {user.email}</p>
-              <p className={styles.infoText}><strong>Nome de Usuário:</strong> {displayName}</p>
-              <p className={styles.infoText}><strong>Bio:</strong> {user.bio || 'Não definida'}</p>
-              <button onClick={handleEditClick} className={styles.button} style={{ marginTop: '20px' }}>
-                Editar Perfil
+        {/* SEÇÃO DE VÍNCULO */}
+        <div className={styles.section}>
+          <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>Vínculo de Casal</h2>
+          {user.linkedPartnerId ? (
+            <>
+              <p className={styles.infoText}>Você está vinculado! Explore os Links e converse com seu par.</p>
+              <button onClick={() => navigate('/link-couple')} className={styles.actionButton}>
+                Gerenciar Vínculo
               </button>
-            </div>
+            </>
+          ) : (
+            <>
+              <p className={styles.infoText}>Você ainda não está vinculado. Conecte-se com seu parceiro(a) para começar a diversão!</p>
+              <button onClick={() => navigate('/link-couple')} className={styles.actionButton}>
+                Vincular Agora
+              </button>
+            </>
           )}
         </div>
-      </div>
+        
+        {/* SEÇÃO DE SKINS */}
+        <div className={styles.section}>
+          <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>Personalização</h2>
+          <Link to="/skins" className={styles.actionButton}>
+            Minhas Skins
+          </Link>
+        </div>
 
-      {/* SEÇÃO DE VÍNCULO */}
-      <div className={styles.section}>
-        <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>Vínculo de Casal</h2>
-        {user.linkedPartnerId ? (
-          <>
-            <p className={styles.infoText}>Você está vinculado! Explore os Links e converse com seu par.</p>
-            <button onClick={() => navigate('/link-couple')} className={styles.actionButton}>
-              Gerenciar Vínculo
-            </button>
-          </>
-        ) : (
-          <>
-            <p className={styles.infoText}>Você ainda não está vinculado. Conecte-se com seu parceiro(a) para começar a diversão!</p>
-            <button onClick={() => navigate('/link-couple')} className={styles.actionButton}>
-              Vincular Agora
-            </button>
-          </>
-        )}
-      </div>
-      
-      {/* SEÇÃO DE SKINS */}
-      <div className={styles.section}>
-        <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>Personalização</h2>
-        <Link to="/skins" className={styles.actionButton}>
-          Minhas Skins
-        </Link>
-      </div>
+        {/* SEÇÃO DE LOGOUT */}
+        <div className={`${styles.section} ${styles.textCenter}`}>
+          <button onClick={handleLogout} className={styles.buttonDestructive}>Logout</button>
+        </div>
 
-      {/* SEÇÃO DE LOGOUT */}
-      <div className={`${styles.section} ${styles.textCenter}`}>
-        <button onClick={handleLogout} className={styles.buttonDestructive}>Logout</button>
-      </div>
+        {/* LINK DE VOLTAR */}
+        <div className={`${styles.textCenter} ${styles.marginTop30}`}>
+          <Link to="/cards" className={styles.link}>&larr; Voltar para as Cartas</Link>
+        </div>
 
-      {/* LINK DE VOLTAR */}
-      <div className={`${styles.textCenter} ${styles.marginTop30}`}>
-        <Link to="/cards" className={styles.link}>&larr; Voltar para as Cartas</Link>
-      </div>
-
-      {/* SEÇÃO DE RESET (DEV) */}
-      <div className={`${styles.section} ${styles.textCenter} ${styles.marginTop50} ${styles.paddingTop20} ${styles.borderTopSolid}`}>
-        <button
-          onClick={handleResetTestData}
-          className={styles.smallLink}
-          aria-label="Resetar dados de teste para desenvolvimento"
-        >
-          Resetar Dados de Teste (Dev)
-        </button>
-        <p className={styles.warningText}>
-          Atenção: Para correta sincronização, esta opção deve ser usada pelos dois usuários do casal simultaneamente.
-        </p>
-      </div>
+        {/* SEÇÃO DE RESET (DEV) */}
+        <div className={`${styles.section} ${styles.textCenter} ${styles.marginTop50} ${styles.paddingTop20} ${styles.borderTopSolid}`}>
+          <button
+            onClick={handleResetTestData}
+            className={styles.smallLink}
+            aria-label="Resetar dados de teste para desenvolvimento"
+          >
+            Resetar Dados de Teste (Dev)
+          </button>
+          <p className={styles.warningText}>
+            Atenção: Para correta sincronização, esta opção deve ser usada pelos dois usuários do casal simultaneamente.
+          </p>
+        </div>
+      </main>
     </div>
   );
 }

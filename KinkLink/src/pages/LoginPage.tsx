@@ -2,6 +2,7 @@ import React, { useState, type FormEvent, useMemo } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './LoginPage.module.css'; // Importa os CSS Modules
+import ForgotPasswordModal from '../components/ForgotPasswordModal'; // Importa o modal
 
 function LoginPage() {
   // Hooks e Estados
@@ -12,6 +13,9 @@ function LoginPage() {
   const { login, isLoading: authIsLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Novo estado para controlar o modal de recuperação de senha
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault(); // Previne o recarregamento da página
@@ -51,55 +55,70 @@ function LoginPage() {
     return styles;
   }, []);
 
-  if (authIsLoading) {
+  if (authIsLoading && !showForgotPasswordModal) { // Não mostrar loading se o modal estiver aberto
     return <div className={styles.pageContainer}><p>Carregando...</p></div>;
   }
 
   return (
     <div className={styles.pageContainer}>
-      <div className={styles.watermarkContainer}>
-        {emojiWatermarkStyles.map((style, index) => (
-          <span key={index} className={styles.watermarkEmoji} style={style}>
-            🚫🔞
-          </span>
-        ))}
-      </div>
+      <main className={styles.mainContent}> {/* Envolve o conteúdo principal */}
+        <div className={styles.watermarkContainer}>
+          {emojiWatermarkStyles.map((style, index) => (
+            <span key={index} className={styles.watermarkEmoji} style={style}>
+              🚫🔞
+            </span>
+          ))}
+        </div>
 
-      <h1 className={styles.pageTitle}>Login</h1>
-      <form onSubmit={handleSubmit} className={styles.formContainer}>
-        <div className={styles.inputGroup}>
-          <label htmlFor="email" className={styles.label}>Email:</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className={styles.input}
-          />
-        </div>
-        <div className={styles.inputGroup}>
-          <label htmlFor="password" className={styles.label}>Senha:</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className={styles.input}
-          />
-        </div>
-        <button type="submit" className={styles.button} disabled={isSubmitting || authIsLoading}>
-          {isSubmitting ? 'Entrando...' : 'Entrar'}
-        </button>
-      </form>
-      {error && <p className={styles.errorText}>{error}</p>}
-      <p className={styles.navigationText}>
-        Não tem uma conta? <Link to="/signup" className={styles.navigationLink}>Cadastre-se</Link>
-      </p>
-      <Link to="/" className={styles.navigationLink}>Voltar para a Página Inicial</Link>
+        <h1 className={styles.pageTitle}>Login</h1>
+        <form onSubmit={handleSubmit} className={styles.formContainer}>
+          <div className={styles.inputGroup}>
+            <label htmlFor="email" className={styles.label}>Email:</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className={styles.input}
+            />
+          </div>
+          <div className={styles.inputGroup}>
+            <label htmlFor="password" className={styles.label}>Senha:</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className={styles.input}
+            />
+          </div>
+          <button type="submit" className={styles.button} disabled={isSubmitting || authIsLoading}>
+            {isSubmitting ? 'Entrando...' : 'Entrar'}
+          </button>
+          <div className={styles.forgotPasswordContainer}>
+            <button
+              type="button"
+              onClick={() => setShowForgotPasswordModal(true)}
+              className={styles.forgotPasswordLink} // Estilize como um link ou botão discreto
+            >
+              Esqueceu sua senha?
+            </button>
+          </div>
+        </form>
+        {error && <p className={styles.errorText}>{error}</p>}
+        <p className={styles.navigationText}>
+          Não tem uma conta? <Link to="/signup" className={styles.navigationLink}>Cadastre-se</Link>
+        </p>
+        <Link to="/" className={styles.navigationLink}>Voltar para a Página Inicial</Link>
+      </main>
+
+      {showForgotPasswordModal && (
+        <ForgotPasswordModal onClose={() => setShowForgotPasswordModal(false)} />
+      )}
     </div>
   );
 }

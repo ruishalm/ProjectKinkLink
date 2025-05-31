@@ -196,18 +196,56 @@ function MatchesPage() {
     }, {} as Record<string, MatchedCard[]>);
   };
   const otherCardsByCategory = groupCardsByCategory(otherMatches);
-  const categoryOrder = ['Exposição', 'Fantasia', 'Poder', 'Sensorial', 'Conexão', 'Persona', 'Limites', 'UserCreated'];
+
+  // Define a ordem fixa e as únicas categorias a serem exibidas nos carrosséis
+  const fixedCarouselOrder: string[] = ['Poder', 'Fantasia', 'Exposição', 'Sensorial']; // Ordem corrigida
+
+
+  // Função auxiliar para obter a classe CSS da categoria
+  const getCarouselCellClasses = (categoryName: string, cardCount: number): string => {
+    const normalizedCategory = categoryName.toLowerCase().replace(/\s+/g, '');
+    const categoryClass = styles[`carouselCell--${normalizedCategory}`] || styles['carouselCell--outros'] || '';
+
+    let borderLevelClass = styles.borderLevel0; // 0-1 links
+    if (cardCount >= 2 && cardCount <= 4) {
+      borderLevelClass = styles.borderLevel1;
+    } else if (cardCount >= 5 && cardCount <= 9) {
+      borderLevelClass = styles.borderLevel2;
+    } else if (cardCount >= 10 && cardCount <= 14) {
+      borderLevelClass = styles.borderLevel3;
+    } else if (cardCount >= 15) {
+      borderLevelClass = styles.borderLevel4;
+    }
+    return `${categoryClass} ${borderLevelClass}`;
+  };
+
+  // Função auxiliar para obter as classes CSS do container de Top Links
+  const getTopLinksContainerClasses = (cardCount: number): string => {
+    let borderLevelClass = styles.topLinksBorderLevel0; // 0-1 links
+    if (cardCount >= 2 && cardCount <= 4) {
+      borderLevelClass = styles.topLinksBorderLevel1;
+    } else if (cardCount >= 5 && cardCount <= 9) {
+      borderLevelClass = styles.topLinksBorderLevel2;
+    } else if (cardCount >= 10 && cardCount <= 14) {
+      borderLevelClass = styles.topLinksBorderLevel3;
+    } else if (cardCount >= 15) {
+      borderLevelClass = styles.topLinksBorderLevel4;
+    }
+    return `${styles.topLinksContainerBase} ${borderLevelClass}`; // Adiciona a classe base e a de nível
+  };
 
   return (
     <div className={styles.page}>
-      <div className={styles.header}>
-        <h1 className={styles.pageTitle}>Seus Links</h1>
-        <button onClick={handleMatchesButtonClick} className={`${styles.backToCardsButton} ${hasUnseenGlobalMatches ? styles.shakeAnimation : ''}`}>
-          {hasUnseenGlobalMatches && <span className={styles.navNotificationDot}></span>}
-          Cartas
-        </button>
-      </div>
+      <main className={styles.mainContent}> {/* Conteúdo principal da página */}
+        <div className={styles.pageHeaderControls}> {/* Novo container para título e botão */}
+          <h1 className={styles.pageTitle}>Seus Links</h1>
+          <button onClick={handleMatchesButtonClick} className={`${styles.backToCardsButton} ${hasUnseenGlobalMatches ? styles.shakeAnimation : ''}`} aria-label="Voltar para as cartas">
+            {hasUnseenGlobalMatches && <span className={styles.navNotificationDot}></span>}
+            Cartas
+          </button>
+        </div>
 
+        {/* O restante do conteúdo da página continua aqui dentro do main */}
       {noMatchesCondition ? (
         <p className={styles.noMatchesText}>
           Você ainda não tem Links. Continue explorando as cartas!
@@ -215,20 +253,22 @@ function MatchesPage() {
       ) : (
         <>
           {hotMatches.length > 0 && (
-            <section>
+            <section className={styles.topLinksSection}>
               <h2 className={styles.sectionTitle}>🔥 Top Links</h2>
-              <div className={styles.matchesGrid}>
-                {hotMatches.map((card: MatchedCard) => (
-                  <MatchCardItem
-                    key={card.id}
-                    card={card} 
-                    onClick={() => handleCardClick(card)}
-                    isHot={true}
-                    isUnread={unreadStatuses[card.id] || false}
-                    onToggleHot={handleToggleHot} 
-                    lastMessageSnippet={unreadStatuses[card.id] ? cardChatsData[card.id]?.lastMessageTextSnippet : undefined}                  
-                  />
-                ))}
+              <div className={getTopLinksContainerClasses(hotMatches.length)}>
+                <div className={styles.matchesGrid}>
+                  {hotMatches.map((card: MatchedCard) => (
+                    <MatchCardItem
+                      key={card.id}
+                      card={card}
+                      onClick={() => handleCardClick(card)}
+                      isHot={true}
+                      isUnread={unreadStatuses[card.id] || false}
+                      onToggleHot={handleToggleHot}
+                      lastMessageSnippet={unreadStatuses[card.id] ? cardChatsData[card.id]?.lastMessageTextSnippet : undefined}
+                    />
+                  ))}
+                </div>
               </div>
             </section>
           )}
@@ -236,14 +276,14 @@ function MatchesPage() {
           {Object.keys(otherCardsByCategory).length > 0 && (
             <section className={styles.section} style={hotMatches.length > 0 ? { marginTop: '40px' } : {}}>
               <h2 className={`${styles.sectionTitle} ${styles.sectionTitleOthers}`}>
-                {hotMatches.length > 0 ? 'Outros Links por Categoria' : 'Seus Links por Categoria'}
+                {hotMatches.length > 0 ? 'Nossos Links' : 'Seus Links por Categoria'}
               </h2>
               <div className={styles.categoryCarouselsGrid}>
-                {categoryOrder.map(categoryName => {
-                  const cardsForCategory = otherCardsByCategory[categoryName];
+                {fixedCarouselOrder.map(categoryName => {
+                  const cardsForCategory = otherCardsByCategory[categoryName]; // Busca as cartas para a categoria da ordem fixa
                   if (cardsForCategory && cardsForCategory.length > 0) {
                     return (
-                      <div key={categoryName} className={styles.carouselCell}>
+                      <div key={categoryName} className={`${styles.carouselCell} ${getCarouselCellClasses(categoryName, cardsForCategory.length)}`}>
                         <CategoryCarousel
                           title={categoryName}
                           cards={cardsForCategory}
@@ -257,25 +297,32 @@ function MatchesPage() {
                   }
                   return null;
                 })}
+                {/* Loop para renderizar outras categorias que não estão na fixedCarouselOrder */}
                 {Object.entries(otherCardsByCategory)
-                  .filter(([categoryName]) => !categoryOrder.includes(categoryName))
-                  .map(([categoryName, cardsForCategory]) => (
-                    <div key={categoryName} className={styles.carouselCell}>
-                      <CategoryCarousel
-                        title={categoryName}
-                        cards={cardsForCategory}
-                        onCardClick={handleCardClick}
-                        onToggleHot={handleToggleHot}
-                        unreadStatuses={unreadStatuses}
-                        cardChatsData={cardChatsData}
-                      />
-                    </div>
-                ))}
+                  .filter(([categoryName]) => !fixedCarouselOrder.includes(categoryName))
+                  .map(([categoryName, cardsForCategory]) => {
+                    if (cardsForCategory && cardsForCategory.length > 0) {
+                      return (
+                        <div key={`other-${categoryName}`} className={`${styles.carouselCell} ${getCarouselCellClasses(categoryName, cardsForCategory.length)}`}>
+                          <CategoryCarousel
+                            title={categoryName}
+                            cards={cardsForCategory}
+                            onCardClick={handleCardClick}
+                            onToggleHot={handleToggleHot}
+                            unreadStatuses={unreadStatuses}
+                            cardChatsData={cardChatsData}
+                          />
+                        </div>
+                      );
+                    }
+                    return null;
+                  })}
               </div>
             </section>
           )}
         </>
       )}
+      </main>
 
       {isChatModalOpen && selectedCardForChat && user && (
         <CardChatModal

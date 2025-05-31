@@ -1,8 +1,20 @@
 /* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\MatchesPage.module.css */
 .page {
-  padding: 20px;
-  font-family: "Trebuchet MS", sans-serif;
-  color: #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  /* align-items: center; /* Removido para permitir que o conteúdo da página use a largura total */
+  min-height: 100vh;
+  width: 100%;
+  padding: 20px; /* Padding geral, ajuste conforme necessário */
+  box-sizing: border-box;
+  background-color: var(--cor-fundo-pagina);
+  background-image: var(--bg-matches-url); /* Usa a variável CSS para a textura dos matches */
+  background-size: cover; /* Faz a imagem cobrir toda a área, mantendo proporção */
+  background-position: center center; /* Centraliza a imagem */
+  background-repeat: no-repeat; /* Evita que a imagem se repita */
+  color: var(--cor-texto-primario);
+  font-family: var(--font-family-main, "Trebuchet MS", sans-serif);
+  overflow-x: hidden; /* Evita scroll horizontal se algum conteúdo vazar */
 }
 
 .header {
@@ -11,8 +23,8 @@
   justify-content: flex-end; /* Alinha o botão "Voltar" à direita */
   align-items: flex-start; /* Alinha o botão "Cartas" ao topo */
   margin-bottom: 20px;
-  /* padding-top: 10px; Removed to allow button to be at the very top of the header content box */
   padding-bottom: 10px; /* Adiciona um pouco de espaço se o título for alto */
+  width: 100%; /* Garante que o header ocupe a largura total */
 }
 
 .pageTitle {
@@ -20,42 +32,43 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  color: #64b5f6;
+  color: var(--cor-destaque, #64b5f6); /* Usa variável de paleta */
   margin: 0; /* Remove margens para não afetar o posicionamento absoluto */
-  /* Fonte dinâmica: min, preferido (baseado na largura da tela), max */
   font-size: clamp(1.6em, 5vw, 2.2em); 
 }
 
 .backToCardsButton {
   border: none;
-  background-color: #ff6b6b;
-  color: white;
+  background-color: var(--cor-acao-secundaria, #ff6b6b); /* Usa variável de paleta */
+  color: var(--cor-texto-sobre-acao-secundaria, white); /* Usa variável de paleta */
   cursor: pointer;
   border-radius: 8px;
   transition: background-color 0.2s ease, transform 0.1s ease;
   text-decoration: none;
   font-weight: bold;
-  /* Padding dinâmico: min, preferido (baseado na largura da tela), max */
   padding: clamp(8px, 1.8vw, 12px) clamp(15px, 3.5vw, 25px);
-  /* Fonte dinâmica para o botão */
   font-size: clamp(0.8em, 2.2vw, 1em);
+}
+.backToCardsButton:hover {
+  filter: brightness(90%);
 }
 
 .noMatchesText {
   text-align: center;
   font-size: 1.1em;
-  color: #b0b0b0;
+  color: var(--cor-texto-secundario, #b0b0b0); /* Usa variável de paleta */
   margin-top: 50px;
 }
 
 .section {
-  /* Estilo base para seções, pode ser usado para marginTop se necessário */
+  width: 100%; /* Garante que as seções ocupem a largura total */
+  margin-bottom: 30px; /* Espaço entre seções */
 }
 
 .sectionTitle {
-  font-size: 1.8em;
-  color: #ff6b6b;
-  border-bottom: 2px solid #ff6b6b;
+  font-size: clamp(1.5em, 4vw, 1.8em); /* Fonte responsiva */
+  color: var(--cor-acao-positiva, #ff6b6b); /* Usa variável de paleta */
+  border-bottom: 2px solid var(--cor-acao-positiva, #ff6b6b); /* Usa variável de paleta */
   padding-bottom: 10px;
   margin-bottom: 25px;
   text-align: center;
@@ -63,108 +76,100 @@
 
 .sectionTitleOthers {
   composes: sectionTitle;
-  border-bottom-color: #64b5f6;
-  color: #64b5f6;
+  color: var(--cor-destaque, #64b5f6); /* Usa variável de paleta */
+  border-bottom-color: var(--cor-destaque, #64b5f6); /* Usa variável de paleta */
 }
 
 .matchesGrid {
   display: grid;
-  gap: 16px; /* Espaçamento entre as cartas */
-  /* Por padrão (mobile), 3 colunas como solicitado */
-  grid-template-columns: repeat(3, 1fr);
-  justify-items: center; /* Centraliza os itens nas células do grid */
+  gap: 16px; 
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* Mais responsivo */
+  justify-items: center;
 }
 
 .cardItemWrapper {
   display: inline-block;
   cursor: pointer;
   transition: transform 0.15s ease-out;
-  position: relative; /* Necessário para o posicionamento absoluto do snippet */
-  overflow: hidden; /* Para que o snippet não ultrapasse as bordas arredondadas da carta, se houver */
+  position: relative; 
+  overflow: hidden; 
 }
 
 .unreadMatch .cardItemWrapper { 
-  /* Exemplo: border: 2px solid gold; */
+  /* Estilos para cartas não lidas, se necessário */
 }
 .unreadIndicator {
   position: absolute;
-  bottom: 18px; /* Subindo metade do incremento anterior (16px + 2px) */
-  left: 12px;   /* Aumentado para mover mais para direita (longe da borda esquerda) */
-  width: 6px;    /* Tamanho ainda menor */
-  height: 6px;   /* Tamanho ainda menor */
-  background-color: #ff4757; /* Vermelho para notificação */
+  bottom: 18px; 
+  left: 12px;   
+  width: 6px;    
+  height: 6px;   
+  background-color: var(--cor-aviso, #ff4757); /* Usa variável de paleta */
   border-radius: 50%;
-  z-index: 10; /* Para ficar sobre a carta */
-  box-shadow: 0 0 3px #ff4757; 
+  z-index: 10; 
+  box-shadow: 0 0 3px var(--cor-aviso, #ff4757); /* Usa variável de paleta */
 }
 .matchCardSnippet {
   position: absolute;
-  bottom: 5px; /* Ajuste conforme necessário para o posicionamento vertical */
-  left: 5px;   /* Ajuste para o posicionamento horizontal */
-  right: 5px;  /* Garante que ele não ultrapasse a largura */
-  background-color: rgba(0, 0, 0, 0.65); /* Fundo semi-transparente para legibilidade */
-  color: white; /* Cor do texto do snippet */
-  padding: 4px 7px; /* Espaçamento interno */
-  border-radius: 4px; /* Bordas levemente arredondadas */
-  font-size: 0.65em; /* Tamanho da fonte menor */
+  bottom: 5px; 
+  left: 5px;   
+  right: 5px;  
+  background-color: var(--cor-fundo-translucido, rgba(0, 0, 0, 0.65)); /* Usa variável de paleta */
+  color: var(--cor-texto-sobre-translucido, white); /* Usa variável de paleta */
+  padding: 4px 7px; 
+  border-radius: 4px; 
+  font-size: 0.65em; 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  z-index: 1; /* Para garantir que fique sobre a imagem da carta */
-  text-align: left; /* Ou center, como preferir */
-  box-sizing: border-box; /* Para que o padding não aumente a largura total */
+  z-index: 1; 
+  text-align: left; 
+  box-sizing: border-box; 
 }
 .navNotificationDot {
   height: 8px;
   width: 8px;
-  background-color: #ff4757;
+  background-color: var(--cor-aviso, #ff4757); /* Usa variável de paleta */
   border-radius: 50%;
   display: inline-block;
   margin-right: 5px;
   vertical-align: middle;
 }
-.backToCardsButton.shakeAnimation { /* Para garantir que a animação do botão de cartas funcione */
-  /* ... estilos existentes do backToCardsButton ... */
+.backToCardsButton.shakeAnimation {
+  /* A animação é definida no CardPilePage.module.css, mas a classe é aplicada aqui */
 }
 
-/* Grid para os carrosséis de categoria */
 .categoryCarouselsGrid {
   display: grid;
-  grid-template-columns: repeat(1, 1fr); /* Começa com 1 coluna para mobile */
-  gap: 20px; /* Espaçamento entre os carrosséis */
-  justify-items: center; /* Centraliza os carrosséis nas células do grid */
-  align-items: start; /* Alinha os carrosséis ao topo da célula */
+  grid-template-columns: 1fr; /* Uma coluna por padrão */
+  gap: 30px; /* Espaçamento entre os carrosséis */
+  justify-items: center; 
+  align-items: start; 
   margin-top: 20px;
+  width: 100%;
 }
 
-/* Para telas um pouco maiores, como tablets pequenos ou celulares em paisagem */
-@media (min-width: 500px) { /* Ajuste este breakpoint conforme necessário */
+/* Nova classe para a célula da grade que envolve cada carrossel */
+.carouselCell {
+  background-color: var(--cor-fundo-elemento-transparente, rgba(40, 40, 40, 0.6));
+  padding: 20px; /* Espaçamento interno da célula */
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+  width: 100%; /* Ocupa a largura da célula da grade */
+  display: flex;
+  flex-direction: column; /* Para o CategoryCarousel usar a altura disponível */
+  justify-content: flex-start; /* Alinha o CategoryCarousel ao topo da célula */
+  align-items: center; /* Centraliza o CategoryCarousel horizontalmente se ele for mais estreito */
+}
+
+/* Media queries para responsividade dos carrosséis e grid de matches */
+@media (min-width: 768px) { /* Ajustado o breakpoint para telas um pouco maiores */
   .categoryCarouselsGrid {
-    grid-template-columns: repeat(2, 1fr); /* 2 colunas */
+    /* Em telas maiores, exibe duas colunas para os carrosséis */
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* Se quiser mais colunas em telas ainda maiores, adicione mais media queries aqui.
-   Por exemplo, para 3 colunas:
-@media (min-width: 1000px) { .categoryCarouselsGrid { grid-template-columns: repeat(3, 1fr); } } */
-
-/* Para telas um pouco maiores, como tablets ou celulares em paisagem */
-@media (min-width: 600px) {
-  .matchesGrid {
-    grid-template-columns: repeat(4, 1fr); /* 4 colunas */
-  }
-}
-
-/* Para tablets em modo paisagem e desktops pequenos */
-@media (min-width: 900px) {
-  .matchesGrid {
-    grid-template-columns: repeat(5, 1fr); /* 5 colunas */
-  }
-}
-
-/* Para desktops maiores */
-@media (min-width: 1200px) {
-  .matchesGrid {
-    grid-template-columns: repeat(6, 1fr); /* 6 colunas */
-  }
-}
+/* As media queries para .matchesGrid já usam auto-fill, o que é bom.
+   Pode-se ajustar o minmax se necessário. */

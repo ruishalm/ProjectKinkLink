@@ -8,7 +8,7 @@ import PlayingCard, { type CardData as PlayingCardDataType } from '../components
 import CardChatModal from '../components/CardChatModal';
 import CategoryCarousel from '../components/CategoryCarousel';
 import { getLastSeenTimestampForCard, markChatAsSeen } from '../utils/chatNotificationStore';
-import { useSkin } from '../contexts/SkinContext'; // Importar o hook useSkin
+import { useSkin } from '../contexts/SkinContext';
 import styles from './MatchesPage.module.css';
 import { Timestamp } from 'firebase/firestore';
 
@@ -58,7 +58,7 @@ function MatchesPage() {
   const { user } = useAuth();
   const { matchedCards: userMatchedCards, toggleHotStatus } = useUserCardInteractions();
   const navigate = useNavigate();
-  const { activeSkins, isLoadingSkins } = useSkin(); // Usar o contexto de skin
+  const { isLoadingSkins } = useSkin(); // activeSkins não é mais usado diretamente aqui para o fundo
   const { cardChatsData, isLoading: isLoadingCardChats, error: cardChatsError } = useCoupleCardChats(user?.coupleId);
 
   const [selectedCardForChat, setSelectedCardForChat] = useState<PlayingCardDataType | null>(null);
@@ -174,20 +174,11 @@ function MatchesPage() {
     }
   };
 
-  const pageStyle: React.CSSProperties = {};
-  if (!isLoadingSkins && activeSkins.backgroundMatchesUrl) {
-    pageStyle.backgroundImage = `url(${activeSkins.backgroundMatchesUrl})`;
-    // Adicione outras propriedades de background se necessário, como:
-    // pageStyle.backgroundSize = 'cover';
-    // pageStyle.backgroundPosition = 'center';
-    // pageStyle.backgroundRepeat = 'no-repeat';
-  }
-
   if (isLoadingSkins || (!user || (isLoadingCardChats && !Object.keys(cardChatsData).length))) { 
-    return <div className={styles.page} style={pageStyle}><p>Carregando seus links...</p></div>;
+    return <div className={styles.page}><p>Carregando seus links...</p></div>;
   }
   if (cardChatsError) {
-    return <div className={styles.page} style={pageStyle}><p>Erro ao carregar dados dos chats: {cardChatsError}</p></div>;
+    return <div className={styles.page}><p>Erro ao carregar dados dos chats: {cardChatsError}</p></div>;
   }
 
   const hotMatches = userMatchedCards.filter(card => card.isHot);
@@ -208,7 +199,7 @@ function MatchesPage() {
   const categoryOrder = ['Exposição', 'Fantasia', 'Poder', 'Sensorial', 'Conexão', 'Persona', 'Limites', 'UserCreated'];
 
   return (
-    <div className={styles.page} style={pageStyle}>
+    <div className={styles.page}>
       <div className={styles.header}>
         <h1 className={styles.pageTitle}>Seus Links</h1>
         <button onClick={handleMatchesButtonClick} className={`${styles.backToCardsButton} ${hasUnseenGlobalMatches ? styles.shakeAnimation : ''}`}>
@@ -252,15 +243,16 @@ function MatchesPage() {
                   const cardsForCategory = otherCardsByCategory[categoryName];
                   if (cardsForCategory && cardsForCategory.length > 0) {
                     return (
-                      <CategoryCarousel
-                        key={categoryName}
-                        title={categoryName}
-                        cards={cardsForCategory}
-                        onCardClick={handleCardClick}
-                        onToggleHot={handleToggleHot}
-                        unreadStatuses={unreadStatuses}
-                        cardChatsData={cardChatsData}
-                      />
+                      <div key={categoryName} className={styles.carouselCell}>
+                        <CategoryCarousel
+                          title={categoryName}
+                          cards={cardsForCategory}
+                          onCardClick={handleCardClick}
+                          onToggleHot={handleToggleHot}
+                          unreadStatuses={unreadStatuses}
+                          cardChatsData={cardChatsData}
+                        />
+                      </div>
                     );
                   }
                   return null;
@@ -268,15 +260,16 @@ function MatchesPage() {
                 {Object.entries(otherCardsByCategory)
                   .filter(([categoryName]) => !categoryOrder.includes(categoryName))
                   .map(([categoryName, cardsForCategory]) => (
-                    <CategoryCarousel
-                      key={categoryName}
-                      title={categoryName}
-                      cards={cardsForCategory}
-                      onCardClick={handleCardClick}
-                      onToggleHot={handleToggleHot}
-                      unreadStatuses={unreadStatuses}
-                      cardChatsData={cardChatsData}
-                    />
+                    <div key={categoryName} className={styles.carouselCell}>
+                      <CategoryCarousel
+                        title={categoryName}
+                        cards={cardsForCategory}
+                        onCardClick={handleCardClick}
+                        onToggleHot={handleToggleHot}
+                        unreadStatuses={unreadStatuses}
+                        cardChatsData={cardChatsData}
+                      />
+                    </div>
                 ))}
               </div>
             </section>

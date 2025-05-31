@@ -12,6 +12,10 @@
   padding-left: 15px; padding-right: 15px; padding-bottom: 15px; /* Mantém os outros paddings */
   box-sizing: border-box;
   background-color: var(--cor-fundo-pagina); /* Usa variável de paleta */
+  background-image: var(--bg-pile-url); /* Usa a variável CSS para a textura */
+  background-size: cover; /* Faz a imagem cobrir toda a área, mantendo proporção */
+  background-position: center center; /* Centraliza a imagem */
+  background-repeat: no-repeat; /* Evita que a imagem se repita */
   position: relative; /* Necessário para o posicionamento absoluto das SideTipMessages */
   color: var(--cor-texto-primario); /* Usa variável de paleta */
   font-family: var(--font-family-main, "Trebuchet MS", sans-serif); /* Usa variável de paleta */

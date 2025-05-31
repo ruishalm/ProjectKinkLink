@@ -1,7 +1,7 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\CardPilePage.tsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { useDrag } from '@use-gesture/react';
-import { Link, useNavigate } from 'react-router-dom'; // Restaurado o import do Link
+import { Link, useNavigate } from 'react-router-dom';
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
 import MatchModal from '../components/MatchModal';
 import PlayingCard, { type CardData as PlayingCardDataType } from '../components/PlayingCard';
@@ -11,8 +11,8 @@ import { useCardPileLogic } from '../hooks/useCardPileLogic';
 import CarinhosMimosModal from '../components/CarinhosMimosModal';
 import CardBack from '../components/CardBack';
 import type { Card } from '../data/cards';
-import { useSkin } from '../contexts/SkinContext'; // Importar o hook useSkin
-import SideTipMessages from '../components/SideTipMessages'; // Importar o novo componente
+import { useSkin } from '../contexts/SkinContext';
+import SideTipMessages from '../components/SideTipMessages';
 import styles from './CardPilePage.module.css';
 
 function CardPilePage() {
@@ -28,7 +28,7 @@ function CardPilePage() {
     handleConexaoInteractionInModal,
     allConexaoCards,
   } = useCardPileLogic();
-  const { activeSkins, isLoadingSkins } = useSkin(); // Usar o contexto de skin
+  const { isLoadingSkins } = useSkin(); // activeSkins não é mais usado diretamente aqui para o fundo
 
   const { matchedCards, seenCards, handleCreateUserCard, toggleHotStatus } = useUserCardInteractions();
   const navigate = useNavigate();
@@ -41,13 +41,11 @@ function CardPilePage() {
   const [cardDimensions, setCardDimensions] = useState({ width: 250, height: 350 });
   const [hasUnseenMatches, setHasUnseenMatches] = useState(false);
 
-  // Estado para as dicas laterais contextuais e aleatórias
   const [activeLeftTip, setActiveLeftTip] = useState<string | null>(null);
   const [activeRightTip, setActiveRightTip] = useState<string | null>(null);
   const [animateTipsIn, setAnimateTipsIn] = useState(false);
 
-  // Definição das dicas por categoria
-  type TipSet = { left: string[]; right: string[] }; // Mantém a definição de TipSet
+  type TipSet = { left: string[]; right: string[] };
   const categorySpecificTips: Record<Card['category'] | 'default', TipSet> = {
     poder: {
       left: [
@@ -233,7 +231,7 @@ function CardPilePage() {
         "Divirtam-se, mas com responsabilidade!"
       ],
     },
-    conexao: { // Chave 'conexao' adicionada
+    conexao: {
       left: [
         "Não sentiu a conexão com essa proposta? Ok.",
         "Prefere outra forma de se conectar agora?",
@@ -249,7 +247,7 @@ function CardPilePage() {
         "Celebrem os momentos juntos."
       ],
     },
-    default: { // Chave 'default' adicionada
+    default: {
       left: [
         "Não curtiu? Sem problemas, próxima!",
         "Se não é pra você, tudo bem.",
@@ -331,46 +329,38 @@ function CardPilePage() {
       }, 150);
       return () => clearTimeout(timer);
     }
-    if (!cardForDisplay && !isCardFlipped) {
-      // setIsCardFlipped(true); // Comentado para evitar loops, ajuste se necessário
-    }
   }, [cardForDisplay, exitingCard, isCardFlipped]);
 
-  // Efeito para atualizar as dicas laterais quando o card atual mudar
   useEffect(() => {
-    setAnimateTipsIn(false); // Reseta a animação para dicas anteriores ou ao carregar nova carta
+    setAnimateTipsIn(false); 
 
     if (currentCard) {
-      const tipsForCategory = categorySpecificTips[currentCard.category];
+      const tipsForCategory = categorySpecificTips[currentCard.category] || categorySpecificTips.default;
 
       let newLeftTip: string | null = null;
       let newRightTip: string | null = null;
 
-      if (tipsForCategory) {
-        if (tipsForCategory.left.length > 0) {
-          newLeftTip = tipsForCategory.left[Math.floor(Math.random() * tipsForCategory.left.length)];
-        }
-        if (tipsForCategory.right.length > 0) {
-          newRightTip = tipsForCategory.right[Math.floor(Math.random() * tipsForCategory.right.length)];
-        }
+      if (tipsForCategory.left.length > 0) {
+        newLeftTip = tipsForCategory.left[Math.floor(Math.random() * tipsForCategory.left.length)];
+      }
+      if (tipsForCategory.right.length > 0) {
+        newRightTip = tipsForCategory.right[Math.floor(Math.random() * tipsForCategory.right.length)];
       }
         
       setActiveLeftTip(newLeftTip);
       setActiveRightTip(newRightTip);
 
-      // Ativa a animação de fade-in para as novas dicas após um atraso
-      // (permitindo que a carta vire e o usuário a veja primeiro)
-      const fadeInDelay = 5000; // 6 segundos de atraso
+      const fadeInDelay = 5000;
       const timerId = setTimeout(() => {
         setAnimateTipsIn(true);
       }, fadeInDelay);
 
-      return () => clearTimeout(timerId); // Limpa o timeout se o currentCard mudar rapidamente
+      return () => clearTimeout(timerId);
     } else {
       setActiveLeftTip(null);
       setActiveRightTip(null);
     }
-  }, [currentCard]); // A dependência categorySpecificTips é estável
+  }, [currentCard]);
 
   const triggerHapticFeedback = (pattern: number | number[] = 30) => {
     if (navigator.vibrate) {
@@ -393,11 +383,11 @@ function CardPilePage() {
         if (Math.abs(vx) > SWIPE_VELOCITY_THRESHOLD || Math.abs(mx) > SWIPE_CONFIRM_DISTANCE_THRESHOLD) {
           if (dx > 0) {
             triggerHapticFeedback();
-            setAnimateTipsIn(false); // Faz a dica desaparecer instantaneamente
+            setAnimateTipsIn(false);
             setExitingCard({ id: cardForDisplay.id, direction: 'right' });
           } else if (dx < 0) {
             triggerHapticFeedback();
-            setAnimateTipsIn(false); // Faz a dica desaparecer instantaneamente
+            setAnimateTipsIn(false);
             setExitingCard({ id: cardForDisplay.id, direction: 'left' });
           }
         }
@@ -405,21 +395,12 @@ function CardPilePage() {
     }
   });
 
-  const pageStyle: React.CSSProperties = {};
-  if (!isLoadingSkins && activeSkins.backgroundPileUrl) {
-    pageStyle.backgroundImage = `url(${activeSkins.backgroundPileUrl})`;
-    // Adicione outras propriedades de background se necessário, como:
-    // pageStyle.backgroundSize = 'cover';
-    // pageStyle.backgroundPosition = 'center';
-    // pageStyle.backgroundRepeat = 'no-repeat';
-  }
-
   if (isLoadingSkins) {
-    return <div className={styles.page}><p>Carregando...</p></div>;
+    return <div className={styles.page}><p>Carregando skins...</p></div>;
   }
 
   return (
-    <div className={styles.page} style={pageStyle}>
+    <div className={styles.page}>
       {showMatchModal && currentMatchCard && (
         <MatchModal
           card={currentMatchCard}
@@ -434,7 +415,7 @@ function CardPilePage() {
           onAccept={() => handleConexaoInteractionInModal(true)}
           onReject={() => handleConexaoInteractionInModal(false)}
           onClose={() => {
-            handleConexaoInteractionInModal(false);
+            handleConexaoInteractionInModal(false); // Considera fechar como rejeitar
           }}
         />
       )}
@@ -463,14 +444,13 @@ function CardPilePage() {
       {cardForDisplay ? (
         <>
           <div className={styles.cardStackContainer}>
-            {/* SideTipMessages is now a child of cardStackContainer for better relative positioning */}
             <SideTipMessages
               leftMessage={activeLeftTip}
               rightMessage={activeRightTip}
               animateIn={animateTipsIn}
               cardWidth={cardDimensions.width}
             />
-            {cardForDisplay && (
+            {cardForDisplay && ( // Renderiza o fundo estático apenas se houver uma carta para exibir
               <div className={styles.staticCardBack}>
                 <CardBack
                   targetWidth={cardDimensions.width}
@@ -508,7 +488,7 @@ function CardPilePage() {
               className={styles.dislikeButton}
               onClick={() => {
                 if (cardForDisplay && !exitingCard) {
-                  setAnimateTipsIn(false); // Faz a dica desaparecer instantaneamente
+                  setAnimateTipsIn(false);
                   setExitingCard({ id: cardForDisplay.id, direction: 'left' });
                 }
               }}
@@ -523,7 +503,7 @@ function CardPilePage() {
               className={styles.likeButton}
               onClick={() => {
                 if (cardForDisplay && !exitingCard) {
-                  setAnimateTipsIn(false); // Faz a dica desaparecer instantaneamente
+                  setAnimateTipsIn(false);
                   setExitingCard({ id: cardForDisplay.id, direction: 'right' });
                 }
               }}
@@ -595,9 +575,8 @@ function CardPilePage() {
         >
           Links ({matchedCards.length})
         </button>
-        {/* Botão de Perfil restaurado */}
         <Link to="/profile" className={styles.profileNavButton} aria-label="Perfil" title="Perfil">
-          👤 {/* Ícone de silhueta Unicode */}
+          👤
         </Link>
       </div>
       <div className={styles.cardCounters}>

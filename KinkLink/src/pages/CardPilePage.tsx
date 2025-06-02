@@ -573,12 +573,12 @@ function CardPilePage() {
         )}
       </div>
       {/* Contadores de cartas voltam a ser um elemento simples */}
-      <div className={styles.cardCounters}>
-        <span className={styles.counterItem}>
+      <div className={`${styles.cardCounters} klnkl-card-counters`}>
+        <span className={`${styles.counterItem} klnkl-counter-item`}>
           Cartas Vistas: <span className={styles.counterValue}>{seenCards.length}</span>
         </span>
-        <span className={styles.counterSeparator}>|</span>
-        <span className={styles.counterItem}>
+        <span className={`${styles.counterSeparator} klnkl-counter-separator`}>|</span>
+        <span className={`${styles.counterItem} klnkl-counter-item`}>
           Restantes: <span className={styles.counterValue}>{unseenCardsCount}</span>
         </span>
       </div>

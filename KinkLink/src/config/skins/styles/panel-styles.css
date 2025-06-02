@@ -244,7 +244,7 @@ html.klnkl-panel-xp-active::after {
 }
 
 /* Estiliza os contadores de cartas como a área do relógio na skin XP */
-html.klnkl-panel-xp-active ._cardCounters_ibwf7_437 {  /* Classe atualizada */
+html.klnkl-panel-xp-active .klnkl-card-counters { /* Alterado para usar a classe global estável */
   position: fixed !important;
   /* Posicionado à esquerda, após "Links", "Perfil" e "Mimos" */
   left: 337px !important; /* Estimativa: 135 (Links) + 4 (margem) + 95 (Perfil) + 4 (margem) + 95 (Mimos) + 4 (margem) */
@@ -262,7 +262,7 @@ html.klnkl-panel-xp-active ._cardCounters_ibwf7_437 {  /* Classe atualizada */
 }
 
 /* Estilo para os "quadrados" dos contadores (estilo janela inativa XP) */
-html.klnkl-panel-xp-active ._cardCounters_ibwf7_437 ._counterItem_ibwf7_463 {
+html.klnkl-panel-xp-active .klnkl-card-counters .klnkl-counter-item { /* Alterado para usar a classe global estável */
   background-color: #3C7DDC !important; /* Mesma cor da borda superior da barra principal */
   color: #FFFFFF !important;
   padding: 1px 8px !important; /* Padding interno do "botão" */
@@ -283,7 +283,7 @@ html.klnkl-panel-xp-active ._cardCounters_ibwf7_437 ._counterItem_ibwf7_463 {
 }
 
 /* Estilo para o separador "|" */
-html.klnkl-panel-xp-active ._cardCounters_ibwf7_437 ._counterSeparator_ibwf7_483 {
+html.klnkl-panel-xp-active .klnkl-card-counters .klnkl-counter-separator { /* Alterado para usar a classe global estável */
   /* margin: 0 1px !important; */
   /* color: #FFFFFF !important; */
   /* line-height: 20px; */
@@ -297,7 +297,7 @@ html.klnkl-panel-xp-active ._page_q1wma_3 {
 }
 
 /* Estilo para o botão "Links" (_matchesNavButton_ibwf7_517) como Botão Iniciar XP */
-html.klnkl-panel-xp-active ._matchesNavButton_ibwf7_517 {
+html.klnkl-panel-xp-active .klnkl-nav-matches { /* Alterado para usar a classe global estável */
   position: fixed !important;
   left: 0 !important;
   bottom: 0 !important;
@@ -335,7 +335,7 @@ html.klnkl-panel-xp-active ._matchesNavButton_ibwf7_517 {
 }
 
 /* Ícone da bandeira do Windows para o botão "Iniciar" */
-html.klnkl-panel-xp-active ._matchesNavButton_ibwf7_517::before {
+html.klnkl-panel-xp-active .klnkl-nav-matches::before { /* Alterado para usar a classe global estável */
   content: '';
   display: inline-block;
   width: 16px; /* Largura do ícone */
@@ -349,8 +349,8 @@ html.klnkl-panel-xp-active ._matchesNavButton_ibwf7_517::before {
 }
 
 /* Estilo para os botões de ícone (❤️ e 👤) como "quadrados" na barra XP */
-html.klnkl-panel-xp-active ._bottomNavIconStyle_ibwf7_547.klnkl-nav-cards,
-html.klnkl-panel-xp-active ._bottomNavIconStyle_ibwf7_547.klnkl-nav-profile {
+html.klnkl-panel-xp-active .klnkl-nav-cards, /* Removida a classe com hash */
+html.klnkl-panel-xp-active .klnkl-nav-profile { /* Removida a classe com hash */
   position: fixed !important;
   bottom: 4px !important; /* Alinhamento vertical dentro da barra de 30px */
   height: 20px !important; /* Mesma altura dos quadrados dos contadores */
@@ -383,27 +383,27 @@ html.klnkl-panel-xp-active ._bottomNavIconStyle_ibwf7_547.klnkl-nav-profile {
 }
 
 /* Posicionamento específico para cada ícone à direita */
-html.klnkl-panel-xp-active ._bottomNavIconStyle_ibwf7_547.klnkl-nav-cards { /* Ícone ❤️ (Mimos) */
+html.klnkl-panel-xp-active .klnkl-nav-cards { /* Ícone ❤️ (Mimos) - Removida a classe com hash */
   /* Posicionado à esquerda, após "Links" e "Perfil" */
   left: 238px !important; /* Estimativa: 135 (Links) + 4 (margem) + 95 (Perfil) + 4 (margem) */
   right: auto !important; /* Remove o alinhamento à direita */
   margin-right: 0 !important; /* Não é mais necessário, o espaçamento é pelo 'left' e largura */
 }
-html.klnkl-panel-xp-active ._bottomNavIconStyle_ibwf7_547.klnkl-nav-cards::after {
+html.klnkl-panel-xp-active .klnkl-nav-cards::after { /* Removida a classe com hash */
   content: 'Mimos';
   font-size: 0.85em; /* Tamanho da fonte do texto, herda a família */
   margin-left: 5px; /* Espaço entre o ícone e o texto */
   line-height: normal; /* Garante que não interfira no alinhamento flex */
 }
 
-html.klnkl-panel-xp-active ._bottomNavIconStyle_ibwf7_547.klnkl-nav-profile { /* Ícone 👤 (Perfil) */
+html.klnkl-panel-xp-active .klnkl-nav-profile { /* Ícone 👤 (Perfil) - Removida a classe com hash */
   /* Ajuste o valor de 'right' conforme a largura final do botão "Mimos" */
   /* Posicionado à esquerda, após o botão "Links" */
   left: 139px !important; /* Estimativa: 135px (min-width do Links) + 4px (margem) */
   right: auto !important; /* Remove o alinhamento à direita */
   margin-right: 0 !important; /* Não é mais necessário */
 }
-html.klnkl-panel-xp-active ._bottomNavIconStyle_ibwf7_547.klnkl-nav-profile::after {
+html.klnkl-panel-xp-active .klnkl-nav-profile::after { /* Removida a classe com hash */
   content: 'Perfil';
   font-size: 0.85em; /* Tamanho da fonte do texto, herda a família */
   margin-left: 5px; /* Espaço entre o ícone e o texto */

@@ -12,9 +12,6 @@
   padding-left: 15px; padding-right: 15px; padding-bottom: 15px; /* Mantém os outros paddings */
   box-sizing: border-box;
   background-color: var(--cor-fundo-pagina); /* Mantém a cor de fundo da página */
-  /* Padding inferior padrão, já que cardCounters não será fixo */
-  padding-bottom: 15px; 
-  /* A textura da pilha foi movida para .cardStackContainer */
   position: relative; /* Necessário para o posicionamento absoluto das SideTipMessages */
   color: var(--cor-texto-primario); /* Usa variável de paleta */
   font-family: var(--font-family-main, "Trebuchet MS", sans-serif); /* Usa variável de paleta */

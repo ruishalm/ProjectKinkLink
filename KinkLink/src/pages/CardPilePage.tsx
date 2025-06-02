@@ -484,16 +484,6 @@ function CardPilePage() {
               </div>
             </div>
 
-            {/* Botão "Crie seu Kink" MOVIDO PARA CÁ */}
-            <button
-              onClick={() => setShowCreateUserCardModal(true)}
-              className={`${styles.createKinkButton} genericButton`}
-              title="Criar novo Kink"
-              aria-label="Criar novo Kink"
-            >
-              Criar Kink
-            </button>
-
             <div className={`${styles.allButtonsPanel} klnkl-themed-panel`}>
               <div className={styles.buttonContainer}>
                 <button
@@ -526,6 +516,16 @@ function CardPilePage() {
               ❤️ Topo!
                 </button>
               </div>
+
+              {/* Botão "Criar Kink" movido para dentro do painel e com classe global estável */}
+              <button
+                onClick={() => setShowCreateUserCardModal(true)}
+                className="klnkl-create-kink-btn genericButton" /* Classe global para estilização no panel-styles.css */
+                title="Criar novo Kink"
+                aria-label="Criar novo Kink"
+              >
+                Criar Kink
+              </button>
 
               <div className={styles.bottomNavContainer}>
                 <button className={`${styles.bottomNavIconStyle} ${styles.ballButton} genericButton klnkl-icon-nav-button klnkl-nav-cards`} onClick={() => setShowCarinhosMimosModal(true)} title="Carinhos & Mimos">

@@ -80,6 +80,60 @@ html.klnkl-panel-xp-active ._YOUR_PROFILE_PAGE_MAIN_CONTAINER_CLASS_.klnkl-theme
 }
 
 /*
+  Ajuste específico para o painel que contém os botões de decisão e navegação
+  na CardPilePage (identificado pela classe _allButtonsPanel_XXXX_YYY do seu CSS Module)
+  quando o tema XP está ativo.
+  Isso empurrará os botões de decisão ("Topo!", "Não Topo!") mais para baixo.
+  Substitua _allButtonsPanel_XXXX_YYY pela classe correta gerada para styles.allButtonsPanel.
+*/
+/* Ajuste para o painel de botões na CardPilePage usando a classe gerada _allButtonsPanel_bzdqe_617.
+   Isso adiciona padding no topo do painel que contém os botões de decisão ("Topo!", "Não Topo!"),
+   empurrando-os para baixo quando o tema XP está ativo. */
+html.klnkl-panel-xp-active ._allButtonsPanel_bzdqe_617.klnkl-themed-panel { /* Painel de botões da CardPilePage */
+  /* Aumenta a espessura da borda cinza inferior (via box-shadow) para que ela passe acima do botão "Criar Kink".
+     O botão "Criar Kink" tem 28px de altura e está a 10px do bottom. Seu topo está a 38px do bottom.
+     Uma borda inferior de 45px passará 7px acima do botão. */
+  box-shadow: 
+    inset 0px 20px 0px 0px #ECE9D8,   /* Borda cinza superior de 20px */
+    inset 6px 0px 0px 0px #ECE9D8,    /* Borda cinza esquerda de 6px */
+    inset -6px 0px 0px 0px #ECE9D8,   /* Borda cinza direita de 6px */
+    inset 0px -45px 0px 0px #ECE9D8 !important; /* NOVA Borda cinza inferior de 45px de espessura */
+  border-bottom-style: none !important; /* Remove a linha azul da borda inferior apenas neste painel */
+  padding-top: 40px !important; /* Aumenta o padding superior para empurrar o conteúdo para baixo */
+  /* Os botões de navegação (Mimos, Perfil, Links) são movidos para a barra inferior
+     pelo tema XP, então este padding afetará apenas os botões de decisão. */
+}
+
+
+/*
+  Posiciona o botão "Criar Kink" (com a classe global klnkl-create-kink-btn)
+  no canto inferior direito do painel de botões da CardPilePage
+  quando o tema XP está ativo.
+*/
+html.klnkl-panel-xp-active ._allButtonsPanel_bzdqe_617.klnkl-themed-panel .klnkl-create-kink-btn {
+  position: absolute !important;
+  bottom: 10px !important; /* Distância da borda inferior do painel (considerando o padding cinza interno) */
+  right: 10px !important;  /* Distância da borda direita do painel (considerando o padding cinza interno) */
+  
+  /* Ajustes de aparência para o botão "Criar Kink" no tema XP */
+  height: 28px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  line-height: 26px !important; /* Altura (28px) - bordas (2px) */
+  font-size: 0.85em !important; /* Similar aos botões de decisão */
+  /* O padding horizontal, gradiente, cor da fonte, etc., virão da classe .genericButton no tema XP */
+}
+
+/*
+  Remove a borda superior do container de navegação inferior (_bottomNavContainer_bzdqe_307)
+  dentro do painel de botões da CardPilePage, quando o tema XP está ativo,
+  para evitar um "risco" indesejado.
+*/
+html.klnkl-panel-xp-active ._allButtonsPanel_bzdqe_617.klnkl-themed-panel ._bottomNavContainer_bzdqe_307 {
+  border-top: none !important;
+}
+
+/*
   Garante que o texto DENTRO DAS ÁREAS QUE SE TORNARAM TRANSPARENTES na SkinsPage
   (como o título da página e os botões de navegação no cabeçalho)
   seja preto quando o painel XP estiver ativo, mesmo que a paleta global seja escura.
@@ -110,16 +164,31 @@ html.klnkl-panel-xp-active ._skinSection_wr3xi_173.klnkl-themed-panel button:not
   color: #000000; /* Texto preto */
 }
 
-/* Botão 'X' estilizado para painéis XP que se parecem com janelas */
-/* Não se aplica a painéis que são especificamente transparentes na SkinsPage */
-html.klnkl-panel-xp-active .klnkl-themed-panel:not(._page_wr3xi_3):not(._pageHeaderControls_wr3xi_21)::after {
+/* Menu Falso e Botão 'X' para painéis XP que se parecem com janelas */
+/* Não se aplica a painéis que são especificamente transparentes (SkinsPage, ProfilePage) */
+/* Lembre-se de substituir _YOUR_PROFILE_PAGE_MAIN_CONTAINER_CLASS_ pela classe correta se ainda não o fez. */
+html.klnkl-panel-xp-active .klnkl-themed-panel:not(._page_wr3xi_3):not(._pageHeaderControls_wr3xi_21):not(._YOUR_PROFILE_PAGE_MAIN_CONTAINER_CLASS_)::before {
+  content: "   Arquivos   Editar   Exibir   Favoritos   Ajuda"; /* Voltando para espaços normais. Sublinhar letras específicas não é possível via CSS content. */
+  position: absolute;
+  top: 2px;    /* Ajuste fino para posicionar dentro da barra cinza superior (20px de altura) */
+  left: 10px;  /* Após a borda cinza interna esquerda de 6px, com um pequeno respiro */
+  font-family: Tahoma, Verdana, Arial, sans-serif;
+  font-size: 11px; /* Tamanho típico de menu XP */
+  color: #000000; /* Texto preto */
+  white-space: pre; /* Faz com que múltiplos espaços sejam respeitados */
+  line-height: 1; /* Compacto */
+  z-index: 15; /* Abaixo do botão 'X', mas acima de outro conteúdo do painel se necessário */
+  pointer-events: none; /* Para não interferir com interações de mouse */
+}
+
+html.klnkl-panel-xp-active .klnkl-themed-panel:not(._page_wr3xi_3):not(._pageHeaderControls_wr3xi_21):not(._YOUR_PROFILE_PAGE_MAIN_CONTAINER_CLASS_)::after {
   content: '×'; /* Usando o caractere de multiplicação para o 'X' */
   position: absolute;
   /* Posicionado para centralizar verticalmente na borda azul superior de 20px.
      top:0 é a padding-edge. Borda azul está "acima" disso.
      Offset = -(altura_borda_azul - (altura_borda_azul - altura_botao)/2) = -(20 - 3) = -17px */
   top: -17px; 
-  right: 5px; /* Espaçamento da borda direita */
+  right: 6px; /* Espaçamento da borda direita, alinhado com a borda cinza interna */
   width: 14px; /* Tamanho do botão X */
   height: 14px; /* Tamanho do botão X */
   background-color: #FF8C00; /* Laranja escuro (Windows XP usa um laranja/vermelho para fechar) */
@@ -194,16 +263,16 @@ html.klnkl-panel-xp-active .ck-theme-button:focus {
 
 /* Ajustes de dimensão para botões específicos na CardPilePage e BottomNav quando a skin XP está ativa */
 /* Botões "Topo!" e "Passo" - São <button> */
-html.klnkl-panel-xp-active button._botaoDecisao_q1wma_163, /* Atualizado de _3av9x_65 */
-html.klnkl-panel-xp-active button._likeButton_q1wma_179,    /* Atualizado de _3av9x_80 */
-html.klnkl-panel-xp-active button._dislikeButton_q1wma_191 { /* Assumindo _q1wma_191 para dislike, VERIFIQUE! */
-  min-height: 32px !important;
-  height: 32px !important;
+/* Ambos os botões de decisão ("Topo!", "Não Topo!") usam a classe styles.botaoDecisao do CardPilePage.module.css.
+   A classe _botaoDecisao_bzdqe_159 foi identificada nos botões de decisão. */
+html.klnkl-panel-xp-active button._botaoDecisao_bzdqe_159 { /* ATUALIZADO com o novo hash bzdqe */
+  min-height: 28px !important; /* Nova altura sugerida */
+  height: 28px !important;     /* Nova altura sugerida */
   padding-top: 0 !important;
   padding-bottom: 0 !important;
   /* O padding horizontal virá do estilo XP base para .genericButton (5px 12px) */
-  line-height: 30px !important; /* Ligeiramente menor que a altura para acomodar a borda */
-  font-size: 0.9em !important; /* Reduzir o tamanho da fonte se necessário */
+  line-height: 26px !important; /* Ajuste para a nova altura (altura - bordas) */
+  font-size: 0.85em !important; /* Pode precisar ajustar a fonte para caber */
 }
 
 /* Botão "Links" na navegação inferior - É <button> */

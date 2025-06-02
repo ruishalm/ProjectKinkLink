@@ -305,3 +305,14 @@
      já que o filter: brightness(90%) já é aplicado por .matchesNavButton:hover */
   transition: box-shadow 0.2s ease-in-out, filter 0.2s ease; /* Adiciona box-shadow à transição */
 }
+
+.allButtonsPanel {
+  /* Esta classe pode ficar vazia por enquanto,
+     ou você pode adicionar estilos depois se precisar.
+     Exemplo:
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     width: 100%;
+  */
+}

@@ -1,0 +1,75 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\CardChatModal.module.css */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7); /* Fundo escuro semi-transparente */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000; /* Garante que fique sobre outros elementos */
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.modalContent {
+  background-color: #2c2c2c; /* Cor de fundo interna, consistente com chatContainer */
+  border-radius: 12px; /* Raio similar ao CardBack */
+  border: 8px solid #b71c1c; /* Borda vermelha escura, como no CardBack */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 380px; /* Largura aumentada para formato de carta */
+  height: 532px; /* Altura aumentada para formato de carta (proporção ~2.5:3.5) */
+  max-width: 95vw; /* Garante que não ultrapasse 95% da largura da viewport */
+  max-height: 90vh; /* Garante que não ultrapasse 90% da altura da viewport */
+  display: flex;
+  flex-direction: column;
+  position: relative; /* Para posicionar o botão de fechar */
+  overflow: hidden; /* Garante que os cantos arredondados da borda sejam respeitados pelos filhos */
+  box-sizing: border-box; /* Para que a borda não aumente o tamanho total */
+}
+
+.closeButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  padding: 5px;
+  line-height: 1;
+  z-index: 10; /* Sobre o header do chat, se houver */
+}
+
+.closeButton:hover {
+  color: #fff;
+}
+
+/* Ajuste para o chatContainer (do CardChat.module.css) quando dentro do modalContent */
+.modalContent > div[class*="chatContainer_"] { /* Seleciona o .chatContainer do CardChat.module.css */
+  box-shadow: none; /* Remove sombra duplicada se o modalContent já tiver */
+  flex-grow: 1; /* Faz o chatContainer ocupar o espaço disponível antes do botão de desfazer */
+  min-height: 0; /* Ajuda o flex-grow a funcionar corretamente em alguns cenários */
+  /* O chatContainer não precisa de border-radius próprio aqui, pois o modalContent já cuida disso */
+}
+
+.destructiveButton {
+  /* background-color e color devem vir de genericButtonDestructive.
+     Se precisar de um override específico ou se genericButtonDestructive não definir cor:
+     background-color: #d9534f;
+     color: white; */
+  /* border, padding, cursor, font-weight, transition
+     são herdados de genericButton. */
+  text-align: center;
+  margin: 0; /* O botão agora é um filho direto do modalContent */
+  width: 100%; 
+  box-sizing: border-box;
+  flex-shrink: 0; /* Impede que o botão encolha */
+}
+
+.destructiveButton:hover {
+  /* O hover (ex: filter: brightness(90%)) virá de genericButton/genericButtonDestructive.
+     Se um hover específico de cor for necessário, defina aqui: background-color: #c9302c; */
+}

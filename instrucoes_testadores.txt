@@ -1,0 +1,70 @@
+Olá, Testador(a) KinkLink! 👋
+
+Muito obrigado por dedicar seu tempo para nos ajudar a testar a primeira versão do KinkLink! Seu feedback é super importante para nós.
+
+O KinkLink é um app pensado para casais explorarem seus desejos, fantasias e formas de conexão de uma maneira divertida e consensual.
+
+**O que gostaríamos que você testasse (idealmente com seu parceiro(a)):**
+
+1.  **Cadastro e Login:**
+    *   Crie uma conta (você e seu/sua parceiro(a) precisarão de contas separadas).
+    *   Faça o login. O processo foi tranquilo?
+
+2.  **Vínculo de Casal:**
+    *   Um de vocês deve gerar um código na página "Vincular Casal" (acessível pelo Perfil).
+    *   O outro deve inserir esse código para se conectar.
+    *   Deu tudo certo? A página de perfil reflete que vocês estão vinculados?
+
+3.  **Explorando as Cartas (Tela Principal):**
+    *   Navegue pelas cartas. Dê "Topo!" (like) ou "Passo" (dislike).
+    *   A experiência de ver as cartas é fluida?
+
+4.  **Criação de "Links" (Matches):**
+    *   Quando ambos curtem a mesma carta, um "Link" é formado.
+    *   O modal de "LINK! 🎉" apareceu?
+    *   A carta apareceu na sua página de "Links" (acessível pela barra de navegação inferior)?
+
+5.  **Chat dos Links:**
+    *   Abra o chat de um "Link" a partir da página "Links".
+    *   Troquem algumas mensagens. O chat funciona bem?
+    *   Teste o botão "Desfazer Link com esta Carta" dentro do chat. A carta sumiu da lista de Links e voltou para a pilha (vocês podem vê-la novamente no futuro)?
+
+6.  **Favoritar "Links" (Top Links):**
+    *   Na página de "Links", clique no ícone de fogo (🔥) em algumas cartas para marcá-las como "Top Links".
+    *   Elas se moveram para a seção "Top Links"? O ícone mudou de cor?
+
+7.  **Criação de Cartas Personalizadas:**
+    *   Na tela de ver cartas, use o botão "Crie seu Kink" (o ícone de verso de carta pequeno).
+    *   Crie uma carta com texto e categoria.
+    *   Essa carta apareceu para seu/sua parceiro(a) como a próxima ou uma das próximas cartas a serem vistas? (Pode levar uma ou duas interações para ela surgir).
+
+8.  **Cartas de Conexão e Modal "Carinhos & Mimos":**
+    *   Após algumas interações (likes/links), uma "Carta de Conexão" deve aparecer. Responda a ela.
+    *   Na tela de ver cartas, clique no ícone de coração (❤️) na barra de navegação inferior.
+    *   O modal "Carinhos & Mimos" abriu? Ele lista as cartas de conexão que já apareceram para você?
+    *   Marque algumas como "feito". O estado persiste se você fechar e reabrir o modal?
+
+9.  **Perfil:**
+    *   Acesse seu perfil. As informações parecem corretas?
+    *   Tente editar seu nome de usuário e bio.
+    *   A opção de "Gerenciar Vínculo" está clara?
+
+10. **Desvincular (Opcional - Cuidado!):**
+    *   Se quiserem testar o fluxo completo, um de vocês pode tentar "Desfazer Vínculo" na página de "Gerenciar Vínculo".
+    *   Isso deve desconectar o casal.
+
+**Feedback:**
+Por favor, anote qualquer coisa que:
+*   Não funcionou como esperado (bugs, erros).
+*   Pareceu confuso ou difícil de usar.
+*   Você achou que poderia ser melhorado.
+*   Você gostou muito! :)
+
+Você pode nos enviar seu feedback por [defina aqui como você quer receber o feedback: email, WhatsApp, um formulário Google Forms, etc.].
+
+**Link para o App:**
+https://kinklink.netlify.app
+
+Mais uma vez, muito obrigado! Divirtam-se explorando!
+
+Equipe KinkLink

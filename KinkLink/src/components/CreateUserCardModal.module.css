@@ -1,0 +1,166 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\CreateUserCardModal.module.css */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1070;
+}
+
+.modalContent {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  padding: 30px 40px;
+  border-radius: 20px;
+  text-align: left;
+  max-width: 600px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  border: 1px solid #444;
+  font-family: "Trebuchet MS", sans-serif;
+}
+
+.headerTitle {
+  margin-top: 0;
+  color: #61dafb;
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #61dafb;
+}
+
+.controlsContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 25px;
+  gap: 20px;
+}
+
+.controlGroup {
+  flex-grow: 1;
+}
+
+.controlGroupIntensity {
+  /* Específico para o grupo de intensidade se precisar de menos espaço */
+}
+
+.select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #555;
+  background-color: #3a3f47;
+  color: #e0e0e0;
+  font-size: 1em;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.inputNumber {
+  composes: select;
+  width: 80px;
+  text-align: center;
+}
+
+.cardPreviewContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 25px;
+  position: relative;
+  min-height: 350px;
+}
+
+.cardBackPreview {
+  position: absolute;
+  z-index: 1;
+  opacity: 0.8;
+}
+
+.cardVisual {
+  width: 250px;
+  height: 350px;
+  border-radius: 12px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.cardCorner {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  text-align: center;
+  line-height: 1;
+}
+
+.intensityNumber {
+  font-size: 2.5em;
+  font-weight: bold;
+  display: block;
+}
+
+.suit {
+  font-size: 0.7em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-top: 2px;
+}
+
+.cardCenterText {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.textarea {
+  flex-grow: 1;
+  padding: 15px;
+  border: 1px solid #555;
+  background-color: #3a3f47;
+  color: #e0e0e0;
+  font-size: 1em;
+  box-sizing: border-box;
+  resize: vertical;
+  border-radius: 6px;
+  min-height: 150px;
+  /* Estilos para textarea dentro da carta */
+  background-color: transparent;
+  border: none;
+  text-align: center;
+  font-size: 1.1em;
+}
+
+.buttonContainer {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.button {
+  border: none;
+  background-color: #61dafb;
+  color: #20232a;
+  /* padding, font-size, border-radius, cursor, font-weight, transition
+     são agora primariamente herdados de 'genericButton'.
+     Mantenha 'padding: 12px 25px;' ou 'font-size: 1.1em;' aqui se forem
+     substituições intencionais aos valores do genericButton.
+     'border: none;' é importante se genericButton adicionar uma borda e você não a quiser aqui. */
+}

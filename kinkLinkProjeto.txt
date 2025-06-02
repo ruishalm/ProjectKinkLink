@@ -1,0 +1,72 @@
+# Resumo do Projeto: KinkLink
+
+**1. Visão Geral:**
+
+*   **Nome:** KinkLink
+*   **Resumo:** Um aplicativo (PWA) projetado para casais descobrirem interesses e desejos mútuos (incluindo atividades cotidianas, românticas e NSFW) de forma anônima e gamificada. A interação principal ocorre através do swipe (aceitar/rejeitar) em cartas. Um "match" só é revelado quando ambos os parceiros expressam interesse na mesma carta (exceto para cartas especiais 'Conexão'), criando uma lista compartilhada de interesses mútuos e sugestões de interação.
+*   **Público-Alvo:** Casais que buscam melhorar a comunicação sobre desejos e atividades, fortalecer a conexão através de pequenos gestos, e explorar sua intimidade de maneira privada e divertida.
+
+**2. Conceito e Mecânicas Principais:**
+
+*   **Vinculação Segura:** Usuários fazem login individualmente (Firebase Auth). A vinculação ocorre através de um código único e temporário gerado por um parceiro e inserido pelo outro. O sistema valida o código e estabelece a ligação entre as contas no backend (Firestore). A desvinculação também é possível.
+*   **Mecanismo de Cartas:**
+    *   **Tipos de Cartas (Nipes):**
+        *   **Sensorial, Poder, Fantasia, Exposição:** Cartas com propostas de atividades, desejos ou cenários, variando em intensidade. Estas cartas seguem a lógica de match.
+        *   **Conexão (MVP):** Cartas especiais que aparecem periodicamente, sugerindo pequenos gestos de carinho ou ações positivas (ex: "Faça um elogio", "Compre um bombom"). **Não geram match**. O aceite/rejeição é registrado em contadores internos (ocultos no MVP) para cada usuário.
+        *   **Personalizadas:** Cartas criadas pelo próprio casal, visíveis apenas para eles.
+    *   **Interação:** Usuários visualizam uma carta por vez e interagem via swipe simplificado ou botões (Aceitar/Rejeitar). Uma animação acompanha a ação.
+*   **Lógica de Match:** Para cartas que não são 'Conexão', se ambos os parceiros "aceitarem" (derem 'like') a mesma carta, um match é criado e adicionado a uma lista compartilhada.
+*   **Lista de Matches:** Uma tela dedicada exibe todas as cartas que tiveram match, permitindo que o casal veja seus interesses em comum. Matches podem ser removidos da lista principal.
+
+**3. Funcionalidades (MVP - Mínimo Produto Viável):**
+
+*   Autenticação completa (Firebase).
+*   Fluxo de vinculação e desvinculação de contas via código.
+*   Visualização e swipe/interação com todos os tipos de cartas (pré-definidas, conexão, personalizadas).
+*   Lógica de registro de swipes (diferenciada para cartas 'Conexão').
+*   Lógica de detecção e criação de Matches (para cartas normais).
+*   Exibição e remoção de itens na Lista de Matches.
+*   Conteúdo inicial de cartas pré-definidas (baseado em `Cartas provisorias.json` + cartas 'Conexão', necessitando revisão humana).
+*   Funcionalidade para usuários criarem suas próprias cartas ('Cartas em Branco').
+*   Navegação básica por abas (Cartas, Matches, Perfil).
+*   Tela de Perfil básica com opção de troca de tema (Safado/Romântico) e desvinculação.
+*   Registro interno (oculto) dos contadores de aceite/rejeição das cartas 'Conexão'.
+*   Aviso de conteúdo NSFW.
+
+**4. Funcionalidades Futuras:**
+
+*   Uso dos contadores 'Conexão' (relatórios, badges).
+*   Interação com Post-its nos matches.
+*   Álbum de fotos compartilhado.
+*   Marcar matches como "realizados".
+*   Filtros/Busca na lista de matches.
+*   Notificações Push.
+*   Melhorias PWA (offline, etc.).
+*   Desfazer swipe.
+*   E mais...
+
+**5. Estratégia de Conteúdo:**
+
+*   **Cartas Iniciais:** Um conjunto pré-definido abrangendo as 5 categorias (Sensorial, Poder, Fantasia, Exposição, Conexão). A base inicial (`Cartas provisorias.json`) foi gerada via IA e necessita de revisão e refinamento humano. Novas cartas 'Conexão' precisam ser criadas.
+*   **Cartas do Usuário:** Permitir que casais criem conteúdo privado.
+
+**6. Tecnologia:**
+
+*   **Frontend:** React.js com TypeScript, usando Vite. Abordagem PWA.
+*   **Backend:** Firebase (Authentication para login, Firestore como banco de dados NoSQL).
+*   **Banco de Dados (Firestore):** Coleções planejadas para `users` (com contadores 'Conexão'), `pendingLinks`, `cards`, `userCards`, `couples`, `userSwipes`, `matches`.
+
+**7. Ferramentas Auxiliares:**
+
+*   **Card Creator:** Ferramenta local (HTML/CSS/JS) desenvolvida para auxiliar na criação/visualização do formato JSON das cartas pré-definidas. Não será usada pelos usuários finais no app.
+
+**8. Próximos Passos (Desenvolvimento):**
+
+*   Seguir o `developmentWorkflow` detalhado no `project_context.json`, começando pelo Milestone 1 (Fundação e Autenticação) e progredindo através dos Milestones até completar o MVP.
+*   Criar o conteúdo das cartas 'Conexão'.
+*   Revisar e refinar o conteúdo das cartas provisórias.
+*   Implementar a lógica diferenciada para o swipe das cartas 'Conexão'.
+
+ cd kinklink
+  npm install
+  npm run dev

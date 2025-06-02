@@ -1,0 +1,138 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\UnlockNotificationModal.module.css */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--cor-overlay, rgba(0, 0, 0, 0.7));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000; /* Acima de outros conteúdos */
+  padding: 20px;
+}
+
+.modalContent {
+  background-color: var(--cor-secundaria, #2c2c2c); /* Usando uma das suas variáveis */
+  padding: 25px 30px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  max-width: 450px;
+  width: 100%;
+  position: relative;
+  animation: fadeInScale 0.3s ease-out;
+  color: var(--cor-texto-primario, #f0f0f0); /* Já usa variável, ótimo! */
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.closeButtonTop {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 2em;
+  color: var(--cor-texto-secundario, #aaa); /* Já usa variável */
+  cursor: pointer;
+  line-height: 1;
+}
+
+.closeButtonTop:hover {
+  color: var(--cor-texto-primario, #fff); /* Já usa variável */
+}
+
+.title {
+  font-size: 1.8em;
+  color: var(--cor-primaria, #76c7c0); /* Usando uma das suas variáveis */
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.skinItem {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: var(--cor-fundo-item, #3a3a3a); /* Exemplo de variável */
+  border-radius: 8px;
+  border: 1px solid var(--cor-borda-item, #4a4a4a); /* Exemplo de variável */
+}
+
+.skinName {
+  font-size: 1.3em;
+  color: var(--cor-texto-nome-skin-modal, #e0e0e0);
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.skinPreviewImage {
+  max-width: 100%;
+  height: auto;
+  max-height: 120px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  object-fit: cover;
+  border: 1px solid var(--cor-borda-sutil, #555); /* Exemplo de variável */
+}
+
+.palettePreview {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.colorSwatch {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  margin: 0 4px;
+  border: 1px solid var(--cor-borda-sutil, #666);
+}
+
+.fontPreview {
+  font-size: 1.4em;
+  padding: 10px;
+  background-color: var(--cor-fundo-item, #444);
+  border-radius: 4px;
+  color: var(--cor-texto-primario, #f0f0f0);
+  margin-bottom: 10px;
+}
+
+.skinDescription {
+  font-size: 0.9em;
+  color: var(--cor-texto-secundario, #ccc);
+  margin-bottom: 0;
+}
+
+.infoText {
+  font-size: 1em;
+  color: var(--cor-texto-secundario, #b0b0b0);
+  margin-top: 0;
+  margin-bottom: 25px;
+}
+
+.confirmButton {
+  background-color: var(--cor-botao-primario, #64b5f6); /* Já usa variável */
+  color: var(--cor-texto-botao-primario, #111); /* Já usa variável */
+  width: 100%;
+  /* border, padding, border-radius, cursor, font-weight, font-size, transition
+     são agora primariamente herdados de 'genericButton'.
+     Mantenha 'padding' ou 'font-size' aqui se forem substituições intencionais.
+     'border: none;' é importante se genericButton adicionar uma borda e você não a quiser aqui. */
+}
+
+.confirmButton:hover {
+  background-color: var(--cor-aviso, #81c784); /* Exemplo de uso de outra variável */
+  /* O genericButton já tem um :hover (filter: brightness(90%)).
+     Se este hover de mudança de cor for preferível, ele sobrescreverá o filter. */
+}

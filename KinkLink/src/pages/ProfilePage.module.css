@@ -1,0 +1,294 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\ProfilePage.module.css */
+.page {
+  max-width: 700px; /* Limita a largura para melhor leitura */
+  margin: 20px auto; /* Centraliza a página e adiciona margem superior/inferior */
+  padding: 20px;
+  background-color: var(--cor-fundo-pagina);
+  color: var(--cor-texto-primario);
+  display: flex;
+  flex-direction: column;
+  gap: 25px; /* Espaçamento entre seções */
+  font-family: var(--font-family-main, "Trebuchet MS", sans-serif); /* Usa a fonte do tema */
+}
+
+.title {
+  color: var(--cor-primaria);
+  font-size: 2em;
+  margin-top: 0; /* Remove margem superior padrão do h1/h2 */
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  /* A borda inferior pode ser aplicada condicionalmente ou removida se o estilo inline no h1 principal for preferido */
+}
+
+.textCenter {
+  text-align: center;
+}
+
+.section {
+  background-color: var(--cor-fundo-elemento);
+  border: 1px solid var(--cor-borda);
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Sombra mais sutil */
+}
+
+.infoText {
+  color: var(--cor-texto-secundario);
+  margin-bottom: 12px;
+  line-height: 1.7;
+  font-size: 1.05em;
+}
+
+.infoText strong {
+  color: var(--cor-texto-primario);
+  margin-right: 8px;
+}
+
+.formLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: var(--cor-primaria); /* Label com cor primária */
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 12px; /* Mais padding interno */
+  margin-bottom: 15px;
+  background-color: var(--cor-fundo-pagina); /* Fundo sutilmente diferente do elemento da seção */
+  border: 1px solid var(--cor-borda);
+  border-radius: 6px; /* Bordas consistentes */
+  color: var(--cor-texto-primario);
+  box-sizing: border-box;
+  font-size: 1em;
+  font-family: inherit; /* Herda a fonte da página */
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--cor-primaria); /* Destaque no foco */
+  box-shadow: 0 0 0 2px var(--cor-primaria-transparente, rgba(100, 181, 246, 0.3)); /* Glow sutil, herdado ou sobrescrito por genericButton */
+}
+
+
+.textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.button,
+.actionButton,
+.buttonDestructive,
+.buttonCancel,
+.buttonDisabled {
+  padding: 12px 22px;
+  border: none;
+  /* border-radius, cursor, font-size, font-weight são herdados de genericButton */
+  transition: background-color 0.2s ease, filter 0.2s ease, transform 0.1s ease;
+  margin-right: 10px;
+  display: inline-block; /* Mantido para sobrescrever o inline-flex do genericButton, se intencional */
+  /* text-decoration, text-align, font-family são herdados de genericButton */
+}
+/* O estado :active (transform: scale(0.98)) é coberto pelo genericButton */
+
+.button:last-child,
+.actionButton:last-child,
+.buttonDestructive:last-child,
+.buttonCancel:last-child {
+  margin-right: 0;
+}
+
+.button {
+  background-color: var(--cor-primaria);
+  color: var(--cor-texto-sobre-primaria);
+}
+
+.button:hover:not([disabled]) {
+  filter: brightness(90%);
+}
+
+.actionButton {
+  background-color: var(--cor-acao-positiva);
+  color: var(--cor-texto-acao-positiva);
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin: 15px auto 0;
+}
+.actionButton:hover:not([disabled]) {
+  filter: brightness(90%);
+}
+
+.buttonDestructive {
+  background-color: var(--cor-acao-negativa);
+  color: var(--cor-texto-acao-negativa);
+}
+.buttonDestructive:hover:not([disabled]) {
+  filter: brightness(90%);
+}
+
+.buttonCancel {
+  background-color: var(--cor-secundaria);
+  color: var(--cor-texto-sobre-secundaria);
+}
+.buttonCancel:hover:not([disabled]) {
+  filter: brightness(110%); /* Leve clareada para secundário */
+}
+
+.buttonDisabled {
+  background-color: var(--cor-secundaria); /* Usa cor secundária para desabilitado */
+  color: var(--cor-texto-secundario); /* Texto secundário para menos destaque */
+  /* cursor: not-allowed e opacity são cobertos por genericButton:disabled ou .genericButton.disabled */
+  /* Se este estilo .buttonDisabled for para elementos <a> que não podem ter :disabled, o genericButton.disabled já cobre */
+}
+
+.link {
+  color: var(--cor-primaria);
+  text-decoration: none;
+  font-weight: 500;
+}
+.link:hover {
+  text-decoration: underline;
+  filter: brightness(120%);
+}
+
+.smallLink {
+  color: var(--cor-texto-secundario);
+  font-size: 0.9em;
+  text-decoration: underline;
+  /* cursor: pointer; é herdado de genericButton */
+  background: none !important; /* Sobrescreve genericButton */
+  border: none !important; /* Sobrescreve genericButton */
+  padding: 0 !important; /* Sobrescreve genericButton */
+  /* font-family: inherit; é herdado de genericButton */
+  font-weight: normal !important; /* Sobrescreve genericButton */
+  box-shadow: none !important; /* Sobrescreve genericButton */
+  min-height: auto !important; /* Sobrescreve genericButton */
+  line-height: normal !important; /* Sobrescreve genericButton */
+  display: inline !important; /* Sobrescreve display do genericButton */
+  text-align: left !important; /* Sobrescreve text-align do genericButton */
+}
+.smallLink:hover {
+  color: var(--cor-texto-primario);
+}
+
+.marginTop30 { margin-top: 30px; }
+.marginTop50 { margin-top: 50px; }
+.paddingTop20 { padding-top: 20px; }
+.borderTopSolid {
+  border-top: 1px solid var(--cor-borda);
+}
+
+.warningText {
+  color: var(--cor-aviso);
+  font-size: 0.9em;
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+.formActions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px; /* Espaço entre os botões de ação do formulário */
+}
+
+/* Estilos para Seção Expansível/Recolhível */
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding-bottom: 10px;
+  /* A borda inferior será herdada do .sectionTitleInHeader se ele usar .title */
+}
+
+.sectionTitleInHeader {
+  /* Herda de .title para consistência, mas pode ser customizado */
+  composes: title; /* Se você quiser herdar todos os estilos de .title */
+  color: var(--cor-primaria); /* Garante a cor primária */
+  font-size: 1.5em; /* Tamanho específico para títulos de seção */
+  margin-bottom: 0 !important; /* Remove margem inferior se herdar de .title */
+  border-bottom: 1px solid var(--cor-borda); /* Linha sutil abaixo do título da seção */
+}
+
+.toggleIcon {
+  font-size: 1.2em;
+  transition: transform 0.3s ease;
+  margin-left: 10px;
+  color: var(--cor-texto-secundario); /* Cor do ícone */
+}
+
+.toggleIconClosed { /* Mantém esta classe para rotação */
+  transform: rotate(-90deg);
+}
+
+.sectionContent {
+  overflow: hidden;
+  transition: max-height 0.35s ease-out, opacity 0.3s ease-in-out,
+              padding-top 0.35s ease-out, padding-bottom 0.35s ease-out,
+              margin-top 0.35s ease-out;
+  max-height: 1000px; /* Suficiente para o conteúdo */
+  opacity: 1;
+  padding-top: 20px; /* Espaçamento quando aberto */
+}
+
+.sectionContentCollapsed {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  margin-top: 0 !important;
+  /* A borda que separava o header do conteúdo não é mais necessária aqui,
+     pois o header da seção já tem sua própria borda inferior. */
+}
+
+/* --- Media Queries para Responsividade --- */
+@media (max-width: 768px) {
+  .page {
+    padding: 15px;
+    margin: 15px auto;
+  }
+
+  .title, .sectionTitleInHeader {
+    font-size: 1.6em; /* Ajuste para títulos principais */
+  }
+  /* Se .sectionTitleInHeader já herda de .title, este ajuste pode não ser necessário
+     ou pode ser mais específico se precisar de tamanhos diferentes. */
+  .sectionTitleInHeader {
+    font-size: 1.3em; /* Título de seção um pouco menor em mobile */
+  }
+
+
+  .section {
+    padding: 20px; /* Padding interno das seções em mobile */
+    margin-bottom: 20px;
+  }
+
+  .formLabel,
+  .infoText,
+  .button,
+  .actionButton,
+  .buttonDestructive,
+  .buttonCancel {
+    font-size: 0.95em;
+  }
+
+  .input,
+  .textarea {
+    font-size: 0.95em;
+    padding: 10px;
+  }
+
+  .formActions {
+    flex-direction: column; /* Botões do formulário empilhados em mobile */
+  }
+  .formActions > button {
+    margin-right: 0;
+    margin-bottom: 10px; /* Espaço entre botões empilhados */
+  }
+  .formActions > button:last-child {
+    margin-bottom: 0;
+  }
+}

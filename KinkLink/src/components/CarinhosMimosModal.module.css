@@ -1,0 +1,94 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\CarinhosMimosModal.module.css */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1055;
+}
+
+.modalContent {
+  background-color: #2c2c2c;
+  color: #e0e0e0;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 550px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  font-family: "Trebuchet MS", sans-serif;
+}
+
+.headerTitle {
+  margin-top: 0;
+  color: #64b5f6;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.subText {
+  text-align: center;
+  font-size: 0.9em;
+  color: #b0b0b0;
+  margin-bottom: 15px;
+}
+
+.noSuggestionsText {
+  text-align: center;
+  color: #aaa;
+}
+
+.tableContainer {
+  overflow-y: auto;
+  flex-grow: 1;
+  margin-top: 15px;
+  border: 1px solid #444;
+  border-radius: 8px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.th {
+  background-color: #353535;
+  color: #64b5f6;
+  padding: 12px;
+  text-align: left;
+  border-bottom: 2px solid #4a4a4a;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #444;
+  vertical-align: top;
+}
+
+.checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  vertical-align: middle; /* Alinha melhor com o texto se houver */
+}
+
+.closeButton {
+  margin-top: 20px;
+  align-self: center;
+  background-color: #757575;
+  color: white;
+  /* padding, border, border-radius, cursor, font-weight, font-size, transition
+     são agora primariamente herdados de 'genericButton'.
+     Mantenha 'padding: 10px 20px;' aqui se for uma substituição intencional.
+     'border: none;' é importante se genericButton adicionar uma borda e você não a quiser aqui. */
+}

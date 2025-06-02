@@ -1,0 +1,63 @@
+.sideMessagesContainer {
+  position: absolute; /* Posicionado em relação ao cardStackContainer */
+  top: 20px; /* Ajusta a distância do topo da área da carta. Experimente este valor. */
+  /* O transform final (translateY e rotate) será aplicado nas classes .left e .right */
+  width: auto; 
+  max-width: 160px; /* Largura máxima para as dicas */
+  display: flex;
+  flex-direction: column;
+  /* gap: 25px; Não tem efeito com uma única dica por container */
+  z-index: 6; /* Acima da pilha de cartas (que tem z-index 5 no container) e do conteúdo da carta */
+  pointer-events: none; /* Para não interferir com cliques */
+  /* padding: 0 10px; O padding agora está no .tipMessage */
+  opacity: 0; /* Inicialmente invisível para o fade-in */
+  /* A transição de opacidade será movida para .animateIn para garantir desaparecimento instantâneo */
+  box-sizing: border-box;
+}
+
+.left {
+  /* 'left' será definido por style inline para alinhar com a carta */
+  align-items: flex-start;
+  transform: rotate(-33deg); /* Inclinação para a esquerda, sem translateY */
+}
+
+.right {
+  /* 'right' será definido por style inline para alinhar com a carta */
+  align-items: flex-end;
+  transform: rotate(33deg); /* Inclinação para a direita, sem translateY */
+}
+
+.tipMessage {
+  font-size: 1rem; /* Tamanho da fonte ajustável */
+  color: rgba(255, 255, 255, 0.65); /* Texto um pouco mais visível */
+  /* background-color: rgba(0, 0, 0, 0.15); /* Fundo removido */
+  padding: 8px 12px;
+  border-radius: 8px;
+  text-align: center;
+  line-height: 1.3;
+  /* Adicionando uma leve sombra para melhor legibilidade contra fundos variados */
+  text-shadow: 0px 1px 3px rgba(0,0,0,0.7);
+}
+.animateIn {
+  opacity: 1; /* Torna visível com a animação */
+  transition: opacity 0.7s ease-in-out; /* Transição suave APENAS para o fade-in */
+}
+
+
+/* Ajustes responsivos */
+@media (max-width: 900px) { /* Telas médias, onde o card stack pode ocupar mais espaço relativo */
+  .sideMessagesContainer {
+    max-width: 120px;
+    gap: 15px;
+  }
+  .tipMessage {
+    font-size: 0.85rem;
+    padding: 6px 10px;
+  }
+}
+
+@media (max-width: 680px) { /* Telas menores, onde as dicas podem ser escondidas */
+  .sideMessagesContainer {
+    display: none;
+  }
+}

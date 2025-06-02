@@ -1,0 +1,59 @@
+.appHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 25px; /* Aumentei o padding lateral um pouco */
+  background-color: var(--cor-fundo-elemento, #2a2a2a);
+  border-bottom: 1px solid var(--cor-borda, #3f3f3f);
+  width: 100%;
+  box-sizing: border-box;
+  /* Descomente abaixo se quiser o header fixo no topo ao rolar */
+  /*
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  */
+}
+
+.logoContainer {
+  /* Flex para centralizar o logo se necessário, ou apenas para conter */
+}
+
+.logoLink {
+  display: inline-block; /* Para que o link se ajuste ao tamanho da imagem */
+}
+
+.logoImage {
+  height: 60px; /* Tamanho do logo aumentado. Ajuste conforme necessário. */
+  width: auto; /* Mantém a proporção da imagem */
+  display: block; /* Remove espaço extra abaixo da imagem */
+  transition: transform 0.2s ease-in-out;
+}
+
+.logoImage:hover {
+  transform: scale(1.05); /* Efeito sutil no hover */
+}
+
+.supportContainer {
+  /* O flexbox no .appHeader já cuida do alinhamento */
+}
+
+.supportButton {
+  /* Estilos removidos/alterados para herdar do tema Cyberpunk */
+  /* background-color, color, border, border-radius serão definidos pelo tema.
+     O padding base vem do genericButton, mas podemos ajustar aqui. */
+  padding: 8px 24px; /* Aumentado o padding horizontal (era 8px 16px do genericButton) */
+  white-space: nowrap; /* Impede que o texto "Suporte e Contato" quebre em duas linhas */
+  text-decoration: none;
+  /* font-size e font-weight também serão influenciados pelo tema (bold, uppercase) */
+  cursor: pointer;
+  transition: all 0.2s ease; /* A transição base também vem do genericButton, mas pode ser mantida/ajustada aqui */
+}
+
+.supportButton:hover {
+  /* O estilo de hover também será herdado do tema Cyberpunk: */
+  /* Ex: fundo ciano neon, borda magenta, sombra, etc. */
+  /* background-color: var(--cor-secundaria, #5C5C5C); */
+  /* color: var(--cor-texto-sobre-secundaria, #FFFFFF); */
+  /* border-color: var(--cor-secundaria, #5C5C5C); */
+}

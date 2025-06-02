@@ -1,0 +1,263 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    margin: 0;
+    padding: 20px;
+    color: #1d2129; 
+    line-height: 1.6;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.5s ease; 
+}
+
+body.fundo-usuario-quadrado { background-color: #e7f3e8; }
+body.fundo-usuario-bolinha { background-color: #fff9e0; }
+
+.container {
+    max-width: 480px;
+    width: 100%;
+    background-color: #ffffff; 
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    z-index: 1; 
+}
+
+h1 {
+    font-size: 2em; font-weight: 700; color: #d92e2e; 
+    text-align: center; margin-bottom: 0.8em; letter-spacing: -0.5px;
+}
+h2 {
+    font-size: 1.3em; font-weight: 600; border-bottom: 1px solid #ccd0d5;
+    padding-bottom: 0.6em; color: #4b4f56; text-align: center;
+    margin-top: 1.5em; margin-bottom: 1em;
+}
+
+.info-usuario, .area-carta, .area-criacao, .area-matches, .area-debug {
+    margin-bottom: 25px; padding: 18px; background-color: #f7f8fa;
+    border: 1px solid #dddfe2; border-radius: 8px;
+}
+
+#containerCartaUnicaWrapper {
+    perspective: 1200px; margin: 15px auto; max-width: 280px; min-height: 430px;
+}
+
+.container-carta-individual {
+    width: 100%; height: 420px; border: 1px solid #ced0d4; 
+    border-radius: 18px; box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+    padding: 18px; display: flex; flex-direction: column;
+    justify-content: space-between; position: relative; overflow: hidden;
+    transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.35s ease-out, background-color 0.3s ease-in-out;
+    color: #1c1e21; 
+}
+
+.container-carta-individual.saindo-esquerda { transform: translateX(-130%) rotate(-25deg) scale(0.9); opacity: 0; }
+.container-carta-individual.saindo-direita { transform: translateX(130%) rotate(25deg) scale(0.9); opacity: 0; }
+
+.carta-sensorial { background-color: #e0f2f7; } 
+.carta-poder { background-color: #fff8e1; } 
+.carta-fantasia { background-color: #f3e5f5; } 
+.carta-exposicao { background-color: #ffebee; } 
+.carta-outras { background-color: #eceff1; } 
+
+.carta-canto {
+    position: absolute; font-weight: 700; display: flex;
+    align-items: center; justify-content: center; padding: 4px 8px;
+    border-radius: 5px; background-color: rgba(255, 255, 255, 0.75); 
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+.canto-superior-esquerdo { top: 15px; left: 15px; font-size: 1.7em; color: #2c3e50; min-width: 28px; text-align: center; }
+.canto-superior-direito { top: 15px; right: 15px; font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.8px; padding: 5px 10px; }
+
+.carta-sensorial .canto-superior-direito { background-color: #00acc1; color: white; }
+.carta-poder .canto-superior-direito { background-color: #fdd835; color: #3e2723; } 
+.carta-fantasia .canto-superior-direito { background-color: #8e24aa; color: white; }
+.carta-exposicao .canto-superior-direito { background-color: #e53935; color: white; }
+.carta-outras .canto-superior-direito { background-color: #546e7a; color: white; }
+
+#areaCartaUnica {
+    text-align: center; flex-grow: 1; display: flex; flex-direction: column;
+    justify-content: center; padding: 50px 10px 10px 10px; overflow-y: auto;
+}
+.descricao-carta { font-size: 1.1em; color: #1c1e21; margin: 0 0 10px 0; line-height: 1.4; font-weight: 500; }
+.categoria-carta-texto { font-size: 0.75em; color: rgba(28, 30, 33, 0.7); text-transform: uppercase; letter-spacing: 0.5px; margin-top: auto; font-weight: 600; }
+
+.botoes-interacao { display: flex; justify-content: space-evenly; margin-top: 15px; gap: 10px; }
+.botoes-interacao button {
+    flex-basis: 120px; flex-grow: 0; padding: 12px 10px; font-size: 1.05em;
+    font-weight: 600; border: none; border-radius: 8px; cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.botoes-interacao button:active { transform: translateY(1px) scale(0.97); box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+#botaoNaoQuero { background-color: #ff6b6b; color: white; }
+#botaoNaoQuero:hover { background-color: #ee5253; }
+#botaoQuero { background-color: #54d454; color: white; }
+#botaoQuero:hover { background-color: #46c046; }
+.instrucao-teclado { text-align: center; font-size: 0.8em; color: #606770; margin-top: 12px; }
+
+.area-criacao input[type="text"], 
+.area-criacao input[type="number"], 
+.area-criacao select {
+    padding: 10px; margin-bottom: 12px; border: 1px solid #ccd0d5;
+    border-radius: 6px; font-size: 0.95em; width: 100%; box-sizing: border-box;
+}
+.area-criacao select { margin-right: 0; }
+.area-criacao input[type="number"] { width: auto; margin-right: 10px; }
+.area-criacao button { width: 100%; padding: 12px; font-size: 1em; background-color: #1877f2; }
+.area-criacao button:hover { background-color: #166fe5; }
+
+#listaInteressesEmComum li {
+    padding: 10px 12px; border-bottom: 1px solid #f0f0f0; background-color: #ffffff;
+    margin-bottom: 6px; border-radius: 6px; font-size: 0.9em; color: #333;
+    cursor: pointer; /* Torna os itens de match clicáveis */
+    transition: background-color 0.2s ease;
+}
+#listaInteressesEmComum li:hover {
+    background-color: #f5f5f5;
+}
+#listaInteressesEmComum li:last-child { border-bottom: none; }
+#listaInteressesEmComum { list-style-type: none; padding-left: 0; }
+
+
+.mensagem-feedback {
+    color: #606770; font-style: italic; text-align: center;
+    padding: 12px; background-color: #f0f2f5; border-radius: 6px; margin-top: 10px;
+}
+.area-debug button { background-color: #f5c33b; color: #333; width: 100%; padding: 10px; }
+.area-debug button:hover { background-color: #e0b032; }
+
+/* --- Estilos do Modal do Chat --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Para ficar sobre tudo */
+}
+
+.modal-chat-carta { /* Herda de .container-carta-individual mas com ajustes */
+    width: 90%; /* Ajusta largura para modal */
+    max-width: 450px; /* Um pouco maior que a carta normal para o chat */
+    height: 80vh; /* Altura responsiva, máximo 80% da tela */
+    max-height: 600px; /* Altura máxima */
+    padding: 20px;
+    box-sizing: border-box; /* Garante que padding não aumente o tamanho total */
+    /* A cor de fundo virá da classe da categoria da carta do match */
+}
+
+.fechar-modal-chat {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 2em;
+    font-weight: bold;
+    color: rgba(0,0,0,0.4);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+.fechar-modal-chat:hover {
+    color: #000;
+}
+
+.cabecalho-chat-carta {
+    text-align: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    margin-bottom: 10px;
+    position: relative; /* Para os cantos da carta dentro do modal */
+    min-height: 60px; /* Espaço para os cantos e título */
+}
+.cabecalho-chat-carta h3 {
+    margin: 15px 0 5px 0;
+    font-size: 1.1em;
+    color: #333;
+    padding: 0 40px; /* Espaço para não sobrepor os cantos/botão fechar */
+    word-break: break-word;
+}
+/* Os cantos no modal usarão as mesmas classes .carta-canto, etc. */
+/* Ajustar se necessário o z-index para ficarem acima do conteúdo do chat */
+.modal-chat-carta .carta-canto {
+    background-color: rgba(0,0,0,0.05); /* Fundo levemente diferente para os cantos no modal */
+}
+.modal-chat-carta .canto-superior-direito { /* Ajuste específico para o naipe no modal se necessário */
+    font-size: 0.6em; /* Pode precisar ser menor */
+}
+
+
+.chat-mensagens-area {
+    flex-grow: 1; /* Ocupa o espaço disponível */
+    overflow-y: auto; /* BARRA DE ROLAGEM AQUI! */
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.5); /* Fundo levemente diferente para área de msgs */
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.mensagem-chat {
+    padding: 8px 12px;
+    border-radius: 15px;
+    margin-bottom: 8px;
+    max-width: 75%;
+    word-wrap: break-word;
+    line-height: 1.3;
+}
+.mensagem-chat .remetente-chat {
+    font-weight: bold;
+    font-size: 0.8em;
+    display: block;
+    margin-bottom: 3px;
+}
+.mensagem-chat .texto-chat {
+    font-size: 0.95em;
+}
+.mensagem-chat .timestamp-chat {
+    font-size: 0.7em;
+    color: #777;
+    display: block;
+    text-align: right;
+    margin-top: 4px;
+}
+
+.mensagem-quadrado {
+    background-color: #dcf8c6; /* Verde claro (tipo WhatsApp) */
+    margin-left: auto; /* Alinha à direita */
+    border-bottom-right-radius: 5px;
+}
+.mensagem-quadrado .remetente-chat { color: #075e54; }
+
+
+.mensagem-bolinha {
+    background-color: #f1f0f0; /* Cinza claro */
+    margin-right: auto; /* Alinha à esquerda */
+    border-bottom-left-radius: 5px;
+}
+.mensagem-bolinha .remetente-chat { color: #2c3e50; }
+
+
+.chat-input-area {
+    display: flex;
+    gap: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(0,0,0,0.1);
+}
+.chat-input-area input[type="text"] {
+    flex-grow: 1;
+    margin-bottom: 0;
+    margin-right: 0;
+}
+.chat-input-area button {
+    padding: 10px 15px;
+    flex-shrink: 0; /* Para não encolher */
+}

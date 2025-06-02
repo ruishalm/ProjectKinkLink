@@ -1,0 +1,463 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\config\skins\styles\panel-styles.css */
+
+/* Estilo base para a classe genérica klnkl-themed-panel. 
+   Pode conter espaçamentos comuns, mas a aparência principal virá dos temas. */
+.klnkl-themed-panel {
+  padding: 15px; /* Um padding padrão, pode ser ajustado pelo tema específico */
+  margin-bottom: 20px; /* Espaço padrão abaixo dos painéis */
+  box-sizing: border-box;
+}
+
+/* Estilo Padrão do Painel KinkLink */
+/* Aplicado quando a classe 'klnkl-panel-default-active' está no html/body */
+html.klnkl-panel-default-active .klnkl-themed-panel {
+  background-color: var(--cor-fundo-elemento, #3a3a3a); /* Um cinza escuro, mais claro que o #242424 do #root */
+  border: 1px solid var(--cor-borda-elemento, #555555); /* Uma borda sutil */
+  border-radius: 8px; /* Bordas arredondadas */
+  color: var(--cor-texto-sobre-elemento, rgba(255, 255, 255, 0.87));
+}
+
+/* Estilo de Painel Windows XP */
+/* Aplicado quando a classe 'klnkl-panel-xp-active' está no html/body */
+html.klnkl-panel-xp-active .klnkl-themed-panel {
+  background-color: #FFFFFF; /* COR FIXA: Preenchimento branco para a área de conteúdo interna */
+  /* padding: 10px; /* O padding base já está em .klnkl-themed-panel, pode ser sobrescrito aqui se necessário */
+  /* margin-bottom: 20px; /* Já definido no base */
+  
+  /* Borda azul estilo Luna XP - com topo mais grosso */
+  border-top-width: 20px;
+  border-left-width: 3px;
+  border-right-width: 3px;
+  border-bottom-width: 3px;
+  border-style: solid;
+  border-color: #0A52A5; /* Azul principal da borda da janela Luna */
+
+  
+  /* Borda interna cinza (#ECE9D8) sobre o fundo branco.
+     Estas sombras são desenhadas sobre o background-color branco.
+     A área de conteúdo branca será o que não for coberto por estas sombras.
+  */
+  box-shadow: 
+    inset 0px 20px 0px 0px #ECE9D8,   /* Borda cinza superior de 20px */
+    inset 6px 0px 0px 0px #ECE9D8,    /* Borda cinza esquerda de 6px */
+    inset -6px 0px 0px 0px #ECE9D8,   /* Borda cinza direita de 6px */
+    inset 0px -6px 0px 0px #ECE9D8;   /* Borda cinza inferior de 6px */
+
+  border-radius: 10px; /* Cantos mais arredondados para o estilo Luna XP */
+  color: #000000; /* COR FIXA: Texto preto para o tema XP */
+  position: relative; /* Necessário para posicionar o botão 'X' pseudo-elemento */
+  /* As propriedades padding, margin-bottom e box-sizing são herdadas de .klnkl-themed-panel */
+}
+
+/* 
+  Regras específicas para a SkinsPage (identificada pela classe _page_wr3xi_3 do seu CSS Module)
+  quando o painel XP está ativo.
+  Faz o contêiner principal da página e o cabeçalho interno serem transparentes,
+  sem borda e sem sombra, para que o fundo global do tema XP apareça.
+*/
+html.klnkl-panel-xp-active ._page_wr3xi_3.klnkl-themed-panel,
+html.klnkl-panel-xp-active ._pageHeaderControls_wr3xi_21.klnkl-themed-panel {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  /* O padding e margin-bottom padrão de .klnkl-themed-panel podem ser removidos aqui se necessário 
+     para que o conteúdo se alinhe melhor com um fundo de "desktop" */
+  padding: 0; 
+  margin-bottom: 0; 
+}
+
+/*
+  Regra específica para o contêiner principal da ProfilePage
+  quando o painel XP está ativo.
+  Substitua '_YOUR_PROFILE_PAGE_MAIN_CONTAINER_CLASS_' pela classe correta.
+*/
+html.klnkl-panel-xp-active ._YOUR_PROFILE_PAGE_MAIN_CONTAINER_CLASS_.klnkl-themed-panel {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin-bottom: 0;
+}
+
+/*
+  Garante que o texto DENTRO DAS ÁREAS QUE SE TORNARAM TRANSPARENTES na SkinsPage
+  (como o título da página e os botões de navegação no cabeçalho)
+  seja preto quando o painel XP estiver ativo, mesmo que a paleta global seja escura.
+  As classes _pageTitle_wr3xi_37 e _backButton_wr3xi_55 vêm de SkinsPage.module.css.
+*/
+html.klnkl-panel-xp-active ._page_wr3xi_3 ._pageTitle_wr3xi_37,
+html.klnkl-panel-xp-active ._page_wr3xi_3 ._backButton_wr3xi_55 {
+  color: #000000 !important; /* Texto preto. !important para garantir sobreposição às variáveis da paleta. */
+}
+
+/* 
+  Garante que os elementos de texto comuns DENTRO DOS PAINÉIS XP REAIS 
+  (as seções _skinSection_wr3xi_173 na SkinsPage) tenham a cor preta.
+  Isso é para os painéis que devem manter a aparência de painel XP (fundo cinza, borda azul).
+*/
+html.klnkl-panel-xp-active ._skinSection_wr3xi_173.klnkl-themed-panel h1,
+html.klnkl-panel-xp-active ._skinSection_wr3xi_173.klnkl-themed-panel h2,
+html.klnkl-panel-xp-active ._skinSection_wr3xi_173.klnkl-themed-panel h3,
+html.klnkl-panel-xp-active ._skinSection_wr3xi_173.klnkl-themed-panel h4,
+html.klnkl-panel-xp-active ._skinSection_wr3xi_173.klnkl-themed-panel h5,
+html.klnkl-panel-xp-active ._skinSection_wr3xi_173.klnkl-themed-panel h6,
+html.klnkl-panel-xp-active ._skinSection_wr3xi_173.klnkl-themed-panel p,
+html.klnkl-panel-xp-active ._skinSection_wr3xi_173.klnkl-themed-panel span,
+html.klnkl-panel-xp-active ._skinSection_wr3xi_173.klnkl-themed-panel div,
+html.klnkl-panel-xp-active ._skinSection_wr3xi_173.klnkl-themed-panel li,
+html.klnkl-panel-xp-active ._skinSection_wr3xi_173.klnkl-themed-panel label,
+html.klnkl-panel-xp-active ._skinSection_wr3xi_173.klnkl-themed-panel button:not(.genericButtonDestructive):not(.likeButton):not(.dislikeButton) {
+  color: #000000; /* Texto preto */
+}
+
+/* Botão 'X' estilizado para painéis XP que se parecem com janelas */
+/* Não se aplica a painéis que são especificamente transparentes na SkinsPage */
+html.klnkl-panel-xp-active .klnkl-themed-panel:not(._page_wr3xi_3):not(._pageHeaderControls_wr3xi_21)::after {
+  content: '×'; /* Usando o caractere de multiplicação para o 'X' */
+  position: absolute;
+  /* Posicionado para centralizar verticalmente na borda azul superior de 20px.
+     top:0 é a padding-edge. Borda azul está "acima" disso.
+     Offset = -(altura_borda_azul - (altura_borda_azul - altura_botao)/2) = -(20 - 3) = -17px */
+  top: -17px; 
+  right: 5px; /* Espaçamento da borda direita */
+  width: 14px; /* Tamanho do botão X */
+  height: 14px; /* Tamanho do botão X */
+  background-color: #FF8C00; /* Laranja escuro (Windows XP usa um laranja/vermelho para fechar) */
+  border: 1px solid white;
+  border-radius: 2px; /* Cantos levemente arredondados para o botão */
+  box-sizing: border-box;
+  z-index: 20; /* Para garantir que fique sobre outros elementos do painel */
+
+  /* Estilos para o 'X' textual */
+  color: white;
+  font-size: 15px; /* Ajuste o tamanho do 'X' conforme necessário */
+  font-weight: bold;
+  /* line-height: 12px; /* Ajustado para a altura do botão (14px) - bordas (2px) */
+  /* text-align: center; */ /* Não é mais necessário com flex */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* padding-bottom: 1px; /* Pequeno ajuste para o caractere '×' que às vezes fica um pouco alto, pode não ser necessário com flex */
+}
+
+/* REMOVIDO: As regras para ::after::before e ::after::after foram removidas */
+
+/* Você pode adicionar mais estilos de painel aqui para outros temas, como Cyberpunk */
+/* Exemplo:
+html.klnkl-panel-cyberpunk-active .klnkl-themed-panel {
+  background-color: #1a1a2e; 
+  border: 1px solid #f924ff;
+  border-radius: 0;
+  box-shadow: 0 0 5px #f924ff, 0 0 10px #f924ff inset;
+  color: #e0e0e0;
+}
+*/
+/*  */
+
+/* Estilos para botões no tema Windows XP */
+html.klnkl-panel-xp-active .genericButton,
+html.klnkl-panel-xp-active .ck-theme-button { /* A classe do botão de ativar skin foi removida daqui pois agora é um toggle */
+  background-image: linear-gradient(to bottom, #F5F5F5, #E1E1E1); /* Gradiente cinza claro XP */
+  color: #000000;            /* Texto preto */
+  border: 1px solid #7799D0;    /* Borda azul clara típica de botões XP */
+  padding: 5px 12px;          /* Padding para botões XP */
+  border-radius: 4px;           /* Cantos arredondados XP */
+  font-family: Tahoma, Verdana, Arial, sans-serif; /* Fonte clássica do XP */
+  text-transform: none;         /* Botões XP geralmente não são em maiúsculas */
+  font-size: inherit;           /* Herda o tamanho da fonte, ou defina um específico (ex: 0.9em) */
+  box-shadow: inset 0 1px 0px rgba(255,255,255,0.6), 0 1px 1px rgba(0,0,0,0.1); /* Efeito sutil de relevo e sombra */
+  cursor: pointer;
+  transition: background-image 0.1s ease-in-out, border-color 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+}
+
+/* Hover state para botões XP */
+html.klnkl-panel-xp-active .genericButton:hover,
+html.klnkl-panel-xp-active .ck-theme-button:hover {
+  background-image: linear-gradient(to bottom, #E5F3FF, #B4D6F1); /* Gradiente azul claro no hover */
+  border-color: #3C7FB1; /* Azul mais forte no hover */
+  box-shadow: inset 0 1px 0px rgba(255,255,255,0.8), 0 1px 1px rgba(0,0,0,0.15);
+}
+
+/* Estado ativo (pressionado) para botões XP */
+html.klnkl-panel-xp-active .genericButton:active,
+html.klnkl-panel-xp-active .ck-theme-button:active {
+  background-image: linear-gradient(to top, #E5F3FF, #B4D6F1); /* Gradiente invertido ou mais escuro */
+  border-color: #2E6092; /* Azul ainda mais escuro quando pressionado */
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.2), inset 0 -1px 0px rgba(255,255,255,0.4); /* Efeito de botão pressionado */
+}
+
+/* Remove o foco padrão do navegador que pode interferir no visual XP */
+html.klnkl-panel-xp-active .genericButton:focus,
+html.klnkl-panel-xp-active .ck-theme-button:focus {
+  outline: none; /* Ou um outline customizado estilo XP se desejar, ex: 1px dotted #000 */
+}
+
+/* Ajustes de dimensão para botões específicos na CardPilePage e BottomNav quando a skin XP está ativa */
+/* Botões "Topo!" e "Passo" - São <button> */
+html.klnkl-panel-xp-active button._botaoDecisao_q1wma_163, /* Atualizado de _3av9x_65 */
+html.klnkl-panel-xp-active button._likeButton_q1wma_179,    /* Atualizado de _3av9x_80 */
+html.klnkl-panel-xp-active button._dislikeButton_q1wma_191 { /* Assumindo _q1wma_191 para dislike, VERIFIQUE! */
+  min-height: 32px !important;
+  height: 32px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  /* O padding horizontal virá do estilo XP base para .genericButton (5px 12px) */
+  line-height: 30px !important; /* Ligeiramente menor que a altura para acomodar a borda */
+  font-size: 0.9em !important; /* Reduzir o tamanho da fonte se necessário */
+}
+
+/* Botão "Links" na navegação inferior - É <button> */
+html.klnkl-panel-xp-active button._matchesNavButton_q1wma_497 { /* Atualizado com a classe correta */
+  height: 32px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  /* O padding horizontal virá do estilo XP base para .genericButton (5px 12px) */
+  line-height: 30px !important;
+  font-size: 0.9em !important; /* Reduzir o tamanho da fonte se necessário */
+}
+
+/* Botões de ícone "Coração" (button) e "Perfil" (Link -> a) na navegação inferior */
+html.klnkl-panel-xp-active button._bottomNavIconStyle_q1wma_527, /* Atualizado para a classe do botão "Coração" (Carinhos & Mimos) */
+html.klnkl-panel-xp-active a._bottomNavIconStyle_q1wma_527 {    /* Atualizado para a classe do botão "Perfil" */
+  height: 36px !important;
+  width: 36px !important;
+  font-size: 1.1em !important; /* Reduzido e fixo, ajuste conforme necessário para o ícone */
+  line-height: 34px !important; /* Para centralizar o ícone verticalmente */
+  padding: 0 !important; /* Remove qualquer padding que possa estar aumentando o tamanho */
+  display: flex !important; /* Para ajudar na centralização do ícone */
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* --- Nova Barra Fixa Azul Independente (Skin XP) --- */
+html.klnkl-panel-xp-active::after {
+  content: ''; /* Necessário para pseudo-elementos */
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 30px !important; /* Altura da barra */
+  background-color: #245EDC !important; /* Azul principal da taskbar XP */
+  border-top: 3px solid #3C7DDC !important; /* Linha superior mais clara (topo do gradiente XP) - AGORA COM 3PX */
+  z-index: 2000 !important; /* Alto z-index para ficar por cima de tudo */
+  box-sizing: border-box !important;
+}
+
+/* Estiliza os contadores de cartas como a área do relógio na skin XP */
+html.klnkl-panel-xp-active ._cardCounters_ibwf7_437 {  /* Classe atualizada */
+  position: fixed !important;
+  /* Posicionado à esquerda, após "Links", "Perfil" e "Mimos" */
+  left: 337px !important; /* Estimativa: 135 (Links) + 4 (margem) + 95 (Perfil) + 4 (margem) + 95 (Mimos) + 4 (margem) */
+  bottom: -6px !important; /* Voltando para -6px */
+  right: auto !important; /* Remove o alinhamento à direita */
+  transform: none !important; /* Remove o transform anterior */
+  width: auto !important; /* Garante que a largura seja baseada no conteúdo para centralização */
+  height: 20px !important; /* Mesma altura dos itens individuais e botões Mimos/Perfil */
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 !important; /* O container em si não precisa de padding */
+  background-color: transparent !important; /* O container é transparente */
+  color: #FFFFFF !important; /* Cor padrão do texto para os filhos */
+  z-index: 2001 !important; /* Acima da barra de tarefas principal */
+}
+
+/* Estilo para os "quadrados" dos contadores (estilo janela inativa XP) */
+html.klnkl-panel-xp-active ._cardCounters_ibwf7_437 ._counterItem_ibwf7_463 {
+  background-color: #3C7DDC !important; /* Mesma cor da borda superior da barra principal */
+  color: #FFFFFF !important;
+  padding: 1px 8px !important; /* Padding interno do "botão" */
+  min-width: 95px !important; /* Largura mínima para todos os "quadrados" da taskbar */
+  border-radius: 3px !important;
+  margin: 0 2px !important; /* Espaçamento entre os "botões" e o separador */
+  font-size: 0.85em !important;
+  font-family: Tahoma, Verdana, Arial, sans-serif !important; /* Fonte XP */
+  line-height: normal !important; /* Deixar o flex controlar o alinhamento vertical do texto */
+  height: 20px !important; /* Altura do "botão" */
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid !important;
+  /* Borda 3D sutil: tom mais claro de #3C7DDC em cima/esquerda, tom mais escuro em baixo/direita */
+  border-color: #7CBFFF #003399 #003399 #7CBFFF !important; 
+}
+
+/* Estilo para o separador "|" */
+html.klnkl-panel-xp-active ._cardCounters_ibwf7_437 ._counterSeparator_ibwf7_483 {
+  /* margin: 0 1px !important; */
+  /* color: #FFFFFF !important; */
+  /* line-height: 20px; */
+  display: none !important; /* Faz o separador desaparecer */
+}
+
+/* Ajusta o padding inferior da página para não cobrir a nova barra fixa */
+/* Esta regra para ._page_q1wma_3 é para a CardPilePage */
+html.klnkl-panel-xp-active ._page_q1wma_3 { 
+  padding-bottom: 40px !important; /* Altura da nova barra (30px) + margem (10px) */
+}
+
+/* Estilo para o botão "Links" (_matchesNavButton_ibwf7_517) como Botão Iniciar XP */
+html.klnkl-panel-xp-active ._matchesNavButton_ibwf7_517 {
+  position: fixed !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  height: 30px !important; /* Mesma altura da barra de tarefas azul */
+  width: auto !important; /* Largura baseada no conteúdo + padding */
+  min-width: 135px !important; /* Aumentando mais a largura mínima */
+  box-sizing: border-box !important;
+
+  /* Cores e gradiente do botão Iniciar XP */
+  background: linear-gradient(to bottom, #59C86A, #3A914A) !important; /* Verde claro em cima, escuro embaixo */
+  color: white !important;
+  font-family: "Franklin Gothic Medium", "Tahoma", "Verdana", "Arial", sans-serif !important;
+  font-weight: bold !important;
+  font-size: 14px !important; /* Ajuste conforme o texto "Links (25)" */
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.4) !important;
+  
+  /* Bordas */
+  border-top: 3px solid #76E986 !important; /* Verde bem claro para a borda superior */
+  border-right: 1px solid #207A2E !important; /* Verde escuro para as outras bordas visíveis */
+  border-bottom: 1px solid #207A2E !important;
+  border-left: none !important; /* Encostado na borda esquerda da tela */
+  
+  border-radius: 0 8px 8px 0 !important; /* Cantos da direita arredondados, esquerdos retos */
+  
+  padding: 0 15px !important; /* Padding horizontal para o texto */
+  
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  
+  text-transform: none !important; /* Botões XP não costumam ser uppercase */
+  box-shadow: inset 0 1px 1px #A8D88A, 0px 1px 2px rgba(0,0,0,0.3) !important; /* Efeito de relevo interno e sombra externa sutil */
+  z-index: 2001 !important; /* Mesmo nível dos "botões de janela" na barra */
+  cursor: pointer !important;
+}
+
+/* Ícone da bandeira do Windows para o botão "Iniciar" */
+html.klnkl-panel-xp-active ._matchesNavButton_ibwf7_517::before {
+  content: '';
+  display: inline-block;
+  width: 16px; /* Largura do ícone */
+  height: 16px; /* Altura do ícone */
+  margin-right: 8px; /* Espaço entre o ícone e o texto */
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><rect x="0" y="0" width="10" height="10" fill="%23F33A2A"/><rect x="12" y="0" width="10" height="10" fill="%237FBA00"/><rect x="0" y="12" width="10" height="10" fill="%2300A4EF"/><rect x="12" y="12" width="10" height="10" fill="%23FFB900"/></svg>');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  flex-shrink: 0; /* Evita que o ícone encolha se não houver espaço */
+}
+
+/* Estilo para os botões de ícone (❤️ e 👤) como "quadrados" na barra XP */
+html.klnkl-panel-xp-active ._bottomNavIconStyle_ibwf7_547.klnkl-nav-cards,
+html.klnkl-panel-xp-active ._bottomNavIconStyle_ibwf7_547.klnkl-nav-profile {
+  position: fixed !important;
+  bottom: 4px !important; /* Alinhamento vertical dentro da barra de 30px */
+  height: 20px !important; /* Mesma altura dos quadrados dos contadores */
+  min-width: 95px !important; /* Largura mínima para todos os "quadrados" da taskbar */
+  width: auto !important; /* Largura baseada no conteúdo (ícone + texto + padding) */
+  /* min-width: 30px !important; Removido para permitir que o padding e conteúdo ditem a largura */
+  box-sizing: border-box !important; 
+
+  background-color: #3C7DDC !important; /* Mesma cor dos quadrados dos contadores */
+  color: #FFFFFF !important;
+  font-family: Tahoma, Verdana, Arial, sans-serif !important; /* Fonte XP */
+  padding: 1px 8px !important; /* Mesmo padding dos quadrados dos contadores */
+  border-radius: 3px !important;
+  font-size: 0.85em !important; /* Unificando tamanho da fonte (para ícone e texto via ::after) */
+  
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  
+  border: 1px solid;
+  /* Borda 3D sutil: tom mais claro de #3C7DDC em cima/esquerda, tom mais escuro em baixo/direita */
+  border-color: #7CBFFF #003399 #003399 #7CBFFF !important; 
+  
+  z-index: 2001 !important; /* Mesmo nível dos outros itens da barra */
+  cursor: pointer !important;
+  text-decoration: none !important; /* Para o link do perfil */
+  line-height: normal !important; /* Para não interferir com flex align-items */
+  box-shadow: none !important; /* Remove qualquer sombra de botão genérico */
+  background-image: none !important; /* Remove qualquer gradiente de botão genérico */
+}
+
+/* Posicionamento específico para cada ícone à direita */
+html.klnkl-panel-xp-active ._bottomNavIconStyle_ibwf7_547.klnkl-nav-cards { /* Ícone ❤️ (Mimos) */
+  /* Posicionado à esquerda, após "Links" e "Perfil" */
+  left: 238px !important; /* Estimativa: 135 (Links) + 4 (margem) + 95 (Perfil) + 4 (margem) */
+  right: auto !important; /* Remove o alinhamento à direita */
+  margin-right: 0 !important; /* Não é mais necessário, o espaçamento é pelo 'left' e largura */
+}
+html.klnkl-panel-xp-active ._bottomNavIconStyle_ibwf7_547.klnkl-nav-cards::after {
+  content: 'Mimos';
+  font-size: 0.85em; /* Tamanho da fonte do texto, herda a família */
+  margin-left: 5px; /* Espaço entre o ícone e o texto */
+  line-height: normal; /* Garante que não interfira no alinhamento flex */
+}
+
+html.klnkl-panel-xp-active ._bottomNavIconStyle_ibwf7_547.klnkl-nav-profile { /* Ícone 👤 (Perfil) */
+  /* Ajuste o valor de 'right' conforme a largura final do botão "Mimos" */
+  /* Posicionado à esquerda, após o botão "Links" */
+  left: 139px !important; /* Estimativa: 135px (min-width do Links) + 4px (margem) */
+  right: auto !important; /* Remove o alinhamento à direita */
+  margin-right: 0 !important; /* Não é mais necessário */
+}
+html.klnkl-panel-xp-active ._bottomNavIconStyle_ibwf7_547.klnkl-nav-profile::after {
+  content: 'Perfil';
+  font-size: 0.85em; /* Tamanho da fonte do texto, herda a família */
+  margin-left: 5px; /* Espaço entre o ícone e o texto */
+  line-height: normal;
+}
+
+/* Novo Relógio Independente à Direita */
+html.klnkl-panel-xp-active::before { /* Usando ::before para não conflitar com a barra azul em ::after */
+  content: "01:30";
+  position: fixed !important;
+  right: 4px !important;
+  bottom: 4px !important; /* Alinhado com a base dos botões Perfil/Mimos */
+  width: 65px !important; /* Largura para o relógio */
+  height: 22px !important; /* Altura típica da área do relógio XP */
+  background-color: #245EDC !important; /* Azul da barra de tarefas */
+  border: 1px solid !important;
+  /* Borda inset para parecer embutido */
+  border-color: #1C47A3 #77A9DD #77A9DD #1C47A3 !important;
+  border-radius: 2px !important;
+  color: white !important;
+  font-family: Tahoma, Verdana, Arial, sans-serif !important;
+  font-size: 11px !important;
+  line-height: 20px !important; /* Para centralizar verticalmente (22px altura - 2px borda) */
+  text-align: center !important;
+  padding: 0 5px !important;
+  z-index: 2001 !important; /* Mesmo nível dos outros itens da barra */
+  box-sizing: border-box !important;
+}
+
+/* NOVO "Quadrado de Status" à DIREITA, ao lado do Relógio */
+/* Você precisará adicionar um elemento no seu HTML com a classe 'klnkl-nav-status-item' 
+   contendo: 🏳️‍🌈💻🌍 {Vs 00:10} */
+html.klnkl-panel-xp-active .klnkl-nav-status-item {
+  position: fixed !important;
+  /* Posicionado à direita, à esquerda do relógio (Relógio: right 4px, width 65px) */
+  right: 73px !important; /* 4px (right do relógio) + 65px (width do relógio) + 4px (espaçamento) */
+  bottom: 4px !important; /* Alinhado com a base do relógio */
+  width: auto !important; /* Largura baseada no conteúdo */
+  min-width: 120px !important; /* Largura mínima para acomodar o conteúdo, ajuste se necessário */
+  height: 22px !important; /* Altura igual à do relógio */
+  background-color: #245EDC !important; /* Azul da barra de tarefas (mesmo do relógio) */
+  border: 1px solid !important;
+  /* Borda inset para parecer embutido (mesma do relógio) */
+  border-color: #1C47A3 #77A9DD #77A9DD #1C47A3 !important; 
+  border-radius: 2px !important;
+  color: white !important;
+  font-family: Tahoma, Verdana, Arial, sans-serif !important;
+  font-size: 11px !important; /* Mesmo tamanho do texto do relógio */
+  line-height: 20px !important; /* Para centralizar verticalmente (22px altura - 2px borda) */
+  text-align: center !important;
+  padding: 0 8px !important; /* Padding horizontal */
+  z-index: 2001 !important; /* Mesmo nível dos outros itens da barra */
+  box-sizing: border-box !important;
+  display: flex; /* Para centralizar conteúdo se necessário */
+  align-items: center;
+  justify-content: center;
+}

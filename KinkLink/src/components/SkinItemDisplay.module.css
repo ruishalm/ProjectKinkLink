@@ -1,0 +1,189 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\SkinItemDisplay.module.css */
+/* Estilos copiados e adaptados de SkinsPage.module.css */
+
+.skinItem {
+  background-color: var(--cor-fundo-pagina); /* Fundo um pouco diferente para destaque */
+  padding: 18px;
+  border-radius: 10px;
+  border: 1px solid var(--cor-borda);
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centraliza conteúdo */
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  position: relative; /* Para o ícone de cadeado */
+}
+
+.skinItem:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.12);
+  border-color: var(--cor-primaria);
+}
+
+.skinItem.activeSkin {
+  border-color: var(--cor-destaque);
+  box-shadow: 0 0 0 3px var(--cor-destaque), 0 5px 12px rgba(0,0,0,0.15); /* Destaque mais forte */
+  background-color: color-mix(in srgb, var(--cor-fundo-elemento) 80%, var(--cor-destaque) 20%);
+}
+
+.skinItem.lockedSkin {
+  opacity: 0.65;
+  cursor: not-allowed;
+  background-color: var(--cor-fundo-elemento); /* Fundo mais escuro para bloqueados */
+}
+.skinItem.lockedSkin:hover {
+  transform: none;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  border-color: var(--cor-borda);
+}
+
+.forceUnlockedHighlight {
+  outline: 2px dashed orange;
+  outline-offset: 2px;
+}
+
+.skinName {
+  font-size: 1.1em;
+  margin-bottom: 12px;
+  font-weight: 600;
+  color: var(--cor-texto-primario);
+  min-height: 2.5em; /* Para alinhar nomes de tamanhos diferentes */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lockedIcon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1.3em;
+  opacity: 0.8;
+}
+
+.palettePreview {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+  height: 25px; /* Altura fixa */
+  width: 100%;
+  max-width: 150px; /* Limita largura da prévia da paleta */
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid var(--cor-borda);
+}
+
+.colorSwatch {
+  flex-grow: 1;
+  height: 100%;
+}
+
+.texturePreview {
+  width: 100%;
+  max-width: 150px; /* Limita largura da prévia da textura */
+  height: 80px; /* Altura fixa */
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  border: 1px solid var(--cor-borda);
+}
+
+.fontPreview {
+  font-size: 1.4em;
+  margin-bottom: 12px;
+  padding: 8px;
+  border: 1px dashed var(--cor-borda);
+  border-radius: 6px;
+  width: 100%;
+  max-width: 180px; /* Limita largura */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.skinDescription {
+  font-size: 0.85em;
+  color: var(--cor-texto-secundario);
+  margin-bottom: 10px;
+  min-height: 2.5em; /* Para alinhar descrições */
+}
+
+.unlockHint {
+  font-size: 0.8em;
+  color: var(--cor-aviso);
+  margin-top: auto; /* Empurra para baixo */
+  margin-bottom: 10px;
+  font-style: italic;
+}
+
+/* Estilos para o container do toggle switch (antigo .activateButton) */
+.activateButton {
+  position: relative;
+  display: inline-block;
+  width: 48px; /* Largura do toggle */
+  height: 26px; /* Altura do toggle */
+  margin-top: auto; /* Empurra para o final do card flex */
+  margin-left: auto;
+  margin-right: auto;
+  cursor: pointer;
+}
+
+.activateButton input { /* O input checkbox real, escondido */
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  /* cursor: pointer; /* O cursor já está no label pai (.activateButton) */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #B0B0B0; /* Cinza XP para estado desligado */
+  border: 1px solid #707070;
+  transition: .3s;
+  border-radius: 26px; /* Para forma de pílula */
+}
+
+.slider:before { /* O "polegar" do slider */
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #F0F0F0; /* Cor do polegar, quase branco */
+  border: 1px solid #707070;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  transition: .3s;
+  border-radius: 50%;
+}
+
+.activateButton input:checked + .slider {
+  background-color: #0A52A5; /* Azul XP para estado ligado */
+  border-color: #003C74;
+}
+
+.activateButton input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+.activateButton input:disabled + .slider {
+  background-color: #D4D0C8; /* Cinza mais claro para desabilitado */
+  border-color: #A0A0A0;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.activateButton input:disabled + .slider:before {
+  background-color: #EAEAEA;
+  border-color: #A0A0A0;
+  box-shadow: none;
+}
+
+/* A regra .skinItem.activeSkin .activateButton não é mais necessária
+   pois o estado ativo é controlado pelo input:checked + .slider */

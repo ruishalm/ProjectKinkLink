@@ -1,0 +1,110 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\PlayingCard.module.css */
+.flipperContainer {
+  transform-origin: center;
+  position: relative;
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  overflow: hidden;
+  perspective: 1000px;
+}
+
+.flipper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.cardFace {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", Arial, sans-serif;
+  overflow: hidden;
+}
+
+.cardFront {
+  composes: cardFace;
+  position: relative; /* Crucial para posicionamento absoluto dos filhos */
+  align-items: center; /* Para centralizar a .textArea se ela tiver altura fixa e não preencher */
+  justify-content: center; /* Para centralizar a .textArea se ela tiver altura fixa e não preencher */
+}
+
+.cardBack {
+  composes: cardFace;
+  background-color: #1a1a1a;
+  align-items: center;
+  justify-content: center;
+  transform: rotateY(180deg);
+}
+
+.corner {
+  position: absolute;
+  text-align: center;
+  line-height: 1;
+  font-weight: bold;
+  z-index: 2;
+}
+
+.cornerNumber {
+  display: block;
+}
+
+.cornerSuit {
+  display: block;
+  /* text-transform: uppercase; */
+}
+
+.textArea {
+  /* flex-grow: 1;  REMOVIDO - A altura será definida explicitamente no TSX */
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  box-sizing: border-box;
+  /* min-height: 0; Não é mais tão crítico se a altura é fixa */
+  position: relative;
+}
+
+.textContent {
+  margin: 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+.swipeFeedbackOverlay {
+  position: absolute;
+  color: white;
+  font-weight: bold;
+  text-transform: uppercase;
+  z-index: 3;
+  pointer-events: none;
+  transition: opacity 0.1s ease-in-out;
+}
+
+.hotButton {
+  position: absolute;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  z-index: 2;
+}
+
+.cardBackLogo {
+  max-width: 70%; /* O logo ocupará no máximo 70% da largura da carta */
+  max-height: 60%; /* E no máximo 60% da altura */
+  width: auto; /* Mantém a proporção da imagem */
+  height: auto; /* Mantém a proporção da imagem */
+  object-fit: contain; /* Garante que a imagem inteira caiba sem cortar, mantendo a proporção */
+  opacity: 0.85; /* Uma leve transparência para integrar melhor com o fundo */
+}

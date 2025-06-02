@@ -1,0 +1,62 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\SupportPage.module.css */
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--cor-fundo-pagina);
+  color: var(--cor-texto-primario);
+}
+
+.mainContent {
+  flex-grow: 1;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.title {
+  font-size: 2.5rem;
+  color: var(--cor-primaria);
+  margin-bottom: 20px;
+}
+
+.text {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  max-width: 600px;
+  margin-bottom: 15px;
+}
+
+.emailLink {
+  font-size: 1.2rem;
+  color: var(--cor-destaque);
+  text-decoration: none;
+  padding: 10px 15px;
+  border: 1px solid var(--cor-destaque);
+  border-radius: 8px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.emailLink:hover {
+  background-color: var(--cor-destaque);
+  color: var(--cor-texto-sobre-destaque);
+}
+
+.backLink {
+  margin-top: 40px;
+  /* text-decoration e font-size são herdados de genericButton */
+  /* Estilos para torná-lo um botão secundário, complementando genericButton */
+  background-color: var(--cor-secundaria, #757575);
+  color: var(--cor-texto-sobre-secundaria, white);
+  border-color: var(--cor-secundaria, #757575); /* Para que a borda do genericButton combine */
+  /* Se não quiser a borda do genericButton, adicione: border: none; */
+}
+
+.backLink:hover {
+  /* O genericButton já tem um :hover (filter: brightness(90%)).
+     Se quiser um hover específico, defina aqui. Ex: */
+  filter: brightness(110%); /* Um pouco mais claro para botões secundários */
+}
+  

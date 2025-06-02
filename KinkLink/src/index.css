@@ -1,0 +1,205 @@
+/* Resets básicos e estilos globais para o corpo da página */
+body {
+  margin: 0; /* Remove margens padrão do navegador */
+  /* Agora usa a variável CSS definida pelo SkinContext. 
+     O SkinContext fornecerá um fallback para uma pilha de fontes do sistema se nenhuma skin de fonte estiver ativa. */
+  font-family: var(--font-family-main, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f0f2f5; /* Um fundo neutro e suave para a área fora do conteúdo principal */
+  /* A cor de texto padrão será definida no #root para o tema escuro */
+  line-height: 1.6; /* Espaçamento entre linhas para melhor legibilidade */
+}
+
+/* Estilizando o contêiner raiz da aplicação (#root) */
+#root {
+  max-width: 1200px; /* Define uma largura máxima para o conteúdo. Ajuste conforme necessário. */
+  min-height: 100vh; /* Garante que o #root ocupe pelo menos toda a altura da viewport. */
+  /* Estas duas linhas são a chave para centralizar o #root horizontalmente */
+  margin-left: auto;
+  margin-right: auto;
+  padding: 20px; /* Adiciona um espaçamento interno para o conteúdo não colar nas bordas */
+  background-color: #242424; /* Cinza bem escuro, similar ao Vite */
+  color: rgba(255, 255, 255, 0.87); /* Cor de texto clara para contraste */
+  /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); Sombra não é ideal em fundo escuro, pode remover ou ajustar */
+  /* Para garantir que o padding não aumente a largura total além do max-width */ /* Para garantir que o padding não aumente a largura total além do max-width */
+  box-sizing: border-box;
+}
+
+/* Opcional: Um reset simples para margens de títulos e parágrafos */
+h1, h2, h3, h4, h5, h6, p {
+  margin-top: 0;
+  margin-bottom: 0.75em; /* Adiciona um pouco de espaço abaixo de parágrafos e títulos */
+}
+
+/* Estilos padrão para links, se desejar */
+a {
+  color: #646cff; /* Cor de link clara para tema escuro (Vite) */
+  text-decoration: none; /* Remove o sublinhado padrão */
+}
+a:hover {
+  text-decoration: underline; /* Adiciona sublinhado no hover */
+  color: #747bff; /* Cor de link mais clara no hover */
+}
+
+/* Estilos para botões, se desejar um padrão global (opcional) */
+/*
+button {
+  cursor: pointer;
+  font-family: inherit; /* Usa a mesma fonte do resto do corpo */
+
+*/
+
+/* Os estilos para ".theme-pack-pack-vintage-link button" foram removidos daqui.
+   Recomendação: Mova esses estilos para 'src/config/skins/styles/button-styles.css'
+   como uma nova skin (ex: 'html.klnkl-btn-style-vintage .genericButton { ... }')
+   e associe-a ao themePack 'pack_vintage_link' através de 'associatedButtonStyleId'. */
+
+/* Estilos para o botão de "Favorito/Hot" (🔥) para remover o fundo/borda do tema */
+/* Aplica-se a qualquer tema que esteja ativo */
+button[class*="_hotButton_"] { /* Target a classe do CSS Module que contém "_hotButton_" */
+  background: transparent !important;
+  border: none !important;
+  clip-path: none !important; /* Remove qualquer clip-path dos temas */
+  box-shadow: none !important; /* Remove qualquer sombra dos temas */
+  padding: 2px !important; /* Um padding mínimo para o ícone não ficar colado */
+  text-transform: none !important; /* Garante que não fique em maiúsculas */
+  font-weight: normal !important; /* Garante que não fique em negrito pelo tema */
+  letter-spacing: normal !important; /* Reseta o espaçamento de letras do tema */
+  /* As propriedades de cor, filter e opacity do estilo inline devem continuar funcionando.
+     Se o tema estiver sobrescrevendo a cor do ícone, adicione:
+     color: rgb(136, 136, 136) !important; */
+}
+
+/* Estilos específicos para o tema Cyberpunk Kink */
+
+/* Fundo geral da página e do #root quando o tema Cyberpunk está ativo */
+html.theme-pack-pack-cyberpunk-kink body,
+html.theme-pack-pack-cyberpunk-kink #root {
+  background-color: var(--cor-fundo-pagina); /* Vermelho da paleta Cyberpunk */
+  background-image: none; /* Garante que não haja imagem de fundo global aqui */
+}
+
+/* O .appMainContent já pega var(--cor-fundo-pagina) do App.css, então está coberto. */
+
+/* Aplica a textura cyberpunk ESPECIFICAMENTE ao contêiner principal da SkinsPage */
+/* A classe _page_1pw04_3 vem de SkinsPage.module.css */
+html.theme-pack-pack-cyberpunk-kink ._page_1pw04_3 { /* Esta é a classe do div que você me mostrou */
+  background-image: url('/assets/skins/textures/cyberpunk.jpg');
+  background-color: var(--cor-fundo-pagina); /* Fallback caso a imagem não carregue */
+  background-size: cover; /* Cobre todo o fundo */
+  background-repeat: no-repeat; /* Evita repetição se a imagem for menor */
+  background-attachment: fixed; /* Mantém a imagem fixa durante o scroll */
+  background-position: center center; /* Centraliza a imagem */
+}
+
+/* Estilos específicos para o tema Windows XP */
+/* Fundo global da página (Bliss wallpaper) e do #root quando o tema Windows XP está ativo */
+html.theme-pack-pack-windows-xp body, /* Adicione esta classe via SkinContext ao <html> */
+html.theme-pack-pack-windows-xp #root {
+  /* A variável --cor-fundo-pagina ainda será definida pelo SkinContext 
+     com base na paletteWindowsXP (ex: #0058E6 ou #3A6EA5).
+     Ela servirá como fallback caso a imagem não carregue. */
+  /* Definimos background-color como transparente para que o wallpaper Bliss seja o único fundo visível.
+     A variável --cor-fundo-pagina (ex: #ECE9D8 ou um azul XP) ainda pode ser usada por outros elementos. */
+  background-color: transparent;
+  background-image: url('/assets/skins/textures/winXp.jpg'); /* Bliss como fundo global */
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center center;
+}
+
+/* O comentário abaixo pode ser removido ou adaptado, pois a lógica está implementada acima.
+  html.theme-active-pack-windows-xp body { // Exemplo antigo
+    background-image: url('/assets/skins/textures/winXp.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center center;
+  }
+*/
+/* Estilo de Fundo Janela XP para Skins */
+.xp-window-background-skin {
+  background-color: #3A6EA5 !important; /* Azul de fundo do desktop XP, !important para garantir sobreposição */
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  position: relative; /* Para posicionar a pseudo-janela */
+  overflow: hidden; /* Para evitar que a sombra da janela cause scroll */
+}
+
+.xp-window-background-skin::before { /* A "janela" em si */
+  content: '';
+  display: block;
+  width: 80%; /* Largura da janela simulada */
+  max-width: 800px; /* Máximo para não ficar muito grande */
+  height: 70vh; /* Altura da janela simulada */
+  max-height: 600px;
+  background-color: #ECE9D8; /* Cinza claro de janela XP */
+  /* Aplicando o estilo de borda levantada dupla */
+  border: 1px solid;
+  border-top-color: #FFFFFF;    /* Destaque externo superior (ButtonHighlight) */
+  border-left-color: #FFFFFF;   /* Destaque externo esquerdo (ButtonHighlight) */
+  border-bottom-color: #808080; /* Sombra externa inferior (ButtonShadow) */
+  border-right-color: #808080;  /* Sombra externa direita (ButtonShadow) */
+  /* A 'box-shadow' cria a segunda linha da borda (interna) */
+  box-shadow: inset 1px 1px 0 #ECE9D8, /* Destaque interno claro, mesclando com o fundo */
+              inset -1px -1px 0 #A0A0A0, /* Sombra interna escura (ButtonDarkShadow) */
+              5px 5px 15px rgba(0,0,0,0.3); /* Sombra projetada externa original da janela */
+  position: relative; /* Para a barra de título */
+  /* border-radius: 3px; /* Bordas 3D clássicas são geralmente nítidas, removemos o radius */
+  z-index: 1; /* Para ficar acima do fundo azul mas abaixo da barra de título */
+}
+
+/* Barra de título da janela XP simulada */
+.xp-window-background-skin::after {
+  content: "KinkLink Messenger XP"; /* Título da Janela - pode ser personalizado */
+  position: absolute;
+  /* Ajuste da posição 'top' da barra de título:
+     15vh é o topo da área de conteúdo do ::before (corpo da janela).
+     Subtraímos 28px (altura da barra de título) para posicioná-la acima do corpo da janela. */
+  top: calc(15vh - 28px); 
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(80% - 2px); /* Largura da janela - bordas */
+  max-width: calc(800px - 2px);
+  height: 28px;
+  background: linear-gradient(to bottom, #0B59E8, #0058E6 80%, #0052D8); /* Gradiente azul XP */
+  color: white;
+  font-family: "Tahoma", "Verdana", sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 0 8px;
+  line-height: 28px;
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='55' height='18'%3E%3Crect x='35' y='4' width='10' height='10' fill='%23D84E30' stroke='white' stroke-width='0.8' rx='1'/%3E%3Crect x='20' y='4' width='10' height='10' fill='%23CCC' stroke='white' stroke-width='0.8' rx='1'/%3E%3Crect x='5' y='4' width='10' height='10' fill='%23CCC' stroke='white' stroke-width='0.8' rx='1'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 5px center;
+  z-index: 2; /* Para ficar acima da "janela" */
+}
+
+/* Novo Estilo de Fundo para a Pilha de Cartas no Tema XP */
+.xp-pile-background-skin {
+  background-color: #3A6EA5; /* Azul clássico do desktop XP - será a "face" do painel */
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px; /* Espaçamento interno para o conteúdo não colar nas bordas 3D */
+  box-sizing: border-box; /* Para que o padding não aumente o tamanho total */
+  /* Aplicando o estilo de borda levantada simples */
+  border: 1px solid;
+  border-top-color: #FFFFFF;    /* Destaque superior (branco) */
+  border-left-color: #FFFFFF;   /* Destaque esquerdo (branco) */
+  border-bottom-color: #808080; /* Sombra inferior (cinza escuro) */
+  border-right-color: #808080;  /* Sombra direita (cinza escuro) */
+  /* Adicione outros estilos se quiser "desenhar" mais elementos aqui */
+}

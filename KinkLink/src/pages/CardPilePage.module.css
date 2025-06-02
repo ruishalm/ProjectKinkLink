@@ -1,0 +1,310 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\CardPilePage.module.css */
+/* Estilos para CardPilePage */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  /* align-items: center; /* Removido para permitir que cardStackContainer se expanda */
+  justify-content: flex-start; /* Alinha todo o conteúdo ao topo */
+  min-height: 100vh;
+  width: 100%;
+  padding-top: 5px; /* Reduzido o padding superior */
+  padding-left: 15px; padding-right: 15px; padding-bottom: 15px; /* Mantém os outros paddings */
+  box-sizing: border-box;
+  background-color: var(--cor-fundo-pagina); /* Mantém a cor de fundo da página */
+  /* Padding inferior padrão, já que cardCounters não será fixo */
+  padding-bottom: 15px; 
+  /* A textura da pilha foi movida para .cardStackContainer */
+  position: relative; /* Necessário para o posicionamento absoluto das SideTipMessages */
+  color: var(--cor-texto-primario); /* Usa variável de paleta */
+  font-family: var(--font-family-main, "Trebuchet MS", sans-serif); /* Usa variável de paleta */
+  overflow-x: hidden; /* Evita scroll horizontal desnecessário */
+}
+
+.cardStackContainer {
+  /* flex-grow: 1; */ /* Removido para que o container não ocupe espaço vertical desnecessário */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* Alinha a carta na parte de baixo do container */
+  align-items: center;
+  position: relative; /* Para o posicionamento absoluto da carta de fundo e controle de z-index */
+  z-index: 5; /* Garante que a pilha de cartas fique acima das SideTipMessages (que têm z-index: 1) */
+  margin-top: 30px; /* Adiciona espaço acima do container das cartas */
+  /* Faz o container ocupar a largura que seria do padding do .page (15px de cada lado) */
+  /* A largura do .page é 100% do seu pai. 
+     Este container terá 100% da largura do .page + 30px (15px para cada lado do padding do .page) */
+  width: calc(100% + 30px); 
+  margin-left: -15px;       /* Compensa o padding-left de 15px do .page */
+  /* O padding interno do cardStackContainer: 20px vertical, 15px horizontal.
+     O padding horizontal de 15px aqui garante que o conteúdo interno comece onde o padding do .page começaria. */
+  padding: 20px 15px; 
+  margin-bottom: 20px; /* Aumenta o espaço abaixo das cartas */
+  box-sizing: border-box;
+
+  /* Aplica a textura da skin da pilha de cartas aqui */
+  background-image: var(--bg-pile-url);
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-color: var(--cor-fundo-elemento, #2a2a2a); /* Cor de fallback caso a textura não carregue ou não esteja definida */
+  border-radius: 15px; /* Opcional: para arredondar as bordas do container da textura */
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2); /* Opcional: para destacar um pouco o container */
+}
+
+.staticCardBack {
+  position: absolute;
+  z-index: 1; /* Atrás da carta principal */
+  transform: rotate(-2deg) translateY(3px) translateX(-3px);
+  filter: brightness(0.85);
+}
+
+.playingCardWrapper {
+  position: relative; /* Para o z-index funcionar corretamente */
+  z-index: 2; /* Na frente da carta de fundo */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* O cursor grab/grabbing é geralmente aplicado pelo use-gesture */
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: space-around;
+  align-items: center; 
+  max-width: 400px; /* Reduzido de 450px para tentar um tamanho menor */
+  margin-left: auto; /* Adicionado para centralizar após remover align-items: center do .page */
+  margin-right: auto; /* Adicionado para centralizar */
+  padding-top: 0; /* Remove completamente o padding superior */
+  padding-bottom: 15px; /* Mantém o padding inferior ou ajusta conforme necessário */
+  margin-bottom: 10px; /* Espaço antes da barra de navegação inferior */
+}
+
+/* Nova classe para estilos compartilhados dos botões de decisão */
+.botaoDecisao {
+  min-height: 55px; 
+  /* text-transform: uppercase; */ /* Removido - Deixe a skin controlar isso */
+}
+
+.likeButton,
+.dislikeButton {
+  /* Propriedades como border, border-radius, padding base, font-size, font-weight,
+     cursor, transition base, e box-shadow devem vir de genericButton e da skin ativa. */
+  /* Mantemos o padding aqui se for uma necessidade MUITO específica destes botões,
+     mas idealmente o genericButton ou a skin cuidam disso.
+     Se o padding do genericButton/skin for suficiente, remova a linha abaixo. */
+  padding: 12px 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px; /* Largura mínima para não ficarem muito pequenos */
+}
+
+.likeButton { /* Botão "Topo!" */
+  background-color: var(--cor-acao-positiva);
+  color: var(--cor-texto-acao-positiva);
+}
+
+.likeButton:hover {
+  filter: brightness(90%);
+}
+
+.dislikeButton { /* Botão "Passo" */
+  background-color: var(--cor-acao-negativa);
+  color: var(--cor-texto-acao-negativa);
+}
+
+.dislikeButton:hover {
+  filter: brightness(90%);
+}
+
+
+.createKinkMiniButton {
+  background-color: var(--cor-primaria);
+  color: var(--cor-texto-sobre-primaria);
+  border-radius: 8px;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-align: center;
+  transition: transform 0.1s ease-out, filter 0.2s ease; /* Adicionado filter à transição */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  padding: 5px;
+  box-sizing: border-box;
+}
+.createKinkMiniButton:hover {
+  filter: brightness(90%);
+}
+
+
+.createKinkMiniCardBackWrapper {
+ /* O CardBack interno já tem tamanho, não precisa definir aqui se o CardBack tem defaults */
+ /* Se precisar forçar: width: 30px; height: 42px; */
+  margin-bottom: 2px;
+}
+
+.createKinkMiniTextOverlay {
+  font-size: 0.6em;
+  font-weight: bold;
+  line-height: 1.1;
+  color: var(--cor-texto-sobre-primaria); /* Garante que o texto use a cor da paleta */
+}
+
+.bottomNavContainer {
+  display: flex;
+  justify-content: center; /* Centraliza os botões */
+  gap: clamp(20px, 5vw, 40px); /* Espaçamento responsivo */
+  align-items: center;
+  width: 100%;
+  padding: 10px 0;
+  margin-top: 10px; /* Reduz o espaço acima da barra de navegação */
+  border-top: 1px solid var(--cor-borda); /* Linha sutil no topo */
+}
+
+/* Ponto de notificação para a barra de navegação (ex: botão Links) */
+.navNotificationDot {
+  height: 8px;
+  width: 8px;
+  background-color: var(--cor-aviso); /* Usa cor de aviso da paleta */
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+/* Animação de "shake" usada, por exemplo, no botão de Links */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.shakeAnimation {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* Estilos para a tela de "Fim das Cartas" */
+.noCardsViewContainer {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+}
+
+.pageTitle { /* Para o h2 "Fim das Cartas!" */
+  color: var(--cor-primaria); /* Usa cor primária da paleta */
+  margin-bottom: 20px;
+}
+
+.noCardsMessage {
+  font-size: 1.1em;
+  color: var(--cor-texto-secundario); /* Usa cor de texto secundário */
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.centeredCreateKinkButton {
+  /* Se precisar de ajustes específicos para centralizar ou dar margem */
+  /* Herda os estilos de .createKinkMiniButton, incluindo as cores da paleta */
+  margin-top: 20px;
+}
+
+.cardCounters {
+  /* Estilo simples para os contadores de cartas */
+  font-size: 0.8em;
+  color: var(--cor-texto-secundario, #777777); /* Cor de texto discreta */
+  text-align: center;
+  width: 100%;
+  padding: 8px 0; /* Padding vertical simples */
+  margin-top: 15px; /* Espaço acima dos contadores */
+  margin-bottom: 10px; /* Espaço abaixo, antes do final da página */
+  box-sizing: border-box;
+}
+
+/* Estilos para os itens individuais dentro dos contadores de cartas */
+.counterItem {
+  display: inline-block; /* Permite padding/margin e não quebra a linha */
+  /* Poderíamos adicionar padding aqui se quiséssemos um espaçamento base,
+     mas vamos deixar isso para a skin por enquanto. */
+}
+
+.counterValue {
+  font-weight: bold; /* Destaca os números */
+}
+
+.counterSeparator {
+  margin: 0 5px; /* Espaçamento em volta do separador "|" */
+}
+
+/* Base comum para botões na barra de navegação inferior */
+.bottomNavButtonBase {
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, filter 0.2s ease; /* Adicionado filter */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: clamp(45px, 10vw, 55px); /* Common height for alignment */
+  box-sizing: border-box;
+  text-decoration: none; /* For Link components styled as buttons */
+}
+
+/* Text button: Links */
+.matchesNavButton {
+  composes: bottomNavButtonBase; /* Herda estilos da base */
+  background-color: var(--cor-destaque);
+  color: var(--cor-texto-sobre-destaque, var(--cor-texto-primario));
+  /* border: none; <- Removido para permitir que o tema aplique a borda e o clip-path */
+  border-radius: 8px; /* Standard button rounding */
+  padding: 10px 30px; /* Aumentado o padding horizontal (era ~22px, agora 30px) */
+  font-size: 1em;
+  font-weight: bold;
+}
+.matchesNavButton:hover {
+  filter: brightness(90%);
+}
+
+/* Nova classe para Botões de Ícone na Navegação Inferior (Coração e Perfil) */
+.bottomNavIconStyle {
+  composes: bottomNavButtonBase; /* Herda estilos da base como cursor, transition, display, align/justify, height, etc. */
+
+  border: 2px solid var(--cor-borda);
+  color: var(--cor-texto-secundario);
+  background: none;
+  width: clamp(45px, 10vw, 55px); /* Largura igual à altura para forma circular */
+  border-radius: 50%; /* Garante que seja um círculo */
+  padding: 0; /* Remove padding interno para centralização do ícone */
+  font-size: clamp(1.2em, 4.5vw, 1.6em); /* Tamanho do ícone/emoji */
+}
+
+.bottomNavIconStyle:hover {
+  /* Cores de hover podem ser alteradas por variáveis CSS da skin */
+  color: var(--cor-primaria);
+  border-color: var(--cor-primaria);
+  background-color: var(--cor-fundo-elemento-transparente, rgba(0,0,0,0.05)); /* Fundo sutil no hover */
+}
+
+/* Estilos específicos para os .ballButton (Carinhos & Mimos, Perfil) */
+.ballButton {
+  /* Exemplo: uma sombra interna sutil e uma borda um pouco mais grossa */
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.1);
+  border-width: 2px; /* Mantém a borda, pode ser ajustada se necessário */
+}
+
+.ballButton:hover {
+  /* Exemplo: intensificar a cor primária no hover */
+  filter: brightness(1.1); /* Levemente mais claro/intenso no hover */
+}
+
+/* Estilos específicos para o .linkButton (Botão de Links) */
+.linkButton {
+  /* Exemplo: Adicionar uma leve transição no box-shadow para um efeito mais suave no hover,
+     já que o filter: brightness(90%) já é aplicado por .matchesNavButton:hover */
+  transition: box-shadow 0.2s ease-in-out, filter 0.2s ease; /* Adiciona box-shadow à transição */
+}

@@ -1,0 +1,175 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\SkinPreviewMiniature.module.css */
+.miniatureContainer {
+  border: 2px solid var(--preview-border-color, #444);
+  border-radius: 8px;
+  padding: 10px;
+  width: 260px; /* Largura ajustada para caber os elementos */
+  height: auto; /* Altura se ajustará ao conteúdo */
+  font-family: var(--preview-font-family, sans-serif);
+  color: var(--preview-text-color, #ccc);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden; /* Para garantir que os cantos arredondados sejam respeitados */
+  position: relative; /* Para posicionar os fundos divididos */
+}
+
+.backgroundTopHalf,
+.backgroundBottomHalf {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  background-size: cover;
+  background-position: center;
+  z-index: 0; /* Atrás do conteúdo */
+}
+
+.backgroundTopHalf {
+  top: 0;
+  border-radius: 6px 6px 0 0; /* Para acompanhar o border-radius do container */
+}
+
+.backgroundBottomHalf {
+  bottom: 0;
+  border-radius: 0 0 6px 6px; /* Para acompanhar o border-radius do container */
+}
+
+.miniHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  background-color: var(--preview-header-bg, #2a2a2a);
+  border-bottom: 1px solid var(--preview-header-border, #3f3f3f);
+  border-radius: 4px 4px 0 0; /* Cantos arredondados apenas no topo */
+  z-index: 1; /* Sobre os fundos divididos */
+}
+
+.miniLogo {
+  font-size: 0.7em;
+  font-weight: bold;
+  padding: 4px 6px;
+  background-color: var(--preview-primary-action-bg, #00bcd4);
+  border-radius: 3px;
+  display: flex; /* Para centralizar a imagem do logo se necessário */
+  align-items: center;
+  justify-content: center;
+}
+
+.miniLogoImage {
+  height: 18px; /* Ajuste conforme o tamanho do seu logo */
+  width: auto;
+}
+
+.miniSupportButton {
+  font-size: 0.6em;
+  padding: 4px 8px;
+  border-radius: 3px;
+  /* Estilos base que podem ser sobrescritos pela classe de botão do tema */
+  background-color: var(--preview-secondary-action-bg, #555);
+  color: var(--preview-text-on-secondary-action, #fff);
+  border: 1px solid transparent;
+  text-align: center;
+}
+
+.miniContentArea {
+  padding: 6px 8px; /* Padding vertical reduzido */
+  background-color: var(--preview-content-bg, #2c2c2c); /* Fundo visível para a barra */
+  border-radius: 4px; /* Raio para a barra */
+  display: flex;
+  flex-direction: column; /* Itens (área das cartas, botões inferiores) empilhados */
+  align-items: center; /* Alinha verticalmente os itens da linha */
+  gap: 6px; /* Espaço reduzido entre a área das cartas e os botões inferiores */
+  z-index: 1; /* Sobre os fundos divididos */
+}
+
+.backgroundSwatch {
+  flex: 1;
+  border-radius: 3px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6em;
+  color: rgba(255,255,255,0.7);
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+  border: 1px solid var(--preview-border-color, #444);
+}
+
+.miniCardsArea {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px; /* Espaçamento entre as cartas levemente reduzido */
+  margin: 4px 0; /* Margem vertical da área das cartas reduzida */
+  min-height: 110px; /* Altura aumentada para as cartas maiores */
+}
+
+.miniCard {
+  width: 70px;  /* Dobro do tamanho anterior */
+  height: 100px; /* Dobro do tamanho anterior */
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8em; /* Ajustado para o símbolo de naipe */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.faceUpCard {
+  background-color: var(--preview-card-face-bg, #f0f0f0);
+  border: 1px solid var(--preview-card-border, #ccc);
+  color: var(--preview-card-face-text, #333);
+  /* Simula um naipe ou valor */
+}
+
+.faceDownCard {
+  background-color: var(--preview-card-back-bg, #6a1b9a); /* Cor de fundo para carta virada */
+  border: 1px solid var(--preview-card-back-border, #4a148c);
+  color: var(--preview-card-back-pattern, #fff);
+  /* background-image: linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%, transparent);
+  background-size: 10px 10px; */ /* Removido para usar a imagem do logo */
+  /* Assegura que o conteúdo (imagem do logo) seja centralizado se a div for maior */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.miniCardBackLogo {
+  max-width: 70%;
+  max-height: 60%;
+  object-fit: contain;
+  opacity: 0.9;
+}
+
+.miniButtonStylePreviewContainer {
+  display: flex;
+  justify-content: center;
+  /* margin-top: 5px; */ /* Removido, pois o botão "Ação" será realocado ou removido desta miniatura por enquanto */
+  width: 100%; /* Se for usado, para ocupar espaço e centralizar */
+}
+
+.miniActionButton {
+  padding: 6px 12px;
+  font-size: 0.7em;
+  border-radius: 4px;
+  /* Estilos base que serão fortemente influenciados pela classe do tema e paleta */
+  font-weight: bold;
+  text-transform: uppercase;
+  border: 1px solid; /* A cor virá da paleta ou classe */
+  /* Cores base da paleta, podem ser sobrescritas pela buttonStyleClass */
+  background-color: var(--preview-button-bg, #00bcd4);
+  color: var(--preview-button-text, #000);
+  border-color: var(--preview-button-border, #008fa1);
+  text-align: center;
+}
+
+/* Estilo para quando um fundo é uma imagem e não uma cor sólida */
+.hasImageTexture::before {
+  content: "🖼️"; /* Ícone de imagem para indicar textura */
+  font-size: 0.8em;
+  opacity: 0.7;
+}

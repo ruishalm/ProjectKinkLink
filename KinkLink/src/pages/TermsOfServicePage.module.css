@@ -1,0 +1,100 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\TermsOfServicePage.module.css */
+@font-face {
+  font-family: 'Pixelated MS Sans Serif';
+  /* Atualize estes caminhos para onde você hospedar os arquivos da fonte localmente, 
+     por exemplo, dentro da sua pasta 'public/fonts/' */
+  src: url('/fonts/WebPixelatedMSSansSerif.woff2') format('woff2'), /* Exemplo de caminho local */
+       url('/fonts/WebPixelatedMSSansSerif.woff') format('woff');   /* Exemplo de caminho local */
+  font-weight: normal;
+  font-style: normal;
+}
+
+.pageContainer {
+  font-family: 'Pixelated MS Sans Serif', 'MS Sans Serif', Arial, sans-serif;
+  background-color: #c0c0c0; /* Cinza clássico do Win95 */
+  color: #000000; /* Texto preto */
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  border-right: 2px solid #808080;
+  border-bottom: 2px solid #808080;
+  box-shadow: 1px 1px 0px #808080, 2px 2px 0px #808080; /* Sombra interna sutil */
+  padding: 3px; /* Padding para a borda interna */
+  max-width: 800px;
+  margin: 20px auto;
+  line-height: 1.5;
+}
+
+.contentWrapper {
+  background-color: #c0c0c0; /* Mesmo cinza */
+  padding: 15px 20px;
+  border-top: 2px solid #808080;
+  border-left: 2px solid #808080;
+  border-right: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  min-height: 400px; /* Para dar um corpo */
+}
+
+/* Estilos para elementos do Markdown */
+.markdownContent h1 {
+  background-color: #000080; /* Azul escuro da barra de título */
+  color: #ffffff; /* Texto branco */
+  padding: 3px 5px;
+  font-size: 1em; /* Fontes no Win95 não eram enormes */
+  margin-top: 10px;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.markdownContent h2 {
+  font-size: 1em;
+  margin-top: 15px;
+  margin-bottom: 10px;
+  font-weight: bold;
+  border-bottom: 1px solid #808080;
+  padding-bottom: 2px;
+}
+
+.markdownContent h3,
+.markdownContent h4,
+.markdownContent h5,
+.markdownContent h6 {
+  font-size: 1em;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.markdownContent p {
+  margin-bottom: 10px;
+}
+
+.markdownContent a {
+  color: #0000ff; /* Azul clássico de link */
+  text-decoration: underline;
+}
+
+.markdownContent ul,
+.markdownContent ol {
+  margin-left: 20px;
+  margin-bottom: 10px;
+}
+
+.markdownContent li {
+  margin-bottom: 5px;
+}
+
+.markdownContent strong {
+  font-weight: bold;
+}
+
+.markdownContent em {
+  font-style: italic;
+}
+
+.markdownContent code {
+  font-family: 'Courier New', Courier, monospace; /* Fonte monoespaçada para código */
+  background-color: #b0b0b0; /* Um cinza um pouco mais escuro que o fundo */
+  padding: 1px 3px;
+  border: 1px solid #808080;
+  font-size: 0.9em; /* Ligeiramente menor para se destacar */
+}

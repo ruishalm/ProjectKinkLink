@@ -1,0 +1,352 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\MatchesPage.module.css */
+.page {
+  display: flex;
+  flex-direction: column;
+  /* align-items: center; /* Removido para permitir que o conteúdo da página use a largura total */
+  min-height: 100vh;
+  width: 100%;
+  padding: 20px; /* Padding geral, ajuste conforme necessário */
+  box-sizing: border-box;
+  background-color: var(--cor-fundo-pagina);
+  background-image: var(--bg-matches-url); /* Usa a variável CSS para a textura dos matches */
+  background-size: cover; /* Faz a imagem cobrir toda a área, mantendo proporção */
+  background-position: center center; /* Centraliza a imagem */
+  background-repeat: no-repeat; /* Evita que a imagem se repita */
+  color: var(--cor-texto-primario);
+  font-family: var(--font-family-main, "Trebuchet MS", sans-serif);
+  overflow-x: hidden; /* Evita scroll horizontal se algum conteúdo vazar */
+}
+
+.header {
+  position: relative; /* Necessário para o posicionamento absoluto do título */
+  display: flex;
+  justify-content: flex-end; /* Alinha o botão "Voltar" à direita */
+  align-items: flex-start; /* Alinha o botão "Cartas" ao topo */
+  margin-bottom: 20px;
+  padding-bottom: 10px; /* Adiciona um pouco de espaço se o título for alto */
+  width: 100%; /* Garante que o header ocupe a largura total */
+}
+
+.pageTitle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--cor-destaque, #64b5f6); /* Usa variável de paleta */
+  margin: 0; /* Remove margens para não afetar o posicionamento absoluto */
+  font-size: clamp(1.6em, 5vw, 2.2em); 
+}
+
+.backToCardsButton {
+  border: none;
+  background-color: var(--cor-acao-secundaria, #ff6b6b); /* Usa variável de paleta */
+  color: var(--cor-texto-sobre-acao-secundaria, white); /* Usa variável de paleta */
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  text-decoration: none;
+  font-weight: bold;
+  padding: clamp(8px, 1.8vw, 12px) clamp(15px, 3.5vw, 25px);
+  font-size: clamp(0.8em, 2.2vw, 1em);
+}
+.backToCardsButton:hover {
+  filter: brightness(90%);
+}
+
+.noMatchesText {
+  text-align: center;
+  font-size: 1.1em;
+  color: var(--cor-texto-secundario, #b0b0b0); /* Usa variável de paleta */
+  margin-top: 50px;
+}
+
+.section {
+  width: 100%; /* Garante que as seções ocupem a largura total */
+  margin-bottom: 30px; /* Espaço entre seções */
+}
+
+.sectionTitle {
+  font-size: clamp(1.5em, 4vw, 1.8em); /* Fonte responsiva */
+  color: var(--cor-acao-positiva, #ff6b6b); /* Usa variável de paleta */
+  border-bottom: 2px solid var(--cor-acao-positiva, #ff6b6b); /* Usa variável de paleta */
+  padding-bottom: 10px;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.sectionTitleOthers {
+  composes: sectionTitle;
+  color: var(--cor-destaque, #64b5f6); /* Usa variável de paleta */
+  border-bottom-color: var(--cor-destaque, #64b5f6); /* Usa variável de paleta */
+}
+
+.matchesGrid {
+  display: grid;
+  gap: 16px; 
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* Mais responsivo */
+  justify-items: center;
+}
+
+.cardItemWrapper {
+  display: inline-block;
+  cursor: pointer;
+  transition: transform 0.15s ease-out;
+  position: relative; 
+  overflow: hidden; 
+}
+
+.unreadMatch .cardItemWrapper { 
+  /* Estilos para cartas não lidas, se necessário */
+}
+.unreadIndicator {
+  position: absolute;
+  bottom: 18px; 
+  left: 12px;   
+  width: 6px;    
+  height: 6px;   
+  background-color: var(--cor-aviso, #ff4757); /* Usa variável de paleta */
+  border-radius: 50%;
+  z-index: 10; 
+  box-shadow: 0 0 3px var(--cor-aviso, #ff4757); /* Usa variável de paleta */
+}
+.matchCardSnippet {
+  position: absolute;
+  bottom: 5px; 
+  left: 5px;   
+  right: 5px;  
+  background-color: var(--cor-fundo-translucido, rgba(0, 0, 0, 0.65)); /* Usa variável de paleta */
+  color: var(--cor-texto-sobre-translucido, white); /* Usa variável de paleta */
+  padding: 4px 7px; 
+  border-radius: 4px; 
+  font-size: 0.65em; 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  z-index: 1; 
+  text-align: left; 
+  box-sizing: border-box; 
+}
+.navNotificationDot {
+  height: 8px;
+  width: 8px;
+  background-color: var(--cor-aviso, #ff4757); /* Usa variável de paleta */
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+.backToCardsButton.shakeAnimation {
+  /* A animação é definida no CardPilePage.module.css, mas a classe é aplicada aqui */
+}
+
+.categoryCarouselsGrid {
+  display: grid;
+  grid-template-columns: 1fr; /* Uma coluna por padrão */
+  gap: 30px; /* Espaçamento entre os carrosséis */
+  justify-items: center; 
+  align-items: start; 
+  margin-top: 20px;
+  width: 100%;
+}
+
+/* Nova classe para a célula da grade que envolve cada carrossel */
+.carouselCell {
+  position: relative; /* Para posicionar pseudo-elementos ::before e ::after */
+  /* O tint da categoria pode ser mais sutil ou aplicado condicionalmente por nível */
+  background-color: var(--cor-fundo-elemento, #2c2c2c); /* Um cinza base ligeiramente diferente */
+  padding: 20px; /* Espaçamento interno da célula */
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+  width: 100%; /* Ocupa a largura da célula da grade */
+  min-height: 280px; /* Altura mínima para acomodar o carrossel e título */
+  display: flex;
+  flex-direction: column; /* Para o CategoryCarousel usar a altura disponível */
+  justify-content: flex-start; /* Alinha o CategoryCarousel ao topo da célula */
+  align-items: center; /* Centraliza o CategoryCarousel horizontalmente se ele for mais estreito */
+
+  /* Variáveis para as cores das bordas, com um fallback */
+  --carousel-border-outer-color: var(--cor-borda, #3f3f3f);
+  --carousel-border-inner-color: var(--cor-borda, #505050);
+}
+
+/* Nível 0 (0-1 Links): Fundo com tint sutil, sem bordas proeminentes */
+.borderLevel0 {
+  /* Aplica o tint da categoria de forma bem sutil */
+  background-color: var(--carousel-background-category-tint-level0, var(--cor-fundo-elemento, #2c2c2c));
+}
+
+/* Nível 1 (2-4 Links): Uma borda colorida */
+.borderLevel1 {
+  border: 2px solid var(--carousel-border-outer-color);
+  background-color: var(--carousel-background-category-tint-level1, var(--cor-fundo-elemento, #2c2c2c));
+}
+
+/* Nível 2 (5-9 Links): Duas bordas coloridas (estado anterior) */
+.borderLevel2::before,
+.borderLevel2::after {
+  content: '';
+  position: absolute;
+  box-sizing: border-box;
+  border-radius: 10px; /* Um pouco menor que o border-radius da célula para efeito interno */
+  pointer-events: none; /* Para não interferir com cliques */
+}
+.borderLevel2::before { /* Borda externa */
+  top: 6px; left: 6px; right: 6px; bottom: 6px;
+  border: 2px solid var(--carousel-border-outer-color);
+}
+.borderLevel2::after { /* Borda interna */
+  top: 11px; left: 11px; right: 11px; bottom: 11px;
+  border: 1px solid var(--carousel-border-inner-color);
+}
+.borderLevel2 {
+  background-color: var(--carousel-background-category-tint-level2, var(--cor-fundo-elemento, #2c2c2c));
+}
+
+/* Nível 3 (10-14 Links): Borda mais rebuscada (ex: borda grossa + sombra interna) */
+.borderLevel3 {
+  border: 3px solid var(--carousel-border-outer-color);
+  box-shadow: inset 0 0 0 3px var(--carousel-border-inner-color), /* Simula uma segunda borda interna */
+              inset 0 0 10px rgba(0,0,0,0.3); /* Sombra interna sutil */
+  background-color: var(--carousel-background-category-tint-level3, var(--cor-fundo-elemento, #2c2c2c));
+}
+
+/* Nível 4 (15+ Links): Borda ainda mais rebuscada (ex: borda dupla com chanfro ou estilo diferente) */
+.borderLevel4 {
+  border: 2px solid var(--carousel-border-inner-color); /* Borda interna primeiro */
+  outline: 3px solid var(--carousel-border-outer-color); /* Borda externa mais grossa com outline */
+  outline-offset: -5px; /* Para trazer o outline para dentro, sobrepondo a borda interna */
+  box-shadow: 0 0 15px var(--carousel-border-outer-color); /* Um brilho sutil da cor externa */
+  background-color: var(--carousel-background-category-tint-level4, var(--cor-fundo-elemento, #2c2c2c));
+}
+
+/* Ajuste das variáveis de tint para cada nível (opcional, pode ser a mesma para todos) */
+:root { /* Ou defina dentro de cada .carouselCell--categoria se quiser variar por categoria E nível */
+  --carousel-background-category-tint-level0: rgba(255,255,255,0.03); /* Quase imperceptível */
+  --carousel-background-category-tint-level1: rgba(255,255,255,0.05);
+  --carousel-background-category-tint-level2: rgba(255,255,255,0.07);
+  --carousel-background-category-tint-level3: rgba(255,255,255,0.1);
+  --carousel-background-category-tint-level4: rgba(255,255,255,0.12);
+}
+
+/* Modificadores de cor por categoria */
+.carouselCell--exposicao {
+  --carousel-border-outer-color: #32CD32; /* Verde para Exposição */
+  --carousel-border-inner-color: #2E8B57; /* Verde Escuro para Exposição */
+  --carousel-background-category-tint-level0: rgba(50, 205, 50, 0.05);
+  --carousel-background-category-tint-level1: rgba(50, 205, 50, 0.08);
+  --carousel-background-category-tint-level2: rgba(50, 205, 50, 0.1);
+  --carousel-background-category-tint-level3: rgba(50, 205, 50, 0.12);
+  --carousel-background-category-tint-level4: rgba(50, 205, 50, 0.15);
+}
+.carouselCell--fantasia {
+  --carousel-border-outer-color: #8A2BE2;
+  --carousel-border-inner-color: #BA55D3; /* Ajustado para melhor contraste */
+  --carousel-background-category-tint-level0: rgba(138, 43, 226, 0.05);
+  --carousel-background-category-tint-level1: rgba(138, 43, 226, 0.08);
+  --carousel-background-category-tint-level2: rgba(138, 43, 226, 0.1);
+  --carousel-background-category-tint-level3: rgba(138, 43, 226, 0.12);
+  --carousel-background-category-tint-level4: rgba(138, 43, 226, 0.15);
+}
+.carouselCell--poder {
+  --carousel-border-outer-color: #DC143C;
+  --carousel-border-inner-color: #B22222; /* Ajustado */
+  --carousel-background-category-tint-level0: rgba(220, 20, 60, 0.05);
+  --carousel-background-category-tint-level1: rgba(220, 20, 60, 0.08);
+  --carousel-background-category-tint-level2: rgba(220, 20, 60, 0.1);
+  --carousel-background-category-tint-level3: rgba(220, 20, 60, 0.12);
+  --carousel-background-category-tint-level4: rgba(220, 20, 60, 0.15);
+}
+.carouselCell--sensorial {
+  --carousel-border-outer-color: #FFD700; /* Amarelo para Sensorial */
+  --carousel-border-inner-color: #FFA500; /* Laranja para Sensorial */
+  --carousel-background-category-tint-level0: rgba(255, 215, 0, 0.05);
+  --carousel-background-category-tint-level1: rgba(255, 215, 0, 0.08);
+  --carousel-background-category-tint-level2: rgba(255, 215, 0, 0.1);
+  --carousel-background-category-tint-level3: rgba(255, 215, 0, 0.12);
+  --carousel-background-category-tint-level4: rgba(255, 215, 0, 0.15);
+}
+
+/* Estilos para o Container de Top Links */
+.topLinksSection { /* Apenas para agrupar o título e o container, se necessário */
+  width: 100%;
+}
+
+.topLinksContainerBase {
+  position: relative;
+  padding: 20px; /* Espaçamento para as bordas aparecerem ao redor do matchesGrid */
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 10px; /* Espaço após o título "Top Links" */
+  margin-bottom: 30px; /* Espaço antes da próxima seção */
+
+  /* Variáveis para o tema de fogo */
+  --toplinks-border-outer-color: #FF4500; /* OrangeRed */
+  --toplinks-border-inner-color: #FF8C00; /* DarkOrange */
+  --toplinks-highlight-color: #FFD700;   /* Gold */
+
+  /* Tints de fundo com tema de fogo */
+  --toplinks-background-tint-level0: rgba(255, 100, 0, 0.05);
+  --toplinks-background-tint-level1: rgba(255, 100, 0, 0.08);
+  --toplinks-background-tint-level2: rgba(255, 100, 0, 0.1);
+  --toplinks-background-tint-level3: rgba(255, 100, 0, 0.12);
+  --toplinks-background-tint-level4: rgba(255, 100, 0, 0.15);
+}
+
+/* Níveis de Borda para Top Links */
+.topLinksBorderLevel0 {
+  background-color: var(--toplinks-background-tint-level0, var(--cor-fundo-elemento, #2c2c2c));
+}
+
+.topLinksBorderLevel1 {
+  border: 2px solid var(--toplinks-border-outer-color);
+  background-color: var(--toplinks-background-tint-level1, var(--cor-fundo-elemento, #2c2c2c));
+}
+
+.topLinksBorderLevel2::before,
+.topLinksBorderLevel2::after {
+  content: '';
+  position: absolute;
+  box-sizing: border-box;
+  border-radius: 10px;
+  pointer-events: none;
+}
+.topLinksBorderLevel2::before {
+  top: 6px; left: 6px; right: 6px; bottom: 6px;
+  border: 2px solid var(--toplinks-border-outer-color);
+}
+.topLinksBorderLevel2::after {
+  top: 11px; left: 11px; right: 11px; bottom: 11px;
+  border: 1px solid var(--toplinks-border-inner-color);
+}
+.topLinksBorderLevel2 {
+  background-color: var(--toplinks-background-tint-level2, var(--cor-fundo-elemento, #2c2c2c));
+}
+
+.topLinksBorderLevel3 {
+  border: 3px solid var(--toplinks-border-outer-color);
+  box-shadow: inset 0 0 0 3px var(--toplinks-border-inner-color),
+              inset 0 0 8px var(--toplinks-highlight-color); /* Brilho dourado interno */
+  background-color: var(--toplinks-background-tint-level3, var(--cor-fundo-elemento, #2c2c2c));
+}
+
+.topLinksBorderLevel4 {
+  border: 2px solid var(--toplinks-border-inner-color);
+  outline: 3px solid var(--toplinks-border-outer-color);
+  outline-offset: -5px;
+  box-shadow: 0 0 15px var(--toplinks-highlight-color), 0 0 25px var(--toplinks-border-outer-color); /* Brilho mais intenso */
+  background-color: var(--toplinks-background-tint-level4, var(--cor-fundo-elemento, #2c2c2c));
+}
+
+/* Media queries para responsividade dos carrosséis e grid de matches */
+@media (min-width: 768px) { /* Ajustado o breakpoint para telas um pouco maiores */
+  .categoryCarouselsGrid {
+    /* Em telas maiores, exibe duas colunas para os carrosséis */
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* As media queries para .matchesGrid já usam auto-fill, o que é bom.
+   Pode-se ajustar o minmax se necessário. */

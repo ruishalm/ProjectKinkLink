@@ -1,0 +1,180 @@
+// d:\Projetos\Github\app\ProjectKinkLink\firestore.rules
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Regras para a coleção 'users'
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && (
+        (request.auth.uid == userId) || // Usuário pode escrever no seu próprio documento
+        ( // OU: Parceiro pode atualizar campos de vínculo do outro usuário
+          request.method == 'update' &&
+          request.auth.uid != userId && // O requisitante não é o dono do documento
+          request.resource.data.linkedPartnerId == request.auth.uid && // O campo linkedPartnerId no documento sendo atualizado aponta para o requisitante
+          (request.resource.data.coupleId == resource.data.coupleId || request.resource.data.coupleId is string) && // Consistência do coupleId
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['linkedPartnerId', 'coupleId']) // Apenas estes campos podem ser alterados pelo parceiro nesta condição
+        ) ||
+        ( // OU: Parceiro pode atualizar o array 'seenCards' do outro usuário
+          request.method == 'update' &&
+          request.auth.uid != userId && // O requisitante não é o dono do documento
+          get(/databases/$(database)/documents/users/$(userId)).data.linkedPartnerId == request.auth.uid && // O documento sendo atualizado pertence ao parceiro atual do requisitante
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seenCards']) // Apenas o campo 'seenCards' pode ser alterado nesta condição
+        )
+      );
+      // Considerar separar 'create' e 'update' se as lógicas ficarem muito complexas.
+      // allow delete: if false; // Geralmente não se permite deletar usuários pelo cliente.
+    }
+
+    // Regras para a coleção 'pendingLinks'
+    match /pendingLinks/{linkCode} {
+      allow read: if request.auth != null &&
+                     (resource.data.initiatorUserId == request.auth.uid ||
+                      (resource.data.status == 'pending' || resource.data.status == 'cancelled_initiator_linked' || resource.data.status == 'expired') ||
+                      (resource.data.status == 'completed' && resource.data.acceptedBy == request.auth.uid)
+                     );
+      allow create: if request.auth != null && request.resource.data.initiatorUserId == request.auth.uid &&
+                       request.resource.data.status == 'pending' &&
+                       request.resource.data.linkCode == linkCode &&
+                       request.resource.data.keys().hasAll(['initiatorUserId', 'linkCode', 'status', 'createdAt']) &&
+                       request.resource.data.keys().hasOnly(['initiatorUserId', 'linkCode', 'status', 'createdAt']);
+      allow update: if request.auth != null &&
+                       resource.data.initiatorUserId != request.auth.uid && 
+                       resource.data.status == 'pending' &&
+                       (
+                         (request.resource.data.status == 'completed' &&
+                          request.resource.data.acceptedBy == request.auth.uid &&
+                          request.resource.data.coupleId is string &&
+                          request.resource.data.initiatorUserId == resource.data.initiatorUserId &&
+                          request.resource.data.linkCode == resource.data.linkCode &&
+                          request.resource.data.createdAt == resource.data.createdAt) ||
+                         ((request.resource.data.status == 'cancelled_initiator_linked' || request.resource.data.status == 'expired') &&
+                          !('acceptedBy' in request.resource.data) &&
+                          !('coupleId' in request.resource.data) &&
+                          request.resource.data.initiatorUserId == resource.data.initiatorUserId)
+                       );
+    }
+    
+    // Regras para a coleção 'linkRequests' (Se ainda estiver em uso, caso contrário, pode ser removida)
+    match /linkRequests/{requestId} {
+        allow read: if request.auth != null && 
+                       (resource.data.requesterId == request.auth.uid || resource.data.targetId == request.auth.uid);
+        allow create: if request.auth != null && request.resource.data.requesterId == request.auth.uid;
+        allow delete: if request.auth != null && 
+                       (resource.data.requesterId == request.auth.uid || resource.data.targetId == request.auth.uid); 
+    }
+
+    // Regras para a coleção 'couples'
+    match /couples/{coupleId} {
+      allow create: if request.auth != null &&
+                       request.resource.data.members.size() == 2 &&
+                       request.auth.uid in request.resource.data.members &&
+                       request.resource.data.members[0] is string &&
+                       request.resource.data.members[1] is string &&
+                       request.resource.data.createdAt == request.time;
+
+      // Helper function para verificar se o usuário autenticado é membro deste casal
+      function isUserMemberOfCouple() {
+        // Revertendo para usar o coupleId do escopo do match
+        let coupleDoc = get(/databases/$(database)/documents/couples/$(coupleId));
+        return coupleDoc.data != null && request.auth.uid in coupleDoc.data.members;
+      }
+      allow read, update, delete: if request.auth != null && isUserMemberOfCouple();
+      
+      // Regras para a subcoleção 'likedInteractions'
+      match /likedInteractions/{cardId} {
+        // Restaurando a verificação de membro para leitura
+        allow read: if request.auth != null && isUserMemberOfCouple(); 
+        
+        allow create: if request.auth != null && isUserMemberOfCouple() &&
+                        request.resource.data.likedByUIDs.size() == 1 &&
+                        request.resource.data.likedByUIDs[0] == request.auth.uid &&
+                        request.resource.data.isMatch == false &&
+                        request.resource.data.keys().hasAll(['cardData', 'likedByUIDs', 'isMatch', 'isHot', 'lastActivity', 'createdAt']);
+        
+        allow update: if request.auth != null && isUserMemberOfCouple() &&
+                         (
+                           ( // Caso 1: Segundo usuário curte, formando um match
+                             resource.data.likedByUIDs.size() == 1 &&
+                             !(request.auth.uid in resource.data.likedByUIDs) &&
+                             request.resource.data.likedByUIDs.size() == 2 &&
+                             request.resource.data.likedByUIDs[0] == resource.data.likedByUIDs[0] && 
+                             request.resource.data.likedByUIDs[1] == request.auth.uid &&          
+                             request.resource.data.isMatch == true &&
+                             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likedByUIDs', 'isMatch', 'lastActivity'])
+                           ) ||
+                           ( // Caso 2: Alternando 'isHot' em um match existente
+                             resource.data.isMatch == true &&
+                             request.resource.data.isMatch == true && 
+                             request.resource.data.likedByUIDs == resource.data.likedByUIDs && 
+                             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isHot', 'lastActivity'])
+                           )
+                         );
+        
+        allow delete: if request.auth != null && isUserMemberOfCouple();
+      }
+
+      // Regras para a subcoleção 'cardChats' (chats de cada carta com match)
+      match /cardChats/{cardId_do_match} {
+        // Restaurando a verificação de membro para leitura e delete
+        allow read, delete: if request.auth != null && isUserMemberOfCouple();
+
+        // Permite a criação do documento do chat se o usuário for membro.
+        // Os campos como lastMessage... serão definidos através de uma operação de update (set com merge).
+        allow create: if request.auth != null && isUserMemberOfCouple();
+
+        // Permite a atualização dos detalhes da última mensagem.
+        allow update: if request.auth != null && isUserMemberOfCouple() &&
+                         request.resource.data.lastMessageSenderId == request.auth.uid && // Garante que quem está atualizando é o remetente da "última mensagem"
+                         request.resource.data.lastMessageTimestamp is timestamp &&
+                         // Verifica se os campos que estão sendo escritos são apenas os permitidos
+                         request.writeFields.hasOnly(['lastMessageSenderId', 'lastMessageTimestamp', 'lastMessageTextSnippet']);
+
+        match /messages/{messageId} {
+          allow read: if request.auth != null && isUserMemberOfCouple();
+          allow create: if request.auth != null && 
+                        isUserMemberOfCouple() &&
+                        request.resource.data.userId == request.auth.uid && 
+                        request.resource.data.keys().hasAll(['userId', 'username', 'text', 'timestamp']);
+                        // request.resource.data.timestamp == request.time; // TEMPORARIAMENTE COMENTADO PARA TESTE
+          allow update, delete: if false; 
+        }
+      }
+    }
+    
+    // Regras para a coleção 'userCards'
+    match /userCards/{userCardId} {
+      function isMemberOfTheCoupleForUserCard(coupleDocId) {
+        let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
+        return userDoc.data != null && userDoc.data.coupleId != null && userDoc.data.coupleId == coupleDocId;
+      }
+      allow create: if request.auth != null &&
+                       isMemberOfTheCoupleForUserCard(request.resource.data.coupleId);
+      allow read, update, delete: if request.auth != null && 
+                                     isMemberOfTheCoupleForUserCard(resource.data.coupleId);
+    }
+
+    // Regra para a coleção 'cards'
+    match /cards/{cardId} {
+      allow read: if request.auth != null;
+      allow write, delete: if false;
+    }
+
+    // Regras para a ANTIGA coleção 'cardChats' (COMENTAR OU REMOVER SE NÃO ESTIVER MAIS EM USO)
+    /*
+    match /cardChats/{chatRoomId}/messages/{messageId} {
+        function isChatMember(chatRoomDocId) {
+            let parts = chatRoomDocId.split('_');
+            return request.auth.uid == parts[1] || request.auth.uid == parts[2];
+        }
+        allow read: if request.auth != null && isChatMember(chatRoomId);
+        allow create: if request.auth != null && 
+                         isChatMember(chatRoomId) &&
+                         request.resource.data.userId == request.auth.uid; 
+        allow update, delete: if false;
+    }
+    */
+  }
+
+}

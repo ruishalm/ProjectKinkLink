@@ -1,0 +1,334 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\SkinsPage.module.css */
+.page {
+  padding: 20px;
+  background-color: var(--cor-fundo-pagina);
+  color: var(--cor-texto-primario);
+  min-height: calc(100vh - var(--header-height, 60px)); /* Ajustar se tiver header */
+  display: flex;
+  flex-direction: column;
+}
+
+.pageHeaderControls {
+  display: flex;
+  align-items: center;
+  margin-bottom: 25px; /* Aumentado o espaçamento */
+  border-bottom: 1px solid var(--cor-borda);
+  padding-bottom: 15px;
+}
+
+.pageTitle {
+  font-size: 2.2em; /* Aumentado */
+  color: var(--cor-primaria);
+  margin: 0; /* Remove margem padrão do h1 */
+  flex-grow: 1; /* Faz o título ocupar o espaço restante */
+  text-align: center; /* Centraliza o título */
+  font-weight: 600;
+}
+
+.backButton {
+  background-color: var(--cor-secundaria);
+  color: var(--cor-texto-sobre-secundaria);
+  padding: 10px 18px; /* Aumentado */
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  border: 1px solid var(--cor-borda);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.backButton:hover {
+  background-color: var(--cor-primaria);
+  color: var(--cor-texto-sobre-primaria);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Layout principal da página de skins */
+.skinsLayoutContainer {
+  display: flex;
+  flex-direction: row; /* Miniatura à esquerda, lista à direita */
+  gap: 30px; /* Espaço entre a miniatura e a lista de skins */
+  flex-grow: 1; /* Para ocupar o espaço vertical restante */
+}
+
+.previewArea {
+  flex-basis: 300px; /* Largura fixa para a área de preview */
+  flex-shrink: 0;
+  padding: 20px;
+  background-color: var(--cor-fundo-elemento);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  position: sticky; /* Faz a miniatura ficar fixa ao rolar */
+  top: 20px; /* Distância do topo ao ficar sticky */
+  align-self: flex-start; /* Alinha ao topo do flex container */
+  height: calc(100vh - var(--header-height, 60px) - 80px); /* Ajustar altura para caber na tela */
+  overflow-y: auto; /* Caso o conteúdo da miniatura seja maior */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centraliza a miniatura dentro da aside */
+}
+
+.previewTitle {
+  font-size: 1.5em;
+  color: var(--cor-texto-primario);
+  margin-bottom: 20px;
+  text-align: center;
+  width: 100%;
+}
+
+.skinsSelectionArea {
+  flex-grow: 1; /* Ocupa o restante do espaço */
+  overflow-y: auto; /* Permite rolagem se a lista de skins for longa */
+  padding-right: 10px; /* Espaço para a barra de rolagem não cobrir conteúdo */
+}
+
+
+.skinSection {
+  margin-bottom: 40px;
+  padding: 20px;
+  background-color: var(--cor-fundo-elemento);
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
+
+.sectionTitle {
+  font-size: 1.6em; /* Aumentado */
+  color: var(--cor-texto-primario);
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--cor-borda);
+  font-weight: 500;
+}
+
+.skinItemsGrid {
+  display: grid;
+  /* grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); Antigo */
+  grid-template-columns: repeat(auto-fit, 150px); /* Novo: Colunas de largura fixa de 150px */
+  gap: 20px; /* Aumentado o espaçamento */
+  justify-content: center; /* Centraliza os itens do grid se não preencherem a linha */
+}
+
+.skinItem {
+  background-color: var(--cor-fundo-pagina); /* Fundo um pouco diferente para destaque */
+  padding: 10px; /* Reduzido para dar mais espaço ao conteúdo dentro do tamanho fixo */
+  border-radius: 10px;
+  border: 1px solid var(--cor-borda);
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centraliza conteúdo */
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  position: relative; /* Para o ícone de cadeado */
+  width: 150px; /* Largura fixa */
+  height: 150px; /* Altura fixa para formar um quadrado */
+  overflow: hidden; /* Corta o conteúdo que exceder o tamanho do card */
+}
+
+.skinItem:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.12);
+  border-color: var(--cor-primaria);
+}
+
+.skinItem.activeSkin {
+  border-color: var(--cor-destaque);
+  box-shadow: 0 0 0 3px var(--cor-destaque), 0 5px 12px rgba(0,0,0,0.15); /* Destaque mais forte */
+  background-color: color-mix(in srgb, var(--cor-fundo-elemento) 80%, var(--cor-destaque) 20%);
+}
+
+.skinItem.lockedSkin {
+  opacity: 0.65;
+  cursor: not-allowed;
+  background-color: var(--cor-fundo-elemento); /* Fundo mais escuro para bloqueados */
+}
+.skinItem.lockedSkin:hover {
+  transform: none;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  border-color: var(--cor-borda);
+}
+
+
+.forceUnlockedHighlight {
+  outline: 2px dashed orange;
+  outline-offset: 2px;
+}
+
+.skinName {
+  font-size: 1.1em; /* Aumentado */
+  margin-bottom: 12px;
+  font-weight: 600; /* Mais peso */
+  color: var(--cor-texto-primario);
+  min-height: 2.5em; /* Para alinhar nomes de tamanhos diferentes */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lockedIcon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1.3em;
+  opacity: 0.8;
+}
+
+.palettePreview {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+  height: 25px; /* Altura fixa */
+  width: 100%;
+  max-width: 150px; /* Limita largura da prévia da paleta */
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid var(--cor-borda);
+}
+
+.colorSwatch {
+  flex-grow: 1;
+  height: 100%;
+  /* width: 20px; Removido para flex-grow funcionar */
+}
+
+.texturePreview {
+  width: 100%;
+  max-width: 150px; /* Limita largura da prévia da textura */
+  height: 80px; /* Altura fixa */
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  border: 1px solid var(--cor-borda);
+}
+
+.fontPreview {
+  font-size: 1.4em; /* Aumentado */
+  margin-bottom: 12px;
+  padding: 8px;
+  border: 1px dashed var(--cor-borda);
+  border-radius: 6px;
+  width: 100%;
+  max-width: 180px; /* Limita largura */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.skinDescription {
+  font-size: 0.85em;
+  color: var(--cor-texto-secundario);
+  margin-bottom: 10px;
+  min-height: 2.5em; /* Para alinhar descrições */
+}
+
+.unlockHint {
+  font-size: 0.8em;
+  color: var(--cor-aviso);
+  margin-top: auto; /* Empurra para baixo */
+  margin-bottom: 10px;
+  font-style: italic;
+}
+
+/* Removendo estilos antigos do botão e preparando para o toggle */
+.activateButton {
+  /* Estilos para o container do toggle switch */
+  position: relative; /* Necessário para o posicionamento do input absoluto se for usado dentro */
+  display: inline-block; /* Ou block se ocupar toda a largura disponível no card */
+  width: 48px; /* Largura do toggle */
+  height: 26px; /* Altura do toggle */
+  margin-top: auto; /* Empurra para o final do card flex, como o botão original */
+  margin-left: auto; /* Para centralizar se display for inline-block e o pai for flex center */
+  margin-right: auto; /* Para centralizar */
+}
+
+.activateButton input { /* O input checkbox real */
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #B0B0B0; /* Cinza XP para estado desligado */
+  border: 1px solid #707070;
+  transition: .3s;
+  border-radius: 26px; /* Para forma de pílula */
+}
+
+.slider:before { /* O "polegar" do slider */
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #F0F0F0; /* Cor do polegar, quase branco */
+  border: 1px solid #707070;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  transition: .3s;
+  border-radius: 50%;
+}
+
+.activateButton input:checked + .slider {
+  background-color: #0A52A5; /* Azul XP para estado ligado */
+  border-color: #003C74;
+}
+
+.activateButton input:checked + .slider:before {
+  transform: translateX(22px); /* (Largura do toggle - (padding*2) - largura do polegar) */
+}
+
+.activateButton input:disabled + .slider {
+  background-color: #D4D0C8; /* Cinza mais claro para desabilitado */
+  border-color: #A0A0A0;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.activateButton input:disabled + .slider:before {
+  background-color: #EAEAEA;
+  border-color: #A0A0A0;
+  box-shadow: none;
+}
+
+/* Media query para telas menores */
+@media (max-width: 900px) {
+  .skinsLayoutContainer {
+    flex-direction: column; /* Empilha a miniatura e a lista */
+  }
+
+  .previewArea {
+    position: static; /* Remove o sticky em telas menores */
+    width: 100%;
+    flex-basis: auto;
+    margin-bottom: 20px;
+    height: auto; /* Altura automática */
+    max-height: 450px; /* Limita altura máxima da miniatura */
+  }
+
+  .skinsSelectionArea {
+    padding-right: 0; /* Remove padding extra */
+  }
+}
+
+@media (max-width: 600px) {
+  .skinItemsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* Mantém o min baseado no tamanho do item */
+  }
+  .pageTitle {
+    font-size: 1.8em;
+  }
+  .sectionTitle {
+    font-size: 1.4em;
+  }
+  .skinName {
+    font-size: 1em;
+  }
+}

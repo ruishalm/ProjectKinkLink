@@ -1,0 +1,75 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\HomePage.module.css */
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: calc(100vh - 150px); /* Ajusta altura considerando o header e um pouco de padding */
+  padding: 40px 20px;
+  text-align: center;
+  font-family: "Trebuchet MS", sans-serif;
+  color: #e0e0e0;
+  box-sizing: border-box;
+}
+
+.title {
+  font-size: 3em;
+  color: #64b5f6; /* Azul claro */
+  margin-bottom: 15px;
+}
+
+.subTitle {
+  font-size: 1.3em;
+  color: #b0b0b0;
+  margin-bottom: 40px;
+  max-width: 600px;
+}
+
+.buttonContainer {
+  display: flex;
+  gap: 20px;
+}
+
+.button {
+  padding: 15px 30px;
+  font-size: 1.2em;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  text-decoration: none;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.primaryButton {
+  composes: button;
+  background-color: #64b5f6;
+  color: #2c2c2c;
+}
+
+.secondaryButton {
+  composes: button;
+  background-color: #4caf50; /* Verde */
+  color: white;
+}
+
+/* Media Query para telas menores (ex: até 768px de largura) */
+@media (max-width: 768px) {
+  .title {
+    font-size: 2.2em; /* Diminui um pouco mais o título */
+  }
+
+  .subTitle {
+    font-size: 1em; /* Diminui um pouco mais o subtítulo */
+    margin-bottom: 30px;
+  }
+
+  .buttonContainer {
+    flex-direction: column; /* Botões um abaixo do outro */
+    width: 90%; /* Ocupa mais da largura disponível */
+    max-width: 320px; /* Limita a largura máxima dos botões empilhados */
+    gap: 15px; /* Reduz o espaço entre os botões empilhados */
+  }
+  /* Os botões (.button, .primaryButton, .secondaryButton) já têm width: 100% implícito pelo compose, então se ajustarão ao .buttonContainer */
+}

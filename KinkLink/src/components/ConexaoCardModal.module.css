@@ -1,0 +1,100 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\ConexaoCardModal.module.css */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000; /* Garante que fique sobre outros elementos */
+  padding: 15px;
+}
+
+.modalContent {
+  background-color: #2c2c2c; /* Um fundo escuro para contraste */
+  color: #e0e0e0; /* Texto claro */
+  padding: 25px 30px;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+  width: 100%;
+  max-width: 450px; /* Largura máxima do modal */
+  text-align: center;
+  border: 1px solid #444;
+  animation: fadeInScale 0.3s ease-out;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.title {
+  font-size: 1.8em;
+  color: #81c784; /* Verde claro para o título, tema "conexão" */
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.cardText {
+  font-size: 1.1em;
+  line-height: 1.6;
+  margin-bottom: 30px;
+  padding: 15px;
+  background-color: #383838; /* Fundo sutil para o texto da carta */
+  border-radius: 8px;
+  min-height: 80px; /* Para dar um espaço mesmo com textos curtos */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f5f5f5;
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: space-around; /* Ou space-between se preferir mais espaçado */
+  gap: 15px; /* Espaço entre os botões */
+  margin-top: 20px;
+}
+
+.acceptButton,
+.rejectButton {
+  /* padding, border, border-radius, font-size, font-weight, cursor, transition
+     são agora primariamente herdados de 'genericButton'.
+     Mantenha 'padding: 12px 20px;' ou 'font-size: 1em;' aqui se forem
+     substituições intencionais aos valores do genericButton.
+     'border: none;' é importante se genericButton adicionar uma borda e você não a quiser aqui. */
+  flex-grow: 1; /* Faz os botões ocuparem espaço similar */
+  min-width: 120px;
+}
+
+.acceptButton {
+  background-color: #4CAF50; /* Verde para aceitar */
+  color: white;
+  /* border: none; Se genericButton tiver borda e não quiser aqui */
+}
+
+.acceptButton:hover {
+  background-color: #66bb6a;
+  /* genericButton tem filter: brightness(90%) no hover. Esta regra sobrescreverá o filter. */
+}
+
+.rejectButton {
+  background-color: #f44336; /* Vermelho para rejeitar */
+  color: white;
+  /* border: none; Se genericButton tiver borda e não quiser aqui */
+}
+
+.rejectButton:hover {
+  background-color: #ef5350;
+  /* genericButton tem filter: brightness(90%) no hover. Esta regra sobrescreverá o filter. */
+}

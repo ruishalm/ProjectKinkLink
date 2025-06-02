@@ -1,0 +1,97 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\LinkCouplePage.module.css */
+.page {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #2c2c2c;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  color: #e0e0e0;
+  font-family: "Trebuchet MS", sans-serif;
+  text-align: center;
+}
+
+.title {
+  color: #64b5f6;
+  margin-bottom: 20px;
+}
+
+.subText {
+  margin-bottom: 30px;
+  font-size: 1.1em;
+  color: #b0b0b0;
+}
+
+.partnerInfoText {
+  font-size: 1.1em;
+  color: #c0c0c0;
+  margin-bottom: 10px;
+}
+
+.button {
+  background-color: #64b5f6;
+  color: white;
+  border: none;
+  margin: 5px;
+  /* padding, border-radius, cursor, font-size, font-weight, transition
+     são herdados de genericButton.
+     Mantenha 'padding: 12px 20px;' se for uma substituição intencional ao padding do genericButton.
+     'border: none;' é mantido para garantir que não haja borda, mesmo que genericButton adicione uma. */
+}
+
+.actionButton {
+  /* Herda de genericButton, não mais de .button localmente */
+  padding: 15px 25px;
+  font-size: 1.1em;
+  width: 250px;
+  background-color: var(--cor-acao-positiva, #03dac6); /* Cor específica para actionButton */
+  color: var(--cor-texto-sobre-acao-positiva, black); /* Cor específica para actionButton */
+  border: none; /* Garante ausência de borda */
+  margin: 5px; /* Mantém uma margem similar ao .button se não for especificado no TSX */
+}
+
+.destructiveButton {
+  /* Herda de genericButton e genericButtonDestructive.
+     A cor de fundo deve vir de genericButtonDestructive.
+     Se precisar de um override específico ou se genericButtonDestructive não definir cor:
+     background-color: #f44336; */
+  margin-top: 15px;
+  border: none; /* Garante ausência de borda */
+}
+
+.secondaryButton {
+  /* Herda de genericButton */
+  background-color: #757575;
+  padding: 10px 20px;
+  color: white; /* Cor específica para secondaryButton */
+  border: none; /* Garante ausência de borda */
+  margin: 5px; /* Mantém uma margem similar ao .button */
+}
+
+.optionsContainer {
+  margin: 30px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.orText {
+  color: #888;
+}
+
+.backLinkContainer {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.backLink {
+  color: #64b5f6;
+  text-decoration: none;
+  font-size: 1em;
+}
+
+.loadingText {
+  font-size: 1.2em;
+  color: #b0b0b0;
+}

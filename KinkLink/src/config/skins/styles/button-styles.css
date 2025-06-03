@@ -1,5 +1,54 @@
 /* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\config\skins\styles\button-styles.css */
 
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\config\skins\styles\button-styles.css */
+
+/* --- Estilos Padrão para Botões de Navegação (Sem Skin Ativa) --- */
+
+/* Estilos para o container dos botões de navegação (Mimos, Links, Perfil)
+   dentro do _allButtonsPanel_bzdqe_617, quando a skin XP NÃO está ativa.
+   Este seletor assume que o div dos botões de navegação é o último filho div do painel. */
+html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617 > div:last-child {
+  position: relative !important; /* Para posicionamento absoluto dos botões laterais */
+  text-align: center !important; /* Para centralizar o botão "Links" (inline-block) */
+  padding: 10px 0 !important;    /* Padding vertical para dar espaço aos botões */
+  margin-top: 15px !important;   /* Espaço acima desta seção de navegação */
+}
+
+/* Botão "Links" (.klnkl-nav-matches) centralizado */
+html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617 > div:last-child .klnkl-nav-matches.genericButton {
+  display: inline-block !important; /* Para ser centralizado pelo text-align do pai */
+  background-color: orange !important; /* Fundo laranja para o botão "Links" no estado padrão */
+  color: white !important; /* Texto branco */
+  position: static !important; /* Garante que não seja fixed ou absolute por outras regras */
+  transform: none !important; /* Remove qualquer transform anterior */
+  /* Reset de posicionamento explícito */
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  z-index: auto !important;
+}
+
+/* Botão "Mimos" (.klnkl-nav-cards) à esquerda */
+html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617 > div:last-child .klnkl-nav-cards.genericButton {
+  position: absolute !important;
+  left: 0px !important; /* Alinhado à esquerda do container pai */
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  /* Reset de posicionamento explícito */
+  bottom: auto !important; right: auto !important;
+}
+
+/* Botão "Perfil" (.klnkl-nav-profile) à direita */
+html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617 > div:last-child .klnkl-nav-profile.genericButton {
+  position: absolute !important;
+  right: 0px !important; /* Alinhado à direita do container pai */
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  /* Reset de posicionamento explícito */
+  bottom: auto !important; left: auto !important;
+}
+
 /* --- Estilos de Botão Cyberpunk --- */
 /* Ativado quando <html> tem a classe 'klnkl-btn-style-cyberpunk' */
 
@@ -193,6 +242,19 @@ html.klnkl-btn-style-cyberpunk .genericButton.genericButtonDestructive:hover:not
 }
 html.klnkl-btn-style-cyberpunk .genericButton.genericButtonDestructive:hover:not(:disabled)::before {
   background-color: var(--cor-acao-negativa, #ff2f2f); /* Borda continua vermelha */
+}
+
+/* ESTILOS ESPECÍFICOS PARA BOTÕES DO MATCHMODAL NA SKIN CYBERPUNK */
+/* Aumenta o padding para torná-los maiores */
+html.klnkl-btn-style-cyberpunk .genericButton.klnkl-match-modal-action-close,
+html.klnkl-btn-style-cyberpunk .genericButton.klnkl-match-modal-action-chat {
+  padding: 14px 28px; /* Padding aumentado. Ajuste conforme necessário. Ex: 12px 25px */
+  /* Se o texto parecer muito pequeno com o novo padding, você pode ajustar o font-size: */
+  /* font-size: 1.05em; */
+
+  /* As outras propriedades do cyberpunk (clip-path, pseudo-elementos para borda/fundo, cor do texto)
+     serão herdadas da regra geral: html.klnkl-btn-style-cyberpunk .genericButton
+     O !important no padding geralmente não é necessário aqui devido à especificidade do seletor. */
 }
 
 /* 4. ESTADO DESABILITADO para todos os botões com este estilo */

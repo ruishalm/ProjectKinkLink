@@ -79,6 +79,54 @@ html.klnkl-panel-xp-active ._YOUR_PROFILE_PAGE_MAIN_CONTAINER_CLASS_.klnkl-theme
   margin-bottom: 0;
 }
 
+/* Estilos padrão para _allButtonsPanel_bzdqe_617 quando a skin XP NÃO está ativa,
+   para controlar a ordem e alinhamento dos seus filhos. */
+html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617.klnkl-themed-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important; /* Centraliza os filhos diretos horizontalmente */
+}
+
+/* Estilo para o container dos botões de decisão (primeiro div filho)
+   dentro do _allButtonsPanel_bzdqe_617, quando a skin XP NÃO está ativa. */
+html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617.klnkl-themed-panel > div:first-child {
+  width: 100% !important; /* Garante que o container ocupe a largura disponível */
+  max-width: 380px; /* Consistente com outros containers de botões no painel */
+  margin-bottom: 15px !important; /* Espaço abaixo do container dos botões de decisão */
+  /* O layout interno dos botões de decisão (ex: lado a lado, centralizados)
+     deve ser tratado pelos estilos do seu próprio CSS module (ex: _buttonContainer_bzdqe_133) */
+}
+
+/* Estilo padrão para klnkl-create-kink-btn quando NÃO estiver no tema XP.
+   Assume que ele é filho de _allButtonsPanel_bzdqe_617.
+   Reseta o posicionamento absoluto do XP e centraliza o botão dentro do seu painel. */
+html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617.klnkl-themed-panel .klnkl-create-kink-btn.genericButton {
+  position: relative !important; /* Reseta de absoluto, relative é bom para centralização de bloco */
+  bottom: auto !important;
+  right: auto !important;
+  top: auto !important;
+  left: auto !important;
+
+  /* display: block !important; /* Não é mais necessário com flex parent + align-items: center */
+  width: -moz-fit-content;   /* Firefox */
+  width: fit-content;      /* Padrão */
+  /* margin: 20px auto !important; /* 'auto' horizontal não é mais necessário */
+  margin-top: 15px !important;    /* Espaçamento acima do botão "Criar Kink" */
+  margin-bottom: 10px !important; /* Espaçamento abaixo do botão "Criar Kink", ajuste se necessário */
+  order: 3 !important; /* Faz este botão ser o último item no flex container */
+}
+
+/* Ajusta o container dos botões de navegação (Mimos, Links, Perfil) dentro do _allButtonsPanel_bzdqe_617
+   para o estado padrão (sem skin XP). Este é o último elemento filho direto do painel. */
+html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617.klnkl-themed-panel > :last-child {
+  order: 2 !important; /* Faz este container aparecer antes do botão "Criar Kink" */
+  width: 100% !important; /* Garante que o container ocupe a largura para posicionamento interno dos botões */
+  max-width: 380px; /* Opcional: limita a largura do container de navegação, pode alinhar com a largura do painel */
+  /* Outros estilos como position:relative, text-align:center, padding, margin-top
+     já são aplicados a este elemento pelo button-styles.css via seletor
+     html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617 > div:last-child */
+}
+
 /*
   Ajuste específico para o painel que contém os botões de decisão e navegação
   na CardPilePage (identificado pela classe _allButtonsPanel_XXXX_YYY do seu CSS Module)

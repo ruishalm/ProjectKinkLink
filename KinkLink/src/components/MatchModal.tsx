@@ -46,8 +46,8 @@ function MatchModal({ card, onClose }: MatchModalProps) {
           <PlayingCard data={card}/>
         </div>
         <div className={styles.buttonContainer}>
-          <button className={`${styles.closeButton} genericButton`} onClick={onClose}>Legal!</button>
-          <button className={`${styles.chatButton} genericButton`} onClick={handleGoToChat}>Vamos conversar</button>
+          <button className={`${styles.closeButton} genericButton klnkl-match-modal-action-close`} onClick={onClose}>Legal!</button>
+          <button className={`${styles.chatButton} genericButton klnkl-match-modal-action-chat`} onClick={handleGoToChat}>Vamos conversar</button>
         </div>
       </div>
     </div>

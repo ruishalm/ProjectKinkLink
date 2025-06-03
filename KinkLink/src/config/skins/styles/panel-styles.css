@@ -81,7 +81,7 @@ html.klnkl-panel-xp-active ._YOUR_PROFILE_PAGE_MAIN_CONTAINER_CLASS_.klnkl-theme
 
 /* Estilos padrão para _allButtonsPanel_bzdqe_617 quando a skin XP NÃO está ativa,
    para controlar a ordem e alinhamento dos seus filhos. */
-html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617.klnkl-themed-panel {
+html:not(.klnkl-panel-xp-active) .klnkl-all-buttons-panel.klnkl-themed-panel {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important; /* Centraliza os filhos diretos horizontalmente */
@@ -89,7 +89,7 @@ html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617.klnkl-themed-panel 
 
 /* Estilo para o container dos botões de decisão (primeiro div filho)
    dentro do _allButtonsPanel_bzdqe_617, quando a skin XP NÃO está ativa. */
-html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617.klnkl-themed-panel > div:first-child {
+html:not(.klnkl-panel-xp-active) .klnkl-all-buttons-panel.klnkl-themed-panel > div:first-child {
   width: 100% !important; /* Garante que o container ocupe a largura disponível */
   max-width: 380px; /* Consistente com outros containers de botões no painel */
   margin-bottom: 15px !important; /* Espaço abaixo do container dos botões de decisão */
@@ -100,7 +100,7 @@ html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617.klnkl-themed-panel 
 /* Estilo padrão para klnkl-create-kink-btn quando NÃO estiver no tema XP.
    Assume que ele é filho de _allButtonsPanel_bzdqe_617.
    Reseta o posicionamento absoluto do XP e centraliza o botão dentro do seu painel. */
-html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617.klnkl-themed-panel .klnkl-create-kink-btn.genericButton {
+html:not(.klnkl-panel-xp-active) .klnkl-all-buttons-panel.klnkl-themed-panel .klnkl-create-kink-btn.genericButton {
   /* Reset de estilos do genericButton que podem interferir */
   padding: 0 !important; /* Padding base é zero */
   text-transform: none !important;
@@ -140,7 +140,7 @@ html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617.klnkl-themed-panel 
 }
 
 /* Pseudo-elemento ::before para as linhas diagonais */
-html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617.klnkl-themed-panel .klnkl-create-kink-btn.genericButton::before {
+html:not(.klnkl-panel-xp-active) .klnkl-all-buttons-panel.klnkl-themed-panel .klnkl-create-kink-btn.genericButton::before {
   content: '';
   position: absolute;
   width: 200%; 
@@ -155,7 +155,7 @@ html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617.klnkl-themed-panel 
 }
 
 /* Pseudo-elemento ::after para o texto "KINKLINK" */
-html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617.klnkl-themed-panel .klnkl-create-kink-btn.genericButton::after {
+html:not(.klnkl-panel-xp-active) .klnkl-all-buttons-panel.klnkl-themed-panel .klnkl-create-kink-btn.genericButton::after {
   content: 'Criar Kink'; /* Texto alterado para o do botão */
   position: absolute;
   top: 0; left: 0; right: 0; 
@@ -176,13 +176,13 @@ html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617.klnkl-themed-panel 
 
 /* Ajusta o container dos botões de navegação (Mimos, Links, Perfil) dentro do _allButtonsPanel_bzdqe_617
    para o estado padrão (sem skin XP). Este é o último elemento filho direto do painel. */
-html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617.klnkl-themed-panel > :last-child {
+html:not(.klnkl-panel-xp-active) .klnkl-all-buttons-panel.klnkl-themed-panel > :last-child {
   order: 2 !important; /* Faz este container aparecer antes do botão "Criar Kink" */
   width: 100% !important; /* Garante que o container ocupe a largura para posicionamento interno dos botões */
   max-width: 380px; /* Opcional: limita a largura do container de navegação, pode alinhar com a largura do painel */
   /* Outros estilos como position:relative, text-align:center, padding, margin-top
      já são aplicados a este elemento pelo button-styles.css via seletor
-     html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617 > div:last-child */
+     html:not(.klnkl-panel-xp-active) .klnkl-all-buttons-panel > div:last-child */
 }
 
 /*
@@ -195,7 +195,7 @@ html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617.klnkl-themed-panel 
 /* Ajuste para o painel de botões na CardPilePage usando a classe gerada _allButtonsPanel_bzdqe_617.
    Isso adiciona padding no topo do painel que contém os botões de decisão ("Topo!", "Não Topo!"),
    empurrando-os para baixo quando o tema XP está ativo. */
-html.klnkl-panel-xp-active ._allButtonsPanel_bzdqe_617.klnkl-themed-panel { /* Painel de botões da CardPilePage */
+html.klnkl-panel-xp-active .klnkl-all-buttons-panel.klnkl-themed-panel { /* Painel de botões da CardPilePage */
   /* Aumenta a espessura da borda cinza inferior (via box-shadow) para que ela passe acima do botão "Criar Kink".
      O botão "Criar Kink" tem 28px de altura e está a 10px do bottom. Seu topo está a 38px do bottom.
      Uma borda inferior de 45px passará 7px acima do botão. */
@@ -220,7 +220,7 @@ html.klnkl-panel-xp-active ._allButtonsPanel_bzdqe_617.klnkl-themed-panel { /* P
   no canto inferior direito do painel de botões da CardPilePage
   quando o tema XP está ativo.
 */
-html.klnkl-panel-xp-active ._allButtonsPanel_bzdqe_617.klnkl-themed-panel .klnkl-create-kink-btn {
+html.klnkl-panel-xp-active .klnkl-all-buttons-panel.klnkl-themed-panel .klnkl-create-kink-btn {
   position: absolute !important;
   bottom: 10px !important; /* Distância da borda inferior do painel (considerando o padding cinza interno) */
   right: 10px !important;  /* Distância da borda direita do painel (considerando o padding cinza interno) */
@@ -239,7 +239,7 @@ html.klnkl-panel-xp-active ._allButtonsPanel_bzdqe_617.klnkl-themed-panel .klnkl
   dentro do painel de botões da CardPilePage, quando o tema XP está ativo,
   para evitar um "risco" indesejado.
 */
-html.klnkl-panel-xp-active ._allButtonsPanel_bzdqe_617.klnkl-themed-panel ._bottomNavContainer_bzdqe_307 {
+html.klnkl-panel-xp-active .klnkl-all-buttons-panel.klnkl-themed-panel ._bottomNavContainer_bzdqe_307 {
   border-top: none !important;
 }
 

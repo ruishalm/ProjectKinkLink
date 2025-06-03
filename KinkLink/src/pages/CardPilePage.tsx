@@ -485,7 +485,7 @@ function CardPilePage() {
               </div>
             </div>
 
-            <div className={`${styles.allButtonsPanel} klnkl-themed-panel`}>
+            <div className={`${styles.allButtonsPanel} klnkl-all-buttons-panel klnkl-themed-panel`}>
               <div className={styles.buttonContainer}>
                 <button
                   className={`${styles.dislikeButton} ${styles.botaoDecisao} genericButton dislikeButton actionButton`}
@@ -528,7 +528,7 @@ function CardPilePage() {
                 Criar Kink
               </button>
 
-              <div className={styles.bottomNavContaine}>
+              <div className={styles.bottomNavContainer}>
                 <button className={`${styles.bottomNavIconStyle} ${styles.ballButton} genericButton klnkl-icon-nav-button klnkl-nav-cards`} onClick={() => setShowCarinhosMimosModal(true)} title="Carinhos & Mimos">
                   ❤️
                 </button>

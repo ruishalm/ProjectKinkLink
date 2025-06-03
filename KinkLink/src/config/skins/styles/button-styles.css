@@ -5,7 +5,7 @@
 /* Estilos para o container dos botões de navegação (Mimos, Links, Perfil)
    dentro do _allButtonsPanel_bzdqe_617, quando a skin XP NÃO está ativa.
    Este seletor assume que o div dos botões de navegação é o último filho div do painel. */
-html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617 > div:last-child {
+html:not(.klnkl-panel-xp-active) .klnkl-all-buttons-panel > div:last-child {
   position: relative !important; /* Para posicionamento absoluto dos botões laterais */
   text-align: center !important; /* Para centralizar o botão "Links" (inline-block) */
   padding: 10px 0 !important;    /* Padding vertical para dar espaço aos botões */
@@ -13,7 +13,7 @@ html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617 > div:last-child {
 }
 
 /* Botão "Links" (.klnkl-nav-matches) centralizado */
-html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617 > div:last-child .klnkl-nav-matches.genericButton {
+html:not(.klnkl-panel-xp-active) .klnkl-all-buttons-panel > div:last-child .klnkl-nav-matches.genericButton {
   display: inline-block !important; /* Para ser centralizado pelo text-align do pai */
   background-color: orange !important; /* Fundo laranja para o botão "Links" no estado padrão */
   color: white !important; /* Texto branco */
@@ -28,7 +28,7 @@ html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617 > div:last-child .k
 }
 
 /* Botão "Mimos" (.klnkl-nav-cards) à esquerda */
-html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617 > div:last-child .klnkl-nav-cards.genericButton {
+html:not(.klnkl-panel-xp-active) .klnkl-all-buttons-panel > div:last-child .klnkl-nav-cards.genericButton {
   position: absolute !important;
   left: 0px !important; /* Alinhado à esquerda do container pai */
   top: 50% !important;
@@ -38,7 +38,7 @@ html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617 > div:last-child .k
 }
 
 /* Botão "Perfil" (.klnkl-nav-profile) à direita */
-html:not(.klnkl-panel-xp-active) ._allButtonsPanel_bzdqe_617 > div:last-child .klnkl-nav-profile.genericButton {
+html:not(.klnkl-panel-xp-active) .klnkl-all-buttons-panel > div:last-child .klnkl-nav-profile.genericButton {
   position: absolute !important;
   right: 0px !important; /* Alinhado à direita do container pai */
   top: 50% !important;

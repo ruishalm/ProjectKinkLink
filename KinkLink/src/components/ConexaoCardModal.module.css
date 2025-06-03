@@ -23,6 +23,7 @@
   max-width: 450px; /* Largura máxima do modal */
   text-align: center;
   border: 1px solid #444;
+  position: relative; /* Necessário para posicionar o botão de fechar absoluto dentro dele */
   animation: fadeInScale 0.3s ease-out;
 }
 
@@ -42,6 +43,7 @@
   color: #81c784; /* Verde claro para o título, tema "conexão" */
   margin-top: 0;
   margin-bottom: 15px;
+  padding-right: 25px; /* Espaço para o botão de fechar não sobrepor o título */
   font-weight: 600;
 }
 
@@ -97,4 +99,23 @@
 .rejectButton:hover {
   background-color: #ef5350;
   /* genericButton tem filter: brightness(90%) no hover. Esta regra sobrescreverá o filter. */
+}
+
+.closeButton {
+  position: absolute;
+  top: 15px; /* Ajustado para alinhar melhor com o padding do modalContent */
+  right: 15px; /* Ajustado para alinhar melhor com o padding do modalContent */
+  background: transparent;
+  border: none;
+  font-size: 1.8rem; /* Tamanho do 'X' */
+  font-weight: bold;
+  color: var(--cor-texto-fraco, #aaa); /* Cor do 'X', pode ser ajustada pelo tema */
+  cursor: pointer;
+  padding: 0;
+  line-height: 1; /* Para garantir que o 'X' fique bem contido */
+  z-index: 10; /* Para garantir que fique acima de outros elementos se houver sobreposição */
+}
+
+.closeButton:hover {
+  color: var(--cor-texto, #e0e0e0); /* Cor do 'X' no hover, usando a cor de texto do modal */
 }

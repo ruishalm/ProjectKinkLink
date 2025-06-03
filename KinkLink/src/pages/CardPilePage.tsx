@@ -400,7 +400,7 @@ function CardPilePage() {
   }
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page}> {/* Removido klnkl-themed-panel daqui */}
       {showMatchModal && currentMatchCard && (
         <MatchModal
           card={currentMatchCard}
@@ -444,8 +444,8 @@ function CardPilePage() {
       <div className={styles.contentArea}>
         {cardForDisplay ? (
           <>
-            <div className={styles.cardStackContainer}>
-              <SideTipMessages
+            <div className={`${styles.cardStackContainer} klnkl-themed-panel`}> {/* Adicionado klnkl-themed-panel aqui */}
+               <SideTipMessages
                 leftMessage={activeLeftTip}
                 rightMessage={activeRightTip}
                 animateIn={animateTipsIn}
@@ -453,13 +453,14 @@ function CardPilePage() {
               />
               {cardForDisplay && (
                 <div className={styles.staticCardBack}>
+                  {/* CardBack estaria dentro do painel */}
                   <CardBack
                     targetWidth={cardDimensions.width}
                     targetHeight={cardDimensions.height}
                   />
                 </div>
               )}
-              <div {...bindCardDrag()} className={styles.playingCardWrapper}>
+              <div {...bindCardDrag()} className={styles.playingCardWrapper}> {/* playingCardWrapper não teria a classe de painel aqui */}
                 <PlayingCard
                     key={cardForDisplay.id}
                     data={cardForDisplay}
@@ -527,7 +528,7 @@ function CardPilePage() {
                 Criar Kink
               </button>
 
-              <div className={styles.bottomNavContainer}>
+              <div className={styles.bottomNavContaine}>
                 <button className={`${styles.bottomNavIconStyle} ${styles.ballButton} genericButton klnkl-icon-nav-button klnkl-nav-cards`} onClick={() => setShowCarinhosMimosModal(true)} title="Carinhos & Mimos">
                   ❤️
                 </button>
@@ -544,7 +545,7 @@ function CardPilePage() {
             </div>
           </>
         ) : (
-          unseenCardsCount === 0 ? (
+          unseenCardsCount === 0 ? ( // Este bloco também deve estar dentro do painel temático da página
             <div className={`${styles.noCardsViewContainer} klnkl-themed-panel`}>
               <h2 className={styles.pageTitle}>Fim das Cartas!</h2>
               <p className={styles.noCardsMessage}>
@@ -570,9 +571,11 @@ function CardPilePage() {
           ) : (
             <p className={styles.noCardsMessage}>Carregando próxima carta...</p>
           )
-        )}
+        )
+      }
       </div>
       {/* Contadores de cartas voltam a ser um elemento simples */}
+      {/* Estes contadores também devem estar dentro do painel temático da página */}
       <div className={`${styles.cardCounters} klnkl-card-counters`}>
         <span className={`${styles.counterItem} klnkl-counter-item`}>
           Cartas Vistas: <span className={styles.counterValue}>{seenCards.length}</span>
@@ -584,6 +587,7 @@ function CardPilePage() {
       </div>
     </div>
   );
-}
+} // Adicionado o fechamento da função CardPilePage
+
 
 export default CardPilePage;

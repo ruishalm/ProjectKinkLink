@@ -2,9 +2,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 25px; /* Aumentei o padding lateral um pouco */
-  background-color: var(--cor-fundo-elemento, #2a2a2a);
-  border-bottom: 1px solid var(--cor-borda, #3f3f3f);
+  /* Padding é agora fornecido pela classe .klnkl-themed-panel para consistência com o tema */
+  /* background-color e border-bottom removidos para permitir que o klnkl-themed-panel controle a aparência */
   width: 100%;
   box-sizing: border-box;
   /* Descomente abaixo se quiser o header fixo no topo ao rolar */

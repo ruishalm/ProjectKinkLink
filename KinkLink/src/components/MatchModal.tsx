@@ -36,6 +36,9 @@ function MatchModal({ card, onClose }: MatchModalProps) {
   return (
     <div className={styles.modalOverlay} onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="match-modal-title">
       <div className={`${styles.modalContent} klnkl-themed-panel`} onClick={(e) => e.stopPropagation()}>
+        <button type="button" onClick={onClose} className={styles.closeButtonTopRight} aria-label="Fechar modal">
+          &times;
+        </button>
         <h2 id="match-modal-title" className={styles.title}>🔗 LINK! 🎉</h2>
         <p className={styles.subTitle}>Vocês dois toparam a carta:</p>
         <div className={styles.cardContainer}>

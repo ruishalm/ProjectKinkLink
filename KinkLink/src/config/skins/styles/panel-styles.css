@@ -98,10 +98,14 @@ html.klnkl-panel-xp-active ._allButtonsPanel_bzdqe_617.klnkl-themed-panel { /* P
     inset 6px 0px 0px 0px #ECE9D8,    /* Borda cinza esquerda de 6px */
     inset -6px 0px 0px 0px #ECE9D8,   /* Borda cinza direita de 6px */
     inset 0px -45px 0px 0px #ECE9D8 !important; /* NOVA Borda cinza inferior de 45px de espessura */
-  border-bottom-style: none !important; /* Remove a linha azul da borda inferior apenas neste painel */
-  padding-top: 40px !important; /* Aumenta o padding superior para empurrar o conteúdo para baixo */
+  border-bottom-style: none !important;
+  padding-top: 55px !important; /* Aumentado de 40px para 55px para empurrar os botões de decisão mais para baixo */
   /* Os botões de navegação (Mimos, Perfil, Links) são movidos para a barra inferior
      pelo tema XP, então este padding afetará apenas os botões de decisão. */
+  width: 100% !important; /* Para responsividade horizontal */
+  max-width: 420px !important; /* Mesma largura máxima do painel da pilha de cartas */
+  margin-left: auto !important;   /* Centraliza o painel horizontalmente */
+  margin-right: auto !important;  /* Centraliza o painel horizontalmente */
 }
 
 
@@ -273,6 +277,7 @@ html.klnkl-panel-xp-active button._botaoDecisao_bzdqe_159 { /* ATUALIZADO com o 
   /* O padding horizontal virá do estilo XP base para .genericButton (5px 12px) */
   line-height: 26px !important; /* Ajuste para a nova altura (altura - bordas) */
   font-size: 0.85em !important; /* Pode precisar ajustar a fonte para caber */
+  transform: translateY(-15px) !important; /* Move os botões 15px PARA CIMA. Ajuste o valor conforme necessário. */
 }
 
 /* Botão "Links" na navegação inferior - É <button> */
@@ -495,11 +500,14 @@ html.klnkl-panel-xp-active::before { /* Usando ::before para não conflitar com 
   color: white !important;
   font-family: Tahoma, Verdana, Arial, sans-serif !important;
   font-size: 11px !important;
-  line-height: 20px !important; /* Para centralizar verticalmente (22px altura - 2px borda) */
-  text-align: center !important;
   padding: 0 5px !important;
   z-index: 2001 !important; /* Mesmo nível dos outros itens da barra */
   box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: normal !important; /* Deixa o flexbox controlar o alinhamento vertical */
+  /* text-align: center; é redundante com justify-content: center */
 }
 
 /* NOVO "Quadrado de Status" à DIREITA, ao lado do Relógio */
@@ -521,12 +529,43 @@ html.klnkl-panel-xp-active .klnkl-nav-status-item {
   color: white !important;
   font-family: Tahoma, Verdana, Arial, sans-serif !important;
   font-size: 11px !important; /* Mesmo tamanho do texto do relógio */
-  line-height: 20px !important; /* Para centralizar verticalmente (22px altura - 2px borda) */
-  text-align: center !important;
   padding: 0 8px !important; /* Padding horizontal */
   z-index: 2001 !important; /* Mesmo nível dos outros itens da barra */
   box-sizing: border-box !important;
-  display: flex; /* Para centralizar conteúdo se necessário */
-  align-items: center;
-  justify-content: center;
+  display: flex !important; /* Para centralizar conteúdo */
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: normal !important; /* Deixa o flexbox controlar o alinhamento vertical */
+  /* text-align: center; é redundante com justify-content: center */
 }
+
+/* Ajuste para estreitar o painel da pilha de cartas (_cardStackContainer_bzdqe_41)
+   quando o tema XP está ativo, para que fique mais próximo à carta. */
+html.klnkl-panel-xp-active ._cardStackContainer_bzdqe_41.klnkl-themed-panel {
+  width: 100% !important; /* Para responsividade horizontal */
+  max-width: 420px !important; /* Largura máxima para o painel. Ajuste conforme necessário.
+                                   Considera a largura da carta (máx ~320px) + paddings/bordas do painel. */
+  margin-left: auto !important;   /* Centraliza o painel horizontalmente */
+  margin-right: auto !important;  /* Centraliza o painel horizontalmente */
+}
+
+/* Ajuste para o painel "Fim das Cartas" (_noCardsViewContainer_bzdqe_550)
+   quando o tema XP está ativo, para consistência de largura e centralização. */
+html.klnkl-panel-xp-active ._noCardsViewContainer_bzdqe_550.klnkl-themed-panel {
+  width: 100% !important; /* Para responsividade horizontal */
+  max-width: 420px !important; /* Largura máxima consistente com outros painéis da página */
+  margin-left: auto !important;   /* Centraliza o painel horizontalmente */
+  margin-right: auto !important;  /* Centraliza o painel horizontalmente */
+  /* Outros estilos específicos como text-align: center já devem estar no CardPilePage.module.css
+     ou podem ser adicionados aqui se necessário para o conteúdo dentro deste painel. */
+}
+
+/* REMOÇÃO DOS AJUSTES ANTERIORES DAS SIDETIPMESSAGES:
+   Com o painel da pilha mais estreito, os ajustes de transform e max-width
+   para as ._sideMessagesContainer_1h3ql_1 não são mais necessários e foram removidos.
+   A posição original das dicas, calculada pelo componente React, deve ser adequada.
+
+html.klnkl-panel-xp-active ._cardStackContainer_bzdqe_41.klnkl-themed-panel ._sideMessagesContainer_1h3ql_1._left_1h3ql_7 { ... }
+html.klnkl-panel-xp-active ._cardStackContainer_bzdqe_41.klnkl-themed-panel ._sideMessagesContainer_1h3ql_1._right_1h3ql_7 { ... }
+html.klnkl-panel-xp-active ._cardStackContainer_bzdqe_41.klnkl-themed-panel ._sideMessagesContainer_1h3ql_1 ._tipMessage_1h3ql_23 { ... }
+*/

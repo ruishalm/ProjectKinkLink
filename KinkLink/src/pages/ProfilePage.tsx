@@ -133,10 +133,18 @@ function ProfilePage() {
   return (
     <div className={styles.page}>
       <main className={styles.mainContent}> {/* Envolve o conteúdo principal */}
-        {/* Removido o estilo inline de cor, será controlado pelo CSS Module e variáveis */}
-        <h1 className={`${styles.title} ${styles.textCenter}`} style={{borderBottom: 'none', marginBottom: '30px'}}>
-          Meu Perfil
-        </h1>
+        <div className={styles.pageHeader}>
+          <h1 className={`${styles.title}`} style={{borderBottom: 'none', marginBottom: '0px', marginRight: 'auto'}}>
+            Meu Perfil
+          </h1>
+          <button
+            onClick={() => navigate('/cards')}
+            className={`${styles.actionButton} ${styles.headerButton} genericButton`}
+            aria-label="Ir para cartas"
+          >
+            Ir para cartas
+          </button>
+        </div>
 
         {/* SEÇÃO DE DADOS PESSOAIS (EXPANSÍVEL/RECOLHÍVEL) */}
         <div className={`${styles.section} klnkl-themed-panel`}>
@@ -245,11 +253,6 @@ function ProfilePage() {
         {/* SEÇÃO DE LOGOUT */}
         <div className={`${styles.section} ${styles.textCenter} klnkl-themed-panel`}>
           <button onClick={handleLogout} className={`${styles.buttonDestructive} genericButton`}>Logout</button>
-        </div>
-
-        {/* LINK DE VOLTAR */}
-        <div className={`${styles.textCenter} ${styles.marginTop30}`}>
-          <Link to="/cards" className={styles.link}>&larr; Voltar para as Cartas</Link>
         </div>
 
         {/* SEÇÃO DE RESET (DEV) */}

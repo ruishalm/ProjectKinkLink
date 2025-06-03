@@ -1,3 +1,4 @@
+// d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\Layout\Header.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styles from './Header.module.css';
@@ -5,11 +6,11 @@ import styles from './Header.module.css';
 // Supondo que o logo esteja em public/kinklogo.png ou um caminho acessível
 const logoSrc = '/kinklogo.png'; // Ajuste o caminho se o logo estiver em outro lugar (ex: /assets/images/kinklogo.png)
 
-const Header: React.FC = () => {
+    const Header: React.FC = () => {
   return (
-    <header className={styles.appHeader}>
+    <header className={`${styles.appHeader} klnkl-themed-panel`}>
       <div className={styles.logoContainer}>
-        <Link to="/" className={styles.logoLink}> {/* Link para a HomePage ou Dashboard */}
+        <Link to="/cards" className={styles.logoLink}> {/* Link para a página de cartas */}
           <img src={logoSrc} alt="KinkLink Logo" className={styles.logoImage} />
         </Link>
       </div>

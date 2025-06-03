@@ -47,9 +47,9 @@ a:hover {
 /*
 button {
   cursor: pointer;
-  font-family: inherit; /* Usa a mesma fonte do resto do corpo */
+  font-family: inherit;
 
-
+*/
 
 /* Os estilos para ".theme-pack-pack-vintage-link button" foram removidos daqui.
    Recomendação: Mova esses estilos para 'src/config/skins/styles/button-styles.css'

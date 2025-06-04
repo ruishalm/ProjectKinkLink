@@ -1,0 +1,143 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\config\skins\styles\button-styles-vintage.css */
+
+/* Estilo base para botões com a skin vintage de máquina de escrever */
+/* Aplica-se à classe base do botão (.actionButton ou .genericButton) QUANDO a skin vintage está ativa no <html> */
+html.klnkl-btn-style-vintage-typewriter .actionButton,
+html.klnkl-btn-style-vintage-typewriter .genericButton { /* Adicione .genericButton se for usado em outros lugares */
+  /* Cores e Fundo */
+  background-color: #f0f0f0; /* Fundo da tecla (cinza claro/creme) */
+  border: 2px solid #555555; /* Borda "metálica" mais escura */
+  color: #333333; /* Texto cinza escuro */
+
+  /* Forma e Tamanho - AGORA RETANGULAR COM CANTOS ARREDONDADOS E PADDING */
+  border-radius: 999px; /* Cantos totalmente arredondados (estilo pílula) */
+  padding: 8px 16px;  /* Padding para acomodar texto e dar um bom visual */
+  /* width e height removidos para se ajustar ao conteúdo */
+  /* line-height removido, o alinhamento vertical é feito por flex */
+  text-align: center;
+  display: inline-flex; /* Para alinhar ícones e texto */
+  align-items: center;
+  justify-content: center;
+  /* overflow: hidden; /* Removido, pode ser desnecessário ou cortar texto com o novo padding */
+
+  /* Tipografia */
+  font-family: 'Courier New', Courier, monospace; /* Fonte de máquina de escrever */
+  font-size: 0.9rem; /* Levemente reduzido para melhor encaixe em botões menores, ajuste se necessário */
+  font-weight: bold;
+  text-transform: uppercase; /* Opcional: letras maiúsculas */
+  user-select: none; /* Impede seleção de texto no botão */
+
+  /* Efeitos e Transições */
+  cursor: pointer;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2), /* Sombra para dar profundidade */
+              inset 0 -2px 2px rgba(0,0,0,0.1); /* Leve sombra interna para efeito 3D */
+  transition: all 0.15s ease-out;
+}
+
+/* Estado Hover */
+html.klnkl-btn-style-vintage-typewriter .actionButton:hover:not(:disabled),
+html.klnkl-btn-style-vintage-typewriter .genericButton:hover:not(:disabled) {
+  background-color: #e0e0e0; /* Escurece um pouco a tecla */
+  border-color: #444444;
+  box-shadow: 0 4px 7px rgba(0, 0, 0, 0.25),
+              inset 0 -2px 2px rgba(0,0,0,0.15);
+}
+
+/* Estado Active (pressionado) */
+html.klnkl-btn-style-vintage-typewriter .actionButton:active:not(:disabled),
+html.klnkl-btn-style-vintage-typewriter .genericButton:active:not(:disabled) {
+  background-color: #d0d0d0;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); /* Efeito de tecla pressionada */
+  transform: translateY(1px); /* Pequeno deslocamento para simular pressão */
+}
+
+/* Estado Disabled */
+html.klnkl-btn-style-vintage-typewriter .actionButton:disabled,
+html.klnkl-btn-style-vintage-typewriter .genericButton:disabled {
+  background-color: #cccccc;
+  border-color: #999999;
+  color: #777777;
+  cursor: not-allowed;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Para botões que são links (<a>), garantir que não tenham sublinhado */
+html.klnkl-btn-style-vintage-typewriter a.actionButton,
+html.klnkl-btn-style-vintage-typewriter a.actionButton:hover,
+a.klnkl-btn-style-vintage-typewriter:active,
+a.klnkl-btn-style-vintage-typewriter:visited {
+  text-decoration: none;
+  color: #333333; /* Garante a cor do texto mesmo para links visitados */
+}
+
+html.klnkl-btn-style-vintage-typewriter a.actionButton:disabled {
+  color: #777777; /* Cor para links desabilitados */
+}
+
+/* Se você tiver ícones dentro dos botões */
+html.klnkl-btn-style-vintage-typewriter .actionButton svg,
+html.klnkl-btn-style-vintage-typewriter .genericButton svg {
+  width: 1.2em; /* Ajuste o tamanho do ícone */
+  height: 1.2em;
+  fill: currentColor; /* Para o ícone herdar a cor do texto do botão */
+}
+
+/* Estilos específicos para botões de ação (Sim/Não) - Opcional */
+/* Você pode adicionar cores diferentes aqui se quiser */
+/*
+html.klnkl-btn-style-vintage-typewriter .actionButton.likeButton {
+  background-color: #d4e8d4;
+  border-color: #5a8c5a;
+}
+html.klnkl-btn-style-vintage-typewriter .actionButton.dislikeButton {
+  background-color: #f8d7da;
+  border-color: #a94442;
+}
+*/
+
+/* Garante que os botões de like/dislike também recebam o estilo vintage completo.
+   O uso de !important aqui é para fins de diagnóstico. */
+html.klnkl-btn-style-vintage-typewriter .actionButton.likeButton,
+html.klnkl-btn-style-vintage-typewriter .actionButton.dislikeButton {
+  background-color: #f0f0f0 !important; /* Fundo da tecla */
+  border: 2px solid #555555 !important; /* Borda "metálica" */
+  color: #333333 !important; /* Texto cinza escuro */
+  /* Garante que os botões de ação também tenham cantos totalmente arredondados */
+  border-radius: 999px !important; /* Estilo pílula */
+  padding: 8px 16px !important; /* Consistente com o padding base, !important para garantir */
+  font-family: 'Courier New', Courier, monospace !important;
+  font-size: 0.9rem !important; /* Consistente com o tamanho de fonte base */
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2),
+              inset 0 -2px 2px rgba(0,0,0,0.1) !important;
+  /* Outras propriedades como display, align-items, justify-content, overflow, user-select, cursor, transition
+     devem ser aplicadas pela regra html.button-style-btn-style-vintage-active .actionButton */
+}
+
+/* Hover para like/dislike vintage */
+html.klnkl-btn-style-vintage-typewriter .actionButton.likeButton:hover:not(:disabled),
+html.klnkl-btn-style-vintage-typewriter .actionButton.dislikeButton:hover:not(:disabled) {
+  background-color: #e0e0e0 !important;
+  border-color: #444444 !important;
+  box-shadow: 0 4px 7px rgba(0, 0, 0, 0.25),
+              inset 0 -2px 2px rgba(0,0,0,0.15) !important;
+}
+
+/* Active para like/dislike vintage */
+html.klnkl-btn-style-vintage-typewriter .actionButton.likeButton:active:not(:disabled),
+html.klnkl-btn-style-vintage-typewriter .actionButton.dislikeButton:active:not(:disabled) {
+  background-color: #d0d0d0 !important;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3) !important;
+  transform: translateY(1px) !important;
+}
+
+/* Disabled para like/dislike vintage */
+html.klnkl-btn-style-vintage-typewriter .actionButton.likeButton:disabled,
+html.klnkl-btn-style-vintage-typewriter .actionButton.dislikeButton:disabled {
+  background-color: #cccccc !important;
+  border-color: #999999 !important;
+  color: #777777 !important;
+  cursor: not-allowed !important;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.1) !important;
+}

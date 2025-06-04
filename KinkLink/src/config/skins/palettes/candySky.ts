@@ -23,5 +23,5 @@ export const paletteCandySky: SkinDefinition = {
     '#D8BFD8', // --cor-destaque (Lilás Pastel)
     '#2F4F4F', // --cor-texto-sobre-destaque (DarkSlateGray)
     'rgba(240, 248, 255, 0.7)' // --cor-overlay (Overlay Azul Alice Transparente)
-  ],
+  ]
 };

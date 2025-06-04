@@ -23,5 +23,5 @@ export const paletteVampNight: SkinDefinition = {
     '#E91E63', // --cor-destaque (Magenta/Pink Escuro)
     '#FFFFFF', // --cor-texto-sobre-destaque (Branco)
     'rgba(10, 0, 20, 0.85)' // --cor-overlay (Overlay Roxo Escuro Transparente)
-  ],
+  ]
 };

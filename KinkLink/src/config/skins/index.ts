@@ -9,7 +9,7 @@ import { paletteVampNight } from './palettes/vampNight';
 import { paletteCandySky } from './palettes/candySky';
 import { paletteCyberpunkNeon } from './palettes/cyberpunkNeon';
 import { paletteVintageSepia } from './palettes/vintageSepia';
-// import paletteWindowsXP from './palettes/paletteWindowsXP'; // Comentado
+import paletteWindowsXP from './palettes/paletteWindowsXP'; // Descomentado
 
 // Fontes
 import { fontDefault } from './fonts/default';
@@ -18,7 +18,7 @@ import { fontDancingScript } from './fonts/dancingScript';
 import { fontMontserrat } from './fonts/montserrat';
 import { fontMerriweather } from './fonts/merriweather';
 import { fontChakraPetch } from './fonts/chakraPetch'; // Nova fonte
-// import fontWindowsXP from './fonts/fontWindowsXP'; // Comentado
+import fontWindowsXP from './fonts/fontWindowsXP'; // Descomentado
 
 // Backgrounds da Pilha
 import { bgPileDefault } from './backgrounds/pile/default';
@@ -46,24 +46,24 @@ import { packDefault } from './themePacks/default';
 import { packCyberpunkKink } from './themePacks/cyberpunkKink';
 // import { packVintageLink } from './themePacks/vintageLink'; // Ocultado temporariamente
 // import { packRomanticNight } from './themePacks/romanticNight'; // Ocultado temporariamente
-// import packWindowsXP from './themePacks/packWindowsXP'; // Comentado
+import packWindowsXP from './themePacks/packWindowsXP'; // Descomentado
 
 // Estilos de Botão
 import { buttonStyleDefault } from './buttonStyles/default';
 import { buttonStyleCyberpunk } from './buttonStyles/cyberpunk';
 import { buttonStyleVintage } from './buttonStyles/vintage';
-// import buttonStyleWindowsXP from './buttonStyles/buttonStyleWindowsXP'; // Comentado
+import buttonStyleWindowsXP from './buttonStyles/buttonStyleWindowsXP'; // Descomentado
 
 // Estilos de Painel (Novo)
 import { panelStyleDefault } from './panelStyles/panelStyleDefault';
-// import { panelStyleWindowsXP } from './panelStyles/panelStyleWindowsXP'; // Comentado
+import { panelStyleWindowsXP } from './panelStyles/panelStyleWindowsXP'; // Descomentado
 import { panelStyleCyberpunk } from './panelStyles/panelStyleCyberpunk'; // Novo
 export { panelStyleDefault } from './panelStyles/panelStyleDefault'; // Adicione esta linha para re-exportar
 
 // Recriar o array exampleSkinsData
 export const exampleSkinsData: SkinDefinition[] = [
   // Backgrounds da Pilha
-  bgPileDefault,
+  bgPileDefault, // Manter padrão
   bgPileAzulNipes,
   bgPileMadeira,
   bgPileVerdeFlor,
@@ -73,7 +73,7 @@ export const exampleSkinsData: SkinDefinition[] = [
   // bgPileWindowsXP, // Comentado
 
   // Backgrounds dos Matches
-  bgMatchesDefault,
+  bgMatchesDefault, // Manter padrão
   bgMatchesCafe,
   bgMatchesVerdeClaro,
   bgMatchesAzulNipes,
@@ -90,7 +90,7 @@ export const exampleSkinsData: SkinDefinition[] = [
   paletteCandySky,
   paletteCyberpunkNeon,
   paletteVintageSepia,
-  // paletteWindowsXP, // Comentado
+  paletteWindowsXP, // Descomentado
 
   // Fontes
   fontDefault,
@@ -99,7 +99,7 @@ export const exampleSkinsData: SkinDefinition[] = [
   fontMontserrat,
   fontMerriweather,
   fontChakraPetch, // Adicionar aqui
-  // fontWindowsXP, // Comentado
+  fontWindowsXP, // Descomentado
 
   // Pacotes de Tema
   packDefault,
@@ -107,16 +107,17 @@ export const exampleSkinsData: SkinDefinition[] = [
   // packVintageLink, // Ocultado temporariamente
   // packRomanticNight, // Ocultado temporariamente
   // packWindowsXP, // Comentado
+  packWindowsXP, // Descomentado
 
   // Estilos de Botão
   buttonStyleDefault,
   buttonStyleCyberpunk,
   buttonStyleVintage,
-  // buttonStyleWindowsXP, // Comentado
+  buttonStyleWindowsXP, // Descomentado
 
   // Estilos de Painel (Novo)
   panelStyleDefault,
-  // panelStyleWindowsXP, // Comentado
+  panelStyleWindowsXP, // Descomentado
   panelStyleCyberpunk,
 ];
 

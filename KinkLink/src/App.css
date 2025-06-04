@@ -1,3 +1,5 @@
+/* Importações de estilos de skins */
+@import './config/skins/styles/button-styles-vintage.css';
 /* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\App.css */
 /* Estilos para o layout principal do App */
 .appContainer {

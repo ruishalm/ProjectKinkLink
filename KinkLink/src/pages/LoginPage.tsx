@@ -10,7 +10,7 @@ function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false); // Renomeado de isLoading para evitar conflito
-  const { login, isLoading: authIsLoading } = useAuth();
+  const { login, loginWithGoogle, isLoading: authIsLoading } = useAuth(); // Adiciona loginWithGoogle
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -36,6 +36,25 @@ function LoginPage() {
       }
     } finally {
       setIsSubmitting(false); // Finaliza o carregamento
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError(null);
+    setIsSubmitting(true); // Usar o mesmo estado de carregamento
+    try {
+      const from = location.state?.from?.pathname || '/profile';
+      await loginWithGoogle();
+      navigate(from, { replace: true });
+    } catch (err: unknown) {
+      console.error("Falha no login com Google:", err);
+      if (err instanceof Error) {
+        setError(err.message || 'Falha ao tentar fazer login com o Google.');
+      } else {
+        setError('Ocorreu um erro desconhecido ao tentar fazer login com o Google.');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -98,6 +117,15 @@ function LoginPage() {
           </div>
           <button type="submit" className={styles.button} disabled={isSubmitting || authIsLoading}>
             {isSubmitting ? 'Entrando...' : 'Entrar'}
+          </button>
+          {/* Botão de Login com Google */}
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className={`${styles.button} ${styles.googleButton}`} // Adicione uma classe específica para estilização
+            disabled={isSubmitting || authIsLoading}
+          >
+            {isSubmitting ? 'Aguarde...' : 'Entrar com Google'}
           </button>
           <div className={styles.forgotPasswordContainer}>
             <button

@@ -7,7 +7,9 @@ import {
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
   updateProfile,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  GoogleAuthProvider, // Importar GoogleAuthProvider
+  signInWithPopup     // Importar signInWithPopup
 } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import type { SkinDefinition } from '../config/skins'; // Corrigido o caminho da importação
@@ -23,7 +25,8 @@ import {
   collection,
   query,
   where,
-  getDocs
+  getDocs,
+  getDoc
 } from 'firebase/firestore';
 
 export interface MatchedCard extends Card {
@@ -58,6 +61,7 @@ interface AuthContextData {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  loginWithGoogle: () => Promise<void>; // Nova função
   requestPasswordReset: (email: string) => Promise<void>;
   signup: (
     email: string,
@@ -195,6 +199,66 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       throw error;
     }
   };
+
+  const loginWithGoogle = async () => {
+    setIsLoading(true);
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const firebaseUser = result.user;
+
+      // Verificar se o usuário já existe no Firestore
+      const userDocRef = doc(db, 'users', firebaseUser.uid);
+      const docSnap = await getDoc(userDocRef);
+
+      if (!docSnap.exists()) {
+        // Usuário novo via Google, criar documento no Firestore
+        console.log(`[AuthContext] Novo usuário via Google: ${firebaseUser.uid}. Criando documento no Firestore.`);
+        const username = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || `user_${firebaseUser.uid.substring(0, 6)}`;
+        const newLinkCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+        // Para usuários do Google, birthDate, sex, e gender não são coletados no login inicial.
+        // Eles podem ser solicitados posteriormente no perfil ou em um fluxo de onboarding.
+        const userData: Omit<User, 'id'> = {
+          email: firebaseUser.email,
+          username: username,
+          // birthDate, sex, gender podem ser undefined ou ter um valor padrão "não informado"
+          linkCode: newLinkCode,
+          linkedPartnerId: null,
+          coupleId: null,
+          seenCards: [],
+          conexaoAccepted: 0,
+          conexaoRejected: 0,
+          unlockedSkinIds: [
+            'bg_pile_default',
+            'bg_match_default',
+            'palette_default',
+            'font_default',
+            'pack_default',
+            'palette_vamp_night',
+            'palette_candy_sky'
+          ],
+          createdAt: serverTimestamp() as Timestamp,
+        };
+        await setDoc(userDocRef, userData);
+        console.log('[AuthContext] Documento do usuário Google criado no Firestore com sucesso para UID:', firebaseUser.uid);
+      } else {
+        console.log(`[AuthContext] Usuário ${firebaseUser.uid} já existe no Firestore. Login via Google bem-sucedido.`);
+        // O onSnapshot já deve cuidar de atualizar o estado 'user'
+      }
+      // O onAuthStateChanged e o onSnapshot devem lidar com a atualização do estado 'user'
+      // e setIsLoading(false)
+    } catch (error: unknown) {
+      console.error("[AuthContext] Erro no login com Google:", error);
+      // Tratar erros específicos do Google Sign-In se necessário
+      // Ex: error.code === 'auth/popup-closed-by-user'
+      setIsLoading(false);
+      throw error;
+    }
+    // setIsLoading(false) é chamado pelo onAuthStateChanged/onSnapshot
+  };
+
+
 
   const logout = async () => {
     setIsLoading(true);
@@ -406,6 +470,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       isLoading,
       login,
       logout,
+      loginWithGoogle,
       requestPasswordReset,
       signup,
       updateUser,

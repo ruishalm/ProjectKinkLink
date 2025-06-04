@@ -1,6 +1,6 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\LinkCouplePage.tsx
 import React, { useState, useEffect, Fragment } from 'react';
-import { useNavigate,Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // Restaurado Link
 import { useAuth, type User } from '../contexts/AuthContext';
 import CreateLink from '../components/CreateLink';
 import AcceptLink from '../components/AcceptLink';
@@ -9,7 +9,7 @@ import { doc, getDoc, writeBatch } from 'firebase/firestore'; // Import firestor
 import styles from './LinkCouplePage.module.css';
 
 const LinkCouplePage: React.FC = () => {
-  const { user, isLoading: authIsLoading, updateUser: updateAuthContextUser } = useAuth();
+  const { user, isLoading: authIsLoading, updateUser: updateAuthContextUser } = useAuth(); // Removido logout se não for mais usado
   const navigate = useNavigate();
   const [showCreateLinkUI, setShowCreateLinkUI] = useState(false);
   const [showAcceptLinkUI, setShowAcceptLinkUI] = useState(false);
@@ -125,7 +125,7 @@ const LinkCouplePage: React.FC = () => {
     setShowCreateLinkUI(false);
     setShowAcceptLinkUI(false);
   };
-  
+
   return (
     <div className={styles.page}>
       <main className={`${styles.mainContent} klnkl-themed-panel`}> {/* Envolve o conteúdo principal */}
@@ -153,7 +153,8 @@ const LinkCouplePage: React.FC = () => {
               </button>
             </div>
             <div className={styles.backLinkContainer}>
-              <Link to="/profile" className={styles.backLink}>
+              {/* Restaurado para Link para /profile */}
+              <Link to="/profile" className={`${styles.secondaryButton} ${styles.backLink} genericButton`}>
                 &larr; Voltar para o Perfil
               </Link>
             </div>

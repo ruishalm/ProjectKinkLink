@@ -57,6 +57,16 @@
   font-weight: bold; /* Added for consistency */
 }
 
+.googleButton {
+  background-color: #4285F4; /* Cor do Google */
+  color: white;
+  /* margin-top já é aplicado pelo .button, mas pode ser ajustado aqui se necessário */
+}
+
+.googleButton:hover {
+  background-color: #357ae8; /* Um tom um pouco mais escuro para o hover */
+}
+
 .errorText {
   color: #ff7b7b; /* Adjusted from 'red' for consistency with SignupPage */
   margin-top: 10px;

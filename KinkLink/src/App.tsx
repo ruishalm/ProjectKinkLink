@@ -55,9 +55,9 @@ function App() {
             <Route
               path="/profile"
               element={
-                <LinkedRoute>
+                <ProtectedRoute> {/* Alterado de LinkedRoute para ProtectedRoute */}
                   <ProfilePage />
-                </LinkedRoute>
+                </ProtectedRoute>
               }
             />
             <Route

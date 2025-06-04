@@ -57,7 +57,8 @@ import buttonStyleWindowsXP from './buttonStyles/buttonStyleWindowsXP'; // Camin
 // Estilos de Painel (Novo)
 import { panelStyleDefault } from './panelStyles/panelStyleDefault';
 import { panelStyleWindowsXP } from './panelStyles/panelStyleWindowsXP';
-    export { panelStyleDefault } from './panelStyles/panelStyleDefault'; // Adicione esta linha para re-exportar
+import { panelStyleCyberpunk } from './panelStyles/panelStyleCyberpunk'; // Novo
+export { panelStyleDefault } from './panelStyles/panelStyleDefault'; // Adicione esta linha para re-exportar
 
 // Recriar o array exampleSkinsData
 export const exampleSkinsData: SkinDefinition[] = [
@@ -116,6 +117,7 @@ export const exampleSkinsData: SkinDefinition[] = [
   // Estilos de Painel (Novo)
   panelStyleDefault,
   panelStyleWindowsXP,
+  panelStyleCyberpunk,
 ];
 
 // Re-exportar o tipo para conveniência

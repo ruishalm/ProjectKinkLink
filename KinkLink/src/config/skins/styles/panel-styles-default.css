@@ -1,0 +1,10 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\config\skins\styles\panel-styles-default.css */
+
+/* Estilo Padrão do Painel KinkLink */
+/* Aplicado quando a classe 'klnkl-panel-default-active' está no html/body */
+html.klnkl-panel-default-active .klnkl-themed-panel {
+  background-color: var(--cor-fundo-elemento, #3a3a3a); /* Um cinza escuro, mais claro que o #242424 do #root */
+  border: 1px solid var(--cor-borda-elemento, #555555); /* Uma borda sutil */
+  border-radius: 8px; /* Bordas arredondadas */
+  color: var(--cor-texto-sobre-elemento, rgba(255, 255, 255, 0.87));
+}

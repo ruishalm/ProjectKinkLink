@@ -233,38 +233,38 @@
 .carouselCell--exposicao {
   --carousel-border-outer-color: #32CD32; /* Verde para Exposição */
   --carousel-border-inner-color: #2E8B57; /* Verde Escuro para Exposição */
-  --carousel-background-category-tint-level0: rgba(50, 205, 50, 0.05);
-  --carousel-background-category-tint-level1: rgba(50, 205, 50, 0.08);
-  --carousel-background-category-tint-level2: rgba(50, 205, 50, 0.1);
-  --carousel-background-category-tint-level3: rgba(50, 205, 50, 0.12);
-  --carousel-background-category-tint-level4: rgba(50, 205, 50, 0.15);
+  --carousel-background-category-tint-level0: rgba(50, 205, 50, 0.20);
+  --carousel-background-category-tint-level1: rgba(50, 205, 50, 0.23);
+  --carousel-background-category-tint-level2: rgba(50, 205, 50, 0.25);
+  --carousel-background-category-tint-level3: rgba(50, 205, 50, 0.27);
+  --carousel-background-category-tint-level4: rgba(50, 205, 50, 0.30);
 }
 .carouselCell--fantasia {
   --carousel-border-outer-color: #8A2BE2;
   --carousel-border-inner-color: #BA55D3; /* Ajustado para melhor contraste */
-  --carousel-background-category-tint-level0: rgba(138, 43, 226, 0.05);
-  --carousel-background-category-tint-level1: rgba(138, 43, 226, 0.08);
-  --carousel-background-category-tint-level2: rgba(138, 43, 226, 0.1);
-  --carousel-background-category-tint-level3: rgba(138, 43, 226, 0.12);
-  --carousel-background-category-tint-level4: rgba(138, 43, 226, 0.15);
+  --carousel-background-category-tint-level0: rgba(138, 43, 226, 0.20);
+  --carousel-background-category-tint-level1: rgba(138, 43, 226, 0.23);
+  --carousel-background-category-tint-level2: rgba(138, 43, 226, 0.25);
+  --carousel-background-category-tint-level3: rgba(138, 43, 226, 0.27);
+  --carousel-background-category-tint-level4: rgba(138, 43, 226, 0.30);
 }
 .carouselCell--poder {
   --carousel-border-outer-color: #DC143C;
   --carousel-border-inner-color: #B22222; /* Ajustado */
-  --carousel-background-category-tint-level0: rgba(220, 20, 60, 0.05);
-  --carousel-background-category-tint-level1: rgba(220, 20, 60, 0.08);
-  --carousel-background-category-tint-level2: rgba(220, 20, 60, 0.1);
-  --carousel-background-category-tint-level3: rgba(220, 20, 60, 0.12);
-  --carousel-background-category-tint-level4: rgba(220, 20, 60, 0.15);
+  --carousel-background-category-tint-level0: rgba(220, 20, 60, 0.20);
+  --carousel-background-category-tint-level1: rgba(220, 20, 60, 0.23);
+  --carousel-background-category-tint-level2: rgba(220, 20, 60, 0.25);
+  --carousel-background-category-tint-level3: rgba(220, 20, 60, 0.27);
+  --carousel-background-category-tint-level4: rgba(220, 20, 60, 0.30);
 }
 .carouselCell--sensorial {
   --carousel-border-outer-color: #FFD700; /* Amarelo para Sensorial */
   --carousel-border-inner-color: #FFA500; /* Laranja para Sensorial */
-  --carousel-background-category-tint-level0: rgba(255, 215, 0, 0.05);
-  --carousel-background-category-tint-level1: rgba(255, 215, 0, 0.08);
-  --carousel-background-category-tint-level2: rgba(255, 215, 0, 0.1);
-  --carousel-background-category-tint-level3: rgba(255, 215, 0, 0.12);
-  --carousel-background-category-tint-level4: rgba(255, 215, 0, 0.15);
+  --carousel-background-category-tint-level0: rgba(255, 215, 0, 0.20);
+  --carousel-background-category-tint-level1: rgba(255, 215, 0, 0.23);
+  --carousel-background-category-tint-level2: rgba(255, 215, 0, 0.25);
+  --carousel-background-category-tint-level3: rgba(255, 215, 0, 0.27);
+  --carousel-background-category-tint-level4: rgba(255, 215, 0, 0.30);
 }
 
 /* Estilos para o Container de Top Links */

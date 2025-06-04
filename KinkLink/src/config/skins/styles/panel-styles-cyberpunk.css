@@ -1,0 +1,89 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\config\skins\styles\panel-styles-cyberpunk.css */
+
+/* --- Estilos de Painel Cyberpunk --- */
+/* Aplicado a todos os painéis com a classe klnkl-themed-panel quando a skin Cyberpunk está ativa */
+html.klnkl-panel-cyberpunk-active .klnkl-themed-panel {
+  color: var(--cor-texto-primario-cyberpunk, #e0e0e0); /* Texto claro */
+  position: relative !important; 
+  z-index: 0; /* Contexto de empilhamento */
+  background-color: transparent !important; /* Fundo transparente para as camadas de pseudo-elementos */
+  border: none !important; /* Garante que não haja borda do .klnkl-themed-panel base */
+  border-radius: 0 !important; /* Cantos retos para o chanfro */
+  /* padding e margin-bottom são herdados do .klnkl-themed-panel base ou podem ser sobrescritos aqui se necessário */
+
+  /* Efeito de chanfro NO CANTO SUPERIOR DIREITO */
+  clip-path: polygon(
+    0% 0%,                     /* Ponto 1: Canto superior esquerdo */
+    calc(100% - 20px) 0%,      /* Ponto 2: Início do chanfro na borda superior (20px antes do fim) */
+    100% 20px,                  /* Ponto 3: Fim do chanfro na borda direita (20px abaixo do topo) */
+    100% 100%,                  /* Ponto 4: Canto inferior direito */
+    0% 100%                     /* Ponto 5: Canto inferior esquerdo */
+  ) !important; 
+
+  /* Adiciona brilho neon ao redor do painel chanfrado */
+  box-shadow: 0 0 8px var(--cor-destaque-cyberpunk, #00f0ff),
+              0 0 15px var(--cor-destaque-cyberpunk, #00f0ff);
+}
+
+/* Camada da BORDA (traseira) para painéis Cyberpunk */
+html.klnkl-panel-cyberpunk-active .klnkl-themed-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--cor-destaque-cyberpunk, #00f0ff); /* Cor da "borda" neon */
+  clip-path: inherit; /* Herda o clip-path do painel */
+  z-index: -2; /* Atrás da camada de preenchimento */
+  pointer-events: none; /* Não interage com mouse */
+}
+
+/* Camada de PREENCHIMENTO (meio) para painéis Cyberpunk */
+html.klnkl-panel-cyberpunk-active .klnkl-themed-panel::after {
+  content: '';
+  position: absolute;
+  top: 3px;    /* Espessura da borda neon */
+  left: 3px;   /* Espessura da borda neon */
+  right: 3px;  /* Espessura da borda neon */
+  bottom: 3px; /* Espessura da borda neon */
+  background-color: var(--cor-fundo-elemento-cyberpunk, #1a1a1a); /* Cor de preenchimento escura (fallback) */
+  background-image: 
+    /* 1. Scanlines (camada superior) */
+    repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 1px, /* Espaço entre as linhas */
+      rgba(0, 240, 255, 0.08) 1px, /* Cor e espessura da scanline (ciano bem sutil) */
+      rgba(0, 240, 255, 0.08) 2px  /* Espessura da scanline */
+    ),
+    /* 2. Imagem de Fundo do Painel (camada inferior) */
+    url('/assets/skins/textures/CyberPainel.jpg');
+
+  /* Ajustes para as camadas de background: [scanlines], [imagem do painel] */
+  background-size: auto, cover; 
+  background-repeat: repeat-x, no-repeat; 
+  background-position: 0 0, center center; 
+  /* A animação cyberpunkScanlineAnimation afetará a posição do primeiro background (scanlines) */
+
+  animation: cyberpunkScanlineAnimation 5s linear infinite; /* Animação das scanlines */
+
+  clip-path: inherit; /* Herda o clip-path do painel */
+  z-index: -1; /* Acima da camada de borda, abaixo do conteúdo do painel */
+  pointer-events: none; /* Não interage com mouse */
+}
+
+/* --- Estilos de Página para o Tema de Painel Cyberpunk --- */
+/* Altera o fundo da página quando o tema de painel Cyberpunk está ativo */
+html.klnkl-panel-cyberpunk-active {
+  /* Substitui a cor de fundo da página (ex: "vermelho sangue" da paleta) por uma base escura */
+  --cor-fundo-pagina: var(--cor-fundo-pagina-cyberpunk-override, #08080C); /* Ou a cor escura que preferir */
+}
+
+html.klnkl-panel-cyberpunk-active body {
+  background-image: url('/assets/skins/textures/cyberpunk.jpg');
+  background-color: var(--cor-fundo-pagina); /* Usará o valor sobrescrito de --cor-fundo-pagina */
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* Mantém o fundo estático durante o scroll */
+}
+
+/* --- Fim dos Estilos de Painel Cyberpunk --- */

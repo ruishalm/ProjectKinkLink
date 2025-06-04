@@ -1,0 +1,106 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\config\skins\styles\panel-styles-base.css */
+
+/* Estilo base para a classe genérica klnkl-themed-panel. 
+   Pode conter espaçamentos comuns, mas a aparência principal virá dos temas. */
+.klnkl-themed-panel {
+  padding: 15px; /* Um padding padrão, pode ser ajustado pelo tema específico */
+  margin-bottom: 20px; /* Espaço padrão abaixo dos painéis */
+  box-sizing: border-box;
+}
+
+/* Estilos padrão para .klnkl-all-buttons-panel quando a skin XP NÃO está ativa,
+   para controlar a ordem e alinhamento dos seus filhos. */
+html:not(.klnkl-panel-xp-active) .klnkl-all-buttons-panel.klnkl-themed-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important; /* Centraliza os filhos diretos horizontalmente */
+}
+
+/* Estilo para o container dos botões de decisão (primeiro div filho)
+   dentro do .klnkl-all-buttons-panel, quando a skin XP NÃO está ativa. */
+html:not(.klnkl-panel-xp-active) .klnkl-all-buttons-panel.klnkl-themed-panel > div:first-child {
+  width: 100% !important; /* Garante que o container ocupe a largura disponível */
+  max-width: 380px; /* Consistente com outros containers de botões no painel */
+  margin-bottom: 15px !important; /* Espaço abaixo do container dos botões de decisão */
+  /* O layout interno dos botões de decisão (ex: lado a lado, centralizados)
+     deve ser tratado pelos estilos do seu próprio CSS module (ex: _buttonContainer_bzdqe_133) */
+}
+
+/* Estilo padrão para klnkl-create-kink-btn quando NÃO estiver no tema XP.
+   Assume que ele é filho de .klnkl-all-buttons-panel.
+   Reseta o posicionamento absoluto do XP e centraliza o botão dentro do seu painel. */
+html:not(.klnkl-panel-xp-active) .klnkl-all-buttons-panel.klnkl-themed-panel .klnkl-create-kink-btn.genericButton {
+  /* Reset de estilos do genericButton que podem interferir */
+  padding: 0 !important; /* Padding base é zero */
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  box-shadow: none !important;
+  /* line-height: normal !important; /* Ajustado abaixo para o texto do botão */
+
+  /* Estilo Miniatura CardBack */
+  height: 6rem !important; /* Altura da parte visual da CARTA (dobrado de 3rem) */
+  width: calc(6rem * (250 / 350)) !important; /* Largura proporcional (aprox. 4.28rem) */
+  border-radius: 10px !important; /* Scaled from CardBack's 12px (era 6px para 3rem) */
+  background-color: #1a1a1a !important; /* Fundo escuro da CardBack */
+  border: 4px solid #b71c1c !important; /* Borda vermelha escura, scaled (era 3px para 3rem) */
+  
+  position: relative !important; 
+  overflow: hidden !important; /* Essencial para o visual da CardBack */
+  display: block !important; /* Garante que width/height sejam respeitados e centralização pelo pai flex funcione */
+
+  /* Estiliza o texto original do botão ("Criar Kink") */
+  color: transparent !important; /* Texto original do botão escondido */
+  font-size: 0 !important; /* Texto original do botão escondido */
+  line-height: normal !important;
+
+  /* Mantém propriedades de posicionamento e ordem do layout anterior */
+  bottom: auto !important;
+  right: auto !important;
+  top: auto !important;
+  left: auto !important;
+  margin-top: 15px !important;    /* Espaçamento acima do botão "Criar Kink" */
+  margin-bottom: 10px !important; /* Espaçamento abaixo de TODO o construto (carta + texto) */
+  order: 3 !important; /* Faz este botão ser o último item no flex container */
+}
+
+/* Pseudo-elemento ::before para as linhas diagonais (Botão Criar Kink - Padrão) */
+html:not(.klnkl-panel-xp-active) .klnkl-all-buttons-panel.klnkl-themed-panel .klnkl-create-kink-btn.genericButton::before {
+  content: '';
+  position: absolute;
+  width: 200%; 
+  height: 200%;
+  top: -50%; /* Centraliza o elemento superdimensionado */
+  left: -50%; /* Centraliza o elemento superdimensionado */
+  background: repeating-linear-gradient(-45deg, #e53935, #e53935 2px, #1a1a1a 2px, #1a1a1a 6px); /* Linhas escalonadas: 2px vermelha, 4px de fundo */
+  opacity: 0.1;
+  transform: rotate(-45deg);
+  z-index: 1; /* Atrás do texto */
+  pointer-events: none;
+}
+
+/* Pseudo-elemento ::after para o texto "Criar Kink" (Botão Criar Kink - Padrão) */
+html:not(.klnkl-panel-xp-active) .klnkl-all-buttons-panel.klnkl-themed-panel .klnkl-create-kink-btn.genericButton::after {
+  content: 'Criar Kink'; /* Texto alterado para o do botão */
+  position: absolute;
+  top: 0; left: 0; right: 0; 
+  height: 6rem; /* IMPORTANTE: Confina o texto KINKLINK à altura da parte visual da carta */
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px !important; /* Tamanho ajustado para "Criar Kink" */
+  font-weight: bold;
+  color: #f0f0f0 !important; /* Cor bem clara para alta visibilidade */
+  opacity: 1 !important; /* Totalmente opaco para alta visibilidade */
+  transform: rotate(-45deg);
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: none;
+  z-index: 2; /* Acima das linhas */
+  text-align: center;
+}
+
+/* Ajusta o container dos botões de navegação (Mimos, Links, Perfil) dentro do .klnkl-all-buttons-panel
+   para o estado padrão (sem skin XP). Este é o último elemento filho direto do painel. */
+html:not(.klnkl-panel-xp-active) .klnkl-all-buttons-panel.klnkl-themed-panel > :last-child {
+  order: 2 !important; /* Faz este container aparecer antes do botão "Criar Kink" */
+  width: 100% !important; /* Garante que o container ocupe a largura para posicionamento interno dos botões */
+  max-width: 380px; /* Opcional: limita a largura do container de navegação, pode alinhar com a largura do painel */
+}

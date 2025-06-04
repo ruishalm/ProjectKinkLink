@@ -8,10 +8,10 @@ export const paletteCyberpunkNeon: SkinDefinition = {
   preview: [
     '#39FF14', // --cor-primaria (Verde Neon)
     '#FF00FF', // --cor-secundaria (Magenta Neon - Rosa)
-    '#2B0000', // --cor-fundo-pagina (Vermelho Sangue Muito Escuro)
+    '#0A0A1E', // --cor-fundo-pagina (Azul Muito Escuro / Quase Preto)
     '#1A1A1A', // --cor-fundo-elemento (Preto Brilhante / Cinza Muito Escuro)
-    '#FFFFFF', // --cor-texto-primario (Branco Puro) - Mantido
-    '#CCCCCC', // --cor-texto-secundario (Cinza Claro) - Mantido
+    '#D0F0FF', // --cor-texto-primario (Branco Levemente Azulado/Ciano)
+    '#80C0D0', // --cor-texto-secundario (Ciano Acinzentado)
     '#000000', // --cor-texto-sobre-primaria (Preto para contraste com Verde Neon)
     '#000000', // --cor-texto-sobre-secundaria (Preto para contraste com Magenta Neon)
     '#333333', // --cor-borda (Cinza Escuro para bordas sutis) - Mantido

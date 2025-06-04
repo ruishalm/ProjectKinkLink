@@ -1,0 +1,269 @@
+/*d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\config\skins\styles\button-styles-cyberpunk.css
+@@ -0,0 1,148 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\config\skins\styles\button-styles-cyberpunk.css */
+
+/*  Estilos de Botão Cyberpunk  */
+/* Ativado quando <html> tem a classe 'klnkl-btn-style-cyberpunk' */
+html.klnkl-btn-style-cyberpunk {
+  --btn-cb-text: var(--cor-destaque, #00f0ff);
+  --btn-cb-border: var(--cor-destaque, #00f0ff);
+  --btn-cb-fill: #1a1a1a;
+  --btn-cb-chamfer-size: 15px;
+  --btn-cb-border-thickness: 2px;
+
+  --btn-cb-hover-text: #1a1a1a;
+  --btn-cb-hover-border: var(--cor-destaque, #00f0ff);
+  --btn-cb-hover-fill: var(--cor-destaque, #00f0ff);
+
+  --btn-cb-disabled-text: #777;
+  --btn-cb-disabled-border: #555;
+  --btn-cb-disabled-fill: #333;
+}
+
+/* 1. ESTILO BASE: Forma, texto e borda padrão para TODOS os botões com este estilo */
+/* Aplicado a elementos com .genericButton quando a skin cyberpunk está ativa */
+html.klnkl-btn-style-cyberpunk .genericButton,
+html.klnkl-btn-style-cyberpunk a.ck-theme-button { /* Aplicar também a links com esta classe */
+  position: relative; 
+  z-index: 0; /* Contexto de empilhamento para os pseudo-elementos */
+  /* padding é herdado do genericButton, mas pode ser sobrescrito aqui se necessário. Ex: padding: 10px 22px; */
+  text-transform: uppercase;
+  /* font-weight é herdado do genericButton (bold), mas pode ser sobrescrito. */
+  /* font-family: 'Orbitron', sans-serif; /* Sugestão de fonte cyberpunk, se desejar */
+  letter-spacing: 1px;
+
+  /* Removemos background e border diretos do botão, serão feitos por pseudo-elementos */
+  background-color: transparent;
+  border: none; 
+  color: var(--btn-cb-text);
+
+  /* Efeito de chanfro NO CANTO SUPERIOR DIREITO */
+  clip-path: polygon(
+    0% 0%,                     /* Ponto 1: Canto superior esquerdo */
+    calc(100% - var(--btn-cb-chamfer-size)) 0%,
+    100% var(--btn-cb-chamfer-size),
+    100% 100%,                  /* Ponto 4: Canto inferior direito */
+    0% 100%                     /* Ponto 5: Canto inferior esquerdo */
+  );
+  /* cursor e outline são herdados do genericButton. */
+  /* display e text-decoration são herdados do genericButton. */
+  box-shadow: 0 0 5px var(--btn-cb-border),
+              0 0 10px var(--btn-cb-border); /* Efeito de brilho */
+  /* Transição para propriedades do botão principal (texto, sombra, transform) */
+  transition-property: color, transform, filter, box-shadow;
+  /* A transition-duration e timing-function virão do .genericButton ou podem ser especificadas aqui */
+}
+
+/* Camada da BORDA (traseira) */
+html.klnkl-btn-style-cyberpunk .genericButton::before,
+html.klnkl-btn-style-cyberpunk a.ck-theme-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--btn-cb-border);
+  clip-path: inherit; /* Herda o clip-path do botão */
+  z-index: -2; /* Atrás da camada de preenchimento */
+  transition: background-color 0.2s ease-in-out;
+}
+
+/* Camada de PREENCHIMENTO (meio) */
+html.klnkl-btn-style-cyberpunk .genericButton::after,
+html.klnkl-btn-style-cyberpunk a.ck-theme-button::after {
+  content: '';
+  position: absolute;
+  top: var(--btn-cb-border-thickness);
+  left: var(--btn-cb-border-thickness);
+  right: var(--btn-cb-border-thickness);
+  bottom: var(--btn-cb-border-thickness);
+  background-color: var(--btn-cb-fill);
+  clip-path: inherit; /* Herda o clip-path do botão */
+  z-index: -1; /* Acima da camada de borda, abaixo do texto */
+  transition: background-color 0.2s ease-in-out;
+}
+
+/* 2. HOVER GENÉRICO para botões cyberpunk (incluindo a.ck-theme-button) */
+html.klnkl-btn-style-cyberpunk .genericButton:hover:not(:disabled),
+html.klnkl-btn-style-cyberpunk a.ck-theme-button:hover:not(:disabled) {
+  color: var(--btn-cb-hover-text);
+  box-shadow: 0 0 8px var(--btn-cb-hover-border), 
+              0 0 15px var(--btn-cb-hover-border), 
+              0 0 25px var(--btn-cb-hover-border);
+  /* transform: translateY(-2px); é uma boa adição, o genericButton já tem translateY(1px) no active */
+}
+/* Ajuste do hover para as camadas dos botões genéricos */
+html.klnkl-btn-style-cyberpunk .genericButton:hover:not(:disabled)::after,
+html.klnkl-btn-style-cyberpunk a.ck-theme-button:hover:not(:disabled)::after {
+  background-color: var(--btn-cb-hover-fill);
+}
+html.klnkl-btn-style-cyberpunk .genericButton:hover:not(:disabled)::before,
+html.klnkl-btn-style-cyberpunk a.ck-theme-button:hover:not(:disabled)::before {
+  background-color: var(--btn-cb-hover-border);
+}
+
+/* 3. BOTÕES DE AÇÃO (likeButton, dislikeButton) */
+html.klnkl-btn-style-cyberpunk .genericButton.likeButton { /* Assumindo que likeButton é uma classe adicional */
+  --btn-cb-text: var(--cor-texto-acao-positiva);
+  background-color: transparent !important; /* Garante que o fundo do App.css não interfira */
+  --btn-cb-border: var(--cor-acao-positiva);
+  --btn-cb-fill: var(--cor-acao-positiva); /* Fill matches border for this type */
+  --btn-cb-border-thickness: 4px; /* Specific thickness */
+  /* Variáveis de hover foram removidas daqui para teste, serão aplicadas diretamente abaixo */
+}
+
+html.klnkl-btn-style-cyberpunk .genericButton.dislikeButton { /* Assumindo que dislikeButton é uma classe adicional */
+  --btn-cb-text: var(--cor-texto-acao-negativa);
+  background-color: transparent !important; /* Garante que o fundo do App.css não interfira */
+  --btn-cb-border: var(--cor-acao-negativa);
+  --btn-cb-fill: var(--cor-acao-negativa); /* Fill matches border for this type */
+  --btn-cb-border-thickness: 4px; /* Specific thickness */
+  /* Variáveis de hover foram removidas daqui para teste, serão aplicadas diretamente abaixo */
+}
+
+/* HOVER ESPECÍFICO E FORÇADO PARA BOTÕES DE AÇÃO (para depuração) */
+html.klnkl-btn-style-cyberpunk .genericButton.likeButton:hover:not(:disabled) {
+  color: #1a1a1a !important; /* Força texto escuro */
+  box-shadow: 0 0 8px var(--cor-acao-positiva, green), /* Força brilho verde */
+              0 0 15px var(--cor-acao-positiva, green), 
+              0 0 25px var(--cor-acao-positiva, green) !important;
+}
+html.klnkl-btn-style-cyberpunk .genericButton.likeButton:hover:not(:disabled)::before {
+  background-color: var(--cor-acao-positiva, green) !important; /* Força borda verde */
+}
+html.klnkl-btn-style-cyberpunk .genericButton.likeButton:hover:not(:disabled)::after {
+  background-color: var(--cor-acao-positiva, green) !important; /* Força preenchimento verde */
+}
+
+html.klnkl-btn-style-cyberpunk .genericButton.dislikeButton:hover:not(:disabled) {
+  color: #1a1a1a !important; /* Força texto escuro */
+  box-shadow: 0 0 8px var(--cor-acao-negativa, red), /* Força brilho vermelho */
+              0 0 15px var(--cor-acao-negativa, red), 
+              0 0 25px var(--cor-acao-negativa, red) !important;
+}
+html.klnkl-btn-style-cyberpunk .genericButton.dislikeButton:hover:not(:disabled)::before {
+  background-color: var(--cor-acao-negativa, red) !important; /* Força borda vermelha */
+}
+html.klnkl-btn-style-cyberpunk .genericButton.dislikeButton:hover:not(:disabled)::after {
+  background-color: var(--cor-acao-negativa, red) !important; /* Força preenchimento vermelho */
+}
+
+/* BOTÕES DE DECISÃO (acceptButton, rejectButton do ConexaoCardModal) */
+html.klnkl-btn-style-cyberpunk .genericButton.acceptButton {
+  /* Garante que o fundo seja transparente para a técnica de pseudo-elementos funcionar.
+     O clip-path é herdado da regra base para .genericButton na skin cyberpunk. */
+  background-color: transparent !important; /* Sobrescreve o background-color do CSS Module */
+  --btn-cb-text: var(--cor-acao-positiva, #4CAF50);
+  --btn-cb-border: var(--cor-acao-positiva, #4CAF50);
+  --btn-cb-fill: #1a1a1a; /* Default dark fill */
+  --btn-cb-border-thickness: 2px; /* Back to default thickness */
+  /* Hover colors for acceptButton (will use generic hover mechanism) */
+  --btn-cb-hover-text: #1a1a1a;
+  --btn-cb-hover-border: var(--cor-acao-positiva, #4CAF50);
+  --btn-cb-hover-fill: var(--cor-acao-positiva, #4CAF50);
+}
+
+html.klnkl-btn-style-cyberpunk .genericButton.rejectButton {
+  /* Garante que o fundo seja transparente. */
+  background-color: transparent !important; /* Sobrescreve o background-color do CSS Module */
+  --btn-cb-text: var(--cor-acao-negativa, #F44336);
+  --btn-cb-border: var(--cor-acao-negativa, #F44336);
+  --btn-cb-fill: #1a1a1a; /* Default dark fill */
+  --btn-cb-border-thickness: 2px; /* Back to default thickness */
+  /* Hover colors for rejectButton */
+  --btn-cb-hover-text: #1a1a1a; /* Assuming text becomes dark */
+  --btn-cb-hover-border: var(--cor-acao-negativa, #F44336);
+  --btn-cb-hover-fill: var(--cor-acao-negativa, #F44336);
+}
+
+/* Para botões destrutivos (usando a classe que já criamos) */
+html.klnkl-btn-style-cyberpunk .genericButton.genericButtonDestructive {
+  --btn-cb-text: var(--cor-acao-negativa, #ff2f2f);
+  --btn-cb-border: var(--cor-acao-negativa, #ff2f2f);
+  --btn-cb-fill: #1a1a1a; /* Default dark fill */
+  --btn-cb-border-thickness: 2px; /* Back to default thickness */
+  /* Hover colors for destructiveButton */
+  --btn-cb-hover-text: #1a1a1a;
+  --btn-cb-hover-border: var(--cor-acao-negativa, #ff2f2f);
+  --btn-cb-hover-fill: var(--cor-acao-negativa, #ff2f2f);
+}
+
+/* ESTILOS ESPECÍFICOS PARA BOTÕES DO MATCHMODAL NA SKIN CYBERPUNK */
+/* Aumenta o padding para torná-los maiores */
+html.klnkl-btn-style-cyberpunk .genericButton.klnkl-match-modal-action-close,
+html.klnkl-btn-style-cyberpunk .genericButton.klnkl-match-modal-action-chat {
+  padding: 14px 28px; /* Padding aumentado. Ajuste conforme necessário. Ex: 12px 25px */
+  /* Se o texto parecer muito pequeno com o novo padding, você pode ajustar o font-size: */
+  /* font-size: 1.05em; */
+
+  /* As outras propriedades do cyberpunk (clip-path, pseudo-elementos para borda/fundo, cor do texto)
+     serão herdadas da regra geral: html.klnkl-btn-style-cyberpunk .genericButton
+     O !important no padding geralmente não é necessário aqui devido à especificidade do seletor. */
+}
+
+/* 4. ESTADO DESABILITADO para todos os botões com este estilo */
+html.klnkl-btn-style-cyberpunk .genericButton:disabled,
+html.klnkl-btn-style-cyberpunk a.ck-theme-button:disabled { /* Se links podem ser desabilitados */
+  color: #777 !important; /* Sobrescreve outras cores de texto */
+  clip-path: none !important; /* Ensure clip-path is off for disabled */
+  box-shadow: none;
+  /* cursor, opacity, transform, filter são herdados do .genericButton:disabled */
+}
+html.klnkl-btn-style-cyberpunk .genericButton:disabled::before,
+html.klnkl-btn-style-cyberpunk a.ck-theme-button:disabled::before {
+  background-color: var(--btn-cb-disabled-border) !important;
+}
+html.klnkl-btn-style-cyberpunk .genericButton:disabled::after,
+html.klnkl-btn-style-cyberpunk a.ck-theme-button:disabled::after {
+  background-color: var(--btn-cb-disabled-fill) !important;
+}
+
+/* 5. BOTÕES DE ÍCONE DA BARRA DE NAVEGAÇÃO (OCTOGONAIS) */
+/* Aplicado a .genericButton com a classe klnkl-icon-nav-button */
+html.klnkl-btn-style-cyberpunk .genericButton.klnkl-icon-nav-button {
+  padding: 0 !important; /* Sobrescreve o padding do .genericButton, pois são botões de ícone */
+  /* A width e height são herdadas do CSS Module do componente (ex: BottomNavBar.module.css) */
+  /* Octógono regular: */
+  clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%) !important;
+  border-radius: 0 !important; 
+  /* Inherits default --btn-cb-text, --btn-cb-border, --btn-cb-fill, etc.
+     The box-shadow will use --btn-cb-border.
+     Hover will use generic hover variables unless overridden here. */
+}
+
+/* Hover para botões de navegação de ÍCONE (octogonais) */
+/* O seletor .klnkl-icon-nav-button é suficiente se o hover for comum a todos os ícones octogonais */
+html.klnkl-btn-style-cyberpunk .genericButton.klnkl-icon-nav-button:hover:not(:disabled) {
+  /* Uses the generic hover variables:
+     --btn-cb-hover-text, --btn-cb-hover-border, --btn-cb-hover-fill
+     If a different hover is needed, override those variables here or the properties directly.
+     Example: Keep text neon on hover for icons
+     --btn-cb-hover-text: var(--cor-destaque, #00f0ff);
+  */
+  box-shadow: 0 0 6px var(--btn-cb-hover-border), /* Brilho mais intenso */
+              0 0 12px var(--btn-cb-hover-border),
+              0 0 18px var(--btn-cb-hover-border);
+}
+
+
+/* Estilo para o botão de navegação de ÍCONE ATIVO (se você tiver uma classe .active) */
+/* O seletor .klnkl-icon-nav-button é suficiente se o active for comum a todos os ícones octogonais */
+html.klnkl-btn-style-cyberpunk .genericButton.klnkl-icon-nav-button.active {
+  color: #1a1a1a; /* Ícone escuro para o ativo */
+  box-shadow: 0 0 6px var(--cor-destaque, #00f0ff),
+              0 0 12px var(--cor-destaque, #00f0ff),
+              0 0 20px #ff00ff; /* Adiciona um brilho magenta específico para o ativo */
+  --btn-cb-text: #1a1a1a; /* Override text color for active state */
+  --btn-cb-fill: var(--cor-destaque, #00f0ff); /* Override fill color for active state */
+}
+/* O botão de "Links" (.klnkl-nav-matches) não tem a classe .klnkl-icon-nav-button.
+   Portanto, ele NÃO receberá o clip-path octogonal.
+   Ele herdará o clip-path chanfrado padrão de:
+   html.klnkl-btn-style-cyberpunk .genericButton
+   
+   Se o botão "Links" precisar de um hover ou active específico DIFERENTE do 
+   .genericButton padrão da skin cyberpunk, você pode adicionar regras para
+   html.klnkl-btn-style-cyberpunk .genericButton.klnkl-nav-matches:hover {}
+   html.klnkl-btn-style-cyberpunk .genericButton.klnkl-nav-matches.active {}
+   Mas, por padrão, ele já pegará o hover do .genericButton genérico da skin. */

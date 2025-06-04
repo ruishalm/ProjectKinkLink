@@ -12,7 +12,9 @@ import CarinhosMimosModal from '../components/CarinhosMimosModal';
 import CardBack from '../components/CardBack';
 import type { Card } from '../data/cards';
 import { useSkin } from '../contexts/SkinContext';
-import { categorySpecificTips } from '../components/categorySpecificTips'; // Importa as dicas
+import { useCardTips } from '../hooks/useCardTips'; // Importa o novo hook
+import { useCardPileModals } from '../hooks/useCardPileModals'; // Importa o hook dos modais
+// import { categorySpecificTips } from '../components/categorySpecificTips'; // Não é mais necessário aqui
 import SideTipMessages from '../components/SideTipMessages';
 import styles from './CardPilePage.module.css';
 
@@ -36,17 +38,20 @@ function CardPilePage() {
 
   const [exitingCard, setExitingCard] = useState<{ id: string; direction: 'left' | 'right' } | null>(null);
   const [isCardFlipped, setIsCardFlipped] = useState(true);
-  const [showCreateUserCardModal, setShowCreateUserCardModal] = useState(false);
-  const [showCarinhosMimosModal, setShowCarinhosMimosModal] = useState(false);
   const [dragVisuals, setDragVisuals] = useState({ x: 0, active: false, dir: 0 });
   const [cardDimensions, setCardDimensions] = useState({ width: 250, height: 350 });
   const [hasUnseenMatches, setHasUnseenMatches] = useState(false);
 
-  const [activeLeftTip, setActiveLeftTip] = useState<string | null>(null);
-  const [activeRightTip, setActiveRightTip] = useState<string | null>(null);
-  const [animateTipsIn, setAnimateTipsIn] = useState(false);
+  const { activeLeftTip, activeRightTip, animateTipsIn } = useCardTips(currentCard); // Usa o hook
 
-  
+  const {
+    showCreateUserCardModal,
+    openCreateUserCardModal,
+    closeCreateUserCardModal,
+    showCarinhosMimosModal,
+    openCarinhosMimosModal,
+    closeCarinhosMimosModal,
+  } = useCardPileModals();
 
   const seenConexaoCardsForModal = useMemo(() => {
     return (allConexaoCards || []).filter(card => seenCards.includes(card.id));
@@ -90,7 +95,7 @@ function CardPilePage() {
       newCardWidth = Math.max(220, Math.min(newCardWidth, 320));
       let newCardHeight = newCardWidth * aspectRatio;
       const availableHeightForCard = screenHeight * 0.9 - 180;
-      
+
       if (newCardHeight > availableHeightForCard) {
         newCardHeight = availableHeightForCard;
         newCardWidth = newCardHeight / aspectRatio;
@@ -114,37 +119,6 @@ function CardPilePage() {
     }
   }, [cardForDisplay, exitingCard, isCardFlipped]);
 
-  useEffect(() => {
-    setAnimateTipsIn(false); 
-
-    if (currentCard) {
-      const tipsForCategory = categorySpecificTips[currentCard.category] || categorySpecificTips.default;
-
-      let newLeftTip: string | null = null;
-      let newRightTip: string | null = null;
-
-      if (tipsForCategory.left.length > 0) {
-        newLeftTip = tipsForCategory.left[Math.floor(Math.random() * tipsForCategory.left.length)];
-      }
-      if (tipsForCategory.right.length > 0) {
-        newRightTip = tipsForCategory.right[Math.floor(Math.random() * tipsForCategory.right.length)];
-      }
-        
-      setActiveLeftTip(newLeftTip);
-      setActiveRightTip(newRightTip);
-
-      const fadeInDelay = 5000;
-      const timerId = setTimeout(() => {
-        setAnimateTipsIn(true);
-      }, fadeInDelay);
-
-      return () => clearTimeout(timerId);
-    } else {
-      setActiveLeftTip(null);
-      setActiveRightTip(null);
-    }
-  }, [currentCard]);
-
   const triggerHapticFeedback = (pattern: number | number[] = 30) => {
     if (navigator.vibrate) {
       try {
@@ -166,11 +140,11 @@ function CardPilePage() {
         if (Math.abs(vx) > SWIPE_VELOCITY_THRESHOLD || Math.abs(mx) > SWIPE_CONFIRM_DISTANCE_THRESHOLD) {
           if (dx > 0) {
             triggerHapticFeedback();
-            setAnimateTipsIn(false);
+            // setAnimateTipsIn(false); // Removido: useCardTips gerencia isso
             setExitingCard({ id: cardForDisplay.id, direction: 'right' });
           } else if (dx < 0) {
             triggerHapticFeedback();
-            setAnimateTipsIn(false);
+            // setAnimateTipsIn(false); // Removido: useCardTips gerencia isso
             setExitingCard({ id: cardForDisplay.id, direction: 'left' });
           }
         }
@@ -206,12 +180,12 @@ function CardPilePage() {
       {showCreateUserCardModal && (
         <CreateUserCardModal
           isOpen={showCreateUserCardModal}
-          onClose={() => setShowCreateUserCardModal(false)}
+          onClose={closeCreateUserCardModal}
           onSubmit={(category: Card['category'], text: string, intensity: number) => {
             if (handleCreateUserCard) {
                  handleCreateUserCard(category, text, intensity);
             }
-            setShowCreateUserCardModal(false);
+            closeCreateUserCardModal();
           }}
         />
       )}
@@ -219,7 +193,7 @@ function CardPilePage() {
       {showCarinhosMimosModal && (
         <CarinhosMimosModal
           isOpen={showCarinhosMimosModal}
-          onClose={() => setShowCarinhosMimosModal(false)}
+          onClose={closeCarinhosMimosModal}
           conexaoCards={seenConexaoCardsForModal}
         />
       )}
@@ -274,7 +248,7 @@ function CardPilePage() {
                   className={`${styles.dislikeButton} ${styles.botaoDecisao} genericButton dislikeButton actionButton`}
                   onClick={() => {
                     if (cardForDisplay && !exitingCard) {
-                      setAnimateTipsIn(false);
+                      // setAnimateTipsIn(false); // Removido: useCardTips gerencia isso
                       setExitingCard({ id: cardForDisplay.id, direction: 'left' });
                     }
                   }}
@@ -289,7 +263,7 @@ function CardPilePage() {
                   className={`${styles.likeButton} ${styles.botaoDecisao} genericButton likeButton actionButton`}
                   onClick={() => {
                     if (cardForDisplay && !exitingCard) {
-                      setAnimateTipsIn(false);
+                      // setAnimateTipsIn(false); // Removido: useCardTips gerencia isso
                       setExitingCard({ id: cardForDisplay.id, direction: 'right' });
                     }
                   }}
@@ -303,7 +277,7 @@ function CardPilePage() {
 
               {/* Botão "Criar Kink" movido para dentro do painel e com classe global estável */}
               <button
-                onClick={() => setShowCreateUserCardModal(true)}
+                onClick={openCreateUserCardModal}
                 className="klnkl-create-kink-btn genericButton" /* Classe global para estilização no panel-styles.css */
                 title="Criar novo Kink"
                 aria-label="Criar novo Kink"
@@ -312,7 +286,7 @@ function CardPilePage() {
               </button>
 
               <div className={styles.bottomNavContainer}>
-                <button className={`${styles.bottomNavIconStyle} ${styles.ballButton} genericButton klnkl-icon-nav-button klnkl-nav-cards`} onClick={() => setShowCarinhosMimosModal(true)} title="Carinhos & Mimos">
+                <button className={`${styles.bottomNavIconStyle} ${styles.ballButton} genericButton klnkl-icon-nav-button klnkl-nav-cards`} onClick={openCarinhosMimosModal} title="Carinhos & Mimos">
                   ❤️
                 </button>
                 <button
@@ -337,13 +311,13 @@ function CardPilePage() {
                 Volte mais tarde para novas sugestões ou crie as suas!
               </p>
               <div
-                onClick={() => setShowCreateUserCardModal(true)}
+                onClick={openCreateUserCardModal}
                 className={`${styles.createKinkMiniButton} ${styles.centeredCreateKinkButton}`}
                 title="Criar novo Kink"
                 role="button"
                 aria-label="Criar novo Kink"
                 tabIndex={0}
-                onKeyPress={(e) => { if (e.key === 'Enter' || e.key === ' ') setShowCreateUserCardModal(true); }}
+                onKeyPress={(e) => { if (e.key === 'Enter' || e.key === ' ') openCreateUserCardModal(); }}
               >
                 <div className={styles.createKinkMiniCardBackWrapper}>
                   <CardBack targetWidth={30} targetHeight={42} />

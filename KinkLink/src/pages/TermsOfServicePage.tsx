@@ -7,42 +7,61 @@ const TermsOfServicePage: React.FC = () => {
   const [markdownContent, setMarkdownContent] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [privacyMarkdownContent, setPrivacyMarkdownContent] = useState('');
+  const [privacyError, setPrivacyError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchTerms = async () => {
+    const fetchDocuments = async () => {
       setIsLoading(true);
       setError(null);
+      setPrivacyError(null);
+
       try {
-        // Busca o arquivo da pasta 'public'
+        // Busca o arquivo de Termos de Serviço
         const response = await fetch('/TERMOS_DE_SERVICO.md');
         if (!response.ok) {
           throw new Error(`Falha ao carregar termos: ${response.status} ${response.statusText}`);
         }
         const text = await response.text();
         setMarkdownContent(text);
-      } catch (err) {
-        let errorMessage = "Não foi possível carregar os Termos de Serviço. Por favor, tente novamente mais tarde.";
-        if (err instanceof Error) {
-            errorMessage = `Erro ao buscar Termos de Serviço: ${err.message}`;
+
+        // Busca o arquivo de Política de Privacidade
+        const privacyResponse = await fetch('/PoliticaDePrivacidade.md');
+         if (!privacyResponse.ok) {
+          throw new Error(`Falha ao carregar política de privacidade: ${privacyResponse.status} ${privacyResponse.statusText}`);
         }
-        console.error("Erro ao buscar Termos de Serviço:", err);
+        const privacyText = await privacyResponse.text();
+        setPrivacyMarkdownContent(privacyText);
+
+      } catch (err) {
+        let errorMessage = "Não foi possível carregar os documentos legais. Por favor, tente novamente mais tarde.";
+        if (err instanceof Error) {
+            errorMessage = `Erro ao buscar documentos legais: ${err.message}`;
+        }
+        console.error("Erro ao buscar documentos legais:", err);
         setError(errorMessage);
-        setMarkdownContent("Conteúdo dos Termos de Serviço não pôde ser carregado."); // Conteúdo de fallback
-      } finally {
+      } finally { // Este finally só roda após AMBOS os fetches
         setIsLoading(false);
       }
     };
 
-    fetchTerms();
+    fetchDocuments(); // Corrigido o nome da função chamada
   }, []); // O array de dependências vazio garante que isso rode apenas uma vez ao montar o componente
 
   return (
     <div className={styles.pageContainer}>
       <main className={styles.mainContentWrapper}> {/* Renomeado para evitar conflito se mainContent for usado no Header */}
         <div className={styles.contentWrapper}>
-          <div className={styles.markdownContent}>
-            {isLoading && <p>Carregando Termos de Serviço...</p>}
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+          <div className={styles.markdownContent}> {/* Mantém a classe para estilos */}
+            {(isLoading) && <p>Carregando documentos legais...</p>}
+            {(error || privacyError) && (
+              <>
+                <p style={{ color: 'red' }}>{error}</p>
+                <p style={{ color: 'red' }}>{privacyError}</p>
+              </>
+            )}
+            {/* Concatena os conteúdos se não houver erro e não estiver carregando */}
+            {!isLoading && !error && !privacyError && <ReactMarkdown>{markdownContent + "\n\n---\n\n" + privacyMarkdownContent}</ReactMarkdown>}
             {!isLoading && !error && <ReactMarkdown>{markdownContent}</ReactMarkdown>}
           </div>
         </div>

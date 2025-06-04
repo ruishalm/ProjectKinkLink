@@ -15,7 +15,7 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { useUserCardInteractions } from './useUserCardInteractions';
-import { exampleSkinsData } from '../config/skins/skinDefinitions'; // Importar dados das skins
+import { exampleSkinsData } from '../config/skins'; // Importar dados das skins do index.ts
 
 // Interface para o tipo de retorno do hook
 interface UseCardPileLogicReturn {

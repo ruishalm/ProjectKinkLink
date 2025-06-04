@@ -21,7 +21,7 @@ import {
   increment,
   arrayRemove, // Importar arrayRemove
 } from 'firebase/firestore';
-import { exampleSkinsData } from '../config/skins/skinDefinitions'; // Importar dados das skins para verificação
+import { exampleSkinsData } from '../config/skins'; // Importar dados das skins do index.ts
 
 export function useUserCardInteractions() {
   const { user, updateUser, checkAndUnlockSkins } = useAuth(); // Adicionar checkAndUnlockSkins

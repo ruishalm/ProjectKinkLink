@@ -32,21 +32,11 @@ function SkinsPage() {
       return;
     }
 
-    const skinDefinition = exampleSkinsData.find(s => s.id === skinId && s.type === skinType);
-    if (!skinDefinition) {
-      console.error(`Definição da skin ${skinId} do tipo ${skinType} não encontrada.`);
-      return;
-    }
+    // A lógica para encontrar a skin e aplicar seus valores está dentro de setActiveSkin no contexto.
+    // Basta passar o tipo e o ID.
+    setActiveSkin(skinType, skinId);
 
-    // O previewValue é o valor que a skin representa (URL, array de cores, nome da classe CSS)
-    // Para themePack, o setActiveSkin no contexto já lida com a lógica de aplicar paleta/fonte/estilo associados.
-    // Para outros tipos, passamos o preview da skin.
-    const valueToPass = skinDefinition.preview;
-    setActiveSkin(skinType, skinId, valueToPass);
-
-    console.log(`Skin ativada via contexto: Tipo=${skinType}, ID=${skinId}, ValorPreview=${
-        Array.isArray(valueToPass) ? `[${valueToPass.join(', ')}]` : valueToPass
-      }, Desbloqueada=${isUnlocked}`);
+    console.log(`Skin ativada via contexto: Tipo=${skinType}, ID=${skinId}, Desbloqueada=${isUnlocked}`);
 
     // Após ativar, atualiza o preview para refletir a skin ativa (será feito pelo useEffect em activeSkins)
   };

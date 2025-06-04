@@ -9,7 +9,7 @@ import { paletteVampNight } from './palettes/vampNight';
 import { paletteCandySky } from './palettes/candySky';
 import { paletteCyberpunkNeon } from './palettes/cyberpunkNeon';
 import { paletteVintageSepia } from './palettes/vintageSepia';
-import paletteWindowsXP from './palettes/paletteWindowsXP'; // Novo
+// import paletteWindowsXP from './palettes/paletteWindowsXP'; // Comentado
 
 // Fontes
 import { fontDefault } from './fonts/default';
@@ -18,7 +18,7 @@ import { fontDancingScript } from './fonts/dancingScript';
 import { fontMontserrat } from './fonts/montserrat';
 import { fontMerriweather } from './fonts/merriweather';
 import { fontChakraPetch } from './fonts/chakraPetch'; // Nova fonte
-import fontWindowsXP from './fonts/fontWindowsXP'; // Novo
+// import fontWindowsXP from './fonts/fontWindowsXP'; // Comentado
 
 // Backgrounds da Pilha
 import { bgPileDefault } from './backgrounds/pile/default';
@@ -28,7 +28,7 @@ import { bgPileVerdeFlor } from './backgrounds/pile/verdeFlor';
 import { bgPileCafe } from './backgrounds/pile/cafe';
 import { bgPileVerdeClaro } from './backgrounds/pile/verdeClaro';
 import { bgPileCyberpunkPanos } from './backgrounds/pile/cyberpunkPanos'; // Novo fundo de pilha
-import bgPileWindowsXP from './backgrounds/pile/bgPileWindowsXP'; // Caminho corrigido para a subpasta 'pile'
+// import bgPileWindowsXP from './backgrounds/pile/bgPileWindowsXP'; // Comentado - "Desktop Azul XP (Pilha)"
 
 // Backgrounds dos Matches
 import { bgMatchesDefault } from './backgrounds/matches/default';
@@ -38,25 +38,25 @@ import { bgMatchesAzulNipes } from './backgrounds/matches/azulNipes';
 import { bgMatchesMadeira } from './backgrounds/matches/madeira';
 import { bgMatchesVerdeFlor } from './backgrounds/matches/verdeFlor';
 import { bgMatchesCyberpunkPanos } from './backgrounds/matches/cyberpunkPanos'; // Novo fundo de matches
-import bgMatchesWindowsXP from './backgrounds/matches/bgMatchesWindowsXP'; // Caminho corrigido
+// import bgMatchesWindowsXP from './backgrounds/matches/bgMatchesWindowsXP'; // Comentado - "Janela XP (Links)"
 
 
 // Pacotes de Tema
 import { packDefault } from './themePacks/default';
 import { packCyberpunkKink } from './themePacks/cyberpunkKink';
-import { packVintageLink } from './themePacks/vintageLink';
-import { packRomanticNight } from './themePacks/romanticNight';
-import packWindowsXP from './themePacks/packWindowsXP'; // Corrigido o caminho
+// import { packVintageLink } from './themePacks/vintageLink'; // Ocultado temporariamente
+// import { packRomanticNight } from './themePacks/romanticNight'; // Ocultado temporariamente
+// import packWindowsXP from './themePacks/packWindowsXP'; // Comentado
 
 // Estilos de Botão
 import { buttonStyleDefault } from './buttonStyles/default';
 import { buttonStyleCyberpunk } from './buttonStyles/cyberpunk';
 import { buttonStyleVintage } from './buttonStyles/vintage';
-import buttonStyleWindowsXP from './buttonStyles/buttonStyleWindowsXP'; // Caminho atualizado
+// import buttonStyleWindowsXP from './buttonStyles/buttonStyleWindowsXP'; // Comentado
 
 // Estilos de Painel (Novo)
 import { panelStyleDefault } from './panelStyles/panelStyleDefault';
-import { panelStyleWindowsXP } from './panelStyles/panelStyleWindowsXP';
+// import { panelStyleWindowsXP } from './panelStyles/panelStyleWindowsXP'; // Comentado
 import { panelStyleCyberpunk } from './panelStyles/panelStyleCyberpunk'; // Novo
 export { panelStyleDefault } from './panelStyles/panelStyleDefault'; // Adicione esta linha para re-exportar
 
@@ -70,7 +70,7 @@ export const exampleSkinsData: SkinDefinition[] = [
   bgPileCafe,
   bgPileVerdeClaro,
   bgPileCyberpunkPanos,
-  bgPileWindowsXP,
+  // bgPileWindowsXP, // Comentado
 
   // Backgrounds dos Matches
   bgMatchesDefault,
@@ -80,7 +80,7 @@ export const exampleSkinsData: SkinDefinition[] = [
   bgMatchesMadeira,
   bgMatchesVerdeFlor,
   bgMatchesCyberpunkPanos,
-  bgMatchesWindowsXP,
+  // bgMatchesWindowsXP, // Comentado
 
   // Paletas
   paletteDefault,
@@ -90,7 +90,7 @@ export const exampleSkinsData: SkinDefinition[] = [
   paletteCandySky,
   paletteCyberpunkNeon,
   paletteVintageSepia,
-  paletteWindowsXP,
+  // paletteWindowsXP, // Comentado
 
   // Fontes
   fontDefault,
@@ -99,24 +99,24 @@ export const exampleSkinsData: SkinDefinition[] = [
   fontMontserrat,
   fontMerriweather,
   fontChakraPetch, // Adicionar aqui
-  fontWindowsXP,
+  // fontWindowsXP, // Comentado
 
   // Pacotes de Tema
   packDefault,
   packCyberpunkKink,
-  packVintageLink,
-  packRomanticNight,
-  packWindowsXP,
+  // packVintageLink, // Ocultado temporariamente
+  // packRomanticNight, // Ocultado temporariamente
+  // packWindowsXP, // Comentado
 
   // Estilos de Botão
   buttonStyleDefault,
   buttonStyleCyberpunk,
   buttonStyleVintage,
-  buttonStyleWindowsXP,
+  // buttonStyleWindowsXP, // Comentado
 
   // Estilos de Painel (Novo)
   panelStyleDefault,
-  panelStyleWindowsXP,
+  // panelStyleWindowsXP, // Comentado
   panelStyleCyberpunk,
 ];
 

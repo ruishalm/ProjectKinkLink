@@ -248,13 +248,13 @@ function ProfilePage() {
         <div className={`${styles.section} ${styles.textCenter} ${styles.marginTop50} ${styles.paddingTop20} ${styles.borderTopSolid} klnkl-themed-panel`}>
           <button
             onClick={handleResetTestData}
-            className={styles.smallLink}
-            aria-label="Resetar dados de teste para desenvolvimento"
+            className={`${styles.buttonDestructive} genericButton`} // Aplicando estilo de botão destrutivo
+            aria-label="Recomeçar o jogo"
           >
-            Resetar Dados de Teste (Dev)
+            RECOMEÇAR
           </button>
           <p className={styles.warningText}>
-            Atenção: Para correta sincronização, esta opção deve ser usada pelos dois usuários do casal simultaneamente.
+            Zerar e recomeçar? Para sincronizar, apertem este botão juntos e iniciem uma nova exploração!
           </p>
         </div>
       </main>

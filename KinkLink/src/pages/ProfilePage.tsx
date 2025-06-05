@@ -98,16 +98,6 @@ function ProfilePage() {
     }
   };
 
-  const getSexLabel = (sexValue?: string): string => {
-    if (!sexValue) return 'Não informado';
-    const labels: Record<string, string> = {
-      'masculino': 'Masculino',
-      'feminino': 'Feminino',
-      'naoinformar_sexo': 'Prefiro não informar',
-    };
-    return labels[sexValue] || sexValue;
-  };
-
   const getGenderLabel = (genderValue?: string): string => {
     if (!genderValue) return 'Não informada';
     const labels: Record<string, string> = {
@@ -212,7 +202,6 @@ function ProfilePage() {
                 <p className={styles.infoText}><strong>Nome de Usuário:</strong> {displayName}</p>
                 <p className={styles.infoText}><strong>Bio:</strong> {user.bio || 'Não definida'}</p>
                 <p className={styles.infoText}><strong>Data de Nascimento:</strong> {formatBirthDate(user.birthDate)}</p>
-                <p className={styles.infoText}><strong>Sexo Atribuído ao Nascer:</strong> {getSexLabel(user.sex)}</p>
                 <p className={styles.infoText}><strong>Identidade de Gênero:</strong> {getGenderLabel(user.gender)}</p>
                 <button onClick={handleEditClick} className={`${styles.button} genericButton`} style={{ marginTop: '20px' }}>
                   Editar Perfil

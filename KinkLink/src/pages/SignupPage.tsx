@@ -9,7 +9,6 @@ function SignupPage() {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState(''); // Novo estado para o nome de usuário
   const [birthDate, setBirthDate] = useState(''); // Data de Nascimento (YYYY-MM-DD)
-  const [sex, setSex] = useState(''); // Sexo biológico
   const [gender, setGender] = useState(''); // Identidade de gênero
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -66,7 +65,7 @@ function SignupPage() {
     const from = location.state?.from?.pathname || '/profile';
     try {
       // Passamos os novos campos para a função signup
-      await signup(email, password, username.trim(), birthDate, sex, gender);
+      await signup(email, password, username.trim(), birthDate, gender);
       navigate(from, { replace: true });
     } catch (err: unknown) {
       const errorMessage = 'Falha ao tentar cadastrar. Tente novamente.';
@@ -127,7 +126,6 @@ function SignupPage() {
     email.length > 0 &&
     username.trim().length > 0 &&
     birthDate.length > 0 && // Garante que a data de nascimento foi preenchida
-    sex.length > 0 && // Agora obrigatório
     gender.length > 0 && // Agora obrigatório
     isPasswordValidLength &&
     doPasswordsMatch &&
@@ -189,24 +187,6 @@ function SignupPage() {
               required
               className={styles.input}
             />
-          </div>
-          <div className={styles.inputGroup}>
-            <label htmlFor="sex" className={styles.label}>Sexo Atribuído ao Nascer:
-              <span className={styles.requiredAsterisk}>*</span></label>
-            <select
-              id="sex"
-              name="sex"
-              value={sex}
-              onChange={(e) => setSex(e.target.value)}
-              className={styles.select} // Estilo para select
-              required
-            >
-              <option value="">Selecione...</option>
-              <option value="masculino">Masculino</option>
-              <option value="feminino">Feminino</option>
-              {/* <option value="intersexo">Intersexo</option> Removido */}
-              <option value="naoinformar_sexo">Prefiro não informar</option>
-            </select>
           </div>
           <div className={styles.inputGroup}>
             <label htmlFor="gender" className={styles.label}>Identidade de Gênero:

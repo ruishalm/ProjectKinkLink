@@ -51,7 +51,7 @@ export interface User {
   createdAt?: Timestamp;
   // Novos campos adicionados:
   birthDate?: string; // Formato YYYY-MM-DD
-  sex?: string;       // e.g., 'masculino', 'feminino', 'naoinformar_sexo'
+  // sex?: string; // Campo removido do signup, manter opcional se usado em outros lugares ou remover completamente
   gender?: string;    // e.g., 'homem_cis', 'mulher_trans', 'nao_binario', etc.
   isSupporter?: boolean; // Novo campo para indicar se o usuário é um apoiador
 }
@@ -69,7 +69,6 @@ interface AuthContextData {
     password: string,
     username: string,
     birthDate: string, // Novo parâmetro
-    sex: string,       // Novo parâmetro
     gender: string     // Novo parâmetro
   ) => Promise<void>;
   updateUser: (updatedData: Partial<User>) => Promise<void>;
@@ -110,7 +109,6 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
               unlockedSkinIds: firestoreData.unlockedSkinIds || [],
               // Incluir os novos campos se existirem no Firestore
               birthDate: firestoreData.birthDate || undefined,
-              sex: firestoreData.sex || undefined,
               gender: firestoreData.gender || undefined,
               isSupporter: firestoreData.isSupporter || false, // Carrega o status de apoiador
             } as User);
@@ -156,7 +154,6 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     password: string,
     username: string,
     birthDate: string,
-    sex: string,
     gender: string
   ) => {
     console.log('[AuthContext] Iniciando signup para:', email, 'com username:', username, 'birthDate:', birthDate, 'sex:', sex, 'gender:', gender);
@@ -177,7 +174,6 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         email: firebaseUser.email,
         username: username,
         birthDate: birthDate, // Salvar data de nascimento
-        sex: sex,             // Salvar sexo
         gender: gender,       // Salvar gênero
         linkCode: newLinkCode,
         linkedPartnerId: null,

@@ -7,5 +7,6 @@ export const bgPileCyberpunkPanos: SkinDefinition = {
   type: 'backgroundPile',
   preview: '/assets/skins/textures/cyberpunkPanos.jpg', // Caminho da imagem para preview
   description: 'Fundo texturizado com panos cibernéticos para a pilha de cartas.',
-  // unlockCriteria: { type: 'default' } // Ou como desejar
+  unlockCriteria: { type: 'matches', count: -1, description: 'Disponível para Apoiadores' }
+  
 };

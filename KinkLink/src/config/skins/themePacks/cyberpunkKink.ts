@@ -12,5 +12,5 @@ export const packCyberpunkKink: SkinDefinition = {
   associatedPileBackgroundId: 'bg_pile_cyberpunk_panos', // Novo
   associatedMatchesBackgroundId: 'bg_matches_cyberpunk_panos', // Novo
   associatedPanelStyleId: 'panel_style_cyberpunk', // CORRIGIDO para usar o painel Cyberpunk
-  unlockCriteria: { type: 'userCreatedCards', count: 5, description: 'Crie 5 cartas personalizadas' }
+  unlockCriteria: { type: 'matches', count: -1, description: 'Disponível para Apoiadores' }
 };

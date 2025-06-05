@@ -5,5 +5,6 @@ export const buttonStyleCyberpunk: SkinDefinition = {
   id: 'btn_style_cyberpunk',
   name: 'Cyberpunk (Botões)',
   type: 'buttonStyle',
-  preview: 'klnkl-btn-style-cyberpunk' // Nome da classe CSS que será aplicada
+  preview: 'klnkl-btn-style-cyberpunk', // Nome da classe CSS que será aplicada
+  unlockCriteria: { type: 'matches', count: -1, description: 'Disponível para Apoiadores' }
 };

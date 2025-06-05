@@ -7,4 +7,5 @@ export const panelStyleCyberpunk: SkinDefinition = {
   type: 'panelStyle',
   description: 'Painéis com uma estética futurista e neon, inspirada no Cyberpunk.',
   preview: 'klnkl-panel-cyberpunk-active', // Classe a ser adicionada ao <html>
+  unlockCriteria: { type: 'matches', count: -1, description: 'Disponível para Apoiadores' }
 };

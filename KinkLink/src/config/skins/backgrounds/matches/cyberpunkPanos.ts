@@ -7,5 +7,5 @@ export const bgMatchesCyberpunkPanos: SkinDefinition = {
   type: 'backgroundMatches',
   preview: '/assets/skins/textures/cyberpunkPanos.jpg', // Caminho da imagem para preview
   description: 'Fundo texturizado com panos cibernéticos para a tela de matches.',
-  // unlockCriteria: { type: 'default' } // Ou como desejar
+  unlockCriteria: { type: 'matches', count: -1, description: 'Disponível para Apoiadores' }
 };

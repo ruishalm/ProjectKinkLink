@@ -7,6 +7,7 @@ const bgPileWindowsXP: SkinDefinition = {
   type: 'backgroundPile',
   description: 'O fundo azul clássico do desktop Windows XP para a tela da pilha de cartas.',
   preview: 'xp-pile-background-skin', // Nova classe CSS para o fundo da pilha
+  unlockCriteria: { type: 'matches', count: -1, description: 'Disponível para Apoiadores' }
 };
 
 export default bgPileWindowsXP;

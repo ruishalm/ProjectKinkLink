@@ -17,6 +17,7 @@ const packWindowsXP: SkinDefinition = {
   // O fundo global "Bliss" precisará ser tratado pelo SkinContext ao detectar este pacote.
   associatedPileBackgroundId: 'bg-pile-windows-xp', // Corrigido: Aponta para a skin com 'xp-pile-background-skin'
   associatedMatchesBackgroundId: 'bg-matches-windows-xp', // Corrigido para corresponder à SkinDefinition
+  unlockCriteria: { type: 'matches', count: -1, description: 'Disponível para Apoiadores' }
 };
 
 export default packWindowsXP;

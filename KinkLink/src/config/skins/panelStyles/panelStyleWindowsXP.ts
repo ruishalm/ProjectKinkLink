@@ -7,4 +7,5 @@ export const panelStyleWindowsXP: SkinDefinition = {
   type: 'panelStyle',
   description: 'Painéis com a aparência 3D clássica do Windows XP.',
   preview: 'klnkl-panel-xp-active', // Classe a ser adicionada ao <html>
+  unlockCriteria: { type: 'matches', count: -1, description: 'Disponível para Apoiadores' }
 };

@@ -51,7 +51,6 @@ export interface User {
   createdAt?: Timestamp;
   // Novos campos adicionados:
   birthDate?: string; // Formato YYYY-MM-DD
-  // sex?: string; // Campo removido do signup, manter opcional se usado em outros lugares ou remover completamente
   gender?: string;    // e.g., 'homem_cis', 'mulher_trans', 'nao_binario', etc.
   isSupporter?: boolean; // Novo campo para indicar se o usuário é um apoiador
 }
@@ -156,7 +155,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     birthDate: string,
     gender: string
   ) => {
-    console.log('[AuthContext] Iniciando signup para:', email, 'com username:', username, 'birthDate:', birthDate, 'sex:', sex, 'gender:', gender);
+    console.log('[AuthContext] Iniciando signup para:', email, 'com username:', username, 'birthDate:', birthDate, 'gender:', gender);
     setIsLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -219,12 +218,12 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         const username = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || `user_${firebaseUser.uid.substring(0, 6)}`;
         const newLinkCode = Math.random().toString(36).substring(2, 8).toUpperCase();
 
-        // Para usuários do Google, birthDate, sex, e gender não são coletados no login inicial.
+      
         // Eles podem ser solicitados posteriormente no perfil ou em um fluxo de onboarding.
         const userData: Omit<User, 'id'> = {
           email: firebaseUser.email,
           username: username,
-          // birthDate, sex, gender podem ser undefined ou ter um valor padrão "não informado"
+          // birthDate, gender podem ser undefined ou ter um valor padrão "não informado"
           linkCode: newLinkCode,
           linkedPartnerId: null,
           coupleId: null,

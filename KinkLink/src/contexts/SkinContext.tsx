@@ -1,6 +1,6 @@
 // src/contexts/SkinContext.tsx
 import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-import type { SkinDefinition, ActiveSkinSettings } from '../config/skins/skinTypes';
+import type { SkinDefinition, ActiveSkinSettings as ImportedActiveSkinSettings, ActiveSkinSettings } from '../config/skins/skinTypes';
 import { exampleSkinsData } from '../config/skins';
 import {
     LOCAL_STORAGE_KEY,
@@ -13,8 +13,12 @@ import { loadAndResolveInitialSkins } from './skinUtils/resolveActiveSkins';
 import { getThemeAppliedSettings, checkThemeIntegrity } from './skinUtils/themeManager';
 import { applyStylesAndClasses } from './skinUtils/styleApplier';
 
+// Re-exportar tipos e constantes que podem ser necessários em outros lugares
+export type { ActiveSkinSettings } from '../config/skins/skinTypes'; // This re-export is fine
+export { defaultPalette } from './skinUtils/skinConstants';
+
 interface SkinContextType {
-  activeSkins: ActiveSkinSettings;
+  activeSkins: ImportedActiveSkinSettings;
   setActiveSkin: (
     type: SkinDefinition['type'],
     skinId: string
@@ -27,7 +31,7 @@ interface SkinContextType {
 const SkinContext = createContext<SkinContextType | undefined>(undefined);
 
 export const SkinProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [activeSkins, setActiveSkinsState] = useState<ActiveSkinSettings>(defaultActiveSkins);
+  const [activeSkins, setActiveSkinsState] = useState<ImportedActiveSkinSettings>(defaultActiveSkins);
   const [isLoadingSkins, setIsLoadingSkins] = useState(true);
 
   useEffect(() => {

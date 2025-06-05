@@ -53,6 +53,7 @@ export interface User {
   birthDate?: string; // Formato YYYY-MM-DD
   sex?: string;       // e.g., 'masculino', 'feminino', 'naoinformar_sexo'
   gender?: string;    // e.g., 'homem_cis', 'mulher_trans', 'nao_binario', etc.
+  isSupporter?: boolean; // Novo campo para indicar se o usuário é um apoiador
 }
 
 interface AuthContextData {
@@ -97,7 +98,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
           };
 
           if (docSnap.exists()) {
-            const firestoreData = docSnap.data() as Partial<User & { partnerId?: string | null }>;
+            const firestoreData = docSnap.data() as Partial<User & { partnerId?: string | null; isSupporter?: boolean }>;
             setUser({
               ...baseUserData,
               ...firestoreData,
@@ -111,18 +112,22 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
               birthDate: firestoreData.birthDate || undefined,
               sex: firestoreData.sex || undefined,
               gender: firestoreData.gender || undefined,
+              isSupporter: firestoreData.isSupporter || false, // Carrega o status de apoiador
             } as User);
           } else {
-            setUser(baseUserData as User);
+            // Se o documento não existe, isSupporter será false por padrão
+            setUser({ ...baseUserData, isSupporter: false } as User);
             console.warn(`[AuthContext] Documento do usuário ${firebaseUser.uid} não encontrado no Firestore via onSnapshot. Será criado no signup se necessário.`);
           }
           setIsLoading(false);
         }, (error) => {
           console.error("[AuthContext] Erro ao ouvir o perfil do usuário no Firestore:", error);
+          // Fallback com isSupporter como false
           setUser({
             id: firebaseUser.uid,
             email: firebaseUser.email,
-            username: firebaseUser.displayName || undefined
+            username: firebaseUser.displayName || undefined,
+            isSupporter: false
           } as User);
           setIsLoading(false);
         });
@@ -189,6 +194,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
           'palette_vamp_night',
           'palette_candy_sky'
         ],
+        isSupporter: false, // Apoiador padrão é false no signup
         createdAt: serverTimestamp() as Timestamp,
       };
       await setDoc(newUserDocRef, userData);
@@ -238,6 +244,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
             'palette_vamp_night',
             'palette_candy_sky'
           ],
+          isSupporter: false, // Apoiador padrão é false no signup com Google
           createdAt: serverTimestamp() as Timestamp,
         };
         await setDoc(userDocRef, userData);
@@ -313,30 +320,48 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
 
     const newlyUnlockedSkins: SkinDefinition[] = [];
     const currentUnlockedIds = user.unlockedSkinIds || [];
+    const isUserSupporter = user.isSupporter || false; // Pega o status de apoiador do objeto user
 
     allSkinsData.forEach(skin => {
-      if (currentUnlockedIds.includes(skin.id) || !skin.unlockCriteria) {
+      // Pula se a skin já estiver desbloqueada
+      if (currentUnlockedIds.includes(skin.id)) {
         return;
       }
 
-      let conditionMet = false;
+      let shouldUnlockThisSkin = false;
       const criteria = skin.unlockCriteria;
 
-      switch (criteria.type) {
-        case 'matches':
-          conditionMet = (user.matchedCards?.length || 0) >= criteria.count;
-          break;
-        case 'seenCards':
-          conditionMet = (user.seenCards?.length || 0) >= criteria.count;
-          break;
-        case 'userCreatedCards':
-          conditionMet = (user.userCreatedCards?.length || 0) >= criteria.count;
-          break;
-        default:
-          break;
+      if (criteria) {
+        // Verifica primeiro se é uma skin de apoiador (marcada com count: -1)
+        if (criteria.count === -1) {
+          if (isUserSupporter) {
+            shouldUnlockThisSkin = true; // Desbloqueia se o usuário for apoiador
+          }
+          // Se não for apoiador, esta skin específica (de apoiador) permanece bloqueada
+        } else {
+          // Lógica para critérios de desbloqueio normais (não de apoiador)
+          switch (criteria.type) {
+            case 'matches':
+              shouldUnlockThisSkin = (user.matchedCards?.length || 0) >= criteria.count;
+              break;
+            case 'seenCards':
+              shouldUnlockThisSkin = (user.seenCards?.length || 0) >= criteria.count;
+              break;
+            case 'userCreatedCards':
+              shouldUnlockThisSkin = (user.userCreatedCards?.length || 0) >= criteria.count;
+              break;
+            // Skins com type: 'default' geralmente são pré-desbloqueadas no signup.
+            // Se precisar de uma lógica dinâmica para elas aqui, adicione um case.
+            default:
+              // Tipo de critério desconhecido ou não aplicável para desbloqueio dinâmico aqui
+              break;
+          }
+        }
       }
+      // Skins sem nenhum unlockCriteria não são processadas para desbloqueio dinâmico aqui.
+      // Elas devem ser incluídas no `unlockedSkinIds` inicial se forem padrão.
 
-      if (conditionMet) {
+      if (shouldUnlockThisSkin) {
         newlyUnlockedSkins.push(skin);
       }
     });
@@ -345,6 +370,8 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       const newIdsToUnlock = newlyUnlockedSkins.map(s => s.id);
       const updatedUnlockedIds = [...new Set([...currentUnlockedIds, ...newIdsToUnlock])];
       try {
+        // O estado de `user` (incluindo `unlockedSkinIds`) será atualizado pelo onSnapshot
+        // após a atualização bem-sucedida do Firestore.
         await updateUser({ unlockedSkinIds: updatedUnlockedIds });
         console.log(`[AuthContext] Novas skins desbloqueadas para ${user.id}:`, newlyUnlockedSkins.map(s => s.name));
         setNewlyUnlockedSkinsForModal(newlyUnlockedSkins);
@@ -352,8 +379,8 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       } catch (error) {
         console.error(`[AuthContext] Erro ao atualizar skins desbloqueadas para ${user.id}:`, error);
       }
-    }
-    return null;
+    }    
+    return newlyUnlockedSkins.length > 0 ? newlyUnlockedSkins : null;
   };
 
   const clearNewlyUnlockedSkinsForModal = () => {

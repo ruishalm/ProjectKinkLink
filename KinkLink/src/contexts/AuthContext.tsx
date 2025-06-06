@@ -53,6 +53,7 @@ export interface User {
   birthDate?: string; // Formato YYYY-MM-DD
   gender?: string;    // e.g., 'homem_cis', 'mulher_trans', 'nao_binario', etc.
   isSupporter?: boolean; // Novo campo para indicar se o usuário é um apoiador
+  isAdmin?: boolean; // Campo para status de admin lido do Firestore
 }
 
 interface AuthContextData {
@@ -75,6 +76,7 @@ interface AuthContextData {
   checkAndUnlockSkins: (allSkinsData: SkinDefinition[]) => Promise<SkinDefinition[] | null>;
   newlyUnlockedSkinsForModal: SkinDefinition[] | null;
   clearNewlyUnlockedSkinsForModal: () => void;
+  // isAdmin flag can be derived from user object: user?.isAdmin
 }
 
 const AuthContext = createContext<AuthContextData | undefined>(undefined);
@@ -83,6 +85,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [newlyUnlockedSkinsForModal, setNewlyUnlockedSkinsForModal] = useState<SkinDefinition[] | null>(null);
+  // O estado 'isAdmin' separado não é mais necessário se 'user.isAdmin' for a fonte da verdade.
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
@@ -93,10 +96,11 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
             id: firebaseUser.uid,
             email: firebaseUser.email,
             username: firebaseUser.displayName || undefined,
+            // isAdmin será preenchido pelos dados do Firestore abaixo
           };
 
           if (docSnap.exists()) {
-            const firestoreData = docSnap.data() as Partial<User & { partnerId?: string | null; isSupporter?: boolean }>;
+            const firestoreData = docSnap.data() as Partial<User & { partnerId?: string | null; isSupporter?: boolean; isAdmin?: boolean }>;
             setUser({
               ...baseUserData,
               ...firestoreData,
@@ -110,10 +114,11 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
               birthDate: firestoreData.birthDate || undefined,
               gender: firestoreData.gender || undefined,
               isSupporter: firestoreData.isSupporter || false, // Carrega o status de apoiador
+              isAdmin: firestoreData.isAdmin || false, // Carrega o status de admin
             } as User);
           } else {
             // Se o documento não existe, isSupporter será false por padrão
-            setUser({ ...baseUserData, isSupporter: false } as User);
+            setUser({ ...baseUserData, isSupporter: false, isAdmin: false } as User);
             console.warn(`[AuthContext] Documento do usuário ${firebaseUser.uid} não encontrado no Firestore via onSnapshot. Será criado no signup se necessário.`);
           }
           setIsLoading(false);
@@ -124,7 +129,8 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
             id: firebaseUser.uid,
             email: firebaseUser.email,
             username: firebaseUser.displayName || undefined,
-            isSupporter: false
+            isSupporter: false,
+            isAdmin: false // Fallback
           } as User);
           setIsLoading(false);
         });
@@ -190,6 +196,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
           'palette_candy_sky'
         ],
         isSupporter: false, // Apoiador padrão é false no signup
+        isAdmin: false, // Usuários padrão não são admins
         createdAt: serverTimestamp() as Timestamp,
       };
       await setDoc(newUserDocRef, userData);
@@ -240,6 +247,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
             'palette_candy_sky'
           ],
           isSupporter: false, // Apoiador padrão é false no signup com Google
+          isAdmin: false, // Usuários padrão não são admins
           createdAt: serverTimestamp() as Timestamp,
         };
         await setDoc(userDocRef, userData);

@@ -1,20 +1,23 @@
-import type { ReactNode } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+// src/components/ProtectedRoute.tsx
+import React from 'react';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-interface ProtectedRouteProps {
-  children: ReactNode;
-}
-
-function ProtectedRoute({ children }: ProtectedRouteProps) {
+const ProtectedRoute: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth(); // Usaremos isAuthenticated diretamente
   const location = useLocation();
 
   if (isLoading) {
-    return <div>Carregando...</div>; // Ou um spinner/componente de loading
+    return <div>Carregando autenticação...</div>; // Ou um spinner/componente de loading
   }
 
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" state={{ from: location }} replace />;
-}
+  if (!isAuthenticated) {
+    // Usuário não autenticado, redireciona para login
+    // Mantém o estado 'from' para redirecionar de volta após o login
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return <Outlet />; // Renderiza as rotas filhas aninhadas
+};
 
 export default ProtectedRoute;

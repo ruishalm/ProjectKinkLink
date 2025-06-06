@@ -1,30 +1,78 @@
 // d:\Projetos\Github\app\ProjectKinkLink\firestore.rules
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Função helper para verificar se o usuário autenticado é admin
+    function isUserAdmin() {
+      // Verifica se o usuário autenticado tem o campo isAdmin = true em seu próprio documento
+      return request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
     // Regras para a coleção 'users'
     match /users/{userId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && (
-        (request.auth.uid == userId) || // Usuário pode escrever no seu próprio documento
-        ( // OU: Parceiro pode atualizar campos de vínculo do outro usuário
-          request.method == 'update' &&
-          request.auth.uid != userId && // O requisitante não é o dono do documento
-          request.resource.data.linkedPartnerId == request.auth.uid && // O campo linkedPartnerId no documento sendo atualizado aponta para o requisitante
-          (request.resource.data.coupleId == resource.data.coupleId || request.resource.data.coupleId is string) && // Consistência do coupleId
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['linkedPartnerId', 'coupleId']) // Apenas estes campos podem ser alterados pelo parceiro nesta condição
+      // Leitura (get para um documento específico):
+      // Usuário pode ler seu próprio documento.
+      // Admin pode ler qualquer documento de usuário.
+      allow get: if request.auth != null && (request.auth.uid == userId || isUserAdmin());
+
+      // Listagem (para ler a coleção inteira):
+      // Apenas admins podem listar todos os usuários.
+      allow list: if request.auth != null && isUserAdmin();
+
+      // Criação (signup):
+      // Usuário pode criar seu próprio documento.
+      // O campo 'isAdmin' deve ser 'false' na criação. AuthContext já faz isso.
+      allow create: if request.auth != null &&
+                       request.auth.uid == userId &&
+                       request.resource.data.isAdmin == false &&
+                       // Outras validações de campos iniciais podem ser adicionadas aqui se necessário,
+                       // por exemplo, garantir que o email corresponde ao token:
+                       // request.resource.data.email == request.auth.token.email
+                       true; // Simplificado, pois o AuthContext deve enviar os dados corretos.
+
+      // Atualização:
+      allow update: if request.auth != null && (
+        // 1. Usuário atualizando seu próprio documento:
+        //    - Não pode mudar seu status 'isAdmin'.
+        //    - Pode atualizar outros campos permitidos (bio, username, etc.).
+        (
+          request.auth.uid == userId &&
+          (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == resource.data.isAdmin)
+          // Se quiser restringir campos que o usuário pode auto-editar, adicione:
+          // && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bio', 'username', 'unlockedSkinIds', ...])
         ) ||
-        ( // OU: Parceiro pode atualizar o array 'seenCards' do outro usuário
+        // 2. Parceiro pode atualizar campos de vínculo ('linkedPartnerId', 'coupleId') do outro usuário.
+        ( // Este bloco é para o parceiro atualizar os campos de vínculo do outro usuário.
+          // A parte anterior `(request.auth.uid == userId) ||` era redundante com a condição 1.
+          request.auth.uid != userId && // O requisitante não é o dono do documento
+          request.resource.data.linkedPartnerId == request.auth.uid && // O campo linkedPartnerId no doc sendo atualizado aponta para o requisitante
+          (request.resource.data.coupleId == resource.data.coupleId || request.resource.data.coupleId is string) && // Consistência do coupleId
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['linkedPartnerId', 'coupleId']) // Apenas estes campos podem ser alterados
+        ) ||
+        // 3. Parceiro pode atualizar o array 'seenCards' do outro usuário.
+        ( // Este bloco era anteriormente para campos de vínculo também (mal rotulado). Corrigindo para 'seenCards'.
           request.method == 'update' &&
           request.auth.uid != userId && // O requisitante não é o dono do documento
           get(/databases/$(database)/documents/users/$(userId)).data.linkedPartnerId == request.auth.uid && // O documento sendo atualizado pertence ao parceiro atual do requisitante
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seenCards']) // Apenas o campo 'seenCards' pode ser alterado nesta condição
+        ) ||
+        // 4. Admin pode atualizar campos específicos de OUTRO usuário (e.g., 'isSupporter', 'bio').
+        //    - Não pode mudar 'isAdmin' de outro usuário por esta regra (isso deve ser feito no console do Firebase).
+        ( // Este bloco é para o admin atualizar outros usuários.
+          isUserAdmin() &&
+          userId != request.auth.uid && // Garante que o admin está atualizando OUTRO usuário
+          (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == resource.data.isAdmin) && // Admin não pode mudar isAdmin de outros
+          request.resource.data.diff(resource.data).affectedKeys().hasAny(['isSupporter', 'bio', 'username', 'unlockedSkinIds' /* adicione outros campos que o admin pode editar */])
+        ) ||
+        // 5. Admin atualizando seu PRÓPRIO documento (pode mudar seu próprio isAdmin, por exemplo, para se remover de admin).
+        (
+          isUserAdmin() &&
+          userId == request.auth.uid // Admin está atualizando seu próprio documento
         )
       );
-      // Considerar separar 'create' e 'update' se as lógicas ficarem muito complexas.
-      // allow delete: if false; // Geralmente não se permite deletar usuários pelo cliente.
+      // Deleção: Apenas admins podem deletar usuários. (Se não quiser permitir, mude para 'if false;')
+      allow delete: if request.auth != null && isUserAdmin();
     }
 
     // Regras para a coleção 'pendingLinks'

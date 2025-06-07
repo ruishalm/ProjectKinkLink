@@ -55,9 +55,3 @@
     padding: 6px 10px;
   }
 }
-
-@media (max-width: 680px) { /* Telas menores, onde as dicas podem ser escondidas */
-  .sideMessagesContainer {
-    display: none;
-  }
-}

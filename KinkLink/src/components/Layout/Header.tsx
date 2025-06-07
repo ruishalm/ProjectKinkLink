@@ -36,7 +36,7 @@ const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick }) =>
           to="/suporte"
           className={`${styles.supportButton} ck-theme-button genericButton`}
         >
-          Suporte e Contato
+          Help
         </Link>
       </div>
     </header>

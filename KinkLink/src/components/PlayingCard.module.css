@@ -101,8 +101,8 @@
 }
 
 .cardBackLogo {
-  max-width: 70%; /* O logo ocupará no máximo 70% da largura da carta */
-  max-height: 60%; /* E no máximo 60% da altura */
+  /* max-width: 70%; Removido para permitir que o logo seja maior */
+  /* max-height: 60%; Removido para permitir que o logo seja maior */
   width: auto; /* Mantém a proporção da imagem */
   height: auto; /* Mantém a proporção da imagem */
   object-fit: contain; /* Garante que a imagem inteira caiba sem cortar, mantendo a proporção */

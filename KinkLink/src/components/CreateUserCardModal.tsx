@@ -96,7 +96,7 @@ function CreateUserCardModal({ isOpen, onClose, onSubmit }: CreateUserCardModalP
               id="card-intensity"
               className={styles.inputNumber}
               value={intensity}
-              onChange={(e) => setIntensity(Math.max(1, Math.min(5, parseInt(e.target.value, 10) || 1)))} // Limita entre 1 e 5
+              onChange={(e) => setIntensity(Math.max(1, Math.min(9, parseInt(e.target.value, 10) || 1)))} // Limita entre 1 e 9
               min="1"
               max="5"
             />
@@ -106,7 +106,7 @@ function CreateUserCardModal({ isOpen, onClose, onSubmit }: CreateUserCardModalP
         <div className={styles.cardPreviewContainer}>
           {/* CardBack como fundo da área de preview */}
           <div className={styles.cardBackPreview}>
-            <CardBack />
+            <CardBack targetWidth={125} targetHeight={175} />
           </div>
 
           {/* Pré-visualização da carta que o usuário está criando */}

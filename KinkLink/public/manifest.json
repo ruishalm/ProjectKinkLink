@@ -19,5 +19,28 @@
   "display": "standalone",
   "scope": "/",
   "theme_color": "#DAA520",
-  "orientation": "portrait"
+  "orientation": "portrait",
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile-1.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "label": "KinkLink em ação no celular - Pilha de Cartas"
+    },
+    {
+      "src": "/screenshot-mobile-2.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "label": "KinkLink em ação no celular - Tela de Links"
+    },
+    {
+      "src": "/screenshot-desktop-1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "KinkLink no desktop - Pilha de Cartas"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
 }

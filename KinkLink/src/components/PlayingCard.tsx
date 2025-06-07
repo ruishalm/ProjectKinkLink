@@ -213,7 +213,7 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
         <div style={cardBackFaceDynamicInlineStyle} className={styles.cardBack}>
           {/* Logo nas costas da carta */}
           <img
-            src="/kinklogo.png" // Certifique-se que este é o nome correto do seu logo
+            src="/kinklogo512.png" // <<< ALTERADO AQUI
             alt="KinkLink Logo"
             className={styles.cardBackLogo}
           />

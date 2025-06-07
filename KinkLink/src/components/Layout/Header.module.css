@@ -66,3 +66,41 @@
   /* color: var(--cor-texto-sobre-secundaria, #FFFFFF); */
   /* border-color: var(--cor-secundaria, #5C5C5C); */
 }
+
+/* Media Query para telas menores (ex: até 768px de largura) */
+@media (max-width: 768px) {
+  .logoImage {
+    height: 50px; /* Reduz um pouco o logo */
+  }
+  .actionsContainer {
+    gap: 10px; /* Reduz o espaço entre os botões */
+  }
+  .supportButton {
+    padding: 7px 18px; /* Reduz o padding do botão Help */
+  }
+  .installButton {
+    padding: 7px 12px; /* Reduz o padding do botão Instalar */
+  }
+}
+
+/* Media Query para telas ainda menores (ex: até 480px de largura) */
+@media (max-width: 480px) {
+  .logoImage {
+    height: 40px; /* Reduz mais o logo */
+  }
+  .appHeader {
+    /* O padding do appHeader é controlado pelo klnkl-themed-panel,
+       mas se precisássemos ajustar especificamente aqui, seria:
+       padding-left: 10px;
+       padding-right: 10px;
+    */
+  }
+  .actionsContainer {
+    gap: 8px; /* Espaço ainda menor entre botões */
+  }
+  .supportButton,
+  .installButton {
+    padding: 6px 10px; /* Padding menor para os botões */
+    font-size: 0.85rem; /* Fonte um pouco menor se necessário */
+  }
+}

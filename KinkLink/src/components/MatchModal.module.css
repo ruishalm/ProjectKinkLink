@@ -45,7 +45,10 @@
 }
 
 .buttonContainer {
-  /* Estilos para o container dos botões, se necessário */
+  display: flex;
+  justify-content: center; /* Centraliza os botões */
+  gap: 15px; /* Espaço entre os botões */
+  margin-top: 25px; /* Mais espaço acima dos botões */
 }
 
 .buttonBase {
@@ -65,6 +68,8 @@
   /* Estilos base (padding, border, fonte, etc.) são agora fornecidos por 'genericButton' */
   background-color: #55efc4;
   color: #20232a;
+  padding: 12px 28px; /* Padding aumentado */
+  font-size: 1.1em;  /* Fonte aumentada */
 }
 
 .chatButton {
@@ -72,6 +77,8 @@
   background-color: #64b5f6;
   color: #20232a; /* Ajustado para melhor contraste */
   margin-left: 10px;
+  padding: 12px 28px; /* Padding aumentado */
+  font-size: 1.1em;  /* Fonte aumentada */
 }
 
 .closeButtonTopRight {

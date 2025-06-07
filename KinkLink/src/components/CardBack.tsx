@@ -30,7 +30,7 @@ const CardBack: React.FC<CardBackProps> = ({
     <div className={styles.cardBack} style={dynamicStyle}>
       {/* Logo nas costas da carta */}
       <img
-        src="/kinklogo.png" // Certifique-se que este é o nome correto do seu logo
+        src="/kinklogo512.png" // Alterado para o logo de 512px
         alt="KinkLink Logo"
         className={styles.cardBackLogo} // Usaremos esta classe para estilizar
       />

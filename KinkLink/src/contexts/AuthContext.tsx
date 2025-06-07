@@ -211,6 +211,11 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   const loginWithGoogle = async () => {
     setIsLoading(true);
     const provider = new GoogleAuthProvider();
+    // Adiciona esta linha para forçar o seletor de contas:
+    provider.setCustomParameters({
+      prompt: 'select_account'
+    });
+
     try {
       const result = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;

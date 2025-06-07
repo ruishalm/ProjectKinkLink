@@ -23,45 +23,37 @@
   position: relative; /* Necessário para posicionar o botão de fechar absoluto */
   color: #e0e0e0; 
   font-family: "Trebuchet MS", sans-serif;
+  /* Adicionado para layout flexível interno */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centraliza a maioria dos filhos */
+  gap: 15px; /* Adicionado: Espaçamento uniforme entre os filhos diretos */
 }
 
 .title {
   font-size: 2em;
   color: #55efc4;
-  margin: 0 0 10px 0;
+  margin: 0; /* Margem inferior removida em favor do gap */
   padding-right: 30px; /* Espaço para o botão de fechar não sobrepor o título */
 }
 
 .subTitle {
   font-size: 1.1em;
-  margin-bottom: 20px;
+  margin: 0; /* Margens removidas em favor do gap */
   color: #b0b0b0;
 }
 
 .cardContainer {
   display: flex;
   justify-content: center;
-  margin-bottom: 20px;
+  /* margin-bottom e margin-top removidos em favor do gap */
 }
 
 .buttonContainer {
   display: flex;
   justify-content: center; /* Centraliza os botões */
   gap: 15px; /* Espaço entre os botões */
-  margin-top: 25px; /* Mais espaço acima dos botões */
-}
-
-.buttonBase {
-  /* Esta classe define estilos base que provavelmente agora são cobertos por 'genericButton'.
-     Se .closeButton e .chatButton são os únicos que a utilizam e agora usam genericButton,
-     esta classe pode se tornar redundante ou ser simplificada no futuro. */
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1em;
-  font-weight: bold;
-  transition: background-color 0.2s ease, transform 0.1s ease;
+  margin-top: 5px; /* Pequena margem adicional acima do container de botões, se necessário após o gap */
 }
 
 .closeButton {

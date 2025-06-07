@@ -26,6 +26,7 @@
   display: flex;
   flex-direction: column;
   position: relative; /* Para posicionar o botão de fechar */
+  gap: 10px; /* Adicionado: Espaçamento entre o chatContainer e o destructiveButton */
   overflow: hidden; /* Garante que os cantos arredondados da borda sejam respeitados pelos filhos */
   box-sizing: border-box; /* Para que a borda não aumente o tamanho total */
 }
@@ -57,16 +58,18 @@
 
 .destructiveButton {
   /* background-color e color devem vir de genericButtonDestructive.
-     Se precisar de um override específico ou se genericButtonDestructive não definir cor:
-     background-color: #d9534f;
-     color: white; */
-  /* border, padding, cursor, font-weight, transition
+     Se precisar de um override específico:
+     background-color: var(--cor-acao-negativa, #d9534f);
+     color: var(--cor-texto-acao-negativa, white); */
+  /* border, cursor, font-weight, transition
      são herdados de genericButton. */
   text-align: center;
-  margin: 0; /* O botão agora é um filho direto do modalContent */
+  /* margin: 0; /* Removido em favor do gap no .modalContent */
   width: 100%; 
   box-sizing: border-box;
   flex-shrink: 0; /* Impede que o botão encolha */
+  padding: 12px 25px; /* Padronizando o tamanho do botão */
+  font-size: 1.1em;    /* Padronizando o tamanho da fonte */
 }
 
 .destructiveButton:hover {

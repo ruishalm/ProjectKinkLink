@@ -1,5 +1,8 @@
 /* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\LinkCouplePage.module.css */
 .page {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centraliza os filhos horizontalmente */
   max-width: 600px;
   margin: 40px auto;
   padding: 30px;
@@ -9,6 +12,7 @@
   color: #e0e0e0;
   font-family: "Trebuchet MS", sans-serif;
   text-align: center;
+  gap: 20px; /* Espaçamento entre os filhos diretos: título, subText, optionsContainer, etc. */
 }
 
 .title {
@@ -69,7 +73,7 @@
 }
 
 .optionsContainer {
-  margin: 30px 0;
+  /* margin: 30px 0; /* Removido em favor do gap no .page */
   display: flex;
   flex-direction: column;
   align-items: center;

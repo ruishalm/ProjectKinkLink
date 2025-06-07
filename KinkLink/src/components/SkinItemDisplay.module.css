@@ -3,7 +3,7 @@
 
 .skinItem {
   background-color: var(--cor-fundo-pagina); /* Fundo um pouco diferente para destaque */
-  padding: 18px;
+  padding: 10px; /* Ajustado para consistência com SkinsPage.module.css e mais espaço interno */
   border-radius: 10px;
   border: 1px solid var(--cor-borda);
   cursor: pointer;
@@ -14,6 +14,8 @@
   text-align: center;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
   position: relative; /* Para o ícone de cadeado */
+  /* width: 150px; /* Largura fixa REMOVIDA */
+  /* height: 150px; /* Altura fixa REMOVIDA */
 }
 
 .skinItem:hover {

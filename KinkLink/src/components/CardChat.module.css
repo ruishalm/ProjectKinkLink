@@ -137,11 +137,12 @@
 
 .sendButton {
   padding: 8px 12px; /* Padding do botão ajustado */
+  padding: 10px 15px; /* Aumentando um pouco o padding */
   border-radius: 20px;
   background-color: #0b5351;
   color: white;
   border: none;
-  font-size: 0.95em; /* Fonte ligeiramente menor */
+  font-size: 1em;    /* Aumentando um pouco a fonte */
   font-weight: bold;
   flex-shrink: 0; 
   /* cursor e transition (base) são herdados de genericButton.

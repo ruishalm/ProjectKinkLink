@@ -158,9 +158,9 @@
   border: none;
   background-color: #61dafb;
   color: #20232a;
-  /* padding, font-size, border-radius, cursor, font-weight, transition
+  padding: 12px 25px; /* Padronizando o tamanho do botão */
+  font-size: 1.1em;   /* Padronizando o tamanho da fonte */
+  /* Outras propriedades como border-radius, cursor, font-weight, transition
      são agora primariamente herdados de 'genericButton'.
-     Mantenha 'padding: 12px 25px;' ou 'font-size: 1.1em;' aqui se forem
-     substituições intencionais aos valores do genericButton.
      'border: none;' é importante se genericButton adicionar uma borda e você não a quiser aqui. */
 }

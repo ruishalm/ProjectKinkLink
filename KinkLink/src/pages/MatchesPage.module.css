@@ -15,6 +15,7 @@
   color: var(--cor-texto-primario);
   font-family: var(--font-family-main, "Trebuchet MS", sans-serif);
   overflow-x: hidden; /* Evita scroll horizontal se algum conteúdo vazar */
+  gap: 30px; /* Adicionado: Espaçamento entre os filhos diretos (.header, .section, .categoryCarouselsGrid) */
 }
 
 .header {
@@ -22,7 +23,7 @@
   display: flex;
   justify-content: flex-end; /* Alinha o botão "Voltar" à direita */
   align-items: flex-start; /* Alinha o botão "Cartas" ao topo */
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; /* Removido em favor do gap no .page */
   padding-bottom: 10px; /* Adiciona um pouco de espaço se o título for alto */
   width: 100%; /* Garante que o header ocupe a largura total */
 }
@@ -62,7 +63,7 @@
 
 .section {
   width: 100%; /* Garante que as seções ocupem a largura total */
-  margin-bottom: 30px; /* Espaço entre seções */
+  /* margin-bottom: 30px; /* Removido em favor do gap no .page */
 }
 
 .sectionTitle {
@@ -145,7 +146,7 @@
   gap: 30px; /* Espaçamento entre os carrosséis */
   justify-items: center; 
   align-items: start; 
-  margin-top: 20px;
+  /* margin-top: 20px; /* Removido em favor do gap no .page */
   width: 100%;
 }
 

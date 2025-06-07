@@ -25,6 +25,11 @@
   border: 1px solid #444;
   position: relative; /* Necessário para posicionar o botão de fechar absoluto dentro dele */
   animation: fadeInScale 0.3s ease-out;
+
+  /* Adicionado para layout flexível interno */
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Espaçamento uniforme entre os filhos diretos */
 }
 
 @keyframes fadeInScale {
@@ -41,8 +46,7 @@
 .title {
   font-size: 1.8em;
   color: #81c784; /* Verde claro para o título, tema "conexão" */
-  margin-top: 0;
-  margin-bottom: 15px;
+  margin: 0; /* Removido margin-top e margin-bottom em favor do gap */
   padding-right: 25px; /* Espaço para o botão de fechar não sobrepor o título */
   font-weight: 600;
 }
@@ -50,7 +54,7 @@
 .cardText {
   font-size: 1.1em;
   line-height: 1.6;
-  margin-bottom: 30px;
+  /* margin-bottom: 30px; /* Removido em favor do gap */
   padding: 15px;
   background-color: #383838; /* Fundo sutil para o texto da carta */
   border-radius: 8px;
@@ -65,7 +69,7 @@
   display: flex;
   justify-content: space-around; /* Ou space-between se preferir mais espaçado */
   gap: 15px; /* Espaço entre os botões */
-  margin-top: 20px;
+  /* margin-top: 20px; /* Removido em favor do gap */
 }
 
 .acceptButton,
@@ -77,6 +81,8 @@
      'border: none;' é importante se genericButton adicionar uma borda e você não a quiser aqui. */
   flex-grow: 1; /* Faz os botões ocuparem espaço similar */
   min-width: 120px;
+  padding: 12px 20px; /* Padronizando o tamanho */
+  font-size: 1em;    /* Padronizando o tamanho da fonte */
 }
 
 .acceptButton {

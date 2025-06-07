@@ -3,17 +3,27 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center; /* Adicionado para centralizar verticalmente */
   width: 100%;
   min-height: 100vh;
   padding: 20px;
   box-sizing: border-box;
   background-color: #2c2c2c;
   position: relative;
-  overflow: 'hidden'; /* Note: In CSS, 'hidden' should not be a string. Corrected below. */
-  overflow: hidden;
+  overflow: hidden; /* Corrigido */
   font-family: "Trebuchet MS", sans-serif; /* Added for consistency */
   color: #e0e0e0; /* Added for consistency */
   text-align: center; /* Added for consistency */
+}
+
+.mainContent { /* Estilos para o <main> container */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centraliza os filhos como pageTitle, formContainer, navigationText */
+  width: 100%;
+  max-width: 450px; /* Define uma largura máxima para o conteúdo principal */
+  z-index: 1; /* Para ficar acima do watermark */
+  position: relative; /* Para o z-index ter efeito em relação ao watermark */
 }
 
 .formContainer {

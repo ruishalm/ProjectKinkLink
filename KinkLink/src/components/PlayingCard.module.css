@@ -31,7 +31,7 @@
 .cardFront {
   composes: cardFace;
   position: relative; /* Crucial para posicionamento absoluto dos filhos */
-  align-items: center; /* Para centralizar a .textArea se ela tiver altura fixa e não preencher */
+  /* align-items: center; /* Removido - A textArea ocupará a largura e a altura é calculada */
   justify-content: center; /* Para centralizar a .textArea se ela tiver altura fixa e não preencher */
 }
 
@@ -68,7 +68,7 @@
   justify-content: center;
   text-align: center;
   overflow: hidden;
-  box-sizing: border-box;
+  box-sizing: border-box; /* Mantido - importante para o padding não aumentar o tamanho total */
   /* min-height: 0; Não é mais tão crítico se a altura é fixa */
   position: relative;
 }

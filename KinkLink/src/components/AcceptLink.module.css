@@ -6,20 +6,27 @@
   border-radius: 8px;
   border: 1px solid #4a4a4a;
   text-align: left;
-  color: #e0e0e0; /* Adicionado para consistência */
-  font-family: "Trebuchet MS", sans-serif; /* Adicionado para consistência */
+  color: var(--cor-texto-primario, #e0e0e0);
+  font-family: var(--font-family-main, "Trebuchet MS", sans-serif);
+
+  /* Adicionado para layout flexível interno */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Alinha os filhos à esquerda, mas botões podem precisar de align-self: center ou width: 100% */
+  gap: 15px; /* Espaçamento uniforme entre os filhos diretos */
 }
 
 .title {
   margin-top: 0;
-  color: #64b5f6;
-  margin-bottom: 20px;
+  color: var(--cor-primaria, #64b5f6);
+  /* margin-bottom: 20px; /* Removido em favor do gap */
+  align-self: center; /* Centraliza o título se o container for align-items: flex-start */
 }
 
 .label {
   display: block;
-  margin-bottom: 5px;
-  color: #e0e0e0; /* Adicionado para consistência */
+  /* margin-bottom: 5px; /* O gap do formGroup (se houver) ou do .section cuidará disso */
+  color: var(--cor-texto-primario, #e0e0e0);
 }
 
 .input {
@@ -28,56 +35,48 @@
   width: 150px;
   border-radius: 4px;
   border: 1px solid #555;
-  background-color: #3a3f47; /* Adicionado para consistência */
-  color: #e0e0e0; /* Adicionado para consistência */
+  background-color: var(--cor-fundo-input, #3a3f47);
+  color: var(--cor-texto-input, #e0e0e0);
   box-sizing: border-box; /* Adicionado para melhor controle de tamanho */
-}
-
-.buttonBase {
-  /* Esta classe pode ser redundante se .primaryButton e .secondaryButton
-     eram seus únicos usuários e agora utilizam genericButton. */
-  padding: 12px 20px;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1em;
-  font-weight: bold;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  margin-right: 10px; /* Mantido se .primaryButton e .secondaryButton não definirem sua própria margem */
 }
 
 .primaryButton {
   /* Estilos base (border-radius, cursor, font-weight, font-size, transition)
      são herdados de genericButton. */
-  background-color: #64b5f6;
-  color: #2c2c2c; /* Ajustado para contraste */
-  padding: 10px 15px; /* Padding específico, sobrescreve o de genericButton. */
-  margin-right: 0; /* Remove margin for last button in group */
+  background-color: var(--cor-primaria, #64b5f6);
+  color: var(--cor-texto-sobre-primaria, #2c2c2c);
+  padding: 10px 20px; /* Tamanho padronizado */
+  font-size: 1em;   /* Tamanho padronizado */
+  /* margin-right: 0; /* Removido, o gap do container pai (se houver) ou width 100% cuidará disso */
   border: none; /* Garante ausência de borda, sobrescrevendo genericButton se necessário. */
+  align-self: stretch; /* Para ocupar a largura se o container for align-items: flex-start */
 }
 
 .secondaryButton {
   /* Estilos base são herdados de genericButton. */
-  background-color: #757575;
-  color: white; /* Cor do texto que viria de buttonBase */
-  padding: 12px 20px; /* Padding específico, que viria de buttonBase, sobrescreve genericButton. */
-  margin-top: 15px;
-  margin-right: 0; /* Remove margin */
+  background-color: var(--cor-secundaria, #757575);
+  color: var(--cor-texto-sobre-secundaria, white);
+  padding: 10px 20px; /* Tamanho padronizado */
+  font-size: 1em;
+  /* margin-top: 15px; /* Removido em favor do gap */
+  /* margin-right: 0; /* Removido */
   border: none; /* Garante ausência de borda. */
+  align-self: stretch; /* Para ocupar a largura se o container for align-items: flex-start */
 }
 
 .messageText {
-  margin-top: 10px;
+  /* margin-top: 10px; /* Removido em favor do gap */
   font-size: 0.9em; /* Adicionado para consistência */
+  width: 100%; /* Para ocupar a largura e permitir text-align: center */
+  text-align: center;
 }
 
 .errorText {
   composes: messageText;
-  color: #ef9a9a; /* Mantido do original, pode ser ajustado para #ff7b7b */
+  color: var(--cor-aviso, #ef9a9a);
 }
 
 .successText {
   composes: messageText;
-  color: #81c784; /* Mantido do original, pode ser ajustado para #4CAF50 */
+  color: var(--cor-sucesso, #81c784);
 }

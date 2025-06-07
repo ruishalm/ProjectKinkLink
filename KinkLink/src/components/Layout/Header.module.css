@@ -40,25 +40,26 @@
   gap: 15px; /* Espaço entre os botões */
 }
 
+.installButton,
 .supportButton {
   /* Estilos removidos/alterados para herdar do tema Cyberpunk */
   /* background-color, color, border, border-radius serão definidos pelo tema.
      O padding base vem do genericButton, mas podemos ajustar aqui. */
-  padding: 8px 24px; /* Aumentado o padding horizontal (era 8px 16px do genericButton) */
+  padding: 8px 18px; /* Padding ajustado para consistência entre os botões do header */
   white-space: nowrap; /* Impede que o texto "Suporte e Contato" quebre em duas linhas */
   text-decoration: none;
   /* font-size e font-weight também serão influenciados pelo tema (bold, uppercase) */
   cursor: pointer;
   transition: all 0.2s ease; /* A transição base também vem do genericButton, mas pode ser mantida/ajustada aqui */
+  /* Se genericButton ou ck-theme-button não definirem display, adicione:
+     display: inline-flex;
+     align-items: center;
+     justify-content: center;
+  */
 }
 
 /* Estilos para o botão de instalar PWA */
-.installButton {
-  /* Herda a maioria dos estilos de .genericButton e .ck-theme-button */
-  padding: 8px 15px; /* Ajuste o padding se necessário, similar ao supportButton ou diferente */
-  white-space: nowrap;
-}
-
+.installButton:hover,
 .supportButton:hover {
   /* O estilo de hover também será herdado do tema Cyberpunk: */
   /* Ex: fundo ciano neon, borda magenta, sombra, etc. */
@@ -75,11 +76,9 @@
   .actionsContainer {
     gap: 10px; /* Reduz o espaço entre os botões */
   }
+  .installButton,
   .supportButton {
-    padding: 7px 18px; /* Reduz o padding do botão Help */
-  }
-  .installButton {
-    padding: 7px 12px; /* Reduz o padding do botão Instalar */
+    padding: 7px 15px; /* Padding reduzido para mobile */
   }
 }
 
@@ -98,8 +97,8 @@
   .actionsContainer {
     gap: 8px; /* Espaço ainda menor entre botões */
   }
-  .supportButton,
-  .installButton {
+  .installButton,
+  .supportButton {
     padding: 6px 10px; /* Padding menor para os botões */
     font-size: 0.85rem; /* Fonte um pouco menor se necessário */
   }

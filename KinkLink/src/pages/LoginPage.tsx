@@ -27,13 +27,32 @@ function LoginPage() {
       await login(email, password); // Chama a função de login do AuthContext
       navigate(from, { replace: true }); // Redireciona após login bem-sucedido
     } catch (err: unknown) {
-      console.error("Falha no login:", err);
-      // Idealmente, mapear códigos de erro do Firebase para mensagens amigáveis
-      if (err instanceof Error) {
-        setError(err.message || 'Falha ao tentar fazer login. Verifique suas credenciais.');
+      console.error("Falha no login:", err); // Mantém o log completo do erro para debug
+
+      let errorMessage = 'Falha ao tentar fazer login. Verifique suas credenciais e tente novamente.';
+      if (typeof err === 'object' && err !== null && 'code' in err) {
+        const firebaseError = err as { code: string; message: string }; // Type assertion
+        switch (firebaseError.code) {
+          case 'auth/user-not-found':
+          case 'auth/invalid-email': // O Firebase pode retornar isso se o email não estiver formatado corretamente
+            errorMessage = 'E-mail não encontrado ou inválido. Verifique o e-mail digitado.';
+            break;
+          case 'auth/wrong-password':
+            errorMessage = 'Senha incorreta. Por favor, tente novamente.';
+            break;
+          case 'auth/invalid-credential': // Erro mais genérico para email/senha inválidos (SDKs mais recentes)
+            errorMessage = 'Credenciais inválidas. Verifique seu e-mail e senha.';
+            break;
+          default:
+            // Para outros erros do Firebase, podemos usar a mensagem padrão ou uma genérica
+            errorMessage = 'Ocorreu um erro inesperado. Tente novamente mais tarde.';
+            console.error("Erro não mapeado do Firebase:", firebaseError.code, firebaseError.message);
+        }
       } else {
-        setError('Ocorreu um erro desconhecido ao tentar fazer login.');
+        // Se não for um erro estruturado do Firebase, usa uma mensagem genérica
+        errorMessage = 'Ocorreu um erro desconhecido ao tentar fazer login.';
       }
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false); // Finaliza o carregamento
     }

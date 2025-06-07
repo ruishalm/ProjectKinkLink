@@ -22,6 +22,9 @@
   max-width: 800px;
   margin: 20px auto;
   line-height: 1.5;
+  display: flex; /* Torna o pageContainer um container flex */
+  flex-direction: column; /* Empilha os filhos verticalmente (o contentWrapper) */
+  /* min-height: 500px; /* Opcional: altura mínima para a "janela" */
 }
 
 .contentWrapper {
@@ -32,6 +35,9 @@
   border-right: 2px solid #ffffff;
   border-bottom: 2px solid #ffffff;
   min-height: 400px; /* Para dar um corpo */
+  flex-grow: 1; /* Permite que o contentWrapper cresça para preencher o pageContainer */
+  display: flex; /* Torna o contentWrapper um container flex para o markdown */
+  flex-direction: column; /* Empilha o conteúdo do markdown verticalmente */
 }
 
 /* Estilos para elementos do Markdown */
@@ -97,4 +103,11 @@
   padding: 1px 3px;
   border: 1px solid #808080;
   font-size: 0.9em; /* Ligeiramente menor para se destacar */
+}
+
+.markdownContent {
+  flex-grow: 1; /* Permite que a área de markdown preencha o contentWrapper */
+  overflow-y: auto; /* Adiciona rolagem vertical se o conteúdo for maior que a área */
+  /* O padding interno do markdown já é tratado pelo .contentWrapper, 
+     mas pode adicionar padding aqui se precisar de espaçamento adicional específico para o texto. */
 }

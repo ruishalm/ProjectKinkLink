@@ -12,7 +12,8 @@
   padding: 30px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center; /* Centraliza conteúdo horizontalmente */
+  justify-content: center; /* Adicionado: Centraliza conteúdo verticalmente */
   text-align: center;
 }
 

@@ -1,0 +1,105 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\AdminUsersPage.module.css */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: calc(100vh - var(--header-height, 60px)); /* Considera a altura do header */
+  background-color: var(--cor-fundo-pagina, #1e1e1e);
+  color: var(--cor-texto-primario, #e0e0e0);
+  font-family: var(--font-family-main, "Trebuchet MS", sans-serif);
+}
+
+.container h1 {
+  color: var(--cor-primaria, #64b5f6);
+  margin-bottom: 25px;
+  font-size: 2em;
+}
+
+.searchInput {
+  width: 100%;
+  max-width: 500px;
+  padding: 10px 15px;
+  margin-bottom: 25px;
+  border-radius: 6px;
+  border: 1px solid var(--cor-borda, #555);
+  background-color: var(--cor-fundo-elemento, #2c2c2c);
+  color: var(--cor-texto-primario, #e0e0e0);
+  font-size: 1em;
+  box-sizing: border-box;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--cor-primaria, #64b5f6);
+  box-shadow: 0 0 0 2px var(--cor-primaria-transparente, rgba(100, 181, 246, 0.3));
+}
+
+.usersTable {
+  width: 100%;
+  max-width: 900px; /* Limita a largura da tabela em telas grandes */
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: var(--cor-fundo-elemento, #2c2c2c);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  overflow: hidden; /* Para que o border-radius funcione nas bordas da tabela */
+}
+
+.usersTable th,
+.usersTable td {
+  border: 1px solid var(--cor-borda, #444);
+  padding: 12px 15px;
+  text-align: left;
+  font-size: 0.95em;
+}
+
+.usersTable th {
+  background-color: var(--cor-fundo-header-tabela, #333); /* Cor de fundo para o cabeçalho da tabela */
+  color: var(--cor-texto-header-tabela, #e0e0e0); /* Cor do texto para o cabeçalho */
+  font-weight: 600;
+}
+
+.usersTable tr:nth-child(even) {
+  background-color: var(--cor-fundo-linha-par, #272727); /* Cor de fundo para linhas pares, se desejar alternância */
+}
+
+.usersTable tr:hover {
+  background-color: var(--cor-fundo-hover-linha, #3a3a3a); /* Cor de fundo ao passar o mouse */
+}
+
+.actionButton {
+  /* Herda de .genericButton, mas podemos adicionar/sobrescrever aqui */
+  padding: 8px 12px;
+  font-size: 0.9em;
+  min-width: 120px; /* Para que os botões tenham uma largura mínima */
+  /* As cores virão do .genericButton e suas variantes (positiva/negativa) */
+}
+
+.errorText {
+  color: var(--cor-aviso, #ff7b7b);
+  background-color: rgba(255, 123, 123, 0.1);
+  border: 1px solid var(--cor-aviso, #ff7b7b);
+  padding: 15px;
+  border-radius: 6px;
+  margin-top: 20px;
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+}
+
+/* Responsividade para a tabela */
+@media (max-width: 768px) {
+  .usersTable th,
+  .usersTable td {
+    font-size: 0.85em; /* Reduz o tamanho da fonte em telas menores */
+    padding: 8px 10px;
+  }
+  .actionButton {
+    padding: 6px 10px;
+    font-size: 0.8em;
+    min-width: auto; /* Permite que os botões fiquem menores */
+  }
+}

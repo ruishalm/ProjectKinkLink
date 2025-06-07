@@ -81,11 +81,14 @@
   flex-grow: 1; /* Ocupa o restante do espaço */
   overflow-y: auto; /* Permite rolagem se a lista de skins for longa */
   padding-right: 10px; /* Espaço para a barra de rolagem não cobrir conteúdo */
+  display: flex; /* Adicionado para usar gap */
+  flex-direction: column; /* Adicionado para empilhar as seções */
+  gap: 30px; /* Espaçamento entre as seções de skin, substitui margin-bottom em .skinSection */
 }
 
 
 .skinSection {
-  margin-bottom: 40px;
+  /* margin-bottom: 40px; /* Removido em favor do gap no .skinsSelectionArea */
   padding: 20px;
   background-color: var(--cor-fundo-elemento);
   border-radius: 12px;
@@ -103,8 +106,8 @@
 
 .skinItemsGrid {
   display: grid;
-  /* grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); Antigo */
-  grid-template-columns: repeat(auto-fit, 150px); /* Novo: Colunas de largura fixa de 150px */
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); /* Permite que os itens tenham largura flexível com um mínimo */
+  /* grid-template-columns: repeat(auto-fit, 150px); /* Revertido: Colunas de largura fixa de 150px */
   gap: 20px; /* Aumentado o espaçamento */
   justify-content: center; /* Centraliza os itens do grid se não preencherem a linha */
 }
@@ -122,8 +125,8 @@
   text-align: center;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
   position: relative; /* Para o ícone de cadeado */
-  width: 150px; /* Largura fixa */
-  height: 150px; /* Altura fixa para formar um quadrado */
+  /* width: 150px; /* Largura fixa REMOVIDA */
+  /* height: 150px; /* Altura fixa REMOVIDA */
   overflow: hidden; /* Corta o conteúdo que exceder o tamanho do card */
 }
 
@@ -320,7 +323,7 @@
 
 @media (max-width: 600px) {
   .skinItemsGrid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* Mantém o min baseado no tamanho do item */
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Ajustado para consistência com o minmax acima */
   }
   .pageTitle {
     font-size: 1.8em;

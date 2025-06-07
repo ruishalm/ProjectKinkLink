@@ -27,11 +27,33 @@ import AdminRoute from './components/AdminRoute'; // <<< ADICIONE ESTE IMPORT
 const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage')); // <<< ADICIONE ESTE IMPORT (lazy load)
 //import PasswordResetPage from './pages/PasswordResetPage'; // Importar PasswordResetPage
 
+// Interface para o evento beforeinstallprompt
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: Array<string>;
+  readonly userChoice: Promise<{
+    outcome: 'accepted' | 'dismissed',
+    platform: string
+  }>;
+  prompt(): Promise<void>;
+}
+
 function App() {
   const { user, isLoading } = useAuth();
   const location = useLocation();
   const isUserLinked = !!user?.linkedPartnerId;
+  const [deferredInstallPrompt, setDeferredInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
+  const [showInstallButtonInHeader, setShowInstallButtonInHeader] = React.useState(false);
 
+  React.useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault(); // Previne o mini-infobar do Chrome (ou outros navegadores)
+      setDeferredInstallPrompt(e as BeforeInstallPromptEvent); // Guarda o evento para usar depois
+      setShowInstallButtonInHeader(true); // Mostra o botão no header
+      console.log('[App] beforeinstallprompt event fired and deferred. Button will be shown.');
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
   useLinkCompletionListener(
     user,
     isUserLinked,
@@ -46,11 +68,23 @@ function App() {
 
   console.log('Dev log - App states: User loaded, isUserLinked:', isUserLinked);
 
+  const handleInstallClick = async () => {
+    if (deferredInstallPrompt) {
+      console.log('[App] handleInstallClick: Prompting user to install.');
+      deferredInstallPrompt.prompt(); // Mostra o prompt de instalação
+      // Espera o usuário responder ao prompt
+      const { outcome } = await deferredInstallPrompt.userChoice;
+      console.log(`User response to the install prompt: ${outcome}`);
+      // Nós só podemos usar o prompt uma vez, ele não pode ser usado novamente.
+      setDeferredInstallPrompt(null);
+      setShowInstallButtonInHeader(false); // Esconde o botão após a tentativa
+    }
+  };
   return (
     <SkinProvider> {/* SkinProvider envolve todo o conteúdo que precisa do contexto */}
       <div className="appContainer"> {/* Contêiner principal para flex layout */}
         <UnlockNotificationModal /> {/* Renderiza o modal de notificação de desbloqueio aqui */}
-        <Header /> {/* Header global adicionado aqui */}
+        <Header showInstallButton={showInstallButtonInHeader} onInstallClick={handleInstallClick} /> {/* Header global com props para PWA */}
         <main className="appMainContent"> {/* Envolve o conteúdo principal */}
           <Suspense fallback={<div className="page-container-centered">Carregando página...</div>}>
             <Routes>

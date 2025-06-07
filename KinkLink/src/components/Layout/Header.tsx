@@ -6,7 +6,12 @@ import styles from './Header.module.css';
 // Supondo que o logo esteja em public/kinklogo.png ou um caminho acessível
 const logoSrc = '/kinklogo.png'; // Ajuste o caminho se o logo estiver em outro lugar (ex: /assets/images/kinklogo.png)
 
-    const Header: React.FC = () => {
+interface HeaderProps {
+  showInstallButton: boolean;
+  onInstallClick: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick }) => {
   return (
     <header className={`${styles.appHeader} klnkl-themed-panel`}>
       <div className={styles.logoContainer}>
@@ -14,16 +19,27 @@ const logoSrc = '/kinklogo.png'; // Ajuste o caminho se o logo estiver em outro 
           <img src={logoSrc} alt="KinkLink Logo" className={styles.logoImage} />
         </Link>
       </div>
-      <div className={styles.supportContainer}>
+      <div className={styles.actionsContainer}> {/* Renomeado para acomodar mais botões */}
+        {showInstallButton && (
+          <button
+            onClick={onInstallClick}
+            className={`${styles.installButton} ck-theme-button genericButton`}
+            title="Adicionar KinkLink à sua tela inicial"
+          >
+            Instalar App
+            {/* Você pode adicionar um ícone aqui depois, quando tiver os ícones prontos */}
+            {/* <img src="/icons/install-icon.svg" alt="" className={styles.buttonIcon} /> */}
+          </button>
+        )}
         {/* Adicionada a classe global ck-theme-button para aplicar o estilo do tema */}
         <Link
           to="/suporte"
-          className={`${styles.supportButton} ck-theme-button genericButton`}>
+          className={`${styles.supportButton} ck-theme-button genericButton`}
+        >
           Suporte e Contato
         </Link>
       </div>
     </header>
   );
 };
-
 export default Header;

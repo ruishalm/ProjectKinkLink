@@ -33,8 +33,11 @@
   transform: scale(1.05); /* Efeito sutil no hover */
 }
 
-.supportContainer {
-  /* O flexbox no .appHeader já cuida do alinhamento */
+/* Alterado de .supportContainer para .actionsContainer para corresponder ao Header.tsx */
+.actionsContainer {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Espaço entre os botões */
 }
 
 .supportButton {
@@ -47,6 +50,13 @@
   /* font-size e font-weight também serão influenciados pelo tema (bold, uppercase) */
   cursor: pointer;
   transition: all 0.2s ease; /* A transição base também vem do genericButton, mas pode ser mantida/ajustada aqui */
+}
+
+/* Estilos para o botão de instalar PWA */
+.installButton {
+  /* Herda a maioria dos estilos de .genericButton e .ck-theme-button */
+  padding: 8px 15px; /* Ajuste o padding se necessário, similar ao supportButton ou diferente */
+  white-space: nowrap;
 }
 
 .supportButton:hover {

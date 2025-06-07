@@ -14,6 +14,8 @@ function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [showEmailPasswordForm, setShowEmailPasswordForm] = useState(false); // Novo estado
+
   // Novo estado para controlar o modal de recuperação de senha
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
 
@@ -28,8 +30,8 @@ function LoginPage() {
       navigate(from, { replace: true }); // Redireciona após login bem-sucedido
     } catch (err: unknown) {
       console.error("Falha no login:", err); // Mantém o log completo do erro para debug
-
       let errorMessage = 'Falha ao tentar fazer login. Verifique suas credenciais e tente novamente.';
+
       if (typeof err === 'object' && err !== null && 'code' in err) {
         const firebaseError = err as { code: string; message: string }; // Type assertion
         switch (firebaseError.code) {
@@ -67,8 +69,8 @@ function LoginPage() {
       navigate(from, { replace: true });
     } catch (err: unknown) {
       console.error("Falha no login com Google:", err);
-      if (err instanceof Error) {
-        setError(err.message || 'Falha ao tentar fazer login com o Google.');
+      if (typeof err === 'object' && err !== null && 'message' in err) {
+        setError((err as { message: string}).message || 'Falha ao tentar fazer login com o Google.');
       } else {
         setError('Ocorreu um erro desconhecido ao tentar fazer login com o Google.');
       }
@@ -109,53 +111,74 @@ function LoginPage() {
         </div>
 
         <h1 className={styles.pageTitle}>Login</h1>
-        <form onSubmit={handleSubmit} className={styles.formContainer}>
-          <div className={styles.inputGroup}>
-            <label htmlFor="email" className={styles.label}>Email:</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className={styles.input}
-            />
-          </div>
-          <div className={styles.inputGroup}>
-            <label htmlFor="password" className={styles.label}>Senha:</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className={styles.input}
-            />
-          </div>
-          <button type="submit" className={styles.button} disabled={isSubmitting || authIsLoading}>
-            {isSubmitting ? 'Entrando...' : 'Entrar'}
+
+        {!showEmailPasswordForm && (
+          <button
+            type="button"
+            className={`${styles.button} ${styles.revealFormButton}`}
+            onClick={() => setShowEmailPasswordForm(true)}
+            disabled={isSubmitting || authIsLoading}
+          >
+            Entrar com Email/Senha
           </button>
-          {/* Botão de Login com Google */}
+        )}
+
+        {showEmailPasswordForm && (
+          <form onSubmit={handleSubmit} className={styles.formContainer}>
+            <div className={styles.inputGroup}>
+              <label htmlFor="email" className={styles.label}>Email:</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className={styles.input}
+              />
+            </div>
+            <div className={styles.inputGroup}>
+              <label htmlFor="password" className={styles.label}>Senha:</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className={styles.input}
+              />
+            </div>
+            <button type="submit" className={styles.button} disabled={isSubmitting || authIsLoading}>
+              {isSubmitting ? 'Entrando...' : 'Entrar'}
+            </button>
+            <div className={styles.forgotPasswordContainer}>
+              <button
+                type="button"
+                onClick={() => setShowForgotPasswordModal(true)}
+                className={styles.forgotPasswordLink}
+              >
+                Esqueceu sua senha?
+              </button>
+            </div>
+          </form>
+        )}
+
+        <div className={styles.separatorContainer}>
+          <span className={styles.separatorLine}></span>
+          <span className={styles.separatorText}>OU</span>
+          <span className={styles.separatorLine}></span>
+        </div>
+
           <button
             type="button"
             onClick={handleGoogleLogin}
             className={`${styles.button} ${styles.googleButton}`} // Adicione uma classe específica para estilização
             disabled={isSubmitting || authIsLoading}
           >
-            {isSubmitting ? 'Aguarde...' : 'Entrar com Google'}
+            {isSubmitting && !showEmailPasswordForm ? 'Aguarde...' : 'Entrar com Google'}
           </button>
-          <div className={styles.forgotPasswordContainer}>
-            <button
-              type="button"
-              onClick={() => setShowForgotPasswordModal(true)}
-              className={styles.forgotPasswordLink} // Estilize como um link ou botão discreto
-            >
-              Esqueceu sua senha?
-            </button>
-          </div>
-        </form>
+
         {error && <p className={styles.errorText}>{error}</p>}
         <p className={styles.navigationText}>
           Não tem uma conta? <Link to="/signup" className={styles.navigationLink}>Cadastre-se</Link>

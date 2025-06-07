@@ -67,6 +67,11 @@
   font-weight: bold; /* Added for consistency */
 }
 
+.revealFormButton { /* Estilo para o botão que revela o formulário */
+  margin-bottom: 20px; /* Espaço antes do separador OU */
+  /* Outros estilos podem ser herdados de .button ou .genericButton */
+}
+
 .googleButton {
   background-color: #4285F4; /* Cor do Google */
   color: white;
@@ -123,4 +128,40 @@
   position: relative;
   color: #64b5f6; /* Added for consistency */
   text-decoration: none; /* Added for consistency */
+}
+
+.forgotPasswordContainer {
+  text-align: right; /* Alinha o link/botão à direita abaixo do botão de login */
+  margin-top: 10px;
+}
+
+.forgotPasswordLink {
+  background: none;
+  border: none;
+  color: #64b5f6; /* Cor de link */
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.9em;
+}
+
+.separatorContainer {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 25px 0; /* Espaçamento vertical do separador */
+  color: #888; /* Cor do texto "OU" */
+  width: 100%;
+  max-width: 350px; /* Para não ficar muito largo */
+}
+
+.separatorLine {
+  flex-grow: 1;
+  border-bottom: 1px solid #555; /* Cor da linha */
+}
+
+.separatorText {
+  padding: 0 15px; /* Espaçamento ao redor do texto "OU" */
+  font-size: 0.9em;
+  font-weight: bold;
 }

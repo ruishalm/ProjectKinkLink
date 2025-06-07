@@ -11,6 +11,8 @@ function ProfilePage() {
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [initialUsername, setInitialUsername] = useState('');
+  const [gender, setGender] = useState(''); // Novo estado para gênero
+  const [initialGender, setInitialGender] = useState(''); // Novo estado para gênero inicial
   const [initialBio, setInitialBio] = useState('');
   const [isPersonalInfoOpen, setIsPersonalInfoOpen] = useState(true); // Começa aberto
 
@@ -18,6 +20,8 @@ function ProfilePage() {
     if (user) {
       setUsername(user.username || '');
       setBio(user.bio || '');
+      setGender(user.gender || ''); // Define o gênero
+      setInitialGender(user.gender || ''); // Define o gênero inicial
       setInitialUsername(user.username || '');
       setInitialBio(user.bio || '');
     } else if (!authIsLoading) {
@@ -40,10 +44,11 @@ function ProfilePage() {
 
   const handleProfileUpdate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (user && (username !== initialUsername || bio !== initialBio)) {
+    if (user && (username !== initialUsername || bio !== initialBio || gender !== initialGender)) {
       try {
-        await updateUser({ username, bio });
+        await updateUser({ username, bio, gender }); // Inclui gênero na atualização
         setInitialUsername(username); // Atualiza os valores iniciais após salvar
+        setInitialGender(gender);
         setInitialBio(bio);
         setIsEditing(false);
         // Adicionar feedback de sucesso para o usuário aqui, se desejar
@@ -66,6 +71,7 @@ function ProfilePage() {
   const handleCancelEdit = () => {
     setUsername(initialUsername); // Restaura para os valores antes da edição atual
     setBio(initialBio);
+    setGender(initialGender); // Restaura gênero
     setIsEditing(false);
   };
 
@@ -118,7 +124,7 @@ function ProfilePage() {
   }
 
   const displayName = user.username || (user.email ? user.email.split('@')[0] : 'Usuário KinkLink');
-  const hasProfileChanged = username !== initialUsername || bio !== initialBio;
+  const hasProfileChanged = username !== initialUsername || bio !== initialBio || gender !== initialGender;
 
   return (
     <div className={styles.page}>
@@ -182,6 +188,26 @@ function ProfilePage() {
                     placeholder="Conte um pouco sobre você..."
                     rows={4}
                   />
+                </div>
+                <div style={{ marginTop: '15px' }}>
+                  <label htmlFor="gender" className={styles.formLabel}>Identidade de Gênero:</label>
+                  <select
+                    id="gender"
+                    name="gender"
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    className={styles.select} // Reutiliza o estilo do select da SignupPage
+                    required // Pode ser opcional dependendo da sua lógica
+                  >
+                    <option value="">Selecione...</option>
+                    <option value="homem_cis">Homem Cisgênero</option>
+                    <option value="mulher_cis">Mulher Cisgênero</option>
+                    <option value="homem_trans">Homem Transgênero</option>
+                    <option value="mulher_trans">Mulher Transgênero</option>
+                    <option value="nao_binario">Não-binário</option>
+                    <option value="outro_genero">Outro</option>
+                    <option value="naoinformar_genero">Prefiro não informar</option>
+                  </select>
                 </div>
                 <div className={styles.formActions}>
                   <button

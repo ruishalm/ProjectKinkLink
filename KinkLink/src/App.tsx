@@ -1,4 +1,4 @@
-// d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\App.tsx
+// App.tsx
 import React, { Suspense, lazy } from 'react'; // Adicionado Suspense e lazy
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom'; // Adicionado Navigate
 import './App.css';
@@ -99,6 +99,7 @@ function App() {
               {/* Rotas Protegidas por Autenticação */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/link-couple" element={<LinkCouplePage />} /> {/* <<<< ROTA MOVIDA PARA CÁ */}
                 {/* <Route path="/skins" element={<SkinsPage />} /> */} {/* Movido para LinkedRoute se depender de vínculo */}
 
                 {/* Rotas que exigem que o usuário esteja vinculado */}
@@ -111,7 +112,8 @@ function App() {
 
                 {/* Rotas que exigem que o usuário NÃO esteja vinculado */}
                 <Route element={<UnlinkedRoute />}>
-                  <Route path="/link-couple" element={<LinkCouplePage />} />
+                  {/* <Route path="/link-couple" element={<LinkCouplePage />} /> <<<< ROTA REMOVIDA DAQUI */}
+                  {/* Outras rotas que só devem ser acessadas por usuários não vinculados podem ir aqui */}
                 </Route>
               </Route>
 

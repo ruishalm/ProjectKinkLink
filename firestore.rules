@@ -12,9 +12,25 @@ service cloud.firestore {
     // Regras para a coleção 'users'
     match /users/{userId} {
       // Leitura (get para um documento específico):
-      // Usuário pode ler seu próprio documento.
-      // Admin pode ler qualquer documento de usuário.
-      allow get: if request.auth != null && (request.auth.uid == userId || isUserAdmin());
+      allow get: if request.auth != null && (
+        request.auth.uid == userId || // Usuário pode ler seu próprio documento.
+        isUserAdmin() ||             // Admin pode ler qualquer documento de usuário.
+        // Permite ler o documento do parceiro se já estiverem vinculados
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.linkedPartnerId == userId) ||
+        (get(/databases/$(database)/documents/users/$(userId)).data.linkedPartnerId == request.auth.uid) ||
+        // PERMISSÃO ADICIONAL PARA O PROCESSO DE VÍNCULO:
+        // Permite que o usuário autenticado (request.auth.uid) leia o documento do usuário (userId)
+        // SE o usuário (userId) for o iniciador de um link pendente que está ativo.
+        // A transação no cliente (linkService.ts) é responsável por validar se o request.auth.uid
+        // é o aceitador correto para o linkCode específico. Esta regra apenas abre a porta para a leitura
+        // do perfil do iniciador se ele tiver um link pendente ativo.
+        (
+          get(/databases/$(database)/documents/users/$(userId)).data.linkCode != null &&
+          exists(/databases/$(database)/documents/pendingLinks/$(get(/databases/$(database)/documents/users/$(userId)).data.linkCode)) &&
+          get(/databases/$(database)/documents/pendingLinks/$(get(/databases/$(database)/documents/users/$(userId)).data.linkCode)).data.initiatorUserId == userId &&
+          get(/databases/$(database)/documents/pendingLinks/$(get(/databases/$(database)/documents/users/$(userId)).data.linkCode)).data.status == 'pending'
+        )
+      );
 
       // Listagem (para ler a coleção inteira):
       // Apenas admins podem listar todos os usuários.

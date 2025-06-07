@@ -1,0 +1,23 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\LanguageSelector.module.css */
+.languageDropdown {
+  /* Herda de .genericButton para estilos base como borda, cursor, etc. */
+  /* Se genericButton não definir, adicione:
+     border: 1px solid var(--cor-borda, #555);
+     cursor: pointer;
+  */
+  padding: 7px 12px; /* Ajuste o padding conforme necessário */
+  font-size: 0.9em;
+  background-color: var(--cor-fundo-elemento, #333); /* Cor de fundo do dropdown */
+  color: var(--cor-texto-primario, #fff); /* Cor do texto do dropdown */
+  border-radius: 6px; /* Arredondamento das bordas */
+  /* Aparência para se assemelhar a um botão, mas ainda ser um select */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  /* Adicionar uma seta customizada ou usar a padrão do navegador */
+  /* background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22/%3E%3C/svg%3E');
+  /* background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 10px; */
+  min-width: 120px; /* Largura mínima para o dropdown */
+}

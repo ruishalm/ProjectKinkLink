@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styles from './Header.module.css';
+import LanguageSelector from '../LanguageSelector'; // Importa o novo componente
 
 // Supondo que o logo esteja em public/kinklogo.png ou um caminho acessível
 const logoSrc = '/kinklogo.png'; // Ajuste o caminho se o logo estiver em outro lugar (ex: /assets/images/kinklogo.png)
@@ -38,6 +39,7 @@ const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick }) =>
         >
           Help
         </Link>
+        <LanguageSelector /> {/* Adiciona o seletor de idiomas aqui */}
       </div>
     </header>
   );

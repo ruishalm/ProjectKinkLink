@@ -9,7 +9,7 @@ i18n
   .use(LanguageDetector) // Detecta o idioma do usuário
   .use(initReactI18next) // Passa a instância do i18n para o react-i18next
   .init({
-    supportedLngs: ['pt', 'en'], // Idiomas que você planeja suportar (ex: Português, Inglês)
+    supportedLngs: ['pt', 'en', 'es'], // Idiomas que você planeja suportar (ex: Português, Inglês, Espanhol)
     fallbackLng: 'pt', // Idioma padrão se a detecção falhar ou o idioma não for suportado
     
     // Define os namespaces que você usará

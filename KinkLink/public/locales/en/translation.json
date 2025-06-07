@@ -1,0 +1,268 @@
+{
+  "appName": "KinkLink",
+  "loading": "Loading...",
+  "app": {
+    "initialLoading": "Loading KinkLink...",
+    "suspenseLoading": "Loading page..."
+  },
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "login": "Login",
+    "signup": "Sign Up",
+    "logout": "Logout",
+    "close": "Close",
+    "next": "Next",
+    "back": "Back",
+    "installApp": "Install App",
+    "help": "Help",
+    "linkNow": "Link Now",
+    "manageLink": "Manage Link",
+    "goToCards": "Go to Cards",
+    "createKink": "Create Kink",
+    "legal": "Got it!",
+    "edit": "Edit",
+    "confirm": "Confirm",
+    "backToProfile": "Back to Profile"
+  },
+  "header": {
+    "installApp": "Install App",
+    "help": "Help"
+  },
+  "homePage": {
+    "title": "KinkLink",
+    "subTitle": "Connections and Discoveries for Couples",
+    "loginButton": "Login",
+    "signupButton": "Create Account"
+  },
+  "loginPage": {
+    "title": "Login",
+    "emailLabel": "Email:",
+    "passwordLabel": "Password:",
+    "forgotPasswordLink": "Forgot your password?",
+    "signupPrompt": "Don't have an account?",
+    "googleLoginButton": "Login with Google",
+    "googleSubmitting": "Please wait...",
+    "backToHomeLink": "Back to Homepage",
+    "errorUserNotFound": "Email not found or invalid. Please check the entered email.",
+    "errorWrongPassword": "Incorrect password. Please try again.",
+    "errorInvalidCredential": "Invalid credentials. Please check your email and password.",
+    "errorGeneric": "Failed to login. Please check your credentials and try again.",
+    "errorUnexpected": "An unexpected error occurred. Please try again later.",
+    "submitting": "Logging in..."
+  },
+  "signupPage": {
+    "title": "Sign Up",
+    "usernameLabel": "Username:",
+    "usernamePlaceholder": "What do you want to be called?",
+    "birthDateLabel": "Date of Birth:",
+    "genderLabel": "Gender Identity:",
+    "passwordLabel": "Password:",
+    "confirmPasswordLabel": "Confirm Password:",
+    "termsAgreement": "I have read and agree to the",
+    "termsLink": "Terms of Service",
+    "importantEmailInfo": "Important: Use an email address you have access to. It will be used for password recovery if needed.",
+    "submitting": "Signing up...",
+    "loginPrompt": "Already have an account?",
+    "loginLink": "Log in",
+    "errorEmailInUse": "This email is already in use. Try another or log in.",
+    "errorWeakPassword": "Password is too weak. Use at least 6 characters.",
+    "errorGenericSignup": "An error occurred while trying to create the account. Please try again."
+  },
+  "registerPage": {
+    "placeholderMessage": "This is the registration page. Content will be coming soon."
+  },
+  "profilePage": {
+    "title": "My Profile",
+    "editTitle": "Edit Personal Data",
+    "personalDataSection": "Your Personal Data",
+    "usernameLabel": "Username:",
+    "bioLabel": "Bio:",
+    "bioPlaceholder": "Tell us a little about yourself...",
+    "genderLabel": "Gender Identity:",
+    "birthDateLabel": "Date of Birth:",
+    "notInformed": "Not informed",
+    "notSet": "Not set",
+    "saveButton": "Save Changes",
+    "editButton": "Edit Profile",
+    "linkSectionTitle": "Couple Link",
+    "linkedMessage": "You are linked! Explore Links and chat with your partner.",
+    "notLinkedMessage": "You are not linked yet. Connect with your partner to start the fun!",
+    "customizationSectionTitle": "Customization",
+    "mySkinsButton": "My Skins",
+    "restartButton": "RESTART",
+    "restartWarning": "Reset and restart? To sync, press this button together and start a new exploration!",
+    "loadingProfile": "Loading profile..."
+  },
+  "linkCouplePage": {
+    "title": "Link Couple",
+    "subText": "To use KinkLink and share experiences with your partner, you need to link your accounts.",
+    "generateCodeButton": "I want to Generate a Code",
+    "orText": "OR",
+    "haveCodeButton": "I have a Code to Enter",
+    "backToProfileButton": "Back to Profile",
+    "alreadyLinkedTitle": "You Are Already Linked!",
+    "alreadyLinkedPartnerInfo": "Your partner is: {{partnerName}}",
+    "alreadyLinkedSubText": "Now you can start using KinkLink together!",
+    "unlinkButton": "Unlink",
+    "unlinkingButton": "Unlinking...",
+    "cancelButton": "Back / Cancel"
+  },
+  "createLinkComponent": {
+    "title": "Generate Link Code",
+    "generateButton": "Generate My Code",
+    "generatingButton": "Generating...",
+    "shareCodeInfo": "Share this code with your partner:",
+    "doneButton": "Done / Back",
+    "errorGenerating": "Error generating code. Please try again."
+  },
+  "acceptLinkComponent": {
+    "title": "Connect with Partner",
+    "inputLabel": "Enter Link Code:",
+    "connectButton": "Connect",
+    "connectingButton": "Connecting...",
+    "cancelButton": "Cancel",
+    "errorInvalidCode": "Invalid or expired code. Please check and try again.",
+    "errorAlreadyLinked": "You or your partner are already linked to another account.",
+    "errorLinkingGeneric": "Error trying to link. Please try again.",
+    "success": "Link successful!"
+  },
+  "cardPilePage": {
+    "loadingSkins": "Loading skins...",
+    "loadingNextCard": "Loading next card...",
+    "noMoreCardsTitle": "End of Cards!",
+    "noMoreCardsMessage": "You've seen all available cards for now.\nCome back later for new suggestions or create your own!",
+    "dislikeButton": "Not into it!",
+    "likeButton": "Into it!",
+    "carinhosMimosButton": "Care & Treats",
+    "matchesNavButton": "Links ({{count}})",
+    "profileNavButton": "Profile",
+    "seenCardsCounter": "Cards Seen: {{count}}",
+    "remainingCardsCounter": "Remaining: {{count}}"
+  },
+  "playingCard": {
+    "swipeLike": "Into it!",
+    "swipeDislike": "Pass",
+    "addToHotLinks": "Add to Top Links",
+    "removeFromHotLinks": "Remove from Top Links"
+  },
+  "skinsPage": {
+    "loadingSkins": "Loading skins...",
+    "userNotFoundError": "Error: User not found. Please try reloading.",
+    "title": "My Skins",
+    "previewTitle": "Pile Preview",
+    "equipButton": "Equip",
+    "lockedIconLabel": "Locked",
+    "categoryTitle": {
+      "backgroundPile": "Background Texture (Card Pile)",
+      "backgroundMatches": "Background Texture (Links Screen)",
+      "colorPalette": "Color Palettes",
+      "font": "Font Styles",
+      "buttonStyle": "Button Styles",
+      "themePack": "Complete Theme Packs",
+      "panelStyle": "Panel Styles",
+      "default": "Skins"
+    }
+  },
+  "matchesPage": {
+    "title": "Your Links!",
+    "backToCardsButton": "Cards",
+    "noMatchesYet": "No links here yet. Keep exploring the cards!",
+    "topLinksSectionTitle": "🔥 Top Links 🔥",
+    "categorySectionTitle": "Links by Category"
+  },
+  "termsPage": {
+    "windowTitle": "KinkLink Terms of Service"
+  },
+  "supportPage": {
+    "title": "Support & Contact",
+    "introText": "Need help or have a suggestion? We'd love to hear from you!",
+    "contactInstruction": "Send an email to:",
+    "emailAddress": "suporte.kinklink@gmail.com"
+  },
+  "adminUsersPage": {
+    "title": "Manage Users",
+    "searchPlaceholder": "Search by email or username...",
+    "tableHeaderId": "ID",
+    "tableHeaderUsername": "User",
+    "tableHeaderEmail": "Email",
+    "tableHeaderLinkedTo": "Linked To",
+    "tableHeaderIsAdmin": "Admin?",
+    "tableHeaderIsSupporter": "Supporter?",
+    "tableHeaderActions": "Actions",
+    "actionToggleAdmin": "Make Admin",
+    "actionRemoveAdmin": "Remove Admin",
+    "actionToggleSupporter": "Make Supporter",
+    "actionRemoveSupporter": "Remove Supporter",
+    "confirmToggleAdmin": "Make {{username}} admin?",
+    "confirmRemoveAdmin": "Remove admin from {{username}}?",
+    "confirmToggleSupporter": "Make {{username}} supporter?",
+    "confirmRemoveSupporter": "Remove supporter from {{username}}?",
+    "errorLoadingUsers": "Error loading users.",
+    "noUsersFound": "No users found matching criteria."
+  },
+  "modals": {
+    "forgotPassword": {
+      "title": "Recover Password",
+      "instructions": "Please enter your email address. We'll send you a link to create a new password.",
+      "emailLabel": "Your Email:",
+      "sendResetEmailButton": "Send Recovery Email",
+      "sendingButton": "Sending...",
+      "successMessage": "Recovery email sent! Check your inbox (and spam folder).",
+      "errorMessage": "Failed to send email. Check the address and try again."
+    },
+    "createUserCard": {
+      "title": "✨ Create New Card ✨",
+      "categoryLabel": "Category:",
+      "intensityLabel": "Intensity:",
+      "textPlaceholder": "Your text here...",
+      "saveButton": "Save Card"
+    },
+    "match": {
+      "title": "🎉 LINK! 🎉",
+      "subTitle": "You both liked this card:",
+      "chatButton": "Chat about it!",
+      "closeButton": "Got it!"
+    },
+    "conexaoCard": {
+      "title": "✨ Connection Card ✨",
+      "acceptButton": "Accept Invitation!",
+      "rejectButton": "Not now, thanks."
+    },
+    "unlockNotification": {
+      "title": "🎉 Skin Unlocked! 🎉",
+      "infoText": "You can equip it on the \"My Skins\" page!",
+      "closeButton": "Got it!"
+    },
+    "carinhosMimos": {
+      "title": "💖 Care & Treats 💖",
+      "subText": "Recall your \"Yes\" votes for Connection cards and get inspired!",
+      "noSuggestions": "You haven't said \"Yes\" to any Connection cards yet.",
+      "tableHeaderCard": "Card",
+      "tableHeaderDate": "Link Date"
+    },
+    "cardChat": {
+      "sendButtonLabel": "Send",
+      "unlinkConfirmationButton": "Unlink and Delete History"
+    }
+  },
+  "gender": {
+    "select": "Select...",
+    "homem_cis": "Cisgender Man",
+    "mulher_cis": "Cisgender Woman",
+    "homem_trans": "Transgender Man",
+    "mulher_trans": "Transgender Woman",
+    "nao_binario": "Non-binary",
+    "outro_genero": "Other",
+    "naoinformar_genero": "Prefer not to say"
+  },
+  "cardCategories": {
+    "sensorial": "Sensorial",
+    "poder": "Power",
+    "fantasia": "Fantasy",
+    "exposicao": "Exposure",
+    "conexao": "Connection",
+    "usercard": "User Card"
+  }
+}

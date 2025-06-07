@@ -1,0 +1,268 @@
+{
+  "appName": "KinkLink",
+  "loading": "Cargando...",
+  "app": {
+    "initialLoading": "Cargando KinkLink...",
+    "suspenseLoading": "Cargando página..."
+  },
+  "buttons": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "submit": "Enviar",
+    "login": "Iniciar Sesión",
+    "signup": "Registrarse",
+    "logout": "Cerrar Sesión",
+    "close": "Cerrar",
+    "next": "Siguiente",
+    "back": "Atrás",
+    "installApp": "Instalar App",
+    "help": "Ayuda",
+    "linkNow": "Vincular Ahora",
+    "manageLink": "Gestionar Vínculo",
+    "goToCards": "Ir a Cartas",
+    "createKink": "Crear Kink",
+    "legal": "¡Entendido!",
+    "edit": "Editar",
+    "confirm": "Confirmar",
+    "backToProfile": "Volver al Perfil"
+  },
+  "header": {
+    "installApp": "Instalar App",
+    "help": "Ayuda"
+  },
+  "homePage": {
+    "title": "KinkLink",
+    "subTitle": "Conexiones y Descubrimientos para Parejas",
+    "loginButton": "Iniciar Sesión",
+    "signupButton": "Crear Cuenta"
+  },
+  "loginPage": {
+    "title": "Iniciar Sesión",
+    "emailLabel": "Correo Electrónico:",
+    "passwordLabel": "Contraseña:",
+    "forgotPasswordLink": "¿Olvidaste tu contraseña?",
+    "signupPrompt": "¿No tienes una cuenta?",
+    "googleLoginButton": "Iniciar Sesión con Google",
+    "googleSubmitting": "Por favor espera...",
+    "backToHomeLink": "Volver a la Página Principal",
+    "errorUserNotFound": "Correo electrónico no encontrado o inválido. Por favor, verifica el correo ingresado.",
+    "errorWrongPassword": "Contraseña incorrecta. Por favor, inténtalo de nuevo.",
+    "errorInvalidCredential": "Credenciales inválidas. Por favor, verifica tu correo y contraseña.",
+    "errorGeneric": "Error al iniciar sesión. Por favor, verifica tus credenciales e inténtalo de nuevo.",
+    "errorUnexpected": "Ocurrió un error inesperado. Por favor, inténtalo más tarde.",
+    "submitting": "Iniciando sesión..."
+  },
+  "signupPage": {
+    "title": "Registrarse",
+    "usernameLabel": "Nombre de Usuario:",
+    "usernamePlaceholder": "¿Cómo quieres que te llamen?",
+    "birthDateLabel": "Fecha de Nacimiento:",
+    "genderLabel": "Identidad de Género:",
+    "passwordLabel": "Contraseña:",
+    "confirmPasswordLabel": "Confirmar Contraseña:",
+    "termsAgreement": "He leído y acepto los",
+    "termsLink": "Términos de Servicio",
+    "importantEmailInfo": "Importante: Usa una dirección de correo electrónico a la que tengas acceso. Se usará para recuperar la contraseña si es necesario.",
+    "submitting": "Registrando...",
+    "loginPrompt": "¿Ya tienes una cuenta?",
+    "loginLink": "Inicia sesión",
+    "errorEmailInUse": "Este correo electrónico ya está en uso. Intenta con otro o inicia sesión.",
+    "errorWeakPassword": "La contraseña es demasiado débil. Usa al menos 6 caracteres.",
+    "errorGenericSignup": "Ocurrió un error al intentar crear la cuenta. Por favor, inténtalo de nuevo."
+  },
+  "registerPage": {
+    "placeholderMessage": "Esta es la página de registro. El contenido estará disponible pronto."
+  },
+  "profilePage": {
+    "title": "Mi Perfil",
+    "editTitle": "Editar Datos Personales",
+    "personalDataSection": "Tus Datos Personales",
+    "usernameLabel": "Nombre de Usuario:",
+    "bioLabel": "Biografía:",
+    "bioPlaceholder": "Cuéntanos un poco sobre ti...",
+    "genderLabel": "Identidad de Género:",
+    "birthDateLabel": "Fecha de Nacimiento:",
+    "notInformed": "No informado",
+    "notSet": "No establecido",
+    "saveButton": "Guardar Cambios",
+    "editButton": "Editar Perfil",
+    "linkSectionTitle": "Vínculo de Pareja",
+    "linkedMessage": "¡Estás vinculado/a! Explora los Vínculos y chatea con tu pareja.",
+    "notLinkedMessage": "Aún no estás vinculado/a. ¡Conéctate con tu pareja para empezar la diversión!",
+    "customizationSectionTitle": "Personalización",
+    "mySkinsButton": "Mis Skins",
+    "restartButton": "REINICIAR",
+    "restartWarning": "¿Restablecer y reiniciar? Para sincronizar, presionen este botón juntos e inicien una nueva exploración.",
+    "loadingProfile": "Cargando perfil..."
+  },
+  "linkCouplePage": {
+    "title": "Vincular Pareja",
+    "subText": "Para usar KinkLink y compartir experiencias con tu pareja, necesitan vincular sus cuentas.",
+    "generateCodeButton": "Quiero Generar un Código",
+    "orText": "O",
+    "haveCodeButton": "Tengo un Código para Ingresar",
+    "backToProfileButton": "Volver al Perfil",
+    "alreadyLinkedTitle": "¡Ya Estás Vinculado/a!",
+    "alreadyLinkedPartnerInfo": "Tu pareja es: {{partnerName}}",
+    "alreadyLinkedSubText": "¡Ahora pueden empezar a usar KinkLink juntos!",
+    "unlinkButton": "Desvincular",
+    "unlinkingButton": "Desvinculando...",
+    "cancelButton": "Volver / Cancelar"
+  },
+  "createLinkComponent": {
+    "title": "Generar Código de Vínculo",
+    "generateButton": "Generar Mi Código",
+    "generatingButton": "Generando...",
+    "shareCodeInfo": "Comparte este código con tu pareja:",
+    "doneButton": "Hecho / Volver",
+    "errorGenerating": "Error al generar el código. Por favor, inténtalo de nuevo."
+  },
+  "acceptLinkComponent": {
+    "title": "Conectar con Pareja",
+    "inputLabel": "Ingresa el Código de Vínculo:",
+    "connectButton": "Conectar",
+    "connectingButton": "Conectando...",
+    "cancelButton": "Cancelar",
+    "errorInvalidCode": "Código inválido o expirado. Por favor, verifica e inténtalo de nuevo.",
+    "errorAlreadyLinked": "Tú o tu pareja ya están vinculados a otra cuenta.",
+    "errorLinkingGeneric": "Error al intentar vincular. Por favor, inténtalo de nuevo.",
+    "success": "¡Vínculo exitoso!"
+  },
+  "cardPilePage": {
+    "loadingSkins": "Cargando skins...",
+    "loadingNextCard": "Cargando siguiente carta...",
+    "noMoreCardsTitle": "¡Fin de las Cartas!",
+    "noMoreCardsMessage": "Has visto todas las cartas disponibles por ahora.\n¡Vuelve más tarde para nuevas sugerencias o crea las tuyas!",
+    "dislikeButton": "¡No me va!",
+    "likeButton": "¡Me va!",
+    "carinhosMimosButton": "Mimos y Cariños",
+    "matchesNavButton": "Vínculos ({{count}})",
+    "profileNavButton": "Perfil",
+    "seenCardsCounter": "Cartas Vistas: {{count}}",
+    "remainingCardsCounter": "Restantes: {{count}}"
+  },
+  "playingCard": {
+    "swipeLike": "¡Me va!",
+    "swipeDislike": "Paso",
+    "addToHotLinks": "Añadir a Top Vínculos",
+    "removeFromHotLinks": "Quitar de Top Vínculos"
+  },
+  "skinsPage": {
+    "loadingSkins": "Cargando skins...",
+    "userNotFoundError": "Error: Usuario no encontrado. Por favor, intenta recargar.",
+    "title": "Mis Skins",
+    "previewTitle": "Vista Previa de la Pila",
+    "equipButton": "Equipar",
+    "lockedIconLabel": "Bloqueado",
+    "categoryTitle": {
+      "backgroundPile": "Textura de Fondo (Pila de Cartas)",
+      "backgroundMatches": "Textura de Fondo (Pantalla de Vínculos)",
+      "colorPalette": "Paletas de Colores",
+      "font": "Estilos de Fuente",
+      "buttonStyle": "Estilos de Botón",
+      "themePack": "Paquetes de Tema Completos",
+      "panelStyle": "Estilos de Panel",
+      "default": "Skins"
+    }
+  },
+  "matchesPage": {
+    "title": "¡Tus Vínculos!",
+    "backToCardsButton": "Cartas",
+    "noMatchesYet": "Aún no hay vínculos por aquí. ¡Sigue explorando las cartas!",
+    "topLinksSectionTitle": "🔥 Top Vínculos 🔥",
+    "categorySectionTitle": "Vínculos por Categoría"
+  },
+  "termsPage": {
+    "windowTitle": "Términos de Servicio de KinkLink"
+  },
+  "supportPage": {
+    "title": "Soporte y Contacto",
+    "introText": "¿Necesitas ayuda o tienes alguna sugerencia? ¡Nos encantaría escucharte!",
+    "contactInstruction": "Envía un correo electrónico a:",
+    "emailAddress": "suporte.kinklink@gmail.com"
+  },
+  "adminUsersPage": {
+    "title": "Gestionar Usuarios",
+    "searchPlaceholder": "Buscar por correo o nombre de usuario...",
+    "tableHeaderId": "ID",
+    "tableHeaderUsername": "Usuario",
+    "tableHeaderEmail": "Correo",
+    "tableHeaderLinkedTo": "Vinculado a",
+    "tableHeaderIsAdmin": "¿Admin?",
+    "tableHeaderIsSupporter": "¿Patrocinador?",
+    "tableHeaderActions": "Acciones",
+    "actionToggleAdmin": "Hacer Admin",
+    "actionRemoveAdmin": "Quitar Admin",
+    "actionToggleSupporter": "Hacer Patrocinador",
+    "actionRemoveSupporter": "Quitar Patrocinador",
+    "confirmToggleAdmin": "¿Hacer admin a {{username}}?",
+    "confirmRemoveAdmin": "¿Quitar admin de {{username}}?",
+    "confirmToggleSupporter": "¿Hacer patrocinador a {{username}}?",
+    "confirmRemoveSupporter": "¿Quitar patrocinador de {{username}}?",
+    "errorLoadingUsers": "Error al cargar usuarios.",
+    "noUsersFound": "No se encontraron usuarios con los criterios."
+  },
+  "modals": {
+    "forgotPassword": {
+      "title": "Recuperar Contraseña",
+      "instructions": "Por favor, ingresa tu dirección de correo electrónico. Te enviaremos un enlace para crear una nueva contraseña.",
+      "emailLabel": "Tu Correo Electrónico:",
+      "sendResetEmailButton": "Enviar Correo de Recuperación",
+      "sendingButton": "Enviando...",
+      "successMessage": "¡Correo de recuperación enviado! Verifica tu bandeja de entrada (y spam).",
+      "errorMessage": "Error al enviar correo. Verifica la dirección e inténtalo de nuevo."
+    },
+    "createUserCard": {
+      "title": "✨ Crear Nueva Carta ✨",
+      "categoryLabel": "Categoría:",
+      "intensityLabel": "Intensidad:",
+      "textPlaceholder": "Tu texto aquí...",
+      "saveButton": "Guardar Carta"
+    },
+    "match": {
+      "title": "🎉 ¡VÍNCULO! 🎉",
+      "subTitle": "A ambos les gustó esta carta:",
+      "chatButton": "¡Chatear sobre esto!",
+      "closeButton": "¡Entendido!"
+    },
+    "conexaoCard": {
+      "title": "✨ Carta de Conexión ✨",
+      "acceptButton": "¡Acepto la Invitación!",
+      "rejectButton": "Ahora no, gracias."
+    },
+    "unlockNotification": {
+      "title": "🎉 ¡Skin Desbloqueada! 🎉",
+      "infoText": "¡Puedes equiparla en la página \"Mis Skins\"!",
+      "closeButton": "¡Entendido!"
+    },
+    "carinhosMimos": {
+      "title": "💖 Mimos y Cariños 💖",
+      "subText": "¡Recuerda tus \"Sí\" a las cartas de Conexión e inspírate!",
+      "noSuggestions": "Aún no han dicho \"Sí\" a ninguna carta de Conexión.",
+      "tableHeaderCard": "Carta",
+      "tableHeaderDate": "Fecha del Vínculo"
+    },
+    "cardChat": {
+      "sendButtonLabel": "Enviar",
+      "unlinkConfirmationButton": "Desvincular y Borrar Historial"
+    }
+  },
+  "gender": {
+    "select": "Selecciona...",
+    "homem_cis": "Hombre Cisgénero",
+    "mulher_cis": "Mujer Cisgénero",
+    "homem_trans": "Hombre Transgénero",
+    "mulher_trans": "Mujer Transgénero",
+    "nao_binario": "No binario",
+    "outro_genero": "Otro",
+    "naoinformar_genero": "Prefiero no decirlo"
+  },
+  "cardCategories": {
+    "sensorial": "Sensorial",
+    "poder": "Poder",
+    "fantasia": "Fantasía",
+    "exposicao": "Exposición",
+    "conexao": "Conexión",
+    "usercard": "Carta de Usuario"
+  }
+}

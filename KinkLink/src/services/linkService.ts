@@ -3,7 +3,6 @@ import {
   doc,
   setDoc,
   getDoc, // Adicionado para verificação opcional
-  serverTimestamp,
   Timestamp, // Adicionado para tipagem correta
   runTransaction, // Necessário para acceptLink
   collection,     // Necessário para criar o doc do casal
@@ -11,6 +10,7 @@ import {
   writeBatch      // Necessário para completeLinkForInitiator
 } from 'firebase/firestore';
 import { auth, db } from '../firebase'; // Ajustado para apontar para src/firebase.ts
+import { serverTimestamp } from 'firebase/firestore'; // Importação correta para serverTimestamp
 
 // --- Função Auxiliar para gerar o código ---
 const generateLinkCode = (length: number = 6): string => {
@@ -60,17 +60,12 @@ export const createLink = async (): Promise<string> => {
 
   // 1. Verificar se o usuário atual já está vinculado
   const userDocRef = doc(db, 'users', currentUser.uid);
-  const userDocSnap = await getDoc(userDocRef);
+  // A verificação de vínculo e a atualização do linkCode do usuário serão feitas dentro da transação
 
-  if (userDocSnap.exists()) {
-    const userData = userDocSnap.data() as UserLinkStatus;
-    if (userData.coupleId || userData.partnerId) {
+  // Verificação inicial fora da transação para feedback rápido, se desejado.
+  const initialUserDocSnap = await getDoc(userDocRef);
+  if (initialUserDocSnap.exists() && (initialUserDocSnap.data().coupleId || initialUserDocSnap.data().partnerId)) {
       throw new Error("Você já está vinculado a alguém. Desvincule primeiro para criar um novo código.");
-    }
-  } else {
-    // Isso não deveria acontecer se o usuário está logado e o M1.T8 (criar doc 'users') foi feito.
-    console.warn(`Documento do usuário ${currentUser.uid} não encontrado em 'users'.`);
-    throw new Error("Não foi possível verificar seu status de vínculo. Tente novamente.");
   }
 
   // 2. Gerar um linkCode
@@ -89,8 +84,31 @@ export const createLink = async (): Promise<string> => {
 
   // 4. Salvar o link pendente no Firestore
   try {
-    await setDoc(pendingLinkRef, newPendingLink);
-    console.log(`Link pendente criado com sucesso. Código: ${linkCode}`);
+    await runTransaction(db, async (transaction) => {
+      // Ler o documento do usuário dentro da transação para a verificação mais atualizada
+      const userDocSnap = await transaction.get(userDocRef);
+
+      if (!userDocSnap.exists()) {
+        // Isso não deveria acontecer se o usuário está logado e o AuthContext garante a criação do doc.
+        console.error(`Documento do usuário ${currentUser.uid} não encontrado em 'users' dentro da transação.`);
+        throw new Error("Seus dados de usuário não foram encontrados. Tente novamente.");
+      }
+
+      const userData = userDocSnap.data() as UserLinkStatus;
+      if (userData.coupleId || userData.partnerId) {
+        // Se o usuário se vinculou entre a verificação inicial e agora.
+        throw new Error("Você já está vinculado a alguém. Desvincule primeiro para criar um novo código.");
+      }
+
+      // Criar o novo documento em pendingLinks
+      transaction.set(pendingLinkRef, newPendingLink);
+
+      // ATUALIZAR o linkCode no documento do usuário iniciador
+      transaction.update(userDocRef, {
+        linkCode: linkCode // O mesmo código usado como ID do pendingLink
+      });
+    });
+    console.log(`Link pendente criado com sucesso. Código: ${linkCode} para usuário ${currentUser.uid}`);
     return linkCode; // Retornar o código para ser exibido na UI
   } catch (error) {
     console.error("Erro ao criar o link pendente no Firestore:", error);

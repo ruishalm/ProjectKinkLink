@@ -4,6 +4,7 @@ import { type MatchedCard } from '../contexts/AuthContext'; // Usaremos o tipo M
 import MatchCardItem, { type MatchCardItemProps } from './MatchCardItem'; // Importa o componente refatorado
 import CardBack from './CardBack'; // Para a carta vazia
 import styles from './CategoryCarousel.module.css';
+import { useTranslation } from 'react-i18next';
 
 // Import Swiper React components
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -26,14 +27,15 @@ interface CategoryCarouselProps {
 }
 
 const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCardClick, onToggleHot, unreadStatuses, cardChatsData }) => {
+  const { t } = useTranslation();
   if (cards.length === 0) {
     return (
       <div className={styles.carouselSection}>
         <h3 className={styles.categoryTitle}>{title}</h3>
         <div className={styles.emptyStateContainer}>
           <div className={styles.emptyCard}>
-            <CardBack targetHeight={175} targetWidth={125} /> {/* Ajuste o tamanho conforme necessário */}
-            <div className={styles.emptyCardText}>Vazio</div>
+            <CardBack targetHeight={175} targetWidth={125} />
+            <div className={styles.emptyCardText}>{t('categoryCarousel.emptyStateText')}</div>
           </div>
         </div>
       </div>
@@ -74,7 +76,9 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCar
                 <MatchCardItem
                   card={cardForDisplay}
                   onClick={() => {
-                    console.log(`CategoryCarousel: MatchCardItem clicado! Card ID: ${card.id}, Texto: "${card.text.substring(0,30)}..."`);
+                    console.log(
+                      t('categoryCarousel.matchCardClickedLog', { cardId: card.id, cardTextSnippet: card.text.substring(0,30) })
+                    );
                     onCardClick(card);
                   }}
                   isHot={card.isHot || false}

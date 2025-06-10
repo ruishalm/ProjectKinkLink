@@ -2,11 +2,13 @@
 import { useState, useEffect } from 'react';
 import { categorySpecificTips } from '../components/categorySpecificTips';
 import type { Card } from '../data/cards';
+import { useTranslation } from 'react-i18next';
 
 export const useCardTips = (currentCard: Card | null) => {
   const [activeLeftTip, setActiveLeftTip] = useState<string | null>(null);
   const [activeRightTip, setActiveRightTip] = useState<string | null>(null);
   const [animateTipsIn, setAnimateTipsIn] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     setAnimateTipsIn(false);
@@ -18,10 +20,12 @@ export const useCardTips = (currentCard: Card | null) => {
       let newRightTip: string | null = null;
 
       if (tipsForCategory.left.length > 0) {
-        newLeftTip = tipsForCategory.left[Math.floor(Math.random() * tipsForCategory.left.length)];
+        const tipKey = tipsForCategory.left[Math.floor(Math.random() * tipsForCategory.left.length)];
+        newLeftTip = t(tipKey);
       }
       if (tipsForCategory.right.length > 0) {
-        newRightTip = tipsForCategory.right[Math.floor(Math.random() * tipsForCategory.right.length)];
+        const tipKey = tipsForCategory.right[Math.floor(Math.random() * tipsForCategory.right.length)];
+        newRightTip = t(tipKey);
       }
 
       setActiveLeftTip(newLeftTip);
@@ -37,7 +41,7 @@ export const useCardTips = (currentCard: Card | null) => {
       setActiveLeftTip(null);
       setActiveRightTip(null);
     }
-  }, [currentCard]);
+  }, [currentCard, t]);
 
   return { activeLeftTip, activeRightTip, animateTipsIn };
 };

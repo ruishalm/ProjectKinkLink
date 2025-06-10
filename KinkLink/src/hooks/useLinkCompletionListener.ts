@@ -14,6 +14,7 @@ import {
   completeLinkForInitiator,
   type PendingLinkData, // Import as type-only
 } from '../services/linkService'; // Adjust path if your linkService is elsewhere
+import { useTranslation } from 'react-i18next';
 
 /**
  * Hook para ouvir por `pendingLinks` completados que foram iniciados pelo usuário atual.
@@ -29,6 +30,7 @@ export const useLinkCompletionListener = (
   onLinkCompleted?: (coupleId: string, partnerId: string) => void
 ) => {
   const [processingLinkId, setProcessingLinkId] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     let unsubscribe: Unsubscribe | undefined = undefined;
@@ -37,7 +39,7 @@ export const useLinkCompletionListener = (
     const currentUserId = currentUser?.id; // Alterado para usar 'id' do AuthContextUser
 
     if (currentUserId && !isUserLinked && !processingLinkId) {
-      console.log(`[Listener Usuário A ${currentUserId}]: Iniciando escuta por links completados.`);
+      console.log(t('hooks.useLinkCompletionListener.startListeningLog', { userId: currentUserId }));
       const q = query(
         collection(db, 'pendingLinks'),
         where('initiatorUserId', '==', currentUserId),
@@ -55,28 +57,24 @@ export const useLinkCompletionListener = (
               } as PendingLinkData;
 
               if (completedLink.linkCode === processingLinkId) {
-                console.log(`[Listener Usuário A ${currentUserId}]: Link ${completedLink.linkCode} já está sendo processado.`);
+                console.log(t('hooks.useLinkCompletionListener.alreadyProcessingLog', { userId: currentUserId, linkCode: completedLink.linkCode }));
                 return;
               }
 
               const userDocRef = doc(db, 'users', currentUserId);
               const userDocSnap = await getDoc(userDocRef);
               if (userDocSnap.exists() && (userDocSnap.data().coupleId || userDocSnap.data().partnerId)) {
-                console.log(`[Listener Usuário A ${currentUserId}]: Usuário já vinculado (verificação interna do listener), ignorando link ${completedLink.linkCode}.`);
+                console.log(t('hooks.useLinkCompletionListener.alreadyLinkedInternalLog', { userId: currentUserId, linkCode: completedLink.linkCode }));
                 return;
               }
 
               if (completedLink.acceptedBy && completedLink.coupleId) {
-                console.log(
-                  `[Listener Usuário A ${currentUserId}]: Link ${completedLink.linkCode} completado por ${completedLink.acceptedBy} detectado!`
-                );
+                console.log(t('hooks.useLinkCompletionListener.linkCompletedDetectedLog', { userId: currentUserId, linkCode: completedLink.linkCode, acceptedBy: completedLink.acceptedBy }));
                 setProcessingLinkId(completedLink.linkCode);
 
                 try {
                   await completeLinkForInitiator(completedLink);
-                  console.log(
-                    `[Listener Usuário A ${currentUserId}]: Vínculo com ${completedLink.acceptedBy} (Couple ID: ${completedLink.coupleId}) finalizado com sucesso.`
-                  );
+                  console.log(t('hooks.useLinkCompletionListener.linkFinalizedSuccessLog', { userId: currentUserId, acceptedBy: completedLink.acceptedBy, coupleId: completedLink.coupleId }));
                   if (onLinkCompleted && completedLink.coupleId && completedLink.acceptedBy) {
                     onLinkCompleted(completedLink.coupleId, completedLink.acceptedBy);
                   }
@@ -84,7 +82,9 @@ export const useLinkCompletionListener = (
                   console.error(
                     `[Listener Usuário A ${currentUserId}]: Erro ao tentar completar o vínculo para o link ${completedLink.linkCode}:`,
                     error
-                  );
+                  ); // This specific error message is harder to translate directly due to the dynamic parts and the error object.
+                  // A more generic translated message could be used, or keep this one for detailed debugging.
+                  // For now, let's keep it as is, or you can opt for a generic t('hooks.useLinkCompletionListener.linkFinalizationErrorLog', {userId, linkCode})
                 } finally {
                   setProcessingLinkId(null);
                 }
@@ -93,7 +93,7 @@ export const useLinkCompletionListener = (
           });
         },
         (error) => {
-          console.error(`[Listener Usuário A ${currentUserId}]: Erro no listener de pendingLinks:`, error);
+          console.error(t('hooks.useLinkCompletionListener.listenerErrorLog', { userId: currentUserId }), error);
         }
       );
     }
@@ -103,5 +103,5 @@ export const useLinkCompletionListener = (
         unsubscribe();
       }
     };
-  }, [currentUser, isUserLinked, onLinkCompleted, processingLinkId]);
+  }, [currentUser, isUserLinked, onLinkCompleted, processingLinkId, t]);
 };

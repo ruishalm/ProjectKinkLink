@@ -6,6 +6,7 @@ import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
 import styles from './CardChatModal.module.css';
 import chatStyles from './CardChat.module.css';
 import { Timestamp } from 'firebase/firestore'; // Importa Timestamp
+import { useTranslation } from 'react-i18next'; // Importa useTranslation
 import { markChatAsSeen } from '../utils/chatNotificationStore'; // Importa a função
 
 interface CardChatModalProps {
@@ -31,6 +32,7 @@ function CardChatModal({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const modalContentRef = useRef<HTMLDivElement>(null); // Ref para o conteúdo do modal
   const { deleteMatch } = useUserCardInteractions();
+  const { t } = useTranslation(); // Hook de tradução
 
   // Efeito para fechar com Escape e clique fora
   useEffect(() => {
@@ -81,7 +83,10 @@ function CardChatModal({
   };
 
   const handleDesfazerLink = async () => {
-    if (cardId && window.confirm(`Tem certeza que deseja desfazer o Link com a carta "${cardTitle || 'esta carta'}"? Esta carta voltará para a pilha de ambos.`)) {
+    const confirmMessage = t('modals.cardChat.unlinkConfirmMessage', {
+      cardTitle: cardTitle || t('modals.cardChat.thisCardFallback')
+    });
+    if (cardId && window.confirm(confirmMessage)) {
       await deleteMatch(cardId);
       onClose();
     }
@@ -94,17 +99,17 @@ function CardChatModal({
   return (
     <div className={styles.modalOverlay} onClick={onClose}> {/* Overlay pode fechar ao clicar */}
       <div className={`${styles.modalContent} klnkl-themed-panel`} ref={modalContentRef} onClick={(e) => e.stopPropagation()}>
-        <button className={styles.closeButton} onClick={onClose} aria-label="Fechar chat">X</button>
+        <button className={styles.closeButton} onClick={onClose} aria-label={t('modals.cardChat.closeChatAriaLabel')}>X</button>
         
         <div className={chatStyles.chatContainer}>
           <div className={chatStyles.chatHeader}>
-            <h3 className={chatStyles.chatHeaderName}>Conversa sobre:</h3>
+            <h3 className={chatStyles.chatHeaderName}>{t('modals.cardChat.chatAboutTitle')}</h3>
             <p className={chatStyles.chatHeaderName} style={{opacity: 0.8, fontSize: '0.9em'}}>
-              {cardTitle || "Carta selecionada"}
+              {cardTitle || t('modals.cardChat.selectedCardFallbackTitle')}
             </p>
           </div>
 
-          {isLoading && <div className={chatStyles.loadingMessages}>Carregando mensagens...</div>}
+          {isLoading && <div className={chatStyles.loadingMessages}>{t('modals.cardChat.loadingMessages')}</div>}
           {chatError && <div className={chatStyles.chatError}>{chatError}</div>}
           
           {!isLoading && !chatError && (
@@ -116,11 +121,11 @@ function CardChatModal({
                 >
                   <div className={chatStyles.messageContent}>{msg.text}</div>
                   <div className={chatStyles.messageInfo}>
-                    <span>{msg.userId === user?.id ? "Você" : (msg.username || "Parceiro(a)")}</span>
+                    <span>{msg.userId === user?.id ? t('modals.cardChat.currentUserMessageLabel') : (msg.username || t('modals.cardChat.partnerMessageLabel'))}</span>
                     <span style={{ marginLeft: '8px' }}>
                       {msg.timestamp && msg.timestamp.toDate ? 
                         msg.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 
-                        'agora'}
+                        t('modals.cardChat.timestampNowFallback')}
                     </span>
                   </div>
                 </div>
@@ -135,7 +140,7 @@ function CardChatModal({
               className={chatStyles.chatInput} 
               value={newMessage} 
               onChange={(e) => setNewMessage(e.target.value)} 
-              placeholder="Escreva no verso da carta..." 
+              placeholder={t('modals.cardChat.inputPlaceholder')}
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()} 
               disabled={isLoading}
             />
@@ -144,13 +149,13 @@ function CardChatModal({
               onClick={handleSendMessage} 
               disabled={!newMessage.trim() || isLoading}
             >
-              Enviar
+              {t('modals.cardChat.sendButtonLabel')}
             </button>
           </div>
         </div>
 
         <button className={`${styles.destructiveButton} genericButton genericButtonDestructive`} onClick={handleDesfazerLink} disabled={isLoading}>
-          Desfazer Link
+          {t('modals.cardChat.unlinkButtonLabel')}
         </button>
       </div>
     </div>

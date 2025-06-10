@@ -10,6 +10,7 @@ import CategoryCarousel from '../components/CategoryCarousel';
 import { getLastSeenTimestampForCard, markChatAsSeen } from '../utils/chatNotificationStore';
 import { useSkin } from '../contexts/SkinContext';
 import styles from './MatchesPage.module.css';
+import { useTranslation } from 'react-i18next';
 import { Timestamp } from 'firebase/firestore';
 
 
@@ -22,7 +23,8 @@ interface MatchCardItemProps {
   lastMessageSnippet?: string;
 }
 
-function MatchCardItem({ card, onClick, isHot, isUnread, onToggleHot, lastMessageSnippet }: MatchCardItemProps) {
+function MatchCardItem({ card, onClick, isHot, isUnread, onToggleHot, lastMessageSnippet }: MatchCardItemProps) { // Adicionado t
+  const { t } = useTranslation(); // Adicionado para MatchCardItem
   const scaleFactor = isHot ? 0.55 : 0.5;
   const cardWidth = 250 * scaleFactor;
   const cardHeight = 350 * scaleFactor;
@@ -34,7 +36,7 @@ function MatchCardItem({ card, onClick, isHot, isUnread, onToggleHot, lastMessag
       onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
       role="button"
       tabIndex={0}
-      aria-label={`Link: ${card.text.substring(0,30)}... ${isUnread ? ' (Não lido)' : ''}`}
+      aria-label={`${t('matchesPage.matchCardAriaLabel', { cardText: card.text.substring(0,30) })} ${isUnread ? t('matchesPage.unreadIndicatorText') : ''}`}
     >
       {isUnread && <div className={styles.unreadIndicator}></div>}
       <PlayingCard
@@ -60,6 +62,7 @@ function MatchesPage() {
   const navigate = useNavigate();
   const { isLoadingSkins } = useSkin(); // activeSkins não é mais usado diretamente aqui para o fundo
   const { cardChatsData, isLoading: isLoadingCardChats, error: cardChatsError } = useCoupleCardChats(user?.coupleId);
+  const { t } = useTranslation();
 
   const [selectedCardForChat, setSelectedCardForChat] = useState<PlayingCardDataType | null>(null);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
@@ -174,11 +177,11 @@ function MatchesPage() {
     }
   };
 
-  if (isLoadingSkins || (!user || (isLoadingCardChats && !Object.keys(cardChatsData).length))) { 
-    return <div className={styles.page}><p>Carregando seus links...</p></div>;
+  if (isLoadingSkins || !user || isLoadingCardChats) { 
+    return <div className={styles.page}><p>{t('matchesPage.loadingMatches')}</p></div>;
   }
   if (cardChatsError) {
-    return <div className={styles.page}><p>Erro ao carregar dados dos chats: {cardChatsError}</p></div>;
+    return <div className={styles.page}><p>{t('matchesPage.errorLoadingChats', { error: cardChatsError })}</p></div>;
   }
 
   const hotMatches = userMatchedCards.filter(card => card.isHot);
@@ -198,7 +201,11 @@ function MatchesPage() {
   const otherCardsByCategory = groupCardsByCategory(otherMatches);
 
   // Define a ordem fixa e as únicas categorias a serem exibidas nos carrosséis
-  const fixedCarouselOrder: string[] = ['Poder', 'Fantasia', 'Exposição', 'Sensorial']; // Ordem corrigida
+  // Simplified the type of fixedCarouselOrder to string[] to avoid potential issues with
+  // the complex `keyof typeof t(...)` type, which might be causing parsing or type inference problems.
+  const fixedCarouselOrder: string[] = [
+    'poder', 'fantasia', 'exposicao', 'sensorial'
+  ];
 
 
   // Função auxiliar para obter a classe CSS da categoria
@@ -240,20 +247,20 @@ function MatchesPage() {
         <div className={styles.pageHeaderControls}> {/* Novo container para título e botão */}
           <button onClick={handleMatchesButtonClick} className={`${styles.backToCardsButton} genericButton ${hasUnseenGlobalMatches ? styles.shakeAnimation : ''}`} aria-label="Voltar para as cartas">
             {hasUnseenGlobalMatches && <span className={styles.navNotificationDot}></span>}
-            Cartas
+            {t('matchesPage.backToCardsButton')}
           </button>
         </div>
 
         {/* O restante do conteúdo da página continua aqui dentro do main */}
       {noMatchesCondition ? (
         <p className={styles.noMatchesText}>
-          Você ainda não tem Links. Continue explorando as cartas!
+          {t('matchesPage.noMatchesYet')}
         </p>
       ) : (
         <>
           {hotMatches.length > 0 && (
             <section className={styles.topLinksSection}>
-              <h2 className={styles.sectionTitle}>🔥 Top Links</h2>
+              <h2 className={styles.sectionTitle}>{t('matchesPage.topLinksSectionTitle')}</h2>
               <div className={getTopLinksContainerClasses(hotMatches.length)}>
                 <div className={styles.matchesGrid}>
                   {hotMatches.map((card: MatchedCard) => (
@@ -275,14 +282,14 @@ function MatchesPage() {
           {Object.keys(otherCardsByCategory).length > 0 && (
             <section className={styles.section} style={hotMatches.length > 0 ? { marginTop: '40px' } : {}}>
               <h2 className={`${styles.sectionTitle} ${styles.sectionTitleOthers}`}>
-                {hotMatches.length > 0 ? 'Nossos Links' : 'Seus Links por Categoria'}
+                {hotMatches.length > 0 ? t('matchesPage.ourLinks') : t('matchesPage.yourLinksByCategory')}
               </h2>
               <div className={styles.categoryCarouselsGrid}>
                 {fixedCarouselOrder.map(categoryName => {
                   const cardsForCategory = otherCardsByCategory[categoryName]; // Busca as cartas para a categoria da ordem fixa
                   if (cardsForCategory && cardsForCategory.length > 0) {
                     return (
-                      <div key={categoryName} className={`${styles.carouselCell} ${getCarouselCellClasses(categoryName, cardsForCategory.length)}`}>
+                      <div key={categoryName} className={`${styles.carouselCell} ${getCarouselCellClasses(t(`cardCategories.${categoryName}`), cardsForCategory.length)}`}>
                         <CategoryCarousel
                           title={categoryName}
                           cards={cardsForCategory}
@@ -301,8 +308,8 @@ function MatchesPage() {
                   .filter(([categoryName]) => !fixedCarouselOrder.includes(categoryName))
                   .map(([categoryName, cardsForCategory]) => {
                     if (cardsForCategory && cardsForCategory.length > 0) {
-                      return (
-                        <div key={`other-${categoryName}`} className={`${styles.carouselCell} ${getCarouselCellClasses(categoryName, cardsForCategory.length)}`}>
+                      return ( // Adicionado return
+                        <div key={`other-${categoryName}`} className={`${styles.carouselCell} ${getCarouselCellClasses(t(`cardCategories.${categoryName}`), cardsForCategory.length)}`}>
                           <CategoryCarousel
                             title={categoryName}
                             cards={cardsForCategory}
@@ -312,7 +319,7 @@ function MatchesPage() {
                             cardChatsData={cardChatsData}
                           />
                         </div>
-                      );
+                      ); // Ponto e vírgula removido daqui
                     }
                     return null;
                   })}

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Card } from '../data/cards';
 import styles from './CarinhosMimosModal.module.css'; // Importa os CSS Modules
+import { useTranslation } from 'react-i18next';
 
 interface CarinhosMimosModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ const STORAGE_KEY_PREFIX = 'kinklink_carinho_status_';
 function CarinhosMimosModal({ isOpen, onClose, conexaoCards }: CarinhosMimosModalProps) {
   // Hooks e Estados
   const [doneStatus, setDoneStatus] = useState<Record<string, boolean>>({});
+  const { t } = useTranslation();
 
   // Carregar status do localStorage ao montar
   useEffect(() => {
@@ -53,22 +55,22 @@ function CarinhosMimosModal({ isOpen, onClose, conexaoCards }: CarinhosMimosModa
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={`${styles.modalContent} klnkl-themed-panel`} onClick={(e) => e.stopPropagation()}>
-        <h2 className={styles.headerTitle}>
-          ❤️ Carinhos & Mimos ❤️
+        <h2 className={styles.headerTitle} aria-label={t('modals.carinhosMimos.title')}>
+          {t('modals.carinhosMimos.title')}
         </h2>
         <p className={styles.subText}>
-          Pequenos gestos para fortalecer a conexão. Marque os que você já fez!
+          {t('modals.carinhosMimos.subText')}
         </p>
         
         {conexaoCards.length === 0 ? (
-          <p className={styles.noSuggestionsText}>Nenhuma sugestão de carinho disponível no momento.</p>
+          <p className={styles.noSuggestionsText}>{t('modals.carinhosMimos.noSuggestions')}</p>
         ) : (
           <div className={styles.tableContainer}>
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th className={styles.th}>Proposta</th>
-                  <th className={`${styles.th}`} style={{ width: '80px', textAlign: 'center' }}>Feito?</th>
+                  <th className={styles.th}>{t('modals.carinhosMimos.tableHeaderCard')}</th>
+                  <th className={`${styles.th}`} style={{ width: '80px', textAlign: 'center' }}>{t('modals.carinhosMimos.tableHeaderDone')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -92,7 +94,7 @@ function CarinhosMimosModal({ isOpen, onClose, conexaoCards }: CarinhosMimosModa
           </div>
         )}
         <button onClick={onClose} className={`${styles.closeButton} genericButton`}>
-          Fechar
+          {t('buttons.close')}
         </button>
       </div>
     </div>

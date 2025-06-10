@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, query, onSnapshot, Timestamp } from 'firebase/firestore';
+import { useTranslation } from 'react-i18next';
 
 export interface CardChatData {
   id: string; // cardId
@@ -19,6 +20,7 @@ export function useCoupleCardChats(coupleId: string | null | undefined) {
   const [cardChatsData, setCardChatsData] = useState<CoupleCardChats>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!coupleId) {
@@ -29,7 +31,7 @@ export function useCoupleCardChats(coupleId: string | null | undefined) {
 
     setIsLoading(true);
     setError(null);
-    console.log(`[useCoupleCardChats] Setting up listener for cardChats in couple ${coupleId}`);
+    console.log(t('hooks.useCoupleCardChats.setupListenerLog', { coupleId }));
 
     const cardChatsColPath = `couples/${coupleId}/cardChats`;
     const q = query(collection(db, cardChatsColPath));
@@ -42,13 +44,13 @@ export function useCoupleCardChats(coupleId: string | null | undefined) {
       setCardChatsData(chats);
       setIsLoading(false);
     }, (err) => {
-      console.error(`[useCoupleCardChats] Error fetching cardChats for couple ${coupleId}:`, err);
-      setError("Failed to load chat data.");
+      console.error(t('hooks.useCoupleCardChats.fetchErrorLog', { coupleId }), err);
+      setError(t('hooks.useCoupleCardChats.loadErrorUserMessage'));
       setIsLoading(false);
     });
 
     return () => unsubscribe();
-  }, [coupleId]);
+  }, [coupleId, t]);
 
   return { cardChatsData, isLoading, error };
 }

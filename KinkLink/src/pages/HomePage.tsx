@@ -2,12 +2,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import React, { useEffect } from 'react'; // Removido CSSProperties
 import styles from './HomePage.module.css'; // Importa os CSS Modules
+import { useTranslation } from 'react-i18next';
 
 function HomePage() {
   const { user, isLoading } = useAuth();
   const navigate = useNavigate();
-
-  // console.log('[HomePage] isLoading:', isLoading, 'User:', user); // Comentado para limpeza
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Se o usuário está carregando, não faz nada ainda
@@ -25,13 +25,13 @@ function HomePage() {
     <div className={styles.pageContainer}>
       {/* Envolve o conteúdo principal para melhor organização e estilização se o header for sticky */}
       <main className={styles.mainContent}>
-        <h1 className={styles.title}>Bem-vindo(a) ao KinkLink!</h1>
+        <h1 className={styles.title}>{t('homePage.welcomeTitle')}</h1>
         <p className={styles.subTitle}>
-          Descubra, explore e conecte-se com seu parceiro(a) de uma maneira totalmente nova.
+          {t('homePage.welcomeSubtitle')}
         </p>
         <div className={styles.buttonContainer}>
-          <Link to="/login" className={styles.primaryButton}>Login</Link>
-          <Link to="/signup" className={styles.secondaryButton}>Cadastre-se</Link>
+          <Link to="/login" className={styles.primaryButton}>{t('buttons.login')}</Link>
+          <Link to="/signup" className={styles.secondaryButton}>{t('buttons.signup')}</Link>
         </div>
       </main>
     </div>

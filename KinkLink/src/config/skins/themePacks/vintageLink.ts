@@ -5,7 +5,7 @@ export const packVintageLink: SkinDefinition = {
   id: 'pack_vintage_link',
   name: 'Vintage Link',
   type: 'themePack',
-  description: 'Charme nostálgico e elegância atemporal. Botões com estilo clássico em breve!',
+  description: ' ',
   associatedPaletteId: 'palette_vintage_sepia',
   associatedFontId: 'font_merriweather',
   associatedButtonStyleId: 'btn_style_vintage',

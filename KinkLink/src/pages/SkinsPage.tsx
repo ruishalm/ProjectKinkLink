@@ -1,5 +1,6 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\SkinsPage.tsx
 import React, { useMemo, useState } from 'react'; // useEffect removido
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import styles from './SkinsPage.module.css';
 import { useSkin } from '../contexts/SkinContext'; // ActiveSkinSettings não é mais necessária aqui diretamente
@@ -12,6 +13,7 @@ import SkinItemDisplay from '../components/SkinItemDisplay'; // Importar o novo 
 function SkinsPage() {
   const { activeSkins, setActiveSkin, isLoadingSkins } = useSkin(); // Usar o contexto
   const { user, isLoading: isLoadingAuth } = useAuth(); // Usar o contexto de autenticação
+  const { t } = useTranslation();
   const [forceUnlockedIds, setForceUnlockedIds] = useState<string[]>([]); // Estado para skins forçadamente desbloqueadas
 
   // Agrupa as skins por tipo para facilitar a renderização
@@ -58,34 +60,34 @@ function SkinsPage() {
 
   const getCategoryTitle = (type: SkinDefinition['type']): string => {
     switch (type) {
-      case 'backgroundPile': return 'Textura de Fundo (Pilha de Cartas)';
-      case 'backgroundMatches': return 'Textura de Fundo (Tela de Links)';
-      case 'colorPalette': return 'Paletas de Cores';
-      case 'font': return 'Estilos de Fonte';
-      case 'buttonStyle': return 'Estilos de Botão';
-      case 'themePack': return 'Pacotes de Tema Completos';
-      case 'panelStyle': return 'Estilos de Painel'; // Adicionado
-      default: return 'Skins';
+      case 'backgroundPile': return t('skinsPage.categoryTitle.backgroundPile');
+      case 'backgroundMatches': return t('skinsPage.categoryTitle.backgroundMatches');
+      case 'colorPalette': return t('skinsPage.categoryTitle.colorPalette');
+      case 'font': return t('skinsPage.categoryTitle.font');
+      case 'buttonStyle': return t('skinsPage.categoryTitle.buttonStyle');
+      case 'themePack': return t('skinsPage.categoryTitle.themePack');
+      case 'panelStyle': return t('skinsPage.categoryTitle.panelStyle');
+      default: return t('skinsPage.categoryTitle.default');
     }
   };
 
   if (isLoadingSkins || isLoadingAuth) {
-    return <div className={styles.page}><p>Carregando skins...</p></div>;
+    return <div className={styles.page}><p>{t('skinsPage.loadingSkins')}</p></div>;
   }
 
   if (!user) {
-    return <div className={styles.page}><p>Erro: Usuário não encontrado. Por favor, tente recarregar.</p></div>;
+    return <div className={styles.page}><p>{t('skinsPage.userNotFoundError')}</p></div>;
   }
 
   return (
     <div className={`${styles.page} klnkl-themed-panel`}> {/* Adicionado klnkl-themed-panel */}
       <div className={styles.pageHeaderControls}>
         <Link to="/profile" className={`${styles.backButton} genericButton ck-theme-button`}>
-          &larr; Voltar
+          &larr; {t('skinsPage.backButton')}
         </Link>
-        <h1 className={styles.pageTitle}>Minhas Skins</h1>
+        <h1 className={styles.pageTitle}>{t('skinsPage.title')}</h1>
         <Link to="/cards" className={`${styles.backButton} genericButton ck-theme-button`}>
-          Pilha de Cartas &rarr;
+          {t('skinsPage.cardsButton')} &rarr;
         </Link>
       </div>
 
@@ -157,4 +159,5 @@ function SkinsPage() {
     </div>
   );
 }
+
 export default SkinsPage;

@@ -1,5 +1,6 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\hooks\useUserCardInteractions.ts
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth, type User, type MatchedCard as AuthMatchedCard } from '../contexts/AuthContext';
 import type { Card } from '../data/cards';
 import { db } from '../firebase';
@@ -25,6 +26,7 @@ import { exampleSkinsData } from '../config/skins'; // Importar dados das skins 
 
 export function useUserCardInteractions() {
   const { user, updateUser, checkAndUnlockSkins } = useAuth(); // Adicionar checkAndUnlockSkins
+  const { t } = useTranslation();
 
   const matchedCards = user?.matchedCards || [];
   const seenCards = user?.seenCards || [];
@@ -148,7 +150,7 @@ export function useUserCardInteractions() {
 
   const handleRegularCardInteraction = async (card: Card, liked: boolean): Promise<boolean> => {
     if (!user || !user.id || !user.coupleId) {
-      console.warn("[Interaction] Tentativa de interação sem usuário, ID ou coupleId.", { userId: user?.id, coupleId: user?.coupleId });
+      console.warn(t('hooks.useUserCardInteractions.interactionAttemptNoUserLog'), { userId: user?.id, coupleId: user?.coupleId });
       return false;
     }
     console.log(`[Interaction] User: ${user.id.substring(0,5)}, Card: ${card.id}, Liked: ${liked}, CoupleId: ${user.coupleId}`);
@@ -188,7 +190,7 @@ export function useUserCardInteractions() {
               isMatch: true,
               lastActivity: Timestamp.now(),
             });
-            console.log(`[MATCH!] Card ${card.id} is now a match for couple ${user.coupleId}`);
+            console.log(t('hooks.useUserCardInteractions.matchSuccessLog', { cardId: card.id, coupleId: user.coupleId }));
             // Verificar desbloqueio de skins após um match
             if (user && checkAndUnlockSkins) {
               try {
@@ -208,7 +210,7 @@ export function useUserCardInteractions() {
         }
       }
     } catch (error) {
-      console.error(`[Interaction] Firestore Error during subcollection match logic for card ${card.id}:`, error);
+      console.error(t('hooks.useUserCardInteractions.firestoreMatchErrorLog', { cardId: card.id }), error);
       return false;
     }
   };
@@ -232,7 +234,7 @@ export function useUserCardInteractions() {
 
   const handleCreateUserCard = async (category: Card['category'], text: string, intensity?: number) => {
     if (!user || !user.id || !text.trim() || !user.coupleId || !user.linkedPartnerId) {
-        console.warn("Tentativa de criar carta sem usuário, texto, coupleId ou parceiro vinculado.");
+        console.warn(t('hooks.useUserCardInteractions.createUserCardWarningLog'));
         return;
     }
     const newCardData: Omit<Card, 'id'> & { createdBy: string, coupleId: string, createdAt: Timestamp } = {
@@ -246,7 +248,7 @@ export function useUserCardInteractions() {
     try {
       const userCardsCollectionRef = collection(db, 'userCards');
       const docRef = await addDoc(userCardsCollectionRef, newCardData);
-      console.log("Firestore: Carta personalizada criada com sucesso!", { id: docRef.id, ...newCardData });
+      console.log(t('hooks.useUserCardInteractions.userCardCreatedSuccessLog', { cardId: docRef.id }), { id: docRef.id, ...newCardData });
 
       const newCardForInteraction: Card = {
         id: docRef.id,
@@ -284,7 +286,7 @@ export function useUserCardInteractions() {
         }
       }
     } catch (error) {
-      console.error("Firestore: Erro ao criar carta personalizada:", error);
+      console.error(t('hooks.useUserCardInteractions.userCardCreateErrorLog'), error);
     }
   };
 

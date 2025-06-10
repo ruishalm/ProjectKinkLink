@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { createLink as apiCreateLink } from '../services/linkService'; // Renomeado para evitar conflito
 import { useAuth } from '../contexts/AuthContext';
 import styles from './CreateLink.module.css'; // Importa os CSS Modules
+import { useTranslation } from 'react-i18next';
 
 interface CreateLinkProps {
   onLinkCreated: (code: string) => void;
@@ -15,10 +16,11 @@ const CreateLink: React.FC<CreateLinkProps> = ({ onLinkCreated, onCancel }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const { t } = useTranslation();
   // Funções Manipuladoras
   const handleCreateLink = async () => {
     if (!user) {
-      setError("Você precisa estar logado para criar um link.");
+      setError(t('createLinkComponent.errorNotLoggedIn'));
       return;
     }
     setIsLoading(true);
@@ -32,7 +34,7 @@ const CreateLink: React.FC<CreateLinkProps> = ({ onLinkCreated, onCancel }) => {
       onLinkCreated(code); // Notifica o pai que o código foi criado
     } catch (err) {
       console.error("Erro ao criar link:", err);
-      setError("Falha ao gerar o código. Tente novamente.");
+      setError(t('createLinkComponent.errorGenerating'));
     } finally {
       setIsLoading(false);
     }
@@ -41,21 +43,21 @@ const CreateLink: React.FC<CreateLinkProps> = ({ onLinkCreated, onCancel }) => {
   // Lógica de Renderização e JSX
   return (
     <div className={styles.section}>
-      <h2 className={styles.title}>Gerar Código de Vínculo</h2>
+      <h2 className={styles.title}>{t('createLinkComponent.title')}</h2>
       {!linkCode ? (
-        <button onClick={handleCreateLink} disabled={isLoading} className={styles.primaryButton}>
-          {isLoading ? 'Gerando...' : 'Gerar Meu Código'}
+        <button onClick={handleCreateLink} disabled={isLoading} className={`${styles.primaryButton} genericButton`}>
+          {isLoading ? t('createLinkComponent.generatingButton') : t('createLinkComponent.generateButton')}
         </button>
       ) : (
         <div>
-          <p className={styles.infoText}>Compartilhe este código com seu parceiro(a):</p>
+          <p className={styles.infoText}>{t('createLinkComponent.shareCodeInfo')}</p>
           <p className={styles.codeDisplay}>{linkCode}</p>
         </div>
       )}
       {error && <p className={styles.errorText}>{error}</p>}
       {/* Botão para chamar onCancel */}
-      <button onClick={onCancel} className={styles.secondaryButton}>
-        {linkCode ? 'Concluído / Voltar' : 'Cancelar'}
+      <button onClick={onCancel} className={`${styles.secondaryButton} genericButton`}>
+        {linkCode ? t('createLinkComponent.doneButton') : t('buttons.cancel')}
       </button>
     </div>
   );

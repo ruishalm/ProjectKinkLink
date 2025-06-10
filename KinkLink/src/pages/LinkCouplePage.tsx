@@ -7,6 +7,7 @@ import AcceptLink from '../components/AcceptLink';
 import { db } from '../firebase'; // Import db
 import { doc, getDoc, writeBatch } from 'firebase/firestore'; // Import firestore functions, removido deleteDoc
 import styles from './LinkCouplePage.module.css';
+import { useTranslation } from 'react-i18next';
 
 const LinkCouplePage: React.FC = () => {
   const { user, isLoading: authIsLoading, updateUser: updateAuthContextUser } = useAuth(); // Removido logout se não for mais usado
@@ -15,6 +16,7 @@ const LinkCouplePage: React.FC = () => {
   const [showAcceptLinkUI, setShowAcceptLinkUI] = useState(false);
   const [partnerInfo, setPartnerInfo] = useState<{ username?: string; email?: string | null } | null>(null);
   const [isUnlinking, setIsUnlinking] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (user && user.linkedPartnerId && !partnerInfo) {
@@ -26,41 +28,40 @@ const LinkCouplePage: React.FC = () => {
             const partnerData = partnerDocSnap.data() as User;
             setPartnerInfo({ username: partnerData.username, email: partnerData.email });
           } else {
-            console.warn("Documento do parceiro não encontrado.");
-            setPartnerInfo({ username: "Parceiro(a) não encontrado(a)" });
+            console.warn(t('linkCouplePage.partnerNotFoundConsole'));
+            setPartnerInfo({ username: t('linkCouplePage.partnerNotFoundUI') });
           }
         } catch (error) {
-          console.error("Erro ao buscar informações do parceiro:", error);
-          setPartnerInfo({ username: "Erro ao buscar parceiro(a)" });
+          console.error(t('linkCouplePage.errorFetchingPartnerConsole'), error);
+          setPartnerInfo({ username: t('linkCouplePage.errorFetchingPartnerUI') });
         }
       };
       fetchPartnerInfo();
     } else if (user && !user.linkedPartnerId) {
       setPartnerInfo(null); // Limpa info do parceiro se desvinculado
     }
-  }, [user, user?.linkedPartnerId, partnerInfo]);
+  }, [user, user?.linkedPartnerId, partnerInfo, t]);
 
   if (authIsLoading) {
-    return <div className={styles.page}><p className={styles.loadingText}>Carregando informações do usuário...</p></div>;
+    return <div className={styles.page}><p className={styles.loadingText}>{t('linkCouplePage.loadingUserInfo')}</p></div>;
   }
 
   if (!user) {
-    return <div className={styles.page}><p className={styles.loadingText}>Por favor, faça login para vincular sua conta.</p></div>;
+    return <div className={styles.page}><p className={styles.loadingText}>{t('linkCouplePage.loginToLink')}</p></div>;
   }
 
   const handleUnlink = async () => {
     if (!user || !user.id || !user.linkedPartnerId || !user.coupleId) {
-      alert("Não foi possível identificar os dados do vínculo para desfazer.");
+      alert(t('linkCouplePage.unlinkErrorIdentification'));
       return;
     }
 
-    if (window.confirm("Tem certeza que deseja desfazer o vínculo com seu parceiro(a)?")) {
+    if (window.confirm(t('linkCouplePage.unlinkConfirmMessage'))) {
       setIsUnlinking(true);
       try {
         const batch = writeBatch(db);
         const currentUserDocRef = doc(db, 'users', user.id);
         const coupleDocRef = doc(db, 'couples', user.coupleId);
-
         // 1. Atualiza o documento do usuário atual
         batch.update(currentUserDocRef, { linkedPartnerId: null, coupleId: null });
 
@@ -69,21 +70,21 @@ const LinkCouplePage: React.FC = () => {
         batch.delete(coupleDocRef);
         await batch.commit();
         await updateAuthContextUser({ linkedPartnerId: null, coupleId: null }); // Atualiza o AuthContext localmente
-        alert("Vínculo desfeito com sucesso!");
+        alert(t('linkCouplePage.unlinkSuccessAlert'));
         // A página será re-renderizada devido à mudança no 'user' do AuthContext,
         // mostrando a UI para vincular novamente.
       } catch (error) {
-        let errorMessage = "Ocorreu um erro ao tentar desfazer o vínculo.";
+        let errorMessage = t('linkCouplePage.unlinkErrorGeneric');
         if (error instanceof Error) {
-          errorMessage += ` Detalhes: ${error.message}`;
+          errorMessage += ` ${t('linkCouplePage.unlinkErrorDetails')} ${error.message}`;
         } else if (typeof error === 'object' && error !== null && 'message' in error) {
-          errorMessage += ` Detalhes: ${(error as { message: string }).message}`;
+          errorMessage += ` ${t('linkCouplePage.unlinkErrorDetails')} ${(error as { message: string }).message}`;
         } else if (typeof error === 'object' && error !== null && 'code' in error) {
-          errorMessage += ` Código: ${(error as { code: string }).code}`;
+          errorMessage += ` ${t('linkCouplePage.unlinkErrorCode')} ${(error as { code: string }).code}`;
         }
-        console.error("Erro ao desfazer vínculo:", error); // Mantém o log completo do objeto de erro
-        alert(errorMessage + " Verifique o console para mais informações.");
-
+        console.error(t('linkCouplePage.unlinkErrorConsole'), error); // Mantém o log completo do objeto de erro
+        alert(errorMessage + ` ${t('linkCouplePage.unlinkErrorCheckConsole')}`);
+        
       } finally {
         setIsUnlinking(false);
       }
@@ -94,16 +95,19 @@ const LinkCouplePage: React.FC = () => {
     return (
       <div className={styles.page}>
         <main className={`${styles.mainContent} klnkl-themed-panel`}> {/* Envolve o conteúdo principal */}
-          <h1 className={styles.title}>Você já está Vinculado!</h1>
-          <p className={styles.partnerInfoText}>Seu parceiro(a) é: {partnerInfo?.username || partnerInfo?.email || user.linkedPartnerId.substring(0, 8) + "..."}</p>
-          <p className={styles.subText}>Agora vocês podem começar a usar o KinkLink juntos!</p>
+          <h1 className={styles.title}>{t('linkCouplePage.alreadyLinkedTitle')}</h1>
+          <p className={styles.partnerInfoText}>
+            {t('linkCouplePage.alreadyLinkedPartnerInfo', { partnerName: partnerInfo?.username || partnerInfo?.email || user.linkedPartnerId.substring(0, 8) + "..." })}
+          </p>
+          <p className={styles.subText}>{t('linkCouplePage.alreadyLinkedSubText')}</p>
           <button 
             onClick={() => {
-              console.log('Botão "Ir para as Cartas" clicado. Navegando para /cards...');
               navigate('/cards');
             }} 
-            className={`${styles.button} genericButton`} style={{ marginTop: '20px' }}>Ir para as Cartas</button>
-          <button onClick={handleUnlink} className={`${styles.destructiveButton} genericButton genericButtonDestructive`} disabled={isUnlinking}>{isUnlinking ? "Desfazendo..." : "Desfazer Vínculo"}</button>
+            className={`${styles.button} genericButton`} style={{ marginTop: '20px' }}>
+            {t('buttons.goToCards')}
+          </button>
+          <button onClick={handleUnlink} className={`${styles.destructiveButton} genericButton genericButtonDestructive`} disabled={isUnlinking}>{isUnlinking ? t('linkCouplePage.unlinkingButton') : t('linkCouplePage.unlinkButton')}</button>
         </main>
       </div>
     );
@@ -129,10 +133,9 @@ const LinkCouplePage: React.FC = () => {
   return (
     <div className={styles.page}>
       <main className={`${styles.mainContent} klnkl-themed-panel`}> {/* Envolve o conteúdo principal */}
-        <h1 className={styles.title}>Vincular Casal</h1>
+        <h1 className={styles.title}>{t('linkCouplePage.title')}</h1>
         <p className={styles.subText}>
-          Para usar o KinkLink e compartilhar experiências com seu parceiro(a),
-          vocês precisam vincular suas contas.
+          {t('linkCouplePage.subText')}
         </p>
 
         {!showCreateLinkUI && !showAcceptLinkUI && (
@@ -142,20 +145,20 @@ const LinkCouplePage: React.FC = () => {
                 onClick={() => { setShowCreateLinkUI(true); setShowAcceptLinkUI(false); }}
                 className={`${styles.actionButton} genericButton`}
               >
-                Quero Gerar um Código
+                {t('linkCouplePage.generateCodeButton')}
               </button>
-              <p className={styles.orText}>OU</p>
+              <p className={styles.orText}>{t('linkCouplePage.orText')}</p>
               <button
                 onClick={() => { setShowAcceptLinkUI(true); setShowCreateLinkUI(false); }}
                 className={`${styles.actionButton} genericButton`}
               >
-                Tenho um Código para Inserir
+                {t('linkCouplePage.haveCodeButton')}
               </button>
             </div>
             <div className={styles.backLinkContainer}>
               {/* Restaurado para Link para /profile */}
               <Link to="/profile" className={`${styles.secondaryButton} ${styles.backLink} genericButton`}>
-                &larr; Voltar para o Perfil
+                {t('buttons.backToProfile')}
               </Link>
             </div>
           </Fragment>
@@ -170,7 +173,7 @@ const LinkCouplePage: React.FC = () => {
               onClick={handleCancelAction} // Usa a nova função
               className={`${styles.secondaryButton} genericButton`}
             >
-              Voltar / Cancelar
+              {t('linkCouplePage.cancelButton')} 
             </button>
           </div>
         )}

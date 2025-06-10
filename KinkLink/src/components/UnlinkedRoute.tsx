@@ -2,13 +2,15 @@
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const UnlinkedRoute: React.FC = () => {
   const { user, isLoading } = useAuth();
   const location = useLocation();
+  const { t } = useTranslation();
 
   if (isLoading) {
-    return <div>Carregando...</div>; // Ou um spinner/skeleton
+    return <div>{t('loading')}</div>; // Ou um spinner/skeleton
   }
 
   // Se o usuário está autenticado E está vinculado, redireciona para o perfil (ou outra página)

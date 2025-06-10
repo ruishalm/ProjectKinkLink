@@ -2,10 +2,12 @@
 import React, { useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './UnlockNotificationModal.module.css';
+import { useTranslation } from 'react-i18next';
 
 const UnlockNotificationModal: React.FC = () => {
   const { newlyUnlockedSkinsForModal, clearNewlyUnlockedSkinsForModal } = useAuth();
-
+  const { t } = useTranslation();
+  
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -28,9 +30,9 @@ const UnlockNotificationModal: React.FC = () => {
 
   return (
     <div className={styles.modalOverlay} onClick={clearNewlyUnlockedSkinsForModal}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <h2 className={styles.title}>🎉 Skin Desbloqueada! 🎉</h2>
-        <button className={styles.closeButtonTop} onClick={clearNewlyUnlockedSkinsForModal} aria-label="Fechar">&times;</button>
+      <div className={`${styles.modalContent} klnkl-themed-panel`} onClick={(e) => e.stopPropagation()}>
+        <h2 className={styles.title}>{t('modals.unlockNotification.title')}</h2>
+        <button className={styles.closeButtonTop} onClick={clearNewlyUnlockedSkinsForModal} aria-label={t('buttons.close')}>&times;</button>
 
         <div className={styles.skinListContainer}> {/* Novo container para a lista rolável */}
           {newlyUnlockedSkinsForModal.map((skin) => (
@@ -58,10 +60,10 @@ const UnlockNotificationModal: React.FC = () => {
 
         <div className={styles.footerContent}> {/* Agrupa o texto e o botão */}
           <p className={styles.infoText}>
-            Você pode equipá-la na página "Minhas Skins"!
+            {t('modals.unlockNotification.infoText')}
           </p>
           <button className={`${styles.confirmButton} genericButton`} onClick={clearNewlyUnlockedSkinsForModal}>
-            Legal!
+            {t('modals.unlockNotification.closeButton')}
           </button>
               </div>
       </div>

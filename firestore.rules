@@ -11,26 +11,8 @@ service cloud.firestore {
 
     // Regras para a coleção 'users'
     match /users/{userId} {
-      // Leitura (get para um documento específico):
-      allow get: if request.auth != null && (
-        request.auth.uid == userId || // Usuário pode ler seu próprio documento.
-        isUserAdmin() ||             // Admin pode ler qualquer documento de usuário.
-        // Permite ler o documento do parceiro se já estiverem vinculados
-        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.linkedPartnerId == userId) ||
-        (get(/databases/$(database)/documents/users/$(userId)).data.linkedPartnerId == request.auth.uid) ||
-        // PERMISSÃO ADICIONAL PARA O PROCESSO DE VÍNCULO:
-        // Permite que o usuário autenticado (request.auth.uid) leia o documento do usuário (userId)
-        // SE o usuário (userId) for o iniciador de um link pendente que está ativo.
-        // A transação no cliente (linkService.ts) é responsável por validar se o request.auth.uid
-        // é o aceitador correto para o linkCode específico. Esta regra apenas abre a porta para a leitura
-        // do perfil do iniciador se ele tiver um link pendente ativo.
-        (
-          get(/databases/$(database)/documents/users/$(userId)).data.linkCode != null &&
-          exists(/databases/$(database)/documents/pendingLinks/$(get(/databases/$(database)/documents/users/$(userId)).data.linkCode)) &&
-          get(/databases/$(database)/documents/pendingLinks/$(get(/databases/$(database)/documents/users/$(userId)).data.linkCode)).data.initiatorUserId == userId &&
-          get(/databases/$(database)/documents/pendingLinks/$(get(/databases/$(database)/documents/users/$(userId)).data.linkCode)).data.status == 'pending'
-        )
-      );
+      // REGRA DE LEITURA TEMPORARIAMENTE SIMPLIFICADA PARA DIAGNÓSTICO
+      allow get: if request.auth != null && request.auth.uid == userId;
 
       // Listagem (para ler a coleção inteira):
       // Apenas admins podem listar todos os usuários.
@@ -141,8 +123,10 @@ service cloud.firestore {
       // Helper function para verificar se o usuário autenticado é membro deste casal
       function isUserMemberOfCouple() {
         // Revertendo para usar o coupleId do escopo do match
-        let coupleDoc = get(/databases/$(database)/documents/couples/$(coupleId));
-        return coupleDoc.data != null && request.auth.uid in coupleDoc.data.members;
+        let couplePath = /databases/$(database)/documents/couples/$(coupleId);
+        return exists(couplePath) &&
+               get(couplePath).data.members is list && // Garante que 'members' existe e é uma lista
+               request.auth.uid in get(couplePath).data.members; // Verifica se o UID está na lista
       }
       allow read, update, delete: if request.auth != null && isUserMemberOfCouple();
       

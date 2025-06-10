@@ -3,6 +3,7 @@ import React, { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './ProfilePage.module.css';
+import { useTranslation } from 'react-i18next';
 
 function ProfilePage() {
   const { user, logout, updateUser, isLoading: authIsLoading, resetUserTestData } = useAuth();
@@ -15,6 +16,7 @@ function ProfilePage() {
   const [initialGender, setInitialGender] = useState(''); // Novo estado para gênero inicial
   const [initialBio, setInitialBio] = useState('');
   const [isPersonalInfoOpen, setIsPersonalInfoOpen] = useState(true); // Começa aberto
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (user) {
@@ -37,7 +39,7 @@ function ProfilePage() {
       await logout();
       navigate('/login', { replace: true }); // Redireciona para login após logout
     } catch (error) {
-      console.error("Erro ao fazer logout:", error);
+      console.error(t('profilePage.errorLogout'), error);
       // Adicionar feedback para o usuário aqui, se necessário
     }
   };
@@ -51,10 +53,10 @@ function ProfilePage() {
         setInitialGender(gender);
         setInitialBio(bio);
         setIsEditing(false);
-        // Adicionar feedback de sucesso para o usuário aqui, se desejar
+        alert(t('profilePage.updateSuccessAlert'));
       } catch (error) {
-        console.error("Erro ao atualizar perfil:", error);
-        // Adicionar feedback de erro para o usuário aqui, se desejar
+        console.error(t('profilePage.errorUpdate'), error);
+        alert(t('profilePage.updateErrorAlert'));
       }
     } else {
       // Se nada mudou, apenas fecha o modo de edição
@@ -76,22 +78,22 @@ function ProfilePage() {
   };
 
   const handleResetTestData = async () => {
-    if (window.confirm("Tem certeza que deseja resetar TODOS os dados de teste (cartas vistas, interações, matches e skins desbloqueadas)? Esta ação é para fins de desenvolvimento e deve ser feita em conjunto com seu par para correta sincronização.")) {
+    if (window.confirm(t('profilePage.resetSection.confirmMessage'))) {
       try {
         await resetUserTestData();
-        alert("Dados de teste resetados com sucesso!");
+        alert(t('profilePage.resetSection.successAlert'));
         // Opcional: forçar recarregamento da página ou do estado do usuário
         // window.location.reload(); // Ou uma forma mais suave de atualizar o estado
       } catch (error) {
-        alert("Falha ao resetar os dados de teste. Verifique o console.");
-        console.error("Erro ao resetar dados de teste:", error);
+        alert(t('profilePage.resetSection.errorAlert'));
+        console.error(t('profilePage.errorResetTestData'), error);
       }
     }
   };
 
   // Funções auxiliares para formatação
   const formatBirthDate = (dateString?: string): string => {
-    if (!dateString) return 'Não informada';
+    if (!dateString) return t('profilePage.notInformed');
     try {
       const [year, month, day] = dateString.split('-');
       if (year && month && day) {
@@ -104,23 +106,13 @@ function ProfilePage() {
     }
   };
 
-  const getGenderLabel = (genderValue?: string): string => {
-    if (!genderValue) return 'Não informada';
-    const labels: Record<string, string> = {
-      'homem_cis': 'Homem Cisgênero',
-      'mulher_cis': 'Mulher Cisgênero',
-      'homem_trans': 'Homem Transgênero',
-      'mulher_trans': 'Mulher Transgênero',
-      'nao_binario': 'Não-binário',
-      'outro_genero': 'Outro',
-      'naoinformar_genero': 'Prefiro não informar',
-    };
-    return labels[genderValue] || genderValue;
-  };
-
   if (authIsLoading || !user) {
     // Mostra uma mensagem de carregamento mais genérica que cobre ambos os casos
-    return <div className={styles.page}><p className={styles.infoText}>Carregando perfil...</p></div>;
+    return (
+      <div className={styles.page}>
+        <p className={styles.infoText}>{t('profilePage.loadingProfile')}</p>
+      </div>
+    );
   }
 
   const displayName = user.username || (user.email ? user.email.split('@')[0] : 'Usuário KinkLink');
@@ -131,14 +123,14 @@ function ProfilePage() {
       <main className={styles.mainContent}> {/* Envolve o conteúdo principal */}
         <div className={styles.pageHeader}>
           <h1 className={`${styles.title}`} style={{borderBottom: 'none', marginBottom: '0px', marginRight: 'auto'}}>
-            Meu Perfil
+            {t('profilePage.title')}
           </h1>
           <button
             onClick={() => navigate('/cards')}
             className={`${styles.actionButton} ${styles.headerButton} genericButton`}
-            aria-label="Ir para cartas"
+            aria-label={t('profilePage.goToCardsButton')}
           >
-            Ir para cartas
+            {t('profilePage.goToCardsButton')}
           </button>
         </div>
 
@@ -154,7 +146,7 @@ function ProfilePage() {
             aria-controls="personal-info-content"
           >
             <h2 className={styles.sectionTitleInHeader}>
-              {isEditing ? 'Editar Dados Pessoais' : 'Seus Dados Pessoais'}
+              {isEditing ? t('profilePage.editTitle') : t('profilePage.personalDataSectionTitle')}
             </h2>
             <span className={`${styles.toggleIcon} ${!isPersonalInfoOpen ? styles.toggleIconClosed : ''}`}>
               ▼
@@ -168,45 +160,45 @@ function ProfilePage() {
             {isEditing ? (
               <form onSubmit={handleProfileUpdate}>
                 <div>
-                  <label htmlFor="username" className={styles.formLabel}>Nome de Usuário:</label>
+                  <label htmlFor="username" className={styles.formLabel}>{t('profilePage.usernameLabel')}</label>
                   <input
                     type="text"
                     id="username"
                     className={styles.input}
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Como você quer ser chamado(a)?"
+                    placeholder={t('profilePage.usernamePlaceholder')}
                   />
                 </div>
                 <div style={{ marginTop: '15px' }}>
-                  <label htmlFor="bio" className={styles.formLabel}>Bio:</label>
+                  <label htmlFor="bio" className={styles.formLabel}>{t('profilePage.bioLabel')}</label>
                   <textarea
                     id="bio"
                     className={styles.textarea}
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
-                    placeholder="Conte um pouco sobre você..."
+                    placeholder={t('profilePage.bioPlaceholder')}
                     rows={4}
                   />
                 </div>
                 <div style={{ marginTop: '15px' }}>
-                  <label htmlFor="gender" className={styles.formLabel}>Identidade de Gênero:</label>
+                  <label htmlFor="gender" className={styles.formLabel}>{t('profilePage.genderLabel')}</label>
                   <select
                     id="gender"
                     name="gender"
                     value={gender}
                     onChange={(e) => setGender(e.target.value)}
                     className={styles.select} // Reutiliza o estilo do select da SignupPage
-                    required // Pode ser opcional dependendo da sua lógica
+                    // required // Pode ser opcional dependendo da sua lógica
                   >
-                    <option value="">Selecione...</option>
-                    <option value="homem_cis">Homem Cisgênero</option>
-                    <option value="mulher_cis">Mulher Cisgênero</option>
-                    <option value="homem_trans">Homem Transgênero</option>
-                    <option value="mulher_trans">Mulher Transgênero</option>
-                    <option value="nao_binario">Não-binário</option>
-                    <option value="outro_genero">Outro</option>
-                    <option value="naoinformar_genero">Prefiro não informar</option>
+                    <option value="">{t('gender.select')}</option>
+                    <option value="homem_cis">{t('gender.homem_cis')}</option>
+                    <option value="mulher_cis">{t('gender.mulher_cis')}</option>
+                    <option value="homem_trans">{t('gender.homem_trans')}</option>
+                    <option value="mulher_trans">{t('gender.mulher_trans')}</option>
+                    <option value="nao_binario">{t('gender.nao_binario')}</option>
+                    <option value="outro_genero">{t('gender.outro_genero')}</option>
+                    <option value="naoinformar_genero">{t('gender.naoinformar_genero')}</option>
                   </select>
                 </div>
                 <div className={styles.formActions}>
@@ -215,22 +207,22 @@ function ProfilePage() {
                     className={`${!hasProfileChanged ? styles.buttonDisabled : styles.button} genericButton`}
                     disabled={!hasProfileChanged}
                   >
-                    Salvar Alterações
+                    {t('profilePage.saveButton')}
                   </button>
-                  <button type="button" onClick={handleCancelEdit} className={`${styles.buttonCancel} genericButton`}>
-                    Cancelar
+                  <button type="button" onClick={handleCancelEdit} className={`${styles.buttonCancel} genericButton`}> {/* Utiliza a chave global */}
+                    {t('buttons.cancel')}
                   </button>
                 </div>
               </form>
             ) : (
               <div>
                 <p className={styles.infoText}><strong>Email:</strong> {user.email}</p>
-                <p className={styles.infoText}><strong>Nome de Usuário:</strong> {displayName}</p>
-                <p className={styles.infoText}><strong>Bio:</strong> {user.bio || 'Não definida'}</p>
-                <p className={styles.infoText}><strong>Data de Nascimento:</strong> {formatBirthDate(user.birthDate)}</p>
-                <p className={styles.infoText}><strong>Identidade de Gênero:</strong> {getGenderLabel(user.gender)}</p>
+                <p className={styles.infoText}><strong>{t('profilePage.usernameLabel')}</strong> {displayName}</p>
+                <p className={styles.infoText}><strong>{t('profilePage.bioLabel')}</strong> {user.bio || t('profilePage.notSet')}</p>
+                <p className={styles.infoText}><strong>{t('profilePage.birthDateLabel')}</strong> {formatBirthDate(user.birthDate)}</p>
+                <p className={styles.infoText}><strong>{t('profilePage.genderLabel')}</strong> {user.gender ? t(`gender.${user.gender}`) : t('profilePage.notInformed')}</p>
                 <button onClick={handleEditClick} className={`${styles.button} genericButton`} style={{ marginTop: '20px' }}>
-                  Editar Perfil
+                  {t('profilePage.editButton')}
                 </button>
               </div>
             )}
@@ -239,19 +231,19 @@ function ProfilePage() {
 
         {/* SEÇÃO DE VÍNCULO */}
         <div className={`${styles.section} klnkl-themed-panel`}>
-          <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>Vínculo de Casal</h2>
+          <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>{t('profilePage.linkSectionTitle')}</h2>
           {user.linkedPartnerId ? (
             <>
-              <p className={styles.infoText}>Você está vinculado! Explore os Links e converse com seu par.</p>
+              <p className={styles.infoText}>{t('profilePage.linkedMessage')}</p>
               <button onClick={() => navigate('/link-couple')} className={`${styles.actionButton} genericButton`}>
-                Gerenciar Vínculo
+                {t('buttons.manageLink')}
               </button>
             </>
           ) : (
             <>
-              <p className={styles.infoText}>Você ainda não está vinculado. Conecte-se com seu parceiro(a) para começar a diversão!</p>
+              <p className={styles.infoText}>{t('profilePage.notLinkedMessage')}</p>
               <button onClick={() => navigate('/link-couple')} className={`${styles.actionButton} genericButton`}>
-                Vincular Agora
+                {t('buttons.linkNow')}
               </button>
             </>
           )}
@@ -259,15 +251,15 @@ function ProfilePage() {
 
         {/* SEÇÃO DE SKINS */}
         <div className={`${styles.section} klnkl-themed-panel`}>
-          <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>Personalização</h2>
+          <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>{t('profilePage.customizationSectionTitle')}</h2>
           <Link to="/skins" className={`${styles.actionButton} genericButton`}>
-            Minhas Skins
+            {t('profilePage.mySkinsButton')}
           </Link>
         </div>
 
         {/* SEÇÃO DE LOGOUT */}
         <div className={`${styles.section} ${styles.textCenter} klnkl-themed-panel`}>
-          <button onClick={handleLogout} className={`${styles.buttonDestructive} genericButton`}>Logout</button>
+          <button onClick={handleLogout} className={`${styles.buttonDestructive} genericButton`}>{t('buttons.logout')}</button>
         </div>
 
         {/* SEÇÃO DE RESET (DEV) */}
@@ -275,12 +267,12 @@ function ProfilePage() {
           <button
             onClick={handleResetTestData}
             className={`${styles.buttonDestructive} genericButton`} // Aplicando estilo de botão destrutivo
-            aria-label="Recomeçar o jogo"
+            aria-label={t('profilePage.resetSection.resetButton')}
           >
-            RECOMEÇAR
+            {t('profilePage.resetSection.resetButton')}
           </button>
           <p className={styles.warningText}>
-            Zerar e recomeçar? Para sincronizar, apertem este botão juntos e iniciem uma nova exploração!
+            {t('profilePage.resetSection.warningText')}
           </p>
         </div>
       </main>

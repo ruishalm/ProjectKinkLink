@@ -1,5 +1,6 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\PlayingCard.tsx
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './PlayingCard.module.css';
 
 export interface CardData {
@@ -45,6 +46,7 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
   const textContentRef = useRef<HTMLParagraphElement>(null);
   const textAreaRef = useRef<HTMLDivElement>(null);
   const [currentFontSize, setCurrentFontSize] = useState(16);
+  const { t } = useTranslation();
 
   const baseCardWidthForScaling = 250;
   const visualScaleFactor = targetWidth / baseCardWidthForScaling;
@@ -159,7 +161,10 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
   };
 
   const displayIntensity = typeof data.intensity === 'number' && !isNaN(data.intensity) ? data.intensity : '-';
-  const displayCategoryName = data.category.charAt(0).toUpperCase() + data.category.slice(1).toLowerCase();
+  // Traduz o nome da categoria, usando o nome original formatado como fallback
+  const displayCategoryName = t(`cardCategories.${data.category.toLowerCase()}`, {
+    defaultValue: data.category.charAt(0).toUpperCase() + data.category.slice(1).toLowerCase()
+  });
 
   return (
     <div
@@ -175,7 +180,7 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
         <div style={cardFrontFaceDynamicInlineStyle} className={styles.cardFront}>
           {dragVisuals && dragVisuals.active && dragVisuals.dir !== 0 && (
             <div className={styles.swipeFeedbackOverlay} style={swipeFeedbackOverlayDynamicStyle}>
-              {dragVisuals.dir > 0 ? 'Topo!' : 'Passo'}
+              {dragVisuals.dir > 0 ? t('playingCard.swipeLike') : t('playingCard.swipeDislike')}
             </div>
           )}
 
@@ -190,7 +195,10 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
 
           <div ref={textAreaRef} className={styles.textArea} style={textAreaDynamicStyle}>
             <p ref={textContentRef} className={styles.textContent} style={textContentFinalStyle}>
-              {data.text}
+              {/* Cartas criadas pelo usuário têm seu texto diretamente. Cartas padrão usam ID para tradução. */}
+              {data.category === 'usercard' || data.category === 'userCard' 
+                ? data.text 
+                : t(`cards:${data.id}`, { defaultValue: data.text })}
             </p>
           </div>
 
@@ -202,8 +210,8 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
               }}
               className={styles.hotButton}
               style={hotButtonDynamicStyle}
-              aria-label={data.isHot ? "Remover dos Top Links" : "Adicionar aos Top Links"}
-              title={data.isHot ? "Remover dos Top Links" : "Adicionar aos Top Links"}
+              aria-label={data.isHot ? t('playingCard.removeFromHotLinks') : t('playingCard.addToHotLinks')}
+              title={data.isHot ? t('playingCard.removeFromHotLinks') : t('playingCard.addToHotLinks')}
             >
               🔥
             </button>

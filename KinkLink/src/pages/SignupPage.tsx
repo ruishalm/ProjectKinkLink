@@ -3,6 +3,7 @@ import React, { useState, type FormEvent, useMemo } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './SignupPage.module.css'; // Importa os CSS Modules
+import { useTranslation } from 'react-i18next';
 
 function SignupPage() {
   // Hooks e Estados
@@ -17,6 +18,7 @@ function SignupPage() {
   const [isSubmitting, setIsSubmitting] = useState(false); // Estado local para o submit do formulário
   const { signup, isLoading: authIsLoading } = useAuth(); // isLoading do AuthContext é para o estado geral de autenticação
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const location = useLocation();
 
   // Funções Auxiliares
@@ -39,25 +41,25 @@ function SignupPage() {
     if (birthDate) {
       const age = calculateAge(birthDate);
       if (age < 18) {
-        setError("Você precisa ter pelo menos 18 anos para se cadastrar.");
+        setError(t('signupPage.errorAgeRequirement'));
         return;
       }
     }
 
     if (!agreedToTerms) {
-      setError("Você precisa concordar com os Termos de Serviço para se cadastrar.");
+      setError(t('signupPage.errorTermsAgreement'));
       return;
     }
     if (!username.trim()) {
-      setError("Por favor, insira um nome de usuário.");
+      setError(t('signupPage.errorUsernameRequired'));
       return;
     }
     if (password.length < 6) {
-      setError("A senha deve ter no mínimo 6 caracteres.");
+      setError(t('signupPage.errorPasswordMinLengthClient'));
       return;
     }
     if (password !== confirmPassword) {
-      setError("As senhas não coincidem!");
+      setError(t('signupPage.errorPasswordsDoNotMatchClient'));
       return;
     }
 
@@ -68,20 +70,22 @@ function SignupPage() {
       await signup(email, password, username.trim(), birthDate, gender);
       navigate(from, { replace: true });
     } catch (err: unknown) {
-      const errorMessage = 'Falha ao tentar cadastrar. Tente novamente.';
+      const errorMessage = t('signupPage.errorGenericSignup');
       let errorCode: string | undefined = undefined;
 
       if (typeof err === 'object' && err !== null && 'code' in err) {
         errorCode = (err as { code: string }).code;
         if (errorCode === 'auth/email-already-in-use') {
-          setError('Este e-mail já está em uso. Tente fazer login ou use um e-mail diferente.');
+          setError(t('signupPage.errorEmailInUse'));
+        } else if (errorCode === 'auth/weak-password') {
+          setError(t('signupPage.errorWeakPassword'));
         } else {
           setError(errorMessage); // Para outros erros do Firebase não mapeados especificamente
         }
       } else if (err instanceof Error) {
         setError(err.message || errorMessage);
       } else {
-        setError('Ocorreu um erro desconhecido ao tentar cadastrar.');
+        setError(t('signupPage.errorGenericSignup'));
       }
       console.error("Falha no cadastro:", errorCode || (err instanceof Error ? err.message : 'Erro desconhecido'), err);
     } finally {
@@ -106,7 +110,7 @@ function SignupPage() {
   }, []);
 
   if (authIsLoading) {
-    return <div className={styles.pageContainer}><p>Carregando...</p></div>;
+    return <div className={styles.pageContainer}><p>{t('loading')}</p></div>;
   }
 
   const isPasswordValidLength = password.length >= 6;
@@ -143,13 +147,13 @@ function SignupPage() {
           ))}
         </div>
 
-        <h1 className={styles.pageTitle}>Cadastro</h1>
+        <h1 className={styles.pageTitle}>{t('signupPage.title')}</h1>
         <p className={styles.requiredInfoText}>
-          Todos os campos marcados com <span className={styles.requiredAsterisk}>*</span> são obrigatórios.
+          {t('signupPage.allFieldsRequired.part1')}<span className={styles.requiredAsterisk}>*</span>{t('signupPage.allFieldsRequired.part2')}
         </p>
         <form onSubmit={handleSubmit} className={styles.formContainer}>
           <div className={styles.inputGroup}>
-            <label htmlFor="email" className={styles.label}>Email:
+            <label htmlFor="email" className={styles.label}>{t('signupPage.emailLabel')}
               <span className={styles.requiredAsterisk}>*</span></label>
             <input
               type="email"
@@ -162,7 +166,7 @@ function SignupPage() {
             />
           </div>
           <div className={styles.inputGroup}>
-            <label htmlFor="username" className={styles.label}>Nome de Usuário:
+            <label htmlFor="username" className={styles.label}>{t('signupPage.usernameLabel')}
               <span className={styles.requiredAsterisk}>*</span></label>
             <input
               type="text"
@@ -176,7 +180,7 @@ function SignupPage() {
             />
           </div>
           <div className={styles.inputGroup}>
-            <label htmlFor="birthDate" className={styles.label}>Data de Nascimento:
+            <label htmlFor="birthDate" className={styles.label}>{t('signupPage.birthDateLabel')}
               <span className={styles.requiredAsterisk}>*</span></label>
             <input
               type="date"
@@ -189,7 +193,7 @@ function SignupPage() {
             />
           </div>
           <div className={styles.inputGroup}>
-            <label htmlFor="gender" className={styles.label}>Identidade de Gênero:
+            <label htmlFor="gender" className={styles.label}>{t('signupPage.genderLabel')}
               <span className={styles.requiredAsterisk}>*</span></label>
             <select
               id="gender"
@@ -199,18 +203,18 @@ function SignupPage() {
               className={styles.select} // Estilo para select
               required
             >
-              <option value="">Selecione...</option>
-              <option value="homem_cis">Homem Cisgênero</option>
-              <option value="mulher_cis">Mulher Cisgênero</option>
-              <option value="homem_trans">Homem Transgênero</option>
-              <option value="mulher_trans">Mulher Transgênero</option>
-              <option value="nao_binario">Não-binário</option>
-              <option value="outro_genero">Outro</option>
-              <option value="naoinformar_genero">Prefiro não informar</option>
+              <option value="">{t('gender.select')}</option>
+              <option value="homem_cis">{t('gender.homem_cis')}</option>
+              <option value="mulher_cis">{t('gender.mulher_cis')}</option>
+              <option value="homem_trans">{t('gender.homem_trans')}</option>
+              <option value="mulher_trans">{t('gender.mulher_trans')}</option>
+              <option value="nao_binario">{t('gender.nao_binario')}</option>
+              <option value="outro_genero">{t('gender.outro_genero')}</option>
+              <option value="naoinformar_genero">{t('gender.naoinformar_genero')}</option>
             </select>
           </div>
           <div className={styles.inputGroup}>
-            <label htmlFor="password" className={styles.label}>Senha:
+            <label htmlFor="password" className={styles.label}>{t('signupPage.passwordLabel')}
               <span className={styles.requiredAsterisk}>*</span></label>
             <input
               type="password"
@@ -221,10 +225,10 @@ function SignupPage() {
               required
               className={getPasswordFieldClassName()}
             />
-            {password.length > 0 && !isPasswordValidLength && <p className={styles.validationMessage}>Senha muito curta (mínimo 6 caracteres).</p>}
+            {password.length > 0 && !isPasswordValidLength && <p className={styles.validationMessage}>{t('signupPage.validationPasswordTooShort')}</p>}
           </div>
           <div className={styles.inputGroup}>
-            <label htmlFor="confirmPassword" className={styles.label}>Confirmar Senha:
+            <label htmlFor="confirmPassword" className={styles.label}>{t('signupPage.confirmPasswordLabel')}
               <span className={styles.requiredAsterisk}>*</span></label>
             <input
               type="password"
@@ -235,8 +239,8 @@ function SignupPage() {
               required
               className={getConfirmPasswordFieldClassName()}
             />
-            {confirmPassword.length > 0 && password.length > 0 && !doPasswordsMatch && <p className={styles.validationMessage}>As senhas não coincidem.</p>}
-            {confirmPassword.length > 0 && password.length > 0 && doPasswordsMatch && !isPasswordValidLength && <p className={styles.validationMessage}>A senha original ainda é muito curta.</p>}
+            {confirmPassword.length > 0 && password.length > 0 && !doPasswordsMatch && <p className={styles.validationMessage}>{t('signupPage.validationPasswordsDoNotMatch')}</p>}
+            {confirmPassword.length > 0 && password.length > 0 && doPasswordsMatch && !isPasswordValidLength && <p className={styles.validationMessage}>{t('signupPage.validationOriginalPasswordStillShort')}</p>}
           </div>
           <div className={styles.termsContainer}>
             <input
@@ -246,25 +250,25 @@ function SignupPage() {
               onChange={(e) => setAgreedToTerms(e.target.checked)}
               className={styles.termsCheckbox}
             />
-            <label htmlFor="terms" className={styles.termsLabel}> {/* Não é obrigatório por asterisco, mas é pela lógica */}
-              Eu li e concordo com os{' '}
+            <label htmlFor="terms" className={styles.termsLabel}>
+              {t('signupPage.termsAgreement')}{' '}
               <Link to="/termos-de-servico" target="_blank" rel="noopener noreferrer" className={styles.termsLink}>
-                Termos de Serviço
+                {t('signupPage.termsLink')}
               </Link>
             </label>
           </div>
           <p className={styles.infoTextSmall}>
-            Importante: Utilize um endereço de e-mail ao qual você tenha acesso. Ele será usado para recuperação de senha caso necessário.
+            {t('signupPage.importantEmailInfo')}
           </p>
           <button type="submit" className={`${styles.button} genericButton`} disabled={isSubmitting || authIsLoading || !canSubmit}>
-            {isSubmitting ? 'Cadastrando...' : 'Cadastrar'}
+            {isSubmitting ? t('signupPage.submitting') : t('buttons.signup')}
           </button>
         </form>
         {error && <p className={styles.errorText}>{error}</p>}
         <p className={styles.navigationText}>
-          Já tem uma conta? <Link to="/login" className={styles.navigationLink}>Faça login</Link>
+          {t('signupPage.loginPrompt')} <Link to="/login" className={styles.navigationLink}>{t('signupPage.loginLink')}</Link>
         </p>
-        <Link to="/" className={styles.navigationLink}>Voltar para a Página Inicial</Link>
+        <Link to="/" className={styles.navigationLink}>{t('loginPage.backToHomeLink')}</Link>
       </main>
     </div>
   );

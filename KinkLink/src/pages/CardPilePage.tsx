@@ -17,6 +17,7 @@ import { useCardPileModals } from '../hooks/useCardPileModals'; // Importa o hoo
 // import { categorySpecificTips } from '../components/categorySpecificTips'; // Não é mais necessário aqui
 import SideTipMessages from '../components/SideTipMessages';
 import styles from './CardPilePage.module.css';
+import { useTranslation } from 'react-i18next';
 
 function CardPilePage() {
   const {
@@ -32,6 +33,7 @@ function CardPilePage() {
     allConexaoCards,
   } = useCardPileLogic();
   const { isLoadingSkins } = useSkin();
+  const { t } = useTranslation();
 
   const { matchedCards, seenCards, handleCreateUserCard, toggleHotStatus } = useUserCardInteractions();
   const navigate = useNavigate();
@@ -153,7 +155,7 @@ function CardPilePage() {
   });
 
   if (isLoadingSkins) {
-    return <div className={styles.page}><p>Carregando skins...</p></div>;
+    return <div className={styles.page}><p>{t('cardPilePage.loadingSkins')}</p></div>;
   }
 
   return (
@@ -254,9 +256,9 @@ function CardPilePage() {
                   }}
                   onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
                   onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                  aria-label="Rejeitar carta"
+                  aria-label={t('cardPilePage.rejectCardAriaLabel')}
                 >
-              👎 Nao Topo!
+                  {t('cardPilePage.dislikeButton')}
                 </button>
 
                 <button
@@ -269,9 +271,9 @@ function CardPilePage() {
                   }}
                   onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
                   onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                  aria-label="Aceitar carta"
+                  aria-label={t('cardPilePage.acceptCardAriaLabel')}
                 >
-              ❤️ Topo!
+                  {t('cardPilePage.likeButton')}
                 </button>
               </div>
 
@@ -279,23 +281,23 @@ function CardPilePage() {
               <button
                 onClick={openCreateUserCardModal}
                 className="klnkl-create-kink-btn genericButton" /* Classe global para estilização no panel-styles.css */
-                title="Criar novo Kink"
-                aria-label="Criar novo Kink"
+                title={t('cardPilePage.createKinkButtonTitle')}
+                aria-label={t('cardPilePage.createKinkButtonTitle')}
               >
-                Criar Kink
+                {t('buttons.createKink')}
               </button>
 
               <div className={styles.bottomNavContainer}>
-                <button className={`${styles.bottomNavIconStyle} ${styles.ballButton} genericButton klnkl-icon-nav-button klnkl-nav-cards`} onClick={openCarinhosMimosModal} title="Carinhos & Mimos">
+                <button className={`${styles.bottomNavIconStyle} ${styles.ballButton} genericButton klnkl-icon-nav-button klnkl-nav-cards`} onClick={openCarinhosMimosModal} title={t('cardPilePage.carinhosMimosButton')}>
                   ❤️
                 </button>
                 <button
                   onClick={handleMatchesButtonClick}
                   className={`${styles.matchesNavButton} ${styles.linkButton} genericButton klnkl-nav-matches ${hasUnseenMatches ? styles.shakeAnimation : ''}`}
                 >
-                  Links ({matchedCards.length})
+                  {t('cardPilePage.matchesNavButton', { count: matchedCards.length })}
                 </button>
-                <Link to="/profile" className={`${styles.bottomNavIconStyle} ${styles.ballButton} genericButton klnkl-icon-nav-button klnkl-nav-profile`} aria-label="Perfil" title="Perfil">
+                <Link to="/profile" className={`${styles.bottomNavIconStyle} ${styles.ballButton} genericButton klnkl-icon-nav-button klnkl-nav-profile`} aria-label={t('cardPilePage.profileNavButton')} title={t('cardPilePage.profileNavButton')}>
                   👤
                 </Link>
               </div>
@@ -304,18 +306,21 @@ function CardPilePage() {
         ) : (
           unseenCardsCount === 0 ? ( // Este bloco também deve estar dentro do painel temático da página
             <div className={`${styles.noCardsViewContainer} klnkl-themed-panel`}>
-              <h2 className={styles.pageTitle}>Fim das Cartas!</h2>
+              <h2 className={styles.pageTitle}>{t('cardPilePage.noMoreCardsTitle')}</h2>
               <p className={styles.noCardsMessage}>
-                Você viu todas as cartas disponíveis por enquanto.
-                <br />
-                Volte mais tarde para novas sugestões ou crie as suas!
+                {t('cardPilePage.noMoreCardsMessage').split('\n').map((line, index, arr) => (
+                  <React.Fragment key={index}>
+                    {line}
+                    {index < arr.length - 1 && <br />}
+                  </React.Fragment>
+                ))}
               </p>
               <div
                 onClick={openCreateUserCardModal}
                 className={`${styles.createKinkMiniButton} ${styles.centeredCreateKinkButton}`}
-                title="Criar novo Kink"
+                title={t('cardPilePage.createKinkButtonTitle')}
                 role="button"
-                aria-label="Criar novo Kink"
+                aria-label={t('cardPilePage.createKinkButtonTitle')}
                 tabIndex={0}
                 onKeyPress={(e) => { if (e.key === 'Enter' || e.key === ' ') openCreateUserCardModal(); }}
               >
@@ -323,10 +328,13 @@ function CardPilePage() {
                   <CardBack targetWidth={30} targetHeight={42} />
                 </div>
                 <div className={styles.createKinkMiniTextOverlay}>Crie<br/>seu Kink</div>
+                {/* <div className={styles.createKinkMiniTextOverlay}>
+                  {t('cardPilePage.createYourKinkOverlay.line1')}<br/>{t('cardPilePage.createYourKinkOverlay.line2')}
+                </div> */}
               </div>
             </div>
           ) : (
-            <p className={styles.noCardsMessage}>Carregando próxima carta...</p>
+            <p className={styles.noCardsMessage}>{t('cardPilePage.loadingNextCard')}</p>
           )
         )
       }
@@ -335,11 +343,11 @@ function CardPilePage() {
       {/* Estes contadores também devem estar dentro do painel temático da página */}
       <div className={`${styles.cardCounters} klnkl-card-counters`}>
         <span className={`${styles.counterItem} klnkl-counter-item`}>
-          Cartas Vistas: <span className={styles.counterValue}>{seenCards.length}</span>
+          {t('cardPilePage.seenCardsCounter', { count: seenCards.length })}
         </span>
         <span className={`${styles.counterSeparator} klnkl-counter-separator`}>|</span>
         <span className={`${styles.counterItem} klnkl-counter-item`}>
-          Restantes: <span className={styles.counterValue}>{unseenCardsCount}</span>
+          {t('cardPilePage.remainingCardsCounter', { count: unseenCardsCount })}
         </span>
       </div>
     </div>

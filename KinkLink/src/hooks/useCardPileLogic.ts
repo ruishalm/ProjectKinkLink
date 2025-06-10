@@ -16,6 +16,7 @@ import {
 } from 'firebase/firestore';
 import { useUserCardInteractions } from './useUserCardInteractions';
 import { exampleSkinsData } from '../config/skins'; // Importar dados das skins do index.ts
+import { useTranslation } from 'react-i18next';
 
 // Interface para o tipo de retorno do hook
 interface UseCardPileLogicReturn {
@@ -40,6 +41,7 @@ interface NextCardForPartnerData {
 
 export function useCardPileLogic(): UseCardPileLogicReturn {
   const { user, checkAndUnlockSkins } = useAuth(); // Adicionar checkAndUnlockSkins
+  const { t } = useTranslation();
   const {
     matchedCards,
     seenCards,
@@ -77,19 +79,19 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
         const cardsSnapshot = await getDocs(cardsCollectionRef);
         const fetchedStandardCards = cardsSnapshot.docs.map(d => ({ id: d.id, ...d.data() } as Card));
         setAllCardsFromDb(fetchedStandardCards);
-        console.log('[useCardPileLogic] Cartas padrão carregadas:', fetchedStandardCards.length);
+        console.log(t('hooks.useCardPileLogic.standardCardsLoadedLog', { count: fetchedStandardCards.length }));
 
         if (user?.coupleId) {
           const userCardsQuery = query(collection(db, 'userCards'), where('coupleId', '==', user.coupleId));
           const userCardsSnapshot = await getDocs(userCardsQuery);
           const fetchedUserCards = userCardsSnapshot.docs.map(d => ({ id: d.id, ...d.data() } as Card));
           setUserCreatedCards(fetchedUserCards);
-          console.log('[useCardPileLogic] Cartas do usuário carregadas:', fetchedUserCards.length);
+          console.log(t('hooks.useCardPileLogic.userCardsLoadedLog', { count: fetchedUserCards.length }));
         } else {
           setUserCreatedCards([]);
         }
       } catch (error) {
-        console.error("[useCardPileLogic] Erro ao buscar cartas do Firestore:", error);
+        console.error(t('hooks.useCardPileLogic.fetchCardsErrorLog'), error);
         setAllCardsFromDb([]);
         setUserCreatedCards([]);
       } finally {
@@ -97,7 +99,7 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
       }
     };
     fetchCards();
-  }, [user?.coupleId]);
+  }, [user?.coupleId, t]);
 
   // Efeito para ouvir por carta nova criada pelo parceiro
   useEffect(() => {
@@ -111,7 +113,7 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
         const coupleData = docSnap.data();
         const nextCardData = coupleData.nextCardForPartner as NextCardForPartnerData | undefined;
         if (nextCardData && nextCardData.forUserId === user.id) {
-          console.log(`[useCardPileLogic] Nova carta do parceiro detectada: ${nextCardData.cardId}`);
+          console.log(t('hooks.useCardPileLogic.partnerNewCardDetectedLog', { cardId: nextCardData.cardId }));
           setPartnerNewCard({ id: nextCardData.cardId, ...nextCardData.cardData });
         } else {
           setPartnerNewCard(null);
@@ -119,7 +121,7 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
       }
     });
     return () => unsubscribe();
-  }, [user?.id, user?.coupleId]);
+  }, [user?.id, user?.coupleId, t]);
 
   // Efeito para buscar likes do parceiro não vistos pelo usuário atual
   useEffect(() => {
@@ -128,7 +130,7 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
         setPartnerLikesQueue([]);
         return;
       }
-      console.log(`[useCardPileLogic] Buscando likes do parceiro ${user.linkedPartnerId.substring(0,5)} não vistos por ${user.id.substring(0,5)}`);
+      console.log(t('hooks.useCardPileLogic.fetchingPartnerLikesLog', { partnerIdShort: user.linkedPartnerId.substring(0,5), userIdShort: user.id.substring(0,5) }));
       try {
         const interactionsRef = collection(db, 'couples', user.coupleId, 'likedInteractions');
         const qPartnerLikes = query(
@@ -144,24 +146,24 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
           }
         });
         setPartnerLikesQueue(potentialPartnerLikedCards.sort(() => 0.5 - Math.random()));
-        console.log('[useCardPileLogic] Likes do parceiro não vistos carregados:', potentialPartnerLikedCards.length);
+        console.log(t('hooks.useCardPileLogic.partnerLikesLoadedLog', { count: potentialPartnerLikedCards.length }));
       } catch (error) {
-        console.error("[useCardPileLogic] Erro ao buscar likes do parceiro:", error);
+        console.error(t('hooks.useCardPileLogic.fetchPartnerLikesErrorLog'), error);
       }
     };
     fetchUnseenPartnerLikes();
-  }, [user?.coupleId, user?.linkedPartnerId, user?.id, seenCards]);
+  }, [user?.coupleId, user?.linkedPartnerId, user?.id, seenCards, t]);
 
   // Combina cartas e separa em "swipable" e "conexao"
   const { swipableCards, allConexaoCards } = useMemo((): { swipableCards: Card[]; allConexaoCards: Card[] } => {
     const combinedSourceCards = [...allCardsFromDb, ...userCreatedCards];
     const sourceCards = combinedSourceCards.length > 0 ? combinedSourceCards :
-      (isLoadingCards ? [{ id: 'loading', text: 'Carregando cartas...', category: 'sensorial' as Card['category'] }]
-                      : [{ id: 'fallback', text: 'Nenhuma carta encontrada.', category: 'sensorial' as Card['category'] }]);
+      (isLoadingCards ? [{ id: 'loading', text: t('hooks.useCardPileLogic.loadingCardsFallbackText'), category: 'sensorial' as Card['category'] }]
+                      : [{ id: 'fallback', text: t('hooks.useCardPileLogic.noCardsFoundFallbackText'), category: 'sensorial' as Card['category'] }]);
     const conexaoResult = sourceCards.filter((card: Card) => card.category === 'conexao');
     const swipableResult = sourceCards.filter((card: Card) => card.category !== 'conexao');
     return { swipableCards: swipableResult, allConexaoCards: conexaoResult };
-  }, [allCardsFromDb, userCreatedCards, isLoadingCards]);
+  }, [allCardsFromDb, userCreatedCards, isLoadingCards, t]);
 
   // Atualiza cartas de conexão não vistas
   useEffect(() => {
@@ -194,9 +196,9 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
     // Prioridade 1: Carta recém-criada pelo parceiro
     if (partnerNewCard && (!excludeCardId || partnerNewCard.id !== excludeCardId) && !seenCards.includes(partnerNewCard.id)) {
       nextCard = partnerNewCard;
-      console.log(`[useCardPileLogic] Priorizando carta do parceiro: ${nextCard.id}`);
+      console.log(t('hooks.useCardPileLogic.prioritizingPartnerCardLog', { cardId: nextCard.id }));
     } else if (partnerNewCard && seenCards.includes(partnerNewCard.id)) {
-        console.warn(`[useCardPileLogic] Carta do parceiro ${partnerNewCard.id} já estava em seenCards e ainda em partnerNewCard state. Limpando localmente.`);
+        console.warn(t('hooks.useCardPileLogic.partnerCardAlreadySeenLog', { cardId: partnerNewCard.id }));
         setPartnerNewCard(null);
     }
 
@@ -205,7 +207,7 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
       const partnerLikedCard = partnerLikesQueue.find((card: Card) => card.id !== excludeCardId && !seenCards.includes(card.id));
       if (partnerLikedCard) {
         nextCard = partnerLikedCard;
-        console.log(`[useCardPileLogic] Priorizando like do parceiro: ${nextCard.id}`);
+        console.log(t('hooks.useCardPileLogic.prioritizingPartnerLikeLog', { cardId: nextCard.id }));
         setPartnerLikesQueue(prev => prev.filter(card => card.id !== nextCard?.id));
       }
     }
@@ -219,7 +221,7 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
       if (availableGeneral.length > 0) {
         const shuffledGeneral = [...availableGeneral].sort(() => 0.5 - Math.random());
         nextCard = shuffledGeneral[0];
-        console.log(`[useCardPileLogic] Selecionando carta aleatória geral: ${nextCard?.id}`);
+        console.log(t('hooks.useCardPileLogic.selectingRandomCardLog', { cardId: nextCard?.id }));
       }
     }
 
@@ -227,7 +229,7 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
       setCurrentCard(nextCard);
     }
     setCardSelectionCycle(prev => (prev + 1) % 3);
-  }, [generalUnseen, isLoadingCards, partnerNewCard, seenCards, user?.coupleId, cardSelectionCycle, partnerLikesQueue]);
+  }, [generalUnseen, isLoadingCards, partnerNewCard, seenCards, user?.coupleId, cardSelectionCycle, partnerLikesQueue, t]);
 
   // Efeito para selecionar a primeira carta
   useEffect(() => {
@@ -248,9 +250,9 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
     await markCardAsSeen(interactedCardId);
 
     if (partnerNewCard && interactedCardId === partnerNewCard.id && user.coupleId) {
-      console.log(`[useCardPileLogic] Carta do parceiro ${interactedCardId} foi vista. Limpando sinalizador.`);
+      console.log(t('hooks.useCardPileLogic.partnerCardSeenClearingFlagLog', { cardId: interactedCardId }));
       const coupleDocRef = doc(db, 'couples', user.coupleId);
-      await updateDoc(coupleDocRef, { nextCardForPartner: null }).catch(err => console.error("Erro ao limpar nextCardForPartner:", err));
+      await updateDoc(coupleDocRef, { nextCardForPartner: null }).catch(err => console.error(t('hooks.useCardPileLogic.clearNextCardErrorLog'), err));
       setPartnerNewCard(null);
     }
 
@@ -300,10 +302,10 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
       try {
         const newlyUnlocked = await checkAndUnlockSkins(exampleSkinsData);
         if (newlyUnlocked && newlyUnlocked.length > 0) {
-          console.log("[useCardPileLogic] Novas skins desbloqueadas (provavelmente por cartas vistas):", newlyUnlocked);
+          console.log(t('hooks.useCardPileLogic.newSkinsUnlockedBySeenLog'), newlyUnlocked);
         }
       } catch (error) {
-        console.error("[useCardPileLogic] Erro ao verificar skins após interação com carta:", error);
+        console.error(t('hooks.useCardPileLogic.checkSkinsErrorAfterInteractionLog'), error);
       }
     }
   };

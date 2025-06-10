@@ -1,7 +1,6 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\services\linkService.ts
 import {
   doc,
-  setDoc,
   getDoc, // Adicionado para verificação opcional
   Timestamp, // Adicionado para tipagem correta
   runTransaction, // Necessário para acceptLink

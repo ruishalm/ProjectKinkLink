@@ -16,6 +16,7 @@ function LoginPage() {
   const location = useLocation();
   const { t } = useTranslation(); // Hook para acessar as traduções
 
+  const [showEmailPasswordForm, setShowEmailPasswordForm] = useState(false); // Novo estado
   // Novo estado para controlar o modal de recuperação de senha
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
 
@@ -54,6 +55,7 @@ function LoginPage() {
         // Se não for um erro estruturado do Firebase, usa uma mensagem genérica
         errorMessage = t('loginPage.errorGeneric'); // Reutilizando a genérica
       }
+      console.log('[LoginPage] Setting error state to:', errorMessage); // LOG ADICIONADO
       setError(errorMessage);
     } finally {
       setIsSubmitting(false); // Finaliza o carregamento
@@ -99,6 +101,8 @@ function LoginPage() {
     return <div className={styles.pageContainer}><p>{t('loading')}</p></div>;
   }
 
+  console.log('[LoginPage] Current error state for rendering:', error); // LOG ADICIONADO
+
   return (
     <div className={styles.pageContainer}>
       <main className={styles.mainContent}> {/* Envolve o conteúdo principal */}
@@ -111,53 +115,74 @@ function LoginPage() {
         </div>
 
         <h1 className={styles.pageTitle}>{t('loginPage.title')}</h1>
-        <form onSubmit={handleSubmit} className={styles.formContainer}>
-          <div className={styles.inputGroup}>
-            <label htmlFor="email" className={styles.label}>{t('loginPage.emailLabel')}</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className={styles.input}
-            />
-          </div>
-          <div className={styles.inputGroup}>
-            <label htmlFor="password" className={styles.label}>{t('loginPage.passwordLabel')}</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className={styles.input}
-            />
-          </div>
-          <button type="submit" className={styles.button} disabled={isSubmitting || authIsLoading}>
-            {isSubmitting ? t('loginPage.submitting') : t('buttons.login')}
+
+        {!showEmailPasswordForm && (
+          <button
+            type="button"
+            className={`${styles.button} ${styles.revealFormButton}`}
+            onClick={() => setShowEmailPasswordForm(true)}
+            disabled={isSubmitting || authIsLoading}
+          >
+            {t('loginPage.loginWithEmailButton')}
           </button>
-          {/* Botão de Login com Google */}
+        )}
+
+        {showEmailPasswordForm && (
+          <form onSubmit={handleSubmit} className={styles.formContainer}>
+            <div className={styles.inputGroup}>
+              <label htmlFor="email" className={styles.label}>{t('loginPage.emailLabel')}</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className={styles.input}
+              />
+            </div>
+            <div className={styles.inputGroup}>
+              <label htmlFor="password" className={styles.label}>{t('loginPage.passwordLabel')}</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className={styles.input}
+              />
+            </div>
+            <button type="submit" className={styles.button} disabled={isSubmitting || authIsLoading}>
+              {isSubmitting ? t('loginPage.submitting') : t('buttons.login')}
+            </button>
+            <div className={styles.forgotPasswordContainer}>
+              <button
+                type="button"
+                onClick={() => setShowForgotPasswordModal(true)}
+                className={styles.forgotPasswordLink}
+              >
+                {t('loginPage.forgotPasswordLink')}
+              </button>
+            </div>
+          </form>
+        )}
+
+        <div className={styles.separatorContainer}>
+          <span className={styles.separatorLine}></span>
+          <span className={styles.separatorText}>{t('loginPage.orSeparator')}</span>
+          <span className={styles.separatorLine}></span>
+        </div>
+
           <button
             type="button"
             onClick={handleGoogleLogin}
             className={`${styles.button} ${styles.googleButton}`} // Adicione uma classe específica para estilização
             disabled={isSubmitting || authIsLoading}
           >
-            {isSubmitting ? t('loginPage.googleSubmitting') : t('loginPage.googleLoginButton')}
+            {isSubmitting && !showEmailPasswordForm ? t('loginPage.googleSubmitting') : t('loginPage.googleLoginButton')}
           </button>
-          <div className={styles.forgotPasswordContainer}>
-            <button
-              type="button"
-              onClick={() => setShowForgotPasswordModal(true)}
-              className={styles.forgotPasswordLink} // Estilize como um link ou botão discreto
-            >
-              {t('loginPage.forgotPasswordLink')}
-            </button>
-          </div>
-        </form>
+
         {error && <p className={styles.errorText}>{error}</p>}
         <p className={styles.navigationText}>
           {t('loginPage.signupPrompt')} <Link to="/signup" className={styles.navigationLink}>{t('buttons.signup')}</Link>

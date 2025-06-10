@@ -12,6 +12,7 @@ import {
   writeBatch,// Para operações atômicas
   // setDoc, // Alternativa ao updateDoc se usarmos set com merge
 } from 'firebase/firestore';
+import { useTranslation } from 'react-i18next';
 
 export interface ChatMessage {
   id: string; // ID do documento Firestore
@@ -26,6 +27,7 @@ export function useCardChat(cardId: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   // Carregar mensagens do Firestore
   useEffect(() => {
@@ -33,12 +35,12 @@ export function useCardChat(cardId: string | null) {
       setMessages([]); // Limpa as mensagens se não houver cardId ou usuário
       setIsLoading(false);
       if (user && !user.coupleId && cardId) {
-        console.warn("[useCardChat] Usuário não possui coupleId. Não é possível carregar o chat.");
+        console.warn(t('hooks.useCardChat.noCoupleIdWarningLog'));
       }
       return;
     }
 
-    console.log(`[useCardChat] Setting up listener for couple ${user.coupleId}, card ${cardId}`);
+    console.log(t('hooks.useCardChat.setupListenerLog', { coupleId: user.coupleId, cardId }));
 
     setIsLoading(true);
     setError(null);
@@ -62,19 +64,19 @@ export function useCardChat(cardId: string | null) {
       setMessages(fetchedMessages);
       setIsLoading(false);
     }, (err) => {
-      console.error(`Erro ao carregar mensagens de ${messagesPath}:`, err);
-      setError("Não foi possível carregar as mensagens.");
+      console.error(t('hooks.useCardChat.loadMessagesErrorLog', { path: messagesPath }), err);
+      setError(t('hooks.useCardChat.loadMessagesErrorUser'));
       setMessages([]);
       setIsLoading(false);
     });
 
     return () => unsubscribe(); // Limpa o listener ao desmontar
 
-  }, [user, cardId]); // Depende do user (para coupleId) e cardId
+  }, [user, cardId, t]); // Depende do user (para coupleId) e cardId
 
   const sendMessage = async (text: string) => {
     if (!user || !user.id || !user.coupleId || !cardId || !text.trim()) {
-      console.warn("[useCardChat] Não é possível enviar mensagem: dados incompletos.", { userId: user?.id, coupleId: user?.coupleId, cardId });
+      console.warn(t('hooks.useCardChat.sendMessageIncompleteDataWarningLog'), { userId: user?.id, coupleId: user?.coupleId, cardId });
       return;
     }
 
@@ -106,9 +108,9 @@ export function useCardChat(cardId: string | null) {
       }, { merge: true });
 
       await batch.commit();
-      console.log(`[useCardChat - sendMessage] Message sent and chat doc updated for ${cardId}.`);
+      console.log(t('hooks.useCardChat.sendMessageSuccessLog', { cardId }));
     } catch (err) {
-      console.error(`[useCardChat - sendMessage] Error sending message or updating chat doc for ${cardId}:`, err);
+      console.error(t('hooks.useCardChat.sendMessageErrorLog', { cardId }), err);
       // Poderia definir um estado de erro para a UI aqui
     }
   };

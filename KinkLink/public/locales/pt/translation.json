@@ -33,8 +33,10 @@
   "homePage": {
     "title": "KinkLink",
     "subTitle": "Conexões e Descobertas para Casais",
-    "loginButton": "Login",
-    "signupButton": "Criar Conta"
+    "loginButton": "Login",  
+    "signupButton": "Criar Conta",
+    "welcomeTitle": "Bem-vindo(a) ao KinkLink!",
+    "welcomeSubtitle": "Descubra, explore e conecte-se com seu parceiro(a) de uma maneira totalmente nova."
   },
   "loginPage": {
     "title": "Login",
@@ -42,12 +44,14 @@
     "passwordLabel": "Senha:",
     "forgotPasswordLink": "Esqueceu sua senha?",
     "signupPrompt": "Não tem uma conta?",
+    "loginWithEmailButton": "Entrar com Email/Senha",
     "googleLoginButton": "Entrar com Google",
     "googleSubmitting": "Aguarde...",
     "backToHomeLink": "Voltar para a Página Inicial",
     "errorUserNotFound": "E-mail não encontrado ou inválido. Verifique o e-mail digitado.",
     "errorWrongPassword": "Senha incorreta. Por favor, tente novamente.",
     "errorInvalidCredential": "Credenciais inválidas. Verifique seu e-mail e senha.",
+    "orSeparator": "OU",
     "errorGeneric": "Falha ao tentar fazer login. Verifique suas credenciais e tente novamente.",
     "errorUnexpected": "Ocorreu um erro inesperado. Tente novamente mais tarde.",
     "submitting": "Entrando..."
@@ -71,13 +75,15 @@
     "errorGenericSignup": "Ocorreu um erro ao tentar criar a conta. Tente novamente."
   },
   "registerPage": {
-    "placeholderMessage": "Esta é a página de registro. O conteúdo virá em breve."
+    "placeholderMessage": "Página de Cadastro (Conteúdo a ser implementado ou esta página será removida se SignupPage for suficiente)"
   },
   "profilePage": {
     "title": "Meu Perfil",
+    "goToCardsButton": "Ir para cartas",
     "editTitle": "Editar Dados Pessoais",
-    "personalDataSection": "Seus Dados Pessoais",
+    "personalDataSectionTitle": "Seus Dados Pessoais",
     "usernameLabel": "Nome de Usuário:",
+    "usernamePlaceholder": "Como você quer ser chamado(a)?",
     "bioLabel": "Bio:",
     "bioPlaceholder": "Conte um pouco sobre você...",
     "genderLabel": "Identidade de Gênero:",
@@ -91,23 +97,47 @@
     "notLinkedMessage": "Você ainda não está vinculado. Conecte-se com seu parceiro(a) para começar a diversão!",
     "customizationSectionTitle": "Personalização",
     "mySkinsButton": "Minhas Skins",
-    "restartButton": "RECOMEÇAR",
-    "restartWarning": "Zerar e recomeçar? Para sincronizar, apertem este botão juntos e iniciem uma nova exploração!",
-    "loadingProfile": "Carregando perfil..."
+    "loadingProfile": "Carregando perfil...",
+    "errorLogout": "Erro ao fazer logout:",
+    "updateSuccessAlert": "Perfil atualizado com sucesso!",
+    "errorUpdate": "Erro ao atualizar perfil:",
+    "updateErrorAlert": "Falha ao atualizar o perfil. Tente novamente.",
+    "errorResetTestData": "Erro ao resetar dados de teste:",
+    "resetSection": {
+      "resetButton": "RECOMEÇAR",
+      "warningText": "Zerar e recomeçar? Para sincronizar, apertem este botão juntos e iniciem uma nova exploração!",
+      "confirmMessage": "Tem certeza que deseja resetar TODOS os dados de teste (cartas vistas, interações, matches e skins desbloqueadas)? Esta ação é para fins de desenvolvimento e deve ser feita em conjunto com seu par para correta sincronização.",
+      "successAlert": "Dados de teste resetados com sucesso!",
+      "errorAlert": "Falha ao resetar os dados de teste. Verifique o console."
+    }
   },
   "linkCouplePage": {
-    "title": "Vincular Casal",
-    "subText": "Para usar o KinkLink e compartilhar experiências com seu parceiro(a), vocês precisam vincular suas contas.",
-    "generateCodeButton": "Quero Gerar um Código",
-    "orText": "OU",
-    "haveCodeButton": "Tenho um Código para Inserir",
-    "backToProfileButton": "Voltar para o Perfil",
-    "alreadyLinkedTitle": "Você já está Vinculado!",
-    "alreadyLinkedPartnerInfo": "Seu parceiro(a) é: {{partnerName}}",
-    "alreadyLinkedSubText": "Agora vocês podem começar a usar o KinkLink juntos!",
-    "unlinkButton": "Desfazer Vínculo",
-    "unlinkingButton": "Desfazendo...",
-    "cancelButton": "Voltar / Cancelar"
+      "title": "Vincular Casal",
+      "subText": "Para usar o KinkLink e compartilhar experiências com seu parceiro(a), vocês precisam vincular suas contas.",
+      "generateCodeButton": "Quero Gerar um Código",
+      "orText": "OU",
+      "haveCodeButton": "Tenho um Código para Inserir",
+      "backToProfileButton": "Voltar para o Perfil",
+      "alreadyLinkedTitle": "Você já está Vinculado!",
+      "alreadyLinkedPartnerInfo": "Seu parceiro(a) é: {{partnerName}}",
+      "alreadyLinkedSubText": "Agora vocês podem começar a usar o KinkLink juntos!",
+      "unlinkButton": "Desfazer Vínculo",
+      "unlinkingButton": "Desfazendo...",
+      "cancelButton": "Voltar / Cancelar",
+      "loadingUserInfo": "Carregando informações do usuário...",
+      "loginToLink": "Por favor, faça login para vincular sua conta.",
+      "unlinkErrorIdentification": "Não foi possível identificar os dados do vínculo para desfazer.",
+      "unlinkConfirmMessage": "Tem certeza que deseja desfazer o vínculo com seu parceiro(a)?",
+      "unlinkSuccessAlert": "Vínculo desfeito com sucesso!",
+      "unlinkErrorGeneric": "Ocorreu um erro ao tentar desfazer o vínculo.",
+      "unlinkErrorDetails": "Detalhes:",
+      "unlinkErrorCode": "Código:",
+      "unlinkErrorConsole": "Erro ao desfazer vínculo:",
+      "unlinkErrorCheckConsole": "Verifique o console para mais informações.",
+      "partnerNotFoundConsole": "Documento do parceiro não encontrado.",
+      "partnerNotFoundUI": "Parceiro(a) não encontrado(a)",
+      "errorFetchingPartnerConsole": "Erro ao buscar informações do parceiro:",
+      "errorFetchingPartnerUI": "Erro ao buscar parceiro(a)"
   },
   "createLinkComponent": {
     "title": "Gerar Código de Vínculo",
@@ -115,7 +145,8 @@
     "generatingButton": "Gerando...",
     "shareCodeInfo": "Compartilhe este código com seu parceiro(a):",
     "doneButton": "Concluído / Voltar",
-    "errorGenerating": "Erro ao gerar o código. Tente novamente."
+    "errorGenerating": "Erro ao gerar o código. Tente novamente.",
+    "errorNotLoggedIn": "Você precisa estar logado para criar um link."
   },
   "acceptLinkComponent": {
     "title": "Conectar com Parceiro(a)",
@@ -125,21 +156,30 @@
     "cancelButton": "Cancelar",
     "errorInvalidCode": "Código inválido ou expirado. Verifique e tente novamente.",
     "errorAlreadyLinked": "Você ou seu parceiro(a) já estão vinculados a outra conta.",
-    "errorLinkingGeneric": "Erro ao tentar vincular. Tente novamente.",
-    "success": "Vínculo realizado com sucesso!"
+    "errorLinkingGeneric": "Erro ao tentar vincular. Tente novamente.", 
+    "success": "Vínculo realizado com sucesso!",
+    "errorEnterCode": "Por favor, insira um código de vínculo.",
+    "errorAcceptingGeneric": "Falha ao aceitar o código de vínculo. Ocorreu um erro desconhecido."
   },
   "cardPilePage": {
     "loadingSkins": "Carregando skins...",
     "loadingNextCard": "Carregando próxima carta...",
     "noMoreCardsTitle": "Fim das Cartas!",
     "noMoreCardsMessage": "Você viu todas as cartas disponíveis por enquanto.\nVolte mais tarde para novas sugestões ou crie as suas!",
-    "dislikeButton": "Nao Topo!",
-    "likeButton": "Topo!",
+    "dislikeButton": "👎 Nao Topo!",
+    "likeButton": "❤️ Topo!",
     "carinhosMimosButton": "Carinhos & Mimos",
     "matchesNavButton": "Links ({{count}})",
     "profileNavButton": "Perfil",
     "seenCardsCounter": "Cartas Vistas: {{count}}",
-    "remainingCardsCounter": "Restantes: {{count}}"
+    "remainingCardsCounter": "Restantes: {{count}}",
+    "rejectCardAriaLabel": "Rejeitar carta",
+    "acceptCardAriaLabel": "Aceitar carta",
+    "createKinkButtonTitle": "Criar novo Kink",
+    "createYourKinkOverlay": {
+      "line1": "Crie",
+      "line2": "seu Kink"
+    }
   },
   "playingCard": {
     "swipeLike": "Topo!",
@@ -151,26 +191,40 @@
     "loadingSkins": "Carregando skins...",
     "userNotFoundError": "Erro: Usuário não encontrado. Por favor, tente recarregar.",
     "title": "Minhas Skins",
+    "backButton": "Voltar",
+    "cardsButton": "Pilha de Cartas",
     "previewTitle": "Pré-visualização da Pilha",
     "equipButton": "Equipar",
     "lockedIconLabel": "Bloqueado",
+    "lockedStatusDefault": "bloqueada",
     "categoryTitle": {
       "backgroundPile": "Textura de Fundo (Pilha de Cartas)",
-      "backgroundMatches": "Textura de Fundo (Tela de Links)",
+      "backgroundMatches": "Textura de Fundo (Links)",
       "colorPalette": "Paletas de Cores",
       "font": "Estilos de Fonte",
       "buttonStyle": "Estilos de Botão",
-      "themePack": "Pacotes de Tema Completos",
+      "themePack": "Pacotes de Tema",
       "panelStyle": "Estilos de Painel",
-      "default": "Skins"
-    }
+      "default": "Outras Skins"
+    },
+    "activateSkinTitle": "Ativar {{skinName}}",
+    "deactivateSkinTitle": "Desativar {{skinName}}",
+    "activateSkinAriaLabel": "Ativar {{skinName}}",
+    "deactivateSkinAriaLabel": "Desativar {{skinName}}",
+    "lockedSkinAriaLabelWithName": "{{skinName}} - {{unlockStatus}}"
   },
   "matchesPage": {
-    "title": "Seus Links!",
-    "backToCardsButton": "Cartas",
-    "noMatchesYet": "Ainda não há links por aqui. Continue explorando as cartas!",
-    "topLinksSectionTitle": "🔥 Top Links 🔥",
-    "categorySectionTitle": "Links por Categoria"
+    "title": "Seus Links!", 
+    "backToCardsButton": "Cartas", 
+    "noMatchesYet": "Ainda não há links por aqui. Continue explorando as cartas!", 
+    "topLinksSectionTitle": "🔥 Top Links 🔥", 
+    "categorySectionTitle": "Links por Categoria", 
+    "loadingMatches": "Carregando seus links...",
+    "errorLoadingChats": "Erro ao carregar dados dos chats: {{error}}",
+    "matchCardAriaLabel": "Link: {{cardText}}...",
+    "unreadIndicatorText": "(Não lido)",
+    "ourLinks": "Nossos Links",
+    "yourLinksByCategory": "Seus Links por Categoria"
   },
   "termsPage": {
     "windowTitle": "Termos de Serviço KinkLink"
@@ -210,7 +264,8 @@
       "sendResetEmailButton": "Enviar E-mail de Recuperação",
       "sendingButton": "Enviando...",
       "successMessage": "E-mail de recuperação enviado! Verifique sua caixa de entrada (e spam).",
-      "errorMessage": "Falha ao enviar e-mail. Verifique o endereço e tente novamente."
+      "errorMessage": "Falha ao enviar e-mail. Verifique o endereço e tente novamente.",
+      "errorEnterEmail": "Por favor, insira seu endereço de e-mail."
     },
     "createUserCard": {
       "title": "✨ Criar Nova Carta ✨",
@@ -230,21 +285,33 @@
       "acceptButton": "Aceito o Convite!",
       "rejectButton": "Agora não, obrigado(a)."
     },
-    "unlockNotification": {
+    "unlockNotification": { 
       "title": "🎉 Skin Desbloqueada! 🎉",
       "infoText": "Você pode equipá-la na página \"Minhas Skins\"!",
-      "closeButton": "Legal!"
+      "closeButton": "Legal!" 
     },
     "carinhosMimos": {
       "title": "💖 Carinhos & Mimos 💖",
       "subText": "Relembre os \"Sim\" para as cartas de Conexão e inspire-se!",
       "noSuggestions": "Vocês ainda não deram \"Sim\" para nenhuma carta de Conexão.",
       "tableHeaderCard": "Carta",
-      "tableHeaderDate": "Data do Link"
+      "tableHeaderDate": "Data do Link",
+      "tableHeaderDone": "Feito?"
     },
     "cardChat": {
       "sendButtonLabel": "Enviar",
-      "unlinkConfirmationButton": "Desfazer Link e Apagar Histórico"
+      "unlinkConfirmationButton": "Desfazer Link e Apagar Histórico",
+      "closeChatAriaLabel": "Fechar chat",
+      "chatAboutTitle": "Conversa sobre:",
+      "selectedCardFallbackTitle": "Carta selecionada",
+      "loadingMessages": "Carregando mensagens...",
+      "currentUserMessageLabel": "Você",
+      "partnerMessageLabel": "Parceiro(a)",
+      "timestampNowFallback": "agora",
+      "inputPlaceholder": "Escreva no verso da carta...",
+      "unlinkConfirmMessage": "Tem certeza que deseja desfazer o Link com a carta \"{{cardTitle}}\"? Esta carta voltará para a pilha de ambos.",
+      "thisCardFallback": "esta carta",
+      "unlinkButtonLabel": "Desfazer Link"
     }
   },
   "gender": {
@@ -264,6 +331,317 @@
     "exposicao": "Exposição",
     "conexao": "Conexão",
     "usercard": "Carta do Usuário"
+  },
+    "cardTips": {
+    "poder": {
+      "left": {
+        "0": "Não curtiu a dinâmica? Sem problemas.",
+        "1": "Se não é para você, está tudo certo.",
+        "2": "Limites são essenciais. Passe.",
+        "3": "Poder só com conforto. Rejeite.",
+        "4": "Não sentiu a troca? Jogue para cá.",
+        "5": "Seu 'não' é a regra aqui.",
+        "6": "Ok não estar nessa vibe hoje.",
+        "7": "Domínio só se ambos quiserem.",
+        "8": "Submissão? Só se for sua vontade.",
+        "9": "Ninguém te julga por passar.",
+        "10": "Sua segurança em primeiro lugar.",
+        "11": "Não é debate, é sua escolha.",
+        "12": "Forçar não combina com prazer.",
+        "13": "Confie na sua intuição. Rejeite.",
+        "14": "Essa não te pegou? Normal.",
+        "15": "O poder é seu de dizer não.",
+        "16": "Não gostou? Próxima carta!",
+        "17": "Respeite seus próprios limites.",
+        "18": "Intenso demais? Sem crise.",
+        "19": "Aqui, seu conforto é lei."
+      },
+      "right": {
+        "0": "Consentimento é a base de tudo!",
+        "1": "Palavra de segurança definida?",
+        "2": "Lembrem-se: o prazer é o objetivo.",
+        "3": "Comunicação clara sobre limites.",
+        "4": "Explorem o poder com respeito mútuo.",
+        "5": "Confiança é sexy. Divirtam-se!",
+        "6": "Definam bem os papéis e curtam.",
+        "7": "Segurança em primeiro, tesão em segundo.",
+        "8": "O 'sim' de ambos abre o jogo.",
+        "9": "Limites claros, prazer sem culpa.",
+        "10": "Negociem os termos da brincadeira.",
+        "11": "Aftercare é importante após cenas intensas.",
+        "12": "Divirtam-se com a troca de poder!",
+        "13": "O consentimento pode ser retirado, ok?",
+        "14": "Certifiquem-se que ambos estão 100%.",
+        "15": "Explore, mas sempre com cuidado.",
+        "16": "A entrega mútua é poderosa.",
+        "17": "Escutem o corpo e os sinais.",
+        "18": "Redefinam 'poder' juntos.",
+        "19": "Que a força (do tesão) esteja com vocês!"
+      }
+    },
+    "sensorial": {
+      "left": {
+        "0": "Não despertou seus sentidos? Ok.",
+        "1": "Prefere outras texturas/aromas?",
+        "2": "Ninguém é obrigado a gostar de tudo.",
+        "3": "Se não parece prazeroso, rejeite.",
+        "4": "Essa sensação não te atrai? Passe.",
+        "5": "Seu corpo, suas regras de prazer.",
+        "6": "Pele sensível? Melhor não arriscar.",
+        "7": "Não curtiu a proposta? Sem problemas.",
+        "8": "Escute seu corpo e seus limites.",
+        "9": "Ok não querer essa experiência.",
+        "10": "Algumas sensações não são para todos.",
+        "11": "Se não for relaxante/excitante, pule.",
+        "12": "Conforto sensorial é prioridade.",
+        "13": "Pode ser que outra te agrade mais.",
+        "14": "Sua intuição diz não? Confie nela.",
+        "15": "Não force uma sensação.",
+        "16": "Se não te arrepia (do jeito bom), não vá.",
+        "17": "Algumas coisas são melhores só na ideia.",
+        "18": "Intenso demais para seus sentidos?",
+        "19": "Passe essa e espere a próxima onda."
+      },
+      "right": {
+        "0": "JAMAIS ferir o(a) parceiro(a)!",
+        "1": "Consentimento em cada toque.",
+        "2": "Se não der prazer, PAREM.",
+        "3": "Palavra de segurança ATIVADA?",
+        "4": "Comunicação é essencial aqui.",
+        "5": "Conectem-se com cada sensação.",
+        "6": "Explorem com cuidado e carinho.",
+        "7": "Limites são para serem respeitados.",
+        "8": "Não ultrapassem o combinado.",
+        "9": "Prazer e segurança andam juntos.",
+        "10": "O 'PARE' não é debatível.",
+        "11": "Atenção às reações do(a) parceiro(a).",
+        "12": "Vão com calma, descubram juntos.",
+        "13": "Menos é mais, às vezes.",
+        "14": "Dor só se for prazerosa e combinada.",
+        "15": "Estejam atentos um ao outro.",
+        "16": "Se algo incomodar, avisem NA HORA.",
+        "17": "O objetivo é o prazer mútuo.",
+        "18": "Respeitem o ritmo de cada um.",
+        "19": "Aproveitem a jornada sensorial!"
+      }
+    },
+    "fantasia": {
+      "left": {
+        "0": "Essa história não te inspira? Ok.",
+        "1": "Não é sua vibe de roleplay? Passe.",
+        "2": "Outra imaginação em mente? Sem problemas.",
+        "3": "Criatividade não pode ser forçada.",
+        "4": "Se o cenário não agrada, rejeite.",
+        "5": "Não é obrigado(a) a entrar na peça.",
+        "6": "Talvez um roteiro mais leve?",
+        "7": "Ok não querer encenar isso.",
+        "8": "Sua zona de conforto primeiro.",
+        "9": "Não curtiu o personagem? Próximo!",
+        "10": "A imaginação é livre, inclusive para dizer não.",
+        "11": "Se não for divertido, não vale.",
+        "12": "Essa fantasia ficou para depois.",
+        "13": "Sem pressão para embarcar.",
+        "14": "Pode ser que outra história agrade mais.",
+        "15": "Sinta-se livre para passar essa.",
+        "16": "Não é toda fantasia que encaixa.",
+        "17": "Seu conforto dita o roteiro.",
+        "18": "Prefere algo mais 'real'? Ok.",
+        "19": "Essa não acendeu sua chama."
+      },
+      "right": {
+        "0": "Deixem a imaginação voar alto!",
+        "1": "Consentimento é o feitiço principal.",
+        "2": "Criem essa história juntos.",
+        "3": "Segurança com locais e acessórios!",
+        "4": "Definam limites antes de começar.",
+        "5": "Divirtam-se construindo o personagem.",
+        "6": "Comunicação é chave no roleplay.",
+        "7": "Entrem no personagem e aproveitem.",
+        "8": "Usem a criatividade sem medo.",
+        "9": "Lembrem-se: é uma brincadeira!",
+        "10": "Cuidado com objetos/cenários.",
+        "11": "Estejam confortáveis com o enredo.",
+        "12": "Acessórios? Testem antes!",
+        "13": "O objetivo é a diversão mútua.",
+        "14": "Pausem se algo sair do script.",
+        "15": "Combinem sinais de segurança.",
+        "16": "Realizem desejos com responsabilidade.",
+        "17": "A fantasia é um convite, não ordem.",
+        "18": "Explorem juntos esse universo.",
+        "19": "Que comece o espetáculo!"
+      }
+    },
+    "exposicao": {
+      "left": {
+        "0": "Muito ousado por agora? Tudo bem.",
+        "1": "Prefere manter só entre vocês?",
+        "2": "Vergonha é natural, sem pressão.",
+        "3": "Se não se sentir seguro(a), rejeite.",
+        "4": "Não está no clima para se expor?",
+        "5": "Sua privacidade em primeiro lugar.",
+        "6": "Ok não querer plateia hoje.",
+        "7": "Expor-se só se for confortável.",
+        "8": "Limites são importantes aqui.",
+        "9": "Não curtiu a ideia? Passe.",
+        "10": "Seu corpo, sua decisão de mostrar.",
+        "11": "Não precisa provar nada a ninguém.",
+        "12": "Sinta-se à vontade para dizer não.",
+        "13": "Se não for divertido, por que fazer?",
+        "14": "Talvez outro tipo de ousadia?",
+        "15": "Não se force a nada.",
+        "16": "A adrenalina não compensa o desconforto.",
+        "17": "Confie nos seus sentimentos.",
+        "18": "Essa não rolou? Normal.",
+        "19": "Ainda não é o momento para isso."
+      },
+      "right": {
+        "0": "Consentimento de TODOS os envolvidos!",
+        "1": "Cuidado com as leis locais!",
+        "2": "Atenção total aos arredores.",
+        "3": "Segurança em primeiro lugar, sempre.",
+        "4": "Definam bem os limites antes.",
+        "5": "Adrenalina e confiança andam juntas.",
+        "6": "A diversão está em se permitir com juízo.",
+        "7": "Se envolver terceiros, diálogo claro!",
+        "8": "Lembrem-se do que é público vs. privado.",
+        "9": "Pensem nas consequências antes.",
+        "10": "Privacidade digital é crucial se filmar/fotografar.",
+        "11": "A espontaneidade tem seus riscos; avaliem.",
+        "12": "Se for em público, discrição é amiga.",
+        "13": "Confiem um no outro para se protegerem.",
+        "14": "Combinem sinais se algo sair do controle.",
+        "15": "Ousadia sim, perigo não!",
+        "16": "O objetivo é excitar, não se encrencar.",
+        "17": "Certifiquem-se que o local é seguro.",
+        "18": "A cumplicidade do casal é fundamental.",
+        "19": "Divirtam-se, mas com responsabilidade!"
+      }
+    },
+    "conexao": {
+      "left": {
+        "0": "Não sentiu a conexão com essa proposta? Ok.",
+        "1": "Prefere outra forma de se conectar agora?",
+        "2": "Se não parece íntimo o suficiente, passe.",
+        "3": "Sua intuição sobre a conexão é válida.",
+        "4": "Não está no clima para essa interação? Sem problemas."
+      },
+      "right": {
+        "0": "Comunicação aberta fortalece os laços.",
+        "1": "Estejam presentes um para o outro.",
+        "2": "Pequenos gestos fazem grande diferença.",
+        "3": "A vulnerabilidade aproxima.",
+        "4": "Celebrem os momentos juntos."
+      }
+    },
+    "default": {
+      "left": {
+        "0": "Não curtiu? Sem problemas, próxima!",
+        "1": "Se não é pra você, tudo bem.",
+        "2": "Passe se não sentir a vibe.",
+        "3": "Sua escolha é o que importa.",
+        "4": "Ok não gostar dessa."
+      },
+      "right": {
+        "0": "Divirtam-se explorando!",
+        "1": "Comunicação é a chave.",
+        "2": "Respeitem os limites um do outro.",
+        "3": "Consentimento sempre!",
+        "4": "Aproveitem a jornada juntos."
+      }
+    }
+  },
+  "hooks": {
+    "useUserCardInteractions": {
+      "interactionAttemptNoUserLog": "[Interaction] Tentativa de interação sem usuário, ID ou coupleId.",
+      "matchSuccessLog": "[MATCH!] Carta {{cardId}} agora é um match para o casal {{coupleId}}",
+      "firestoreMatchErrorLog": "[Interaction] Erro no Firestore durante a lógica de match da subcoleção para a carta {{cardId}}:",
+      "createUserCardWarningLog": "[UserCardCreation] Tentativa de criar carta sem usuário, texto, coupleId ou parceiro vinculado.",
+      "userCardCreatedSuccessLog": "Firestore: Carta personalizada criada com sucesso! ID da Carta: {{cardId}}",
+      "userCardCreateErrorLog": "Firestore: Erro ao criar carta personalizada:"
+    },
+    "useLinkCompletionListener": {
+      "startListeningLog": "[Listener Usuário A {{userId}}]: Iniciando escuta por links completados.",
+      "alreadyProcessingLog": "[Listener Usuário A {{userId}}]: Link {{linkCode}} já está sendo processado.",
+      "alreadyLinkedInternalLog": "[Listener Usuário A {{userId}}]: Usuário já vinculado (verificação interna do listener), ignorando link {{linkCode}}.",
+      "linkCompletedDetectedLog": "[Listener Usuário A {{userId}}]: Link {{linkCode}} completado por {{acceptedBy}} detectado!",
+      "linkFinalizedSuccessLog": "[Listener Usuário A {{userId}}]: Vínculo com {{acceptedBy}} (Couple ID: {{coupleId}}) finalizado com sucesso.",
+      "listenerErrorLog": "[Listener Usuário A {{userId}}]: Erro no listener de pendingLinks:"
+    },
+    "useCoupleLinking": {
+      "incomingRequestsUpdatedLog": "[useCoupleLinking] Solicitações de vínculo recebidas atualizadas:",
+      "errorListeningIncomingLog": "[useCoupleLinking] Erro ao ouvir solicitações de vínculo recebidas:",
+      "sentRequestAcceptedLog": "[useCoupleLinking] Solicitação enviada parece ter sido aceita (usuário vinculado).",
+      "errorListeningSentLog": "[useCoupleLinking] Erro ao ouvir status da solicitação enviada:",
+      "requestLinkWarnNoUserOrCodeLog": "[useCoupleLinking] Não é possível solicitar vínculo: sem usuário, usuário já vinculado ou código vazio.",
+      "requestLinkAttemptLog": "[useCoupleLinking] Tentando solicitar vínculo com código: {{code}} pelo usuário {{email}}",
+      "requestLinkNoUserFoundOrLinkedLog": "[useCoupleLinking] Nenhum usuário encontrado com o código {{code}} ou o usuário já está vinculado.",
+      "requestLinkSelfAttemptLog": "[useCoupleLinking] Usuário tentou enviar solicitação para si mesmo.",
+      "requestLinkAlreadyPendingLog": "[useCoupleLinking] Solicitação para {{targetIdentifier}} já está pendente.",
+      "requestLinkSentSuccessLog": "[useCoupleLinking] Solicitação de vínculo enviada para {{targetIdentifier}}",
+      "requestLinkSendErrorLog": "[useCoupleLinking] Erro ao enviar solicitação de vínculo:",
+      "acceptLinkWarnInvalidUserLog": "[useCoupleLinking] Não é possível aceitar solicitação: usuário inválido, não é o alvo, ou já vinculado.",
+      "acceptLinkAttemptLog": "[useCoupleLinking] Usuário {{userId}} aceitando solicitação {{requestId}} de {{requesterId}}",
+      "acceptLinkSuccessLog": "[useCoupleLinking] Vínculo aceito e estabelecido entre {{userId}} e {{requesterId}}.",
+      "acceptLinkErrorLog": "[useCoupleLinking] Erro ao aceitar solicitação de vínculo:",
+      "rejectLinkAttemptLog": "[useCoupleLinking] Usuário {{userId}} rejeitando solicitação {{requestId}}",
+      "rejectLinkSuccessLog": "[useCoupleLinking] Solicitação {{requestId}} rejeitada e removida.",
+      "rejectLinkErrorLog": "[useCoupleLinking] Erro ao rejeitar solicitação de vínculo:",
+      "unlinkWarnNoUserOrLinkLog": "[useCoupleLinking] Não é possível desvincular: sem usuário ou usuário não vinculado.",
+      "unlinkAttemptLog": "[useCoupleLinking] Iniciando desvinculação entre {{userId}} e {{partnerId}}",
+      "unlinkSuccessLog": "[useCoupleLinking] {{email}} desvinculado de {{partnerId}}.",
+      "unlinkErrorLog": "[useCoupleLinking] Erro ao desvincular parceiro:",
+      "cancelSentWarnNoPendingLog": "[useCoupleLinking] Nenhuma solicitação pendente para cancelar.",
+      "cancelSentAttemptLog": "[useCoupleLinking] Usuário {{userId}} cancelando solicitação enviada.",
+      "cancelSentSuccessLog": "[useCoupleLinking] Solicitação {{requestId}} cancelada.",
+      "cancelSentNoRequestFoundLog": "[useCoupleLinking] Nenhuma solicitação pendente encontrada para cancelar (pode já ter sido processada).",
+      "cancelSentErrorLog": "[useCoupleLinking] Erro ao cancelar solicitação enviada:"
+    },
+    "useCoupleCardChats": {
+      "setupListenerLog": "[useCoupleCardChats] Configurando listener para cardChats no casal {{coupleId}}",
+      "fetchErrorLog": "[useCoupleCardChats] Erro ao buscar cardChats para o casal {{coupleId}}:",
+      "loadErrorUserMessage": "Falha ao carregar dados do chat."
+    },
+    "useCardPileLogic": {
+      "standardCardsLoadedLog": "[useCardPileLogic] Cartas padrão carregadas: {{count}}",
+      "userCardsLoadedLog": "[useCardPileLogic] Cartas do usuário carregadas: {{count}}",
+      "fetchCardsErrorLog": "[useCardPileLogic] Erro ao buscar cartas do Firestore:",
+      "partnerNewCardDetectedLog": "[useCardPileLogic] Nova carta do parceiro detectada: {{cardId}}",
+      "fetchingPartnerLikesLog": "[useCardPileLogic] Buscando likes do parceiro {{partnerIdShort}} não vistos por {{userIdShort}}",
+      "partnerLikesLoadedLog": "[useCardPileLogic] Likes do parceiro não vistos carregados: {{count}}",
+      "fetchPartnerLikesErrorLog": "[useCardPileLogic] Erro ao buscar likes do parceiro:",
+      "loadingCardsFallbackText": "Carregando cartas...",
+      "noCardsFoundFallbackText": "Nenhuma carta encontrada.",
+      "prioritizingPartnerCardLog": "[useCardPileLogic] Priorizando carta do parceiro: {{cardId}}",
+      "partnerCardAlreadySeenLog": "[useCardPileLogic] Carta do parceiro {{cardId}} já estava em seenCards e ainda em partnerNewCard state. Limpando localmente.",
+      "prioritizingPartnerLikeLog": "[useCardPileLogic] Priorizando like do parceiro: {{cardId}}",
+      "selectingRandomCardLog": "[useCardPileLogic] Selecionando carta aleatória geral: {{cardId}}",
+      "partnerCardSeenClearingFlagLog": "[useCardPileLogic] Carta do parceiro {{cardId}} foi vista. Limpando sinalizador.",
+      "clearNextCardErrorLog": "Erro ao limpar nextCardForPartner:",
+      "newSkinsUnlockedBySeenLog": "[useCardPileLogic] Novas skins desbloqueadas (provavelmente por cartas vistas):",
+      "checkSkinsErrorAfterInteractionLog": "[useCardPileLogic] Erro ao verificar skins após interação com carta:"
+    },
+    "useCardChat": {
+      "noCoupleIdWarningLog": "[useCardChat] Usuário não possui coupleId. Não é possível carregar o chat.",
+      "setupListenerLog": "[useCardChat] Configurando listener para o casal {{coupleId}}, carta {{cardId}}",
+      "loadMessagesErrorLog": "Erro ao carregar mensagens de {{path}}:",
+      "loadMessagesErrorUser": "Não foi possível carregar as mensagens.",
+      "sendMessageIncompleteDataWarningLog": "[useCardChat] Não é possível enviar mensagem: dados incompletos.",
+      "sendMessageSuccessLog": "[useCardChat - sendMessage] Mensagem enviada e documento do chat atualizado para {{cardId}}.",
+      "sendMessageErrorLog": "[useCardChat - sendMessage] Erro ao enviar mensagem ou atualizar documento do chat para {{cardId}}:"
+    }
+  },
+  "categoryCarousel": {
+    "emptyStateText": "Vazio",
+    "matchCardClickedLog": "CategoryCarousel: MatchCardItem clicado! Card ID: {{cardId}}, Texto: \"{{cardTextSnippet}}...\""
+  },
+  "languageSelector": {
+    "ariaLabel": "Selecionar idioma",
+    "pt": "Português (PT)",
+    "en": "Inglês (EN)",
+    "es": "Espanhol (ES)"
+  },
+  "cardBack": {
+    "logoAlt": "Logo KinkLink"
   }
-  
+
 }

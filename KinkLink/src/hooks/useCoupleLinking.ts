@@ -15,6 +15,7 @@ import {
   onSnapshot,
   type Timestamp, // Import Timestamp type
 } from 'firebase/firestore';
+import { useTranslation } from 'react-i18next';
 
 export interface LinkRequest {
   id: string; // ID do documento da solicitação
@@ -31,6 +32,7 @@ export function useCoupleLinking() {
   const [incomingRequests, setIncomingRequests] = useState<LinkRequest[]>([]);
   const [sentRequestStatus, setSentRequestStatus] = useState<'pending' | 'accepted' | 'rejected' | null>(null);
   const [sentRequestTargetEmail, setSentRequestTargetEmail] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   // Efeito para ouvir solicitações de vínculo direcionadas ao usuário atual
   useEffect(() => {
@@ -47,9 +49,9 @@ export function useCoupleLinking() {
     const unsubscribeIncoming = onSnapshot(qIncoming, (snapshot) => {
       const requests = snapshot.docs.map(docFound => ({ id: docFound.id, ...docFound.data() } as LinkRequest));
       setIncomingRequests(requests);
-      console.log('[useCoupleLinking] Solicitações de vínculo recebidas atualizadas:', requests);
+      console.log(t('hooks.useCoupleLinking.incomingRequestsUpdatedLog'), requests);
     }, (error) => {
-      console.error("[useCoupleLinking] Erro ao ouvir solicitações de vínculo recebidas:", error);
+      console.error(t('hooks.useCoupleLinking.errorListeningIncomingLog'), error);
       setIncomingRequests([]);
     });
 
@@ -62,9 +64,9 @@ export function useCoupleLinking() {
             // Se não há solicitações pendentes enviadas, verifica se alguma foi aceita/rejeitada recentemente
             // Isso é um pouco mais complexo, pois a request é deletada ao aceitar/rejeitar.
             // A atualização do `user.linkedPartnerId` pelo `AuthContext` é a principal forma de saber se foi vinculado.
-            // Se o `user.linkedPartnerId` está preenchido e `sentRequestStatus` era 'pending', então foi aceita.
+            // Se o `user.linkedPartnerId` está preenchido e `sentRequestStatus` era 'pending', então foi aceita. // TODO: Translate this comment if needed
             if (user.linkedPartnerId && sentRequestStatus === 'pending') {
-                console.log('[useCoupleLinking] Solicitação enviada parece ter sido aceita (usuário vinculado).');
+                console.log(t('hooks.useCoupleLinking.sentRequestAcceptedLog'));
                 setSentRequestStatus('accepted');
             } else if (sentRequestStatus === 'pending') {
                 // Se era pending e agora está vazia, e não foi vinculado, pode ter sido rejeitada ou cancelada.
@@ -80,7 +82,7 @@ export function useCoupleLinking() {
             setSentRequestTargetEmail(sentReqData.targetEmail || sentReqData.targetId);
         }
     }, (error) => {
-      console.error("[useCoupleLinking] Erro ao ouvir status da solicitação enviada:", error);
+      console.error(t('hooks.useCoupleLinking.errorListeningSentLog'), error);
     });
 
 
@@ -88,16 +90,16 @@ export function useCoupleLinking() {
       unsubscribeIncoming();
       unsubscribeSent();
     };
-  }, [user, sentRequestStatus]); // Adicionado sentRequestStatus para reavaliar se ele muda
+  }, [user, sentRequestStatus, t]); // Adicionado sentRequestStatus para reavaliar se ele muda
 
   const requestLinkWithCode = async (codeToTry: string): Promise<boolean> => {
     if (!user || !user.id || user.linkedPartnerId || !codeToTry.trim()) {
-      console.warn("[useCoupleLinking] Não é possível solicitar vínculo: sem usuário, usuário já vinculado ou código vazio.");
+      console.warn(t('hooks.useCoupleLinking.requestLinkWarnNoUserOrCodeLog'));
       return false;
     }
 
     const normalizedCode = codeToTry.toUpperCase();
-    console.log(`[useCoupleLinking] Tentando solicitar vínculo com código: ${normalizedCode} pelo usuário ${user.email}`);
+    console.log(t('hooks.useCoupleLinking.requestLinkAttemptLog', { code: normalizedCode, email: user.email }));
 
     try {
       const usersRef = collection(db, 'users');
@@ -110,7 +112,7 @@ export function useCoupleLinking() {
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
-        console.log(`[useCoupleLinking] Nenhum usuário encontrado com o código ${normalizedCode} ou o usuário já está vinculado.`);
+        console.log(t('hooks.useCoupleLinking.requestLinkNoUserFoundOrLinkedLog', { code: normalizedCode }));
         return false;
       }
 
@@ -119,7 +121,7 @@ export function useCoupleLinking() {
       const targetData = targetUserDoc.data();
 
       if (targetId === user.id) {
-        console.log("[useCoupleLinking] Usuário tentou enviar solicitação para si mesmo.");
+        console.log(t('hooks.useCoupleLinking.requestLinkSelfAttemptLog'));
         return false;
       }
 
@@ -131,7 +133,7 @@ export function useCoupleLinking() {
       const existingRequestSnap = await getDocs(existingRequestQuery);
 
       if (!existingRequestSnap.empty) {
-        console.log(`[useCoupleLinking] Solicitação para ${targetData.email || targetId} já está pendente.`);
+        console.log(t('hooks.useCoupleLinking.requestLinkAlreadyPendingLog', { targetIdentifier: targetData.email || targetId }));
         setSentRequestStatus('pending');
         setSentRequestTargetEmail(targetData.email || targetId);
         return true;
@@ -146,13 +148,13 @@ export function useCoupleLinking() {
         createdAt: serverTimestamp(),
       });
 
-      console.log(`[useCoupleLinking] Solicitação de vínculo enviada para ${targetData.email || targetId}`);
+      console.log(t('hooks.useCoupleLinking.requestLinkSentSuccessLog', { targetIdentifier: targetData.email || targetId }));
       setSentRequestStatus('pending');
       setSentRequestTargetEmail(targetData.email || targetId);
       return true;
 
     } catch (error) {
-      console.error("[useCoupleLinking] Erro ao enviar solicitação de vínculo:", error);
+      console.error(t('hooks.useCoupleLinking.requestLinkSendErrorLog'), error);
       setSentRequestStatus(null);
       setSentRequestTargetEmail(null);
       return false;
@@ -161,11 +163,11 @@ export function useCoupleLinking() {
 
   const acceptLinkRequest = async (request: LinkRequest): Promise<boolean> => {
     if (!user || !user.id || user.id !== request.targetId || user.linkedPartnerId) {
-      console.warn("[useCoupleLinking] Não é possível aceitar solicitação: usuário inválido, não é o alvo, ou já vinculado.");
+      console.warn(t('hooks.useCoupleLinking.acceptLinkWarnInvalidUserLog'));
       return false;
     }
     const { id: requestId, requesterId } = request;
-    console.log(`[useCoupleLinking] Usuário ${user.id} aceitando solicitação ${requestId} de ${requesterId}`);
+    console.log(t('hooks.useCoupleLinking.acceptLinkAttemptLog', { userId: user.id, requestId, requesterId }));
 
     try {
       const batch = writeBatch(db);
@@ -197,7 +199,7 @@ export function useCoupleLinking() {
       batch.delete(requestDocRef); // Deleta a solicitação após aceitar
 
       await batch.commit();
-      console.log(`[useCoupleLinking] Vínculo aceito e estabelecido entre ${user.id} e ${requesterId}.`);
+      console.log(t('hooks.useCoupleLinking.acceptLinkSuccessLog', { userId: user.id, requesterId }));
       // O AuthContext (onSnapshot) deve pegar a atualização do linkedPartnerId.
       // A remoção da solicitação também será pega pelo listener de incomingRequests.
       // E o listener de sentRequest do parceiro também deve atualizar.
@@ -207,32 +209,32 @@ export function useCoupleLinking() {
       setSentRequestTargetEmail(null);
       return true;
     } catch (error) {
-      console.error("[useCoupleLinking] Erro ao aceitar solicitação de vínculo:", error);
+      console.error(t('hooks.useCoupleLinking.acceptLinkErrorLog'), error);
       return false;
     }
   };
 
   const rejectLinkRequest = async (requestId: string): Promise<boolean> => {
     if (!user || !user.id) return false;
-    console.log(`[useCoupleLinking] Usuário ${user.id} rejeitando solicitação ${requestId}`);
+    console.log(t('hooks.useCoupleLinking.rejectLinkAttemptLog', { userId: user.id, requestId }));
     try {
       const requestDocRef = doc(db, 'linkRequests', requestId);
       await deleteDoc(requestDocRef);
-      console.log(`[useCoupleLinking] Solicitação ${requestId} rejeitada e removida.`);
+      console.log(t('hooks.useCoupleLinking.rejectLinkSuccessLog', { requestId }));
       return true;
     } catch (error) {
-      console.error("[useCoupleLinking] Erro ao rejeitar solicitação de vínculo:", error);
+      console.error(t('hooks.useCoupleLinking.rejectLinkErrorLog'), error);
       return false;
     }
   };
 
   const unlinkPartner = async (): Promise<void> => {
     if (!user || !user.id || !user.linkedPartnerId) {
-      console.warn("[useCoupleLinking] Cannot unlink: no user or user not linked.");
+      console.warn(t('hooks.useCoupleLinking.unlinkWarnNoUserOrLinkLog'));
       return;
     }
     const partnerIdToUnlink = user.linkedPartnerId;
-    console.log(`[useCoupleLinking] Iniciando desvinculação entre ${user.id} e ${partnerIdToUnlink}`);
+    console.log(t('hooks.useCoupleLinking.unlinkAttemptLog', { userId: user.id, partnerId: partnerIdToUnlink }));
     try {
       const batch = writeBatch(db);
       const commonUpdates = {
@@ -251,19 +253,19 @@ export function useCoupleLinking() {
       await updateUser(commonUpdates); // Atualiza o estado local do usuário atual
       setSentRequestStatus(null); // Limpa qualquer status de solicitação pendente
       setSentRequestTargetEmail(null);
-      console.log(`[useCoupleLinking] ${user.email} desvinculado de ${partnerIdToUnlink}.`);
+      console.log(t('hooks.useCoupleLinking.unlinkSuccessLog', { email: user.email, partnerId: partnerIdToUnlink }));
     } catch (error) {
-      console.error("[useCoupleLinking] Erro ao desvincular parceiro:", error);
+      console.error(t('hooks.useCoupleLinking.unlinkErrorLog'), error);
     }
   };
 
   // Função para cancelar uma solicitação enviada que ainda está pendente
   const cancelSentRequest = async (): Promise<boolean> => {
     if (!user || !user.id || sentRequestStatus !== 'pending') {
-        console.warn("[useCoupleLinking] Nenhuma solicitação pendente para cancelar.");
+        console.warn(t('hooks.useCoupleLinking.cancelSentWarnNoPendingLog'));
         return false;
     }
-    console.log(`[useCoupleLinking] Usuário ${user.id} cancelando solicitação enviada.`);
+    console.log(t('hooks.useCoupleLinking.cancelSentAttemptLog', { userId: user.id }));
     try {
         const requestsRef = collection(db, 'linkRequests');
         const q = query(requestsRef, where('requesterId', '==', user.id), where('status', '==', 'pending'));
@@ -271,17 +273,17 @@ export function useCoupleLinking() {
         if (!snapshot.empty) {
             const requestToCancel = snapshot.docs[0];
             await deleteDoc(doc(db, 'linkRequests', requestToCancel.id));
-            console.log(`[useCoupleLinking] Solicitação ${requestToCancel.id} cancelada.`);
+            console.log(t('hooks.useCoupleLinking.cancelSentSuccessLog', { requestId: requestToCancel.id }));
             setSentRequestStatus(null);
             setSentRequestTargetEmail(null);
             return true;
         }
-        console.log("[useCoupleLinking] Nenhuma solicitação pendente encontrada para cancelar (pode já ter sido processada).");
+        console.log(t('hooks.useCoupleLinking.cancelSentNoRequestFoundLog'));
         setSentRequestStatus(null); // Limpa de qualquer forma
         setSentRequestTargetEmail(null);
         return false;
     } catch (error) {
-        console.error("[useCoupleLinking] Erro ao cancelar solicitação enviada:", error);
+        console.error(t('hooks.useCoupleLinking.cancelSentErrorLog'), error);
         return false;
     }
   };

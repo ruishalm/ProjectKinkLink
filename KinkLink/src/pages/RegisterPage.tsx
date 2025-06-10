@@ -2,11 +2,13 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './RegisterPage.module.css'; // Importa os CSS Modules
+import { useTranslation } from 'react-i18next';
 
 const RegisterPage: React.FC = () => {
   // Hooks
   const { user, isLoading } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Efeitos
   useEffect(() => {
@@ -28,7 +30,7 @@ const RegisterPage: React.FC = () => {
   return (
     <div className={styles.pageContainer}>
       <main className={styles.mainContent}> {/* Envolve o conteúdo principal */}
-        <p className={styles.messageText}>Página de Cadastro (Conteúdo a ser implementado ou esta página será removida se SignupPage for suficiente)</p>
+        <p className={styles.messageText}>{t('registerPage.placeholderMessage')}</p>
       </main>
     </div>
   );

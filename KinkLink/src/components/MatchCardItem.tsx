@@ -2,6 +2,7 @@
 import React from 'react';
 import PlayingCard, { type CardData as PlayingCardDataType } from './PlayingCard';
 import styles from './MatchCardItem.module.css'; // Usará seu próprio CSS module
+import { useTranslation } from 'react-i18next';
 
 export interface MatchCardItemProps { // Exportar a interface
   card: PlayingCardDataType;
@@ -20,6 +21,7 @@ const MatchCardItem: React.FC<MatchCardItemProps> = ({
   onToggleHot,
   lastMessageSnippet,
 }) => {
+  const { t } = useTranslation();
   const scaleFactor = isHot ? 0.55 : 0.5;
   const cardWidth = 250 * scaleFactor;
   const cardHeight = 350 * scaleFactor;
@@ -32,7 +34,7 @@ const MatchCardItem: React.FC<MatchCardItemProps> = ({
       onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
       role="button"
       tabIndex={0}
-      aria-label={`Link: ${card.text.substring(0,30)}... ${isUnread ? ' (Não lido)' : ''}`}
+      aria-label={`${t('matchesPage.matchCardAriaLabel', { cardText: card.text.substring(0,30) })} ${isUnread ? t('matchesPage.unreadIndicatorText') : ''}`}
     >
       {isUnread && <div className={styles.unreadIndicator}></div>}
       <PlayingCard

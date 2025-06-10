@@ -5,7 +5,7 @@ export const packCyberpunkKink: SkinDefinition = {
   id: 'pack_cyberpunk_kink',
   name: 'Cyberpunk Kink',
   type: 'themePack',
-  description: 'Neon, tecnologia e atitude. Botões com chanfros em breve!',
+  description: 'Neon e tecnologia.',
   associatedPaletteId: 'palette_cyberpunk_neon',
   associatedFontId: 'font_chakra_petch', // Atualizado para Chakra Petch
   associatedButtonStyleId: 'btn_style_cyberpunk',

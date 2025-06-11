@@ -1,7 +1,6 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\FeedbackModal.tsx
 import React, { useState, useEffect, type FormEvent } from 'react';
 import styles from './FeedbackModal.module.css'; // Criaremos este CSS Module
-import { useTranslation } from 'react-i18next';
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -15,7 +14,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const { t } = useTranslation();
+  // const { t } = useTranslation(); // Removido
 
   useEffect(() => {
     if (isOpen) {
@@ -42,7 +41,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!feedbackText.trim()) {
-      setError(t('modals.feedback.errorEmpty'));
+      setError('Por favor, escreva seu feedback antes de enviar.'); // String fixa
       return;
     }
     setIsSubmitting(true);
@@ -50,13 +49,13 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
     setSuccessMessage(null);
     try {
       await onSubmitFeedback(feedbackText.trim());
-      setSuccessMessage(t('modals.feedback.successMessage'));
+      setSuccessMessage('Feedback enviado com sucesso! Obrigado.'); // String fixa
       setFeedbackText(''); // Limpa o campo após o envio bem-sucedido
       // Poderia fechar o modal automaticamente após um tempo ou deixar o usuário fechar
       // setTimeout(onClose, 2000); // Exemplo: fecha após 2 segundos
     } catch (err) {
       console.error("Erro ao enviar feedback:", err);
-      setError(t('modals.feedback.errorMessage'));
+      setError('Erro ao enviar o feedback. Por favor, tente novamente.'); // String fixa
     } finally {
       setIsSubmitting(false);
     }
@@ -69,16 +68,16 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={`${styles.modalContent} klnkl-themed-panel`} onClick={(e) => e.stopPropagation()}>
-        <button onClick={onClose} className={styles.closeButtonTop} aria-label={t('buttons.close')}>&times;</button>
-        <h2 className={styles.title}>{t('modals.feedback.title')}</h2>
-        <p className={styles.instructions}>{t('modals.feedback.instructions')}</p>
+        <button onClick={onClose} className={styles.closeButtonTop} aria-label="Fechar">&times;</button>
+        <h2 className={styles.title}>Enviar Feedback / Reportar Bug</h2>
+        <p className={styles.instructions}>Encontrou um problema ou tem uma sugestão? Conte-nos! Seu feedback nos ajuda a melhorar o KinkLink.</p>
         
         <form onSubmit={handleSubmit}>
           <textarea
             className={styles.textarea}
             value={feedbackText}
             onChange={(e) => setFeedbackText(e.target.value)}
-            placeholder={t('modals.feedback.placeholder')}
+            placeholder="Descreva o bug ou sua sugestão aqui..."
             rows={6}
             disabled={isSubmitting || !!successMessage}
           />
@@ -86,10 +85,10 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
           {successMessage && <p className={styles.successMessage}>{successMessage}</p>}
           <div className={styles.buttonContainer}>
             <button type="button" onClick={onClose} className={`${styles.buttonSecondary} genericButton`} disabled={isSubmitting}>
-              {t('buttons.cancel')}
+              Cancelar
             </button>
             <button type="submit" className={`${styles.buttonPrimary} genericButton`} disabled={isSubmitting || !feedbackText.trim() || !!successMessage}>
-              {isSubmitting ? t('modals.feedback.submittingButton') : t('modals.feedback.submitButton')}
+              {isSubmitting ? 'Enviando...' : 'Enviar Feedback'}
             </button>
           </div>
         </form>

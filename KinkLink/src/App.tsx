@@ -25,7 +25,7 @@ import Header from './components/Layout/Header';
 import UnlockNotificationModal from './components/UnlockNotificationModal';
 import AdminRoute from './components/AdminRoute';
 import FeedbackModal from './components/FeedbackModal'; // <<< IMPORT PARA O MODAL
-import { useTranslation } from 'react-i18next'; // <<< IMPORT PARA TRADUÇÃO
+// import { useTranslation } from 'react-i18next'; // Removido, pois não usaremos t() para os alertas aqui
 
 
 const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'));
@@ -45,7 +45,7 @@ function App() {
   const isUserLinked = !!user?.linkedPartnerId;
   const [deferredInstallPrompt, setDeferredInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallButtonInHeader, setShowInstallButtonInHeader] = React.useState(false);
-  const { t } = useTranslation();
+  // const { t } = useTranslation(); // Removido
 
   // Estado para o modal de feedback - DEVE ESTAR NO TOPO DA FUNÇÃO
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
@@ -76,9 +76,9 @@ function App() {
     if (user) {
       setIsFeedbackModalOpen(true);
     } else {
-      alert(t('app.loginForFeedback')); 
+      alert('Você precisa estar logado para enviar feedback.'); // String fixa
     }
-  }, [user, t]); // Dependências corretas
+  }, [user]); // Dependência 't' removida
 
   const handleCloseFeedbackModal = useCallback(() => {
     setIsFeedbackModalOpen(false);
@@ -87,10 +87,10 @@ function App() {
   const handleSubmitFeedbackToContext = useCallback(async (feedbackText: string) => {
     if (!submitUserFeedback) {
         console.error("[App] Função submitUserFeedback não está disponível no AuthContext");
-        throw new Error(t('app.feedbackSubmitError')); 
+        throw new Error('Não foi possível enviar o feedback no momento.'); // String fixa
     }
     await submitUserFeedback(feedbackText);
-  }, [submitUserFeedback, t]); // Dependências corretas
+  }, [submitUserFeedback]); // Dependência 't' removida
 
 
   if (isLoading) {

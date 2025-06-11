@@ -1,7 +1,7 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\Layout\Header.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next'; // Importar useTranslation
+// import { useTranslation } from 'react-i18next'; // Removido
 import styles from './Header.module.css';
 
 // Supondo que o logo esteja em public/kinklogo.png ou um caminho acessível
@@ -14,7 +14,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOpenFeedbackModal }) => {
-  const { t } = useTranslation(); // Hook de tradução
+  // const { t } = useTranslation(); // Removido
   return (
     <header className={`${styles.appHeader} klnkl-themed-panel`}>
       <div className={styles.logoContainer}>
@@ -39,7 +39,7 @@ const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOp
           onClick={onOpenFeedbackModal} // Chama a função para abrir o modal
           className={`${styles.feedbackButton} ck-theme-button genericButton`} // Pode renomear a classe se quiser
         >
-          {t('header.feedbackButton')} {/* Texto traduzível */}
+          Feedback {/* String fixa */}
         </button>
       </div>
     </header>

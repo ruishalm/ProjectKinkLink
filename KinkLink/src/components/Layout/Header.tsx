@@ -18,8 +18,9 @@ const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOp
   return (
     <header className={`${styles.appHeader} klnkl-themed-panel`}>
       <div className={styles.logoContainer}>
-        <Link to="/cards" className={styles.logoLink}> {/* Link para a página de cartas */}
+        <Link to="/cards" className={styles.logoLink}>
           <img src={logoSrc} alt="KinkLink Logo" className={styles.logoImage} />
+          <span className={styles.betaText}>BETA</span>
         </Link>
       </div>
       <div className={styles.actionsContainer}> {/* Renomeado para acomodar mais botões */}
@@ -39,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOp
           onClick={onOpenFeedbackModal} // Chama a função para abrir o modal
           className={`${styles.feedbackButton} ck-theme-button genericButton`} // Pode renomear a classe se quiser
         >
-          Feedback {/* String fixa */}
+          Reportar erro
         </button>
       </div>
     </header>

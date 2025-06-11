@@ -92,6 +92,10 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
             </button>
           </div>
         </form>
+        <div className={styles.alternativeContact}>
+          <p>OU</p>
+          <p>nos contacte em <a href="mailto:ruishalm.matzukan@gmail.com" className={styles.emailLink}>ruishalm.matzukan@gmail.com</a></p>
+        </div>
       </div>
     </div>
   );

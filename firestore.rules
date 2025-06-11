@@ -17,8 +17,8 @@ service cloud.firestore {
       allow get: if request.auth != null;
 
       // Listagem (para ler a coleção inteira):
-      // Apenas admins podem listar todos os usuários.
-      allow list: if request.auth != null && isUserAdmin();
+      // Alterado para permitir que usuários autenticados façam queries (necessário para buscar por linkCode).
+      allow list: if request.auth != null;
 
       // Criação (signup):
       // Usuário pode criar seu próprio documento.
@@ -40,7 +40,7 @@ service cloud.firestore {
           request.auth.uid == userId &&
           (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == resource.data.isAdmin) &&
           // Permite que o usuário atualize os campos listados, incluindo 'feedbackTickets'
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bio', 'username', 'unlockedSkinIds', 'gender', 'birthDate', 'linkCode', 'seenCards', 'conexaoAccepted', 'conexaoRejected', 'feedbackTickets', 'linkedPartnerId', 'coupleId'])
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bio', 'username', 'unlockedSkinIds', 'gender', 'birthDate', 'linkCode', 'seenCards', 'conexaoAccepted', 'conexaoRejected', 'feedbackTickets', 'linkedPartnerId', 'coupleId', 'partnerId'])
         ) ||
         // 2. Parceiro pode atualizar campos de vínculo ('linkedPartnerId', 'coupleId') do outro usuário.
         ( // Este bloco é para o parceiro atualizar os campos de vínculo do outro usuário.

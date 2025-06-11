@@ -15,22 +15,39 @@
 }
 
 .logoContainer {
-  /* Flex para centralizar o logo se necessário, ou apenas para conter */
+  position: relative; /* Para posicionar o texto BETA em relação ao container */
 }
 
 .logoLink {
-  display: inline-block; /* Para que o link se ajuste ao tamanho da imagem */
+  display: flex; /* Para alinhar a imagem e o texto BETA */
+  align-items: flex-end; /* Alinha o texto BETA na parte inferior da imagem */
+  text-decoration: none; /* Remove sublinhado do link */
 }
 
 .logoImage {
-  height: 60px; /* Tamanho do logo aumentado. Ajuste conforme necessário. */
+  height: 100px; /* AUMENTO MAIOR PARA TESTE. Ajuste conforme necessário. */
   width: auto; /* Mantém a proporção da imagem */
   display: block; /* Remove espaço extra abaixo da imagem */
-  transition: transform 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out; /* Adicionada transição para filter */
+  /* Opcional: Adicionar cantos arredondados se o logo permitir e ficar bom */
+  /* border-radius: 8px; */
+  /* Opcional: Adicionar uma sombra sutil para dar profundidade */
+  /* box-shadow: 0 2px 4px rgba(0,0,0,0.1); */
 }
 
 .logoImage:hover {
   transform: scale(1.05); /* Efeito sutil no hover */
+  filter: drop-shadow(0 0 5px var(--cor-primaria, #64b5f6)); /* Adiciona um brilho sutil com a cor primária no hover */
+}
+
+.betaText {
+  font-size: 0.6em; /* Tamanho pequeno */
+  color: white;
+  font-weight: bold;
+  margin-left: 5px; /* Espaço entre o logo e o texto BETA */
+  padding-bottom: 5px; /* Ajuste para alinhar verticalmente com a base do logo, se necessário */
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.7); /* Sombra para destacar */
+  align-self: flex-end; /* Garante que fique na base se o logo for mais alto */
 }
 
 /* Alterado de .supportContainer para .actionsContainer para corresponder ao Header.tsx */
@@ -41,14 +58,14 @@
 }
 
 .installButton,
-.supportButton {
+.supportButton,
+.feedbackButton { /* Adicionada a classe .feedbackButton aqui */
   /* Estilos removidos/alterados para herdar do tema Cyberpunk */
   /* background-color, color, border, border-radius serão definidos pelo tema.
      O padding base vem do genericButton, mas podemos ajustar aqui. */
   padding: 8px 18px; /* Padding ajustado para consistência entre os botões do header */
   white-space: nowrap; /* Impede que o texto "Suporte e Contato" quebre em duas linhas */
   text-decoration: none;
-  /* font-size e font-weight também serão influenciados pelo tema (bold, uppercase) */
   cursor: pointer;
   transition: all 0.2s ease; /* A transição base também vem do genericButton, mas pode ser mantida/ajustada aqui */
   /* Se genericButton ou ck-theme-button não definirem display, adicione:
@@ -56,16 +73,25 @@
      align-items: center;
      justify-content: center;
   */
+  font-weight: 500; /* Um peso de fonte um pouco menos bold que o padrão de alguns temas */
+  border: 1px solid transparent; /* Garante uma borda base para consistência, mesmo que o tema a altere */
+}
+
+/* Estilos mais específicos para o botão de feedback para torná-lo menos "quadradão" */
+.feedbackButton {
+  border-radius: 20px; /* Deixa o botão bem mais arredondado/formato de pílula */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); /* Sombra sutil para profundidade */
+  /* As cores de fundo e texto virão do ck-theme-button */
 }
 
 /* Estilos para o botão de instalar PWA */
 .installButton:hover,
-.supportButton:hover {
+.supportButton:hover,
+.feedbackButton:hover { /* Adicionada a classe .feedbackButton aqui */
   /* O estilo de hover também será herdado do tema Cyberpunk: */
-  /* Ex: fundo ciano neon, borda magenta, sombra, etc. */
-  /* background-color: var(--cor-secundaria, #5C5C5C); */
-  /* color: var(--cor-texto-sobre-secundaria, #FFFFFF); */
-  /* border-color: var(--cor-secundaria, #5C5C5C); */
+  filter: brightness(110%); /* Levemente mais claro no hover, funciona bem com cores de tema */
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12); /* Sombra um pouco mais pronunciada no hover */
+  transform: translateY(-1px); /* Efeito de leve "levantamento" */
 }
 
 /* Media Query para telas menores (ex: até 768px de largura) */
@@ -77,7 +103,8 @@
     gap: 10px; /* Reduz o espaço entre os botões */
   }
   .installButton,
-  .supportButton {
+  .supportButton,
+  .feedbackButton { /* Adicionada a classe .feedbackButton aqui */
     padding: 7px 15px; /* Padding reduzido para mobile */
   }
 }
@@ -98,7 +125,8 @@
     gap: 8px; /* Espaço ainda menor entre botões */
   }
   .installButton,
-  .supportButton {
+  .supportButton,
+  .feedbackButton { /* Adicionada a classe .feedbackButton aqui */
     padding: 6px 10px; /* Padding menor para os botões */
     font-size: 0.85rem; /* Fonte um pouco menor se necessário */
   }

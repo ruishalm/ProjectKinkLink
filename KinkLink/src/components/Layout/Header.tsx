@@ -1,6 +1,7 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\Layout\Header.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next'; // Importar useTranslation
 import styles from './Header.module.css';
 
 // Supondo que o logo esteja em public/kinklogo.png ou um caminho acessível
@@ -9,9 +10,11 @@ const logoSrc = '/kinklogo.png'; // Ajuste o caminho se o logo estiver em outro 
 interface HeaderProps {
   showInstallButton: boolean;
   onInstallClick: () => void;
+  onOpenFeedbackModal: () => void; // Nova prop para abrir o modal de feedback
 }
 
-const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick }) => {
+const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOpenFeedbackModal }) => {
+  const { t } = useTranslation(); // Hook de tradução
   return (
     <header className={`${styles.appHeader} klnkl-themed-panel`}>
       <div className={styles.logoContainer}>
@@ -32,12 +35,12 @@ const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick }) =>
           </button>
         )}
         {/* Adicionada a classe global ck-theme-button para aplicar o estilo do tema */}
-        <Link
-          to="/suporte"
-          className={`${styles.supportButton} ck-theme-button genericButton`}
+        <button
+          onClick={onOpenFeedbackModal} // Chama a função para abrir o modal
+          className={`${styles.feedbackButton} ck-theme-button genericButton`} // Pode renomear a classe se quiser
         >
-          Help
-        </Link>
+          {t('header.feedbackButton')} {/* Texto traduzível */}
+        </button>
       </div>
     </header>
   );

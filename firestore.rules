@@ -1,4 +1,4 @@
-// d:\Projetos\Github\app\ProjectKinkLink\firestore.rules
+// d:\Projetos\Github\app\ProjectKinkLink\KinkLink\firestore.rules
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -11,10 +11,10 @@ service cloud.firestore {
 
     // Regras para a coleção 'users'
     match /users/{userId} {
-      // Leitura (get para um documento específico):
-      // Usuário pode ler seu próprio documento.
-      // Admin pode ler qualquer documento de usuário.
-      allow get: if request.auth != null && (request.auth.uid == userId || isUserAdmin());
+      // Permite que usuários autenticados leiam documentos de outros usuários.
+      // Necessário para funcionalidades como ver o perfil do parceiro ao vincular contas,
+      // ou para o usuário aceitante ler dados do usuário iniciador do vínculo.
+      allow get: if request.auth != null;
 
       // Listagem (para ler a coleção inteira):
       // Apenas admins podem listar todos os usuários.
@@ -38,20 +38,19 @@ service cloud.firestore {
         //    - Pode atualizar outros campos permitidos (bio, username, etc.).
         (
           request.auth.uid == userId &&
-          (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == resource.data.isAdmin)
-          // Se quiser restringir campos que o usuário pode auto-editar, adicione:
-          // && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bio', 'username', 'unlockedSkinIds', ...])
+          (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == resource.data.isAdmin) &&
+          // Permite que o usuário atualize os campos listados, incluindo 'feedbackTickets'
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bio', 'username', 'unlockedSkinIds', 'gender', 'birthDate', 'linkCode', 'seenCards', 'conexaoAccepted', 'conexaoRejected', 'feedbackTickets'])
         ) ||
         // 2. Parceiro pode atualizar campos de vínculo ('linkedPartnerId', 'coupleId') do outro usuário.
         ( // Este bloco é para o parceiro atualizar os campos de vínculo do outro usuário.
-          // A parte anterior `(request.auth.uid == userId) ||` era redundante com a condição 1.
           request.auth.uid != userId && // O requisitante não é o dono do documento
           request.resource.data.linkedPartnerId == request.auth.uid && // O campo linkedPartnerId no doc sendo atualizado aponta para o requisitante
           (request.resource.data.coupleId == resource.data.coupleId || request.resource.data.coupleId is string) && // Consistência do coupleId
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['linkedPartnerId', 'coupleId']) // Apenas estes campos podem ser alterados
         ) ||
         // 3. Parceiro pode atualizar o array 'seenCards' do outro usuário.
-        ( // Este bloco era anteriormente para campos de vínculo também (mal rotulado). Corrigindo para 'seenCards'.
+        ( 
           request.method == 'update' &&
           request.auth.uid != userId && // O requisitante não é o dono do documento
           get(/databases/$(database)/documents/users/$(userId)).data.linkedPartnerId == request.auth.uid && // O documento sendo atualizado pertence ao parceiro atual do requisitante
@@ -59,7 +58,7 @@ service cloud.firestore {
         ) ||
         // 4. Admin pode atualizar campos específicos de OUTRO usuário (e.g., 'isSupporter', 'bio').
         //    - Não pode mudar 'isAdmin' de outro usuário por esta regra (isso deve ser feito no console do Firebase).
-        ( // Este bloco é para o admin atualizar outros usuários.
+        ( 
           isUserAdmin() &&
           userId != request.auth.uid && // Garante que o admin está atualizando OUTRO usuário
           (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == resource.data.isAdmin) && // Admin não pode mudar isAdmin de outros
@@ -213,7 +212,7 @@ service cloud.firestore {
     /*
     match /cardChats/{chatRoomId}/messages/{messageId} {
         function isChatMember(chatRoomDocId) {
-            let parts = chatRoomDocId.split('_');
+            let parts = chatRoomId.split('_');
             return request.auth.uid == parts[1] || request.auth.uid == parts[2];
         }
         allow read: if request.auth != null && isChatMember(chatRoomId);
@@ -224,5 +223,4 @@ service cloud.firestore {
     }
     */
   }
-
 }

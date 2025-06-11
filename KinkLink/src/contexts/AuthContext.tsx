@@ -26,12 +26,21 @@ import {
   query,
   where,
   getDocs,
-  getDoc
+  getDoc,
+  arrayUnion // Importar arrayUnion
 } from 'firebase/firestore';
 
 export interface MatchedCard extends Card {
   isHot?: boolean;
 }
+
+export interface UserFeedback {
+  id: string; // ID único para o feedback, pode ser gerado no cliente
+  text: string;
+  createdAt: Timestamp;
+  status: 'new' | 'seen' | 'resolved'; // Status do feedback
+}
+
 
 export interface User {
   id: string;
@@ -54,6 +63,7 @@ export interface User {
   gender?: string;    // e.g., 'homem_cis', 'mulher_trans', 'nao_binario', etc.
   isSupporter?: boolean; // Novo campo para indicar se o usuário é um apoiador
   isAdmin?: boolean; // Campo para status de admin lido do Firestore
+  feedbackTickets?: UserFeedback[]; // Novo campo para os tickets de feedback
 }
 
 interface AuthContextData {
@@ -76,6 +86,7 @@ interface AuthContextData {
   checkAndUnlockSkins: (allSkinsData: SkinDefinition[]) => Promise<SkinDefinition[] | null>;
   newlyUnlockedSkinsForModal: SkinDefinition[] | null;
   clearNewlyUnlockedSkinsForModal: () => void;
+  submitUserFeedback: (feedbackText: string) => Promise<void>; // Nova função
   // isAdmin flag can be derived from user object: user?.isAdmin
 }
 
@@ -115,10 +126,12 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
               gender: firestoreData.gender || undefined,
               isSupporter: firestoreData.isSupporter || false, // Carrega o status de apoiador
               isAdmin: firestoreData.isAdmin || false, // Carrega o status de admin
+              feedbackTickets: firestoreData.feedbackTickets || [], // Carrega os tickets de feedback
             } as User);
           } else {
             // Se o documento não existe, isSupporter será false por padrão
-            setUser({ ...baseUserData, isSupporter: false, isAdmin: false } as User);
+            // Também inicializa feedbackTickets
+            setUser({ ...baseUserData, isSupporter: false, isAdmin: false, feedbackTickets: [] } as User);
             console.warn(`[AuthContext] Documento do usuário ${firebaseUser.uid} não encontrado no Firestore via onSnapshot. Será criado no signup se necessário.`);
           }
           setIsLoading(false);
@@ -130,7 +143,8 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
             email: firebaseUser.email,
             username: firebaseUser.displayName || undefined,
             isSupporter: false,
-            isAdmin: false // Fallback
+            isAdmin: false, // Fallback
+            feedbackTickets: [] // Fallback
           } as User);
           setIsLoading(false);
         });
@@ -197,6 +211,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         ],
         isSupporter: false, // Apoiador padrão é false no signup
         isAdmin: false, // Usuários padrão não são admins
+        feedbackTickets: [], // Inicializa feedbackTickets como array vazio
         createdAt: serverTimestamp() as Timestamp,
       };
       await setDoc(newUserDocRef, userData);
@@ -253,6 +268,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
           ],
           isSupporter: false, // Apoiador padrão é false no signup com Google
           isAdmin: false, // Usuários padrão não são admins
+          feedbackTickets: [], // Inicializa feedbackTickets como array vazio
           createdAt: serverTimestamp() as Timestamp,
         };
         await setDoc(userDocRef, userData);
@@ -498,6 +514,34 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     }
   };
 
+  const submitUserFeedback = async (feedbackText: string) => {
+    if (!user || !user.id) {
+      console.warn("[AuthContext] submitUserFeedback chamado sem usuário logado.");
+      throw new Error("Usuário não autenticado para enviar feedback.");
+    }
+    const newTicket: UserFeedback = {
+      // Gera um ID único para o ticket usando o mesmo método que o Firestore usaria para um novo doc
+      id: doc(collection(db, 'temp_ids_for_generation')).id, 
+      text: feedbackText,
+      createdAt: Timestamp.now(), // Usa Timestamp.now() para consistência imediata
+      status: 'new' as const
+    };
+    const userDocRef = doc(db, 'users', user.id);
+    try {
+      await updateDoc(userDocRef, {
+        feedbackTickets: arrayUnion(newTicket)
+      });
+      // Atualiza o estado local do usuário para refletir o novo ticket
+      setUser(currentUser => currentUser ? ({
+        ...currentUser,
+        feedbackTickets: [...(currentUser.feedbackTickets || []), newTicket]
+      }) : null);
+      console.log(`[AuthContext] Feedback enviado pelo usuário ${user.id}: ${newTicket.id}`);
+    } catch (error) {
+      console.error(`[AuthContext] Erro ao enviar feedback para ${user.id}:`, error);
+      throw error;
+    }
+  };
   return (
     <AuthContext.Provider value={{
       user,
@@ -512,7 +556,8 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       resetUserTestData,
       checkAndUnlockSkins,
       newlyUnlockedSkinsForModal,
-      clearNewlyUnlockedSkinsForModal
+      clearNewlyUnlockedSkinsForModal,
+      submitUserFeedback // Adiciona a nova função ao contexto
     }}>
       {children}
     </AuthContext.Provider>

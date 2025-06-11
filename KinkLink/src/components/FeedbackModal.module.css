@@ -1,0 +1,134 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\FeedbackModal.module.css */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050; /* Acima de outros elementos */
+  padding: 15px;
+}
+
+.modalContent {
+  background-color: var(--cor-fundo-elemento, #333);
+  color: var(--cor-texto-primaria, #fff);
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+  width: 100%;
+  max-width: 500px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.title {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: var(--cor-destaque, #61dafb);
+  font-size: 1.5em;
+  text-align: center;
+}
+
+.instructions {
+  font-size: 0.95em;
+  margin-bottom: 15px;
+  line-height: 1.5;
+  text-align: center;
+  opacity: 0.9;
+}
+
+.textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid var(--cor-borda-input, #555);
+  background-color: var(--cor-fundo-input, #444);
+  color: var(--cor-texto-input, #fff);
+  font-family: inherit;
+  font-size: 1em;
+  resize: vertical;
+  min-height: 100px;
+  box-sizing: border-box;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: var(--cor-primaria, #61dafb);
+  box-shadow: 0 0 0 2px var(--cor-primaria-transparente, rgba(97, 218, 251, 0.3));
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.buttonPrimary,
+.buttonSecondary {
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+.buttonPrimary {
+  background-color: var(--cor-primaria, #007bff);
+  color: var(--cor-texto-sobre-primaria, white);
+}
+.buttonPrimary:hover:not(:disabled) {
+  background-color: var(--cor-primaria-hover, #0056b3);
+}
+.buttonPrimary:disabled {
+  background-color: var(--cor-desabilitado-fundo, #555);
+  color: var(--cor-desabilitado-texto, #888);
+  cursor: not-allowed;
+}
+
+.buttonSecondary {
+  background-color: var(--cor-fundo-botao-secundario, #6c757d);
+  color: var(--cor-texto-sobre-secundaria, white);
+}
+.buttonSecondary:hover:not(:disabled) {
+  background-color: var(--cor-fundo-botao-secundario-hover, #5a6268);
+}
+
+
+.closeButtonTop {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: var(--cor-texto-secundaria, #aaa);
+  cursor: pointer;
+  padding: 5px;
+  line-height: 1;
+}
+.closeButtonTop:hover {
+  color: var(--cor-texto-primaria, #fff);
+}
+
+.errorMessage, .successMessage {
+  text-align: center;
+  padding: 8px;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+.errorMessage {
+  color: var(--cor-aviso-texto, white);
+  background-color: var(--cor-aviso-fundo, #d9534f);
+}
+.successMessage {
+  color: var(--cor-sucesso-texto, white);
+  background-color: var(--cor-sucesso-fundo, #5cb85c);
+}

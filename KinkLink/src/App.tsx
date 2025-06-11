@@ -1,9 +1,9 @@
 // App.tsx
-import React, { Suspense, lazy } from 'react'; // Adicionado Suspense e lazy
-import { Routes, Route, useLocation, Navigate } from 'react-router-dom'; // Adicionado Navigate
+import React, { Suspense, lazy, useState, useCallback } from 'react'; // Adicionado useState, useCallback, useEffect
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import './App.css';
-import './config/skins/styles/panel-styles.css'; // Importa os novos estilos de painel
-import './config/skins/styles/button-styles.css'; // Importa os novos estilos de botão
+import './config/skins/styles/panel-styles.css';
+import './config/skins/styles/button-styles.css';
 import { useAuth } from './contexts/AuthContext';
 import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
@@ -15,19 +15,21 @@ import LinkCouplePage from './pages/LinkCouplePage';
 import MatchesPage from './pages/MatchesPage';
 import LinkedRoute from './components/LinkedRoute';
 import ProtectedRoute from './components/ProtectedRoute';
-import UnlinkedRoute from './components/UnlinkedRoute'; // Importar UnlinkedRoute
+import UnlinkedRoute from './components/UnlinkedRoute';
 import TermsOfServicePage from './pages/TermsOfServicePage';
-import SupportPage from './pages/SupportPage'; // Importar a SupportPage
+import SupportPage from './pages/SupportPage';
 import SkinsPage from './pages/SkinsPage';
-import { SkinProvider } from './contexts/SkinContext'; // Importar SkinProvider
+import { SkinProvider } from './contexts/SkinContext';
 import { useLinkCompletionListener } from './hooks/useLinkCompletionListener';
-import Header from './components/Layout/Header'; // Importar o Header global
-import UnlockNotificationModal from './components/UnlockNotificationModal'; // Importar o novo modal
-import AdminRoute from './components/AdminRoute'; // <<< ADICIONE ESTE IMPORT
-const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage')); // <<< ADICIONE ESTE IMPORT (lazy load)
-//import PasswordResetPage from './pages/PasswordResetPage'; // Importar PasswordResetPage
+import Header from './components/Layout/Header';
+import UnlockNotificationModal from './components/UnlockNotificationModal';
+import AdminRoute from './components/AdminRoute';
+import FeedbackModal from './components/FeedbackModal'; // <<< IMPORT PARA O MODAL
+import { useTranslation } from 'react-i18next'; // <<< IMPORT PARA TRADUÇÃO
 
-// Interface para o evento beforeinstallprompt
+
+const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'));
+
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: Array<string>;
   readonly userChoice: Promise<{
@@ -38,22 +40,29 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 function App() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, submitUserFeedback } = useAuth(); // submitUserFeedback do AuthContext
   const location = useLocation();
   const isUserLinked = !!user?.linkedPartnerId;
   const [deferredInstallPrompt, setDeferredInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallButtonInHeader, setShowInstallButtonInHeader] = React.useState(false);
+  const { t } = useTranslation();
 
+  // Estado para o modal de feedback - DEVE ESTAR NO TOPO DA FUNÇÃO
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+
+  // useEffect para o prompt de instalação PWA - ESTÁ SENDO USADO
   React.useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault(); // Previne o mini-infobar do Chrome (ou outros navegadores)
-      setDeferredInstallPrompt(e as BeforeInstallPromptEvent); // Guarda o evento para usar depois
-      setShowInstallButtonInHeader(true); // Mostra o botão no header
+      e.preventDefault();
+      setDeferredInstallPrompt(e as BeforeInstallPromptEvent);
+      setShowInstallButtonInHeader(true);
       console.log('[App] beforeinstallprompt event fired and deferred. Button will be shown.');
     };
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
   }, []);
+
+  // Hook customizado, chamado incondicionalmente
   useLinkCompletionListener(
     user,
     isUserLinked,
@@ -61,6 +70,28 @@ function App() {
       console.log(`Vínculo concluído: CoupleID: ${completedCoupleId}, PartnerID: ${completedPartnerId}`);
     }
   );
+
+  // Funções para o modal de feedback - DEVEM ESTAR NO TOPO DA FUNÇÃO, ANTES DE QUALQUER RETURN CONDICIONAL
+  const handleOpenFeedbackModal = useCallback(() => {
+    if (user) {
+      setIsFeedbackModalOpen(true);
+    } else {
+      alert(t('app.loginForFeedback')); 
+    }
+  }, [user, t]); // Dependências corretas
+
+  const handleCloseFeedbackModal = useCallback(() => {
+    setIsFeedbackModalOpen(false);
+  }, []); // Dependência vazia é correta aqui
+
+  const handleSubmitFeedbackToContext = useCallback(async (feedbackText: string) => {
+    if (!submitUserFeedback) {
+        console.error("[App] Função submitUserFeedback não está disponível no AuthContext");
+        throw new Error(t('app.feedbackSubmitError')); 
+    }
+    await submitUserFeedback(feedbackText);
+  }, [submitUserFeedback, t]); // Dependências corretas
+
 
   if (isLoading) {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#282c34', color: 'white' }}>Carregando KinkLink...</div>;
@@ -71,48 +102,48 @@ function App() {
   const handleInstallClick = async () => {
     if (deferredInstallPrompt) {
       console.log('[App] handleInstallClick: Prompting user to install.');
-      deferredInstallPrompt.prompt(); // Mostra o prompt de instalação
-      // Espera o usuário responder ao prompt
+      deferredInstallPrompt.prompt();
       const { outcome } = await deferredInstallPrompt.userChoice;
       console.log(`User response to the install prompt: ${outcome}`);
-      // Nós só podemos usar o prompt uma vez, ele não pode ser usado novamente.
       setDeferredInstallPrompt(null);
-      setShowInstallButtonInHeader(false); // Esconde o botão após a tentativa
+      setShowInstallButtonInHeader(false);
     }
   };
+
   return (
-    <SkinProvider> {/* SkinProvider envolve todo o conteúdo que precisa do contexto */}
-      <div className="appContainer"> {/* Contêiner principal para flex layout */}
-        <UnlockNotificationModal /> {/* Renderiza o modal de notificação de desbloqueio aqui */}
-        <Header showInstallButton={showInstallButtonInHeader} onInstallClick={handleInstallClick} /> {/* Header global com props para PWA */}
-        <main className="appMainContent"> {/* Envolve o conteúdo principal */}
+    <SkinProvider>
+      <div className="appContainer">
+        <UnlockNotificationModal />
+        <Header
+          showInstallButton={showInstallButtonInHeader}
+          onInstallClick={handleInstallClick}
+          onOpenFeedbackModal={handleOpenFeedbackModal} // Passa a função para o Header
+        />
+        <main className="appMainContent">
           <Suspense fallback={<div className="page-container-centered">Carregando página...</div>}>
             <Routes>
               {/* Rotas Públicas */}
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
-              <Route path="/register" element={<RegisterPage />} /> {/* Considerar remover se SignupPage for a principal */}
+              <Route path="/register" element={<RegisterPage />} />
               <Route path="/termos-de-servico" element={<TermsOfServicePage />} />
               <Route path="/suporte" element={<SupportPage />} />
 
               {/* Rotas Protegidas por Autenticação */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/link-couple" element={<LinkCouplePage />} /> {/* <<<< ROTA MOVIDA PARA CÁ */}
-                {/* <Route path="/skins" element={<SkinsPage />} /> */} {/* Movido para LinkedRoute se depender de vínculo */}
+                <Route path="/link-couple" element={<LinkCouplePage />} />
 
                 {/* Rotas que exigem que o usuário esteja vinculado */}
                 <Route element={<LinkedRoute />}>
                   <Route path="/cards" element={<CardPilePage />} />
                   <Route path="/matches" element={<MatchesPage />} />
-                  <Route path="/skins" element={<SkinsPage />} /> {/* Skins aqui se for para usuários vinculados */}
-                  {/* <Route path="/chat/:matchId" element={<ChatPage />} />  // Exemplo se ChatPage existir */}
+                  <Route path="/skins" element={<SkinsPage />} />
                 </Route>
 
                 {/* Rotas que exigem que o usuário NÃO esteja vinculado */}
                 <Route element={<UnlinkedRoute />}>
-                  {/* <Route path="/link-couple" element={<LinkCouplePage />} /> <<<< ROTA REMOVIDA DAQUI */}
                   {/* Outras rotas que só devem ser acessadas por usuários não vinculados podem ir aqui */}
                 </Route>
               </Route>
@@ -120,26 +151,28 @@ function App() {
               {/* ROTA DE ADMINISTRAÇÃO */}
               <Route element={<AdminRoute />}>
                 <Route path="/admin/users" element={<AdminUsersPage />} />
-                {/* Você pode adicionar mais rotas de admin aqui dentro no futuro */}
               </Route>
 
               {/* Fallback para rotas não encontradas */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
-          {location.pathname === '/cards' && ( // Este bloco pode ser específico da CardPilePage
-            <div className="actionButtons"> {/* Considerar mover para dentro da CardPilePage */}
+          {location.pathname === '/cards' && (
+            <div className="actionButtons">
               {/* Botões de ação para a página de cartas, se aplicável globalmente aqui */}
-              {/* Exemplo:
-              <button
-                className="actionButton dislikeButton genericButton"
-              >Passo</button> */}
-              {/* <button
-                className="actionButton likeButton genericButton"
-              >Topo!</button> */}
             </div>
           )}
         </main>
+        {/* Renderiza o modal de feedback */}
+        {isFeedbackModalOpen && user && (
+          <FeedbackModal
+            isOpen={isFeedbackModalOpen}
+            onClose={handleCloseFeedbackModal}
+            onSubmitFeedback={handleSubmitFeedbackToContext}
+            // Opcional: preencher com último feedback não visto ou um rascunho
+            // initialText={user.feedbackTickets?.find(ticket => ticket.status === 'new')?.text || ''}
+          />
+        )}
       </div>
     </SkinProvider>
   );

@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import styles from './ProfilePage.module.css';
 
 function ProfilePage() {
-  const { user, logout, updateUser, isLoading: authIsLoading, resetUserTestData } = useAuth();
+  const { user, logout, updateUser, isLoading: authIsLoading } = useAuth();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [username, setUsername] = useState('');
@@ -75,19 +75,20 @@ function ProfilePage() {
     setIsEditing(false);
   };
 
-  const handleResetTestData = async () => {
-    if (window.confirm("Tem certeza que deseja resetar TODOS os dados de teste (cartas vistas, interações, matches e skins desbloqueadas)? Esta ação é para fins de desenvolvimento e deve ser feita em conjunto com seu par para correta sincronização.")) {
-      try {
-        await resetUserTestData();
-        alert("Dados de teste resetados com sucesso!");
-        // Opcional: forçar recarregamento da página ou do estado do usuário
-        // window.location.reload(); // Ou uma forma mais suave de atualizar o estado
-      } catch (error) {
-        alert("Falha ao resetar os dados de teste. Verifique o console.");
-        console.error("Erro ao resetar dados de teste:", error);
-      }
-    }
-  };
+  // Função comentada pois o botão que a utiliza está comentado
+  // const handleResetTestData = async () => {
+  //   if (window.confirm("Tem certeza que deseja resetar TODOS os dados de teste (cartas vistas, interações, matches e skins desbloqueadas)? Esta ação é para fins de desenvolvimento e deve ser feita em conjunto com seu par para correta sincronização.")) {
+  //     try {
+  //       await resetUserTestData();
+  //       alert("Dados de teste resetados com sucesso!");
+  //       // Opcional: forçar recarregamento da página ou do estado do usuário
+  //       // window.location.reload(); // Ou uma forma mais suave de atualizar o estado
+  //     } catch (error) {
+  //       alert("Falha ao resetar os dados de teste. Verifique o console.");
+  //       console.error("Erro ao resetar dados de teste:", error);
+  //     }
+  //   }
+  // };
 
   // Funções auxiliares para formatação
   const formatBirthDate = (dateString?: string): string => {
@@ -270,11 +271,12 @@ function ProfilePage() {
           <button onClick={handleLogout} className={`${styles.buttonDestructive} genericButton`}>Logout</button>
         </div>
 
-        {/* SEÇÃO DE RESET (DEV) */}
+        {/* SEÇÃO DE RESET (DEV) - TEMPORARIAMENTE OCULTADA */}
+        {/*
         <div className={`${styles.section} ${styles.textCenter} ${styles.marginTop50} ${styles.paddingTop20} ${styles.borderTopSolid} klnkl-themed-panel`}>
           <button
             onClick={handleResetTestData}
-            className={`${styles.buttonDestructive} genericButton`} // Aplicando estilo de botão destrutivo
+            className={`${styles.buttonDestructive} genericButton`}
             aria-label="Recomeçar o jogo"
           >
             RECOMEÇAR
@@ -283,6 +285,7 @@ function ProfilePage() {
             Zerar e recomeçar? Para sincronizar, apertem este botão juntos e iniciem uma nova exploração!
           </p>
         </div>
+        */}
       </main>
     </div>
   );

@@ -65,13 +65,13 @@ export function useCoupleLinking() {
             // Se o `user.linkedPartnerId` está preenchido e `sentRequestStatus` era 'pending', então foi aceita.
             if (user.linkedPartnerId && sentRequestStatus === 'pending') {
                 console.log('[useCoupleLinking] Solicitação enviada parece ter sido aceita (usuário vinculado).');
-                setSentRequestStatus('accepted');
-            } else if (sentRequestStatus === 'pending') {
+                setSentRequestStatus('accepted'); // Target email remains to show who accepted
+            } else if (sentRequestStatus === 'pending' && !user.linkedPartnerId) {
                 // Se era pending e agora está vazia, e não foi vinculado, pode ter sido rejeitada ou cancelada.
                 // Para simplificar, se não foi vinculado, resetamos.
-                // console.log('[useCoupleLinking] Solicitação enviada não está mais pendente e não houve vínculo.');
-                // setSentRequestStatus(null); // Comentado para não limpar a msg de "enviada" tão rápido
-                // setSentRequestTargetEmail(null);
+                console.log('[useCoupleLinking] Solicitação enviada não está mais pendente e não houve vínculo (rejeitada/cancelada).');
+                setSentRequestStatus(null); 
+                setSentRequestTargetEmail(null);
             }
         } else {
             // Ainda há uma solicitação pendente enviada

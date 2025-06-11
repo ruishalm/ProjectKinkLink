@@ -2,6 +2,8 @@
 import React, { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { db } from '../firebase'; // Import db
+import { doc, getDoc } from 'firebase/firestore'; // Import firestore functions
 import styles from './ProfilePage.module.css';
 
 function ProfilePage() {
@@ -14,6 +16,7 @@ function ProfilePage() {
   const [gender, setGender] = useState(''); // Novo estado para gênero
   const [initialGender, setInitialGender] = useState(''); // Novo estado para gênero inicial
   const [initialBio, setInitialBio] = useState('');
+  const [partnerInfo, setPartnerInfo] = useState<{ username?: string; email?: string | null } | null>(null);
   const [isPersonalInfoOpen, setIsPersonalInfoOpen] = useState(true); // Começa aberto
 
   useEffect(() => {
@@ -29,6 +32,30 @@ function ProfilePage() {
       // Isso pode ser redundante se você tiver ProtectedRoute/LinkedRoute no App.tsx
       // mas é uma boa salvaguarda.
       navigate('/login', { replace: true });
+    }
+  }, [user, authIsLoading, navigate]);
+
+  useEffect(() => {
+    if (user && user.linkedPartnerId && !partnerInfo) {
+      const fetchPartnerInfo = async () => {
+        try {
+          const partnerDocRef = doc(db, 'users', user.linkedPartnerId!);
+          const partnerDocSnap = await getDoc(partnerDocRef);
+          if (partnerDocSnap.exists()) {
+            const partnerData = partnerDocSnap.data() as { username?: string; email?: string | null }; // Simplificando o tipo User aqui
+            setPartnerInfo({ username: partnerData.username, email: partnerData.email });
+          } else {
+            console.warn('ProfilePage: Documento do parceiro não encontrado.');
+            setPartnerInfo({ username: 'Parceiro(a) não encontrado(a)' });
+          }
+        } catch (error) {
+          console.error('ProfilePage: Erro ao buscar informações do parceiro:', error);
+          setPartnerInfo({ username: 'Erro ao buscar parceiro(a)' });
+        }
+      };
+      fetchPartnerInfo();
+    } else if (user && !user.linkedPartnerId) {
+      setPartnerInfo(null); // Limpa info do parceiro se desvinculado
     }
   }, [user, authIsLoading, navigate]);
 
@@ -243,7 +270,12 @@ function ProfilePage() {
           <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>Vínculo de Casal</h2>
           {user.linkedPartnerId ? (
             <>
-              <p className={styles.infoText}>Você está vinculado! Explore os Links e converse com seu par.</p>
+              <p className={styles.infoText}>
+                Você está vinculado com: <strong>{partnerInfo?.username || partnerInfo?.email || user.linkedPartnerId.substring(0, 8) + "..."}</strong>
+              </p>
+              <p className={styles.infoText} style={{fontSize: '0.9em', opacity: 0.8, marginTop: '-5px', marginBottom: '15px'}}>
+                Explore os Links e converse com seu par!
+              </p>
               <button onClick={() => navigate('/link-couple')} className={`${styles.actionButton} genericButton`}>
                 Gerenciar Vínculo
               </button>

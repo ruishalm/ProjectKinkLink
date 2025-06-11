@@ -40,7 +40,7 @@ service cloud.firestore {
           request.auth.uid == userId &&
           (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == resource.data.isAdmin) &&
           // Permite que o usuário atualize os campos listados, incluindo 'feedbackTickets'
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bio', 'username', 'unlockedSkinIds', 'gender', 'birthDate', 'linkCode', 'seenCards', 'conexaoAccepted', 'conexaoRejected', 'feedbackTickets'])
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bio', 'username', 'unlockedSkinIds', 'gender', 'birthDate', 'linkCode', 'seenCards', 'conexaoAccepted', 'conexaoRejected', 'feedbackTickets', 'linkedPartnerId', 'coupleId'])
         ) ||
         // 2. Parceiro pode atualizar campos de vínculo ('linkedPartnerId', 'coupleId') do outro usuário.
         ( // Este bloco é para o parceiro atualizar os campos de vínculo do outro usuário.

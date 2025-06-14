@@ -1,0 +1,48 @@
+/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\Layout\Footer.module.css */
+.appFooter {
+  padding: 15px 20px; /* Padding geral para o container do rodapé */
+  text-align: center;
+  /* A classe klnkl-themed-panel já deve vir do seu tema global,
+     mas você pode adicionar cores específicas de background/texto aqui se necessário */
+  /* background-color: var(--panel-bg-color); */
+  /* color: var(--text-color-primary); */
+  border-top: 1px solid var(--border-color-soft, #444); /* Linha sutil de separação, com fallback */
+  min-height: auto; /* A altura será definida pelo conteúdo e padding */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%; /* Garante que ocupe a largura total */
+  box-sizing: border-box; /* Inclui padding e borda na largura/altura total */
+}
+
+.footerContent {
+  display: flex;
+  flex-direction: column; /* Empilha texto e logo em telas menores se necessário */
+  align-items: center;
+  gap: 10px; /* Espaço entre o texto e o logo */
+  background-color: #282c34; /* Cinza escuro para o fundo do conteúdo (similar ao loading do App) */
+  color: #e0e0e0;           /* Cor de texto clara para contraste */
+  padding: 15px 30px;       /* Padding interno para o conteúdo */
+  border-radius: 8px;       /* Bordas arredondadas */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* Sombra sutil para destacar o painel interno */
+  max-width: 90%; /* Evita que o painel interno fique muito largo em telas grandes */
+  width: auto; /* Permite que encolha se o conteúdo for pequeno */
+  min-width: 280px; /* Largura mínima para não ficar muito espremido */
+}
+
+.supportText {
+  margin: 0 0 10px 0; /* Margem inferior para separar do logo */
+  font-size: 0.9rem;
+  line-height: 1.4; /* Melhora a legibilidade */
+  /* A cor é herdada de .footerContent */
+}
+
+.catarseLink {
+  display: inline-block; /* Para melhor controle de layout da imagem */
+}
+
+.catarseLogo {
+  height: 30px; /* Ajuste conforme o tamanho desejado para o logo */
+  width: auto;
+  vertical-align: middle; /* Ajuda a alinhar se o texto estiver na mesma linha */
+}

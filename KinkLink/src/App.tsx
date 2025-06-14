@@ -22,6 +22,7 @@ import SkinsPage from './pages/SkinsPage';
 import { SkinProvider } from './contexts/SkinContext';
 import { useLinkCompletionListener } from './hooks/useLinkCompletionListener';
 import Header from './components/Layout/Header';
+import Footer from './components/Layout/Footer'; // <<< IMPORT PARA O RODAPÉ
 import UnlockNotificationModal from './components/UnlockNotificationModal';
 import AdminRoute from './components/AdminRoute';
 import FeedbackModal from './components/FeedbackModal'; // <<< IMPORT PARA O MODAL
@@ -173,6 +174,7 @@ function App() {
             // initialText={user.feedbackTickets?.find(ticket => ticket.status === 'new')?.text || ''}
           />
         )}
+        <Footer /> {/* <<< RODAPÉ ADICIONADO AQUI */}
       </div>
     </SkinProvider>
   );

@@ -1,7 +1,7 @@
 .sideMessagesContainer {
   position: absolute; /* Posicionado em relação ao cardStackContainer */
   top: 20px; /* Ajusta a distância do topo da área da carta. Experimente este valor. */
-  /* O transform final (translateY e rotate) será aplicado nas classes .left e .right */
+  /* A rotação (transform) é definida nas classes .left e .right */
   width: auto; 
   max-width: 160px; /* Largura máxima para as dicas */
   display: flex;
@@ -17,12 +17,14 @@
 
 .left {
   /* 'left' será definido por style inline para alinhar com a carta */
+  /* Em telas menores, o CSS na media query controlará 'left' */
   align-items: flex-start;
   transform: rotate(-33deg); /* Inclinação para a esquerda, sem translateY */
 }
 
 .right {
   /* 'right' será definido por style inline para alinhar com a carta */
+  /* Em telas menores, o CSS na media query controlará 'right' */
   align-items: flex-end;
   transform: rotate(33deg); /* Inclinação para a direita, sem translateY */
 }
@@ -45,11 +47,30 @@
 
 
 /* Ajustes responsivos */
-@media (max-width: 900px) { /* Telas médias, onde o card stack pode ocupar mais espaço relativo */
+@media (max-width: 767px) { /* Breakpoint para telas pequenas */
   .sideMessagesContainer {
-    max-width: 120px;
-    gap: 15px;
+    /* Ajusta 'top' para garantir que as dicas fiquem visivelmente acima das cartas.
+       Considerando que o cardStackContainer tem padding-top: 20px e as cartas estão no fundo,
+       um 'top' menor ou até negativo (se o pai não tiver padding suficiente) pode ser necessário.
+       Vamos tentar um valor que as posicione claramente na parte superior do cardStackContainer. */
+    top: 10px; /* Sobe um pouco mais em relação ao topo do cardStackContainer */
+    max-width: 120px; /* Dicas um pouco menores */
+    /* gap: 15px; /* Não tem efeito com uma única dica por container */
   }
+
+  /* Quando isSmallScreen é true no JS, os estilos inline de left/right não são aplicados.
+     Estas regras definirão o posicionamento horizontal e a rotação. */
+  .sideMessagesContainer.left {
+    left: 5%; /* "Entra mais" para dentro da tela */
+    transform: rotate(-15deg); /* Rotação mais suave */
+    right: auto; /* Garante que 'right' não interfira se definido em outro lugar */
+  }
+  .sideMessagesContainer.right {
+    right: 5%; /* "Entra mais" para dentro da tela */
+    transform: rotate(15deg); /* Rotação mais suave */
+    left: auto; /* Garante que 'left' não interfira se definido em outro lugar */
+  }
+
   .tipMessage {
     font-size: 0.85rem;
     padding: 6px 10px;

@@ -98,7 +98,7 @@ function CreateUserCardModal({ isOpen, onClose, onSubmit }: CreateUserCardModalP
               value={intensity}
               onChange={(e) => setIntensity(Math.max(1, Math.min(9, parseInt(e.target.value, 10) || 1)))} // Limita entre 1 e 9
               min="1"
-              max="5"
+              max="9" // Corrigido para permitir até 9, alinhado com a lógica do onChange
             />
           </div>
         </div>
@@ -126,8 +126,11 @@ function CreateUserCardModal({ isOpen, onClose, onSubmit }: CreateUserCardModalP
         </div>
 
         <div className={styles.buttonContainer}>
+          <button className={`${styles.buttonSecondary} genericButton`} onClick={onClose}>
+            Cancelar
+          </button>
           <button className={`${styles.button} genericButton`} onClick={handleSubmit} disabled={!cardText.trim()}>
-            Salvar Carta
+            Criar Carta
           </button>
         </div>
       </div>

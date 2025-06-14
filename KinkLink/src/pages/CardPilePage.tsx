@@ -152,6 +152,9 @@ function CardPilePage() {
     }
   });
 
+  // Determina se os botões de ação da carta devem ser desabilitados
+  const areActionButtonsDisabled = !!exitingCard || isCardFlipped;
+
   if (isLoadingSkins) {
     return <div className={styles.page}><p>Carregando skins...</p></div>;
   }
@@ -219,7 +222,7 @@ function CardPilePage() {
               )}
               <div {...bindCardDrag()} className={styles.playingCardWrapper}> {/* playingCardWrapper não teria a classe de painel aqui */}
                 <PlayingCard
-                    key={cardForDisplay.id}
+                    key={cardForDisplay.id} // A key aqui é importante para o React identificar a carta mudando
                     data={cardForDisplay}
                     targetWidth={cardDimensions.width}
                     targetHeight={cardDimensions.height}
@@ -242,12 +245,14 @@ function CardPilePage() {
               </div>
             </div>
 
-            <div className={`${styles.allButtonsPanel} klnkl-all-buttons-panel klnkl-themed-panel`}>
+            {/* Painel para botões de ação da carta e "Criar Kink" */}
+            {/* Este painel só aparece se houver cardForDisplay. Adicionada a classe global klnkl-all-buttons-panel */}
+            <div className={`${styles.cardActionsPanel} klnkl-all-buttons-panel klnkl-themed-panel`}>
               <div className={styles.buttonContainer}>
                 <button
                   className={`${styles.dislikeButton} ${styles.botaoDecisao} genericButton dislikeButton actionButton`}
                   onClick={() => {
-                    if (cardForDisplay && !exitingCard) {
+                    if (cardForDisplay && !areActionButtonsDisabled) { // Verifica se não está desabilitado
                       // setAnimateTipsIn(false); // Removido: useCardTips gerencia isso
                       setExitingCard({ id: cardForDisplay.id, direction: 'left' });
                     }
@@ -255,6 +260,7 @@ function CardPilePage() {
                   onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
                   onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
                   aria-label="Rejeitar carta"
+                  disabled={areActionButtonsDisabled} // Adiciona o estado de desabilitado
                 >
               👎 Nao Topo!
                 </button>
@@ -262,7 +268,7 @@ function CardPilePage() {
                 <button
                   className={`${styles.likeButton} ${styles.botaoDecisao} genericButton likeButton actionButton`}
                   onClick={() => {
-                    if (cardForDisplay && !exitingCard) {
+                    if (cardForDisplay && !areActionButtonsDisabled) { // Verifica se não está desabilitado
                       // setAnimateTipsIn(false); // Removido: useCardTips gerencia isso
                       setExitingCard({ id: cardForDisplay.id, direction: 'right' });
                     }
@@ -270,36 +276,12 @@ function CardPilePage() {
                   onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
                   onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
                   aria-label="Aceitar carta"
+                  disabled={areActionButtonsDisabled} // Adiciona o estado de desabilitado
                 >
               ❤️ Topo!
-                </button>
-              </div>
-
-              {/* Botão "Criar Kink" movido para dentro do painel e com classe global estável */}
-              <button
-                onClick={openCreateUserCardModal}
-                className="klnkl-create-kink-btn genericButton" /* Classe global para estilização no panel-styles.css */
-                title="Criar novo Kink"
-                aria-label="Criar novo Kink"
-              >
-                Criar Kink
               </button>
-
-              <div className={styles.bottomNavContainer}>
-                <button className={`${styles.bottomNavIconStyle} ${styles.ballButton} genericButton klnkl-icon-nav-button klnkl-nav-cards`} onClick={openCarinhosMimosModal} title="Carinhos & Mimos">
-                  ❤️
-                </button>
-                <button
-                  onClick={handleMatchesButtonClick}
-                  className={`${styles.matchesNavButton} ${styles.linkButton} genericButton klnkl-nav-matches ${hasUnseenMatches ? styles.shakeAnimation : ''}`}
-                >
-                  Links ({matchedCards.length})
-                </button>
-                <Link to="/profile" className={`${styles.bottomNavIconStyle} ${styles.ballButton} genericButton klnkl-icon-nav-button klnkl-nav-profile`} aria-label="Perfil" title="Perfil">
-                  👤
-                </Link>
-              </div>
             </div>
+            </div> {/* Fecha o cardActionsPanel */}
           </>
         ) : (
           unseenCardsCount === 0 ? ( // Este bloco também deve estar dentro do painel temático da página
@@ -310,28 +292,42 @@ function CardPilePage() {
                 <br />
                 Volte mais tarde para novas sugestões ou crie as suas!
               </p>
-              <div
-                onClick={openCreateUserCardModal}
-                className={`${styles.createKinkMiniButton} ${styles.centeredCreateKinkButton}`}
-                title="Criar novo Kink"
-                role="button"
-                aria-label="Criar novo Kink"
-                tabIndex={0}
-                onKeyPress={(e) => { if (e.key === 'Enter' || e.key === ' ') openCreateUserCardModal(); }}
-              >
-                <div className={styles.createKinkMiniCardBackWrapper}>
-                  <CardBack targetWidth={30} targetHeight={42} />
-                </div>
-                <div className={styles.createKinkMiniTextOverlay}>Crie<br/>seu Kink</div>
-              </div>
+              {/* O botão "Crie seu Kink" foi movido para o painel de navegação inferior */}
             </div>
           ) : (
             <p className={styles.noCardsMessage}>Carregando próxima carta...</p>
           )
         )
       }
+      </div> {/* Fim de styles.contentArea */}
+      {/* PAINEL DE NAVEGAÇÃO INFERIOR - SEMPRE VISÍVEL. Adicionada klnkl-all-buttons-panel para o estilo do botão Criar Kink */}
+      <div className={`${styles.bottomNavPanel} klnkl-all-buttons-panel klnkl-themed-panel`}>
+        <div className={styles.bottomNavContainer}>
+          <button className={`${styles.bottomNavIconStyle} ${styles.ballButton} genericButton klnkl-icon-nav-button klnkl-nav-cards`} onClick={openCarinhosMimosModal} title="Carinhos & Mimos">
+            ❤️
+          </button>
+          <button
+            onClick={handleMatchesButtonClick}
+            className={`${styles.matchesNavButton} ${styles.linkButton} genericButton klnkl-nav-matches ${hasUnseenMatches ? styles.shakeAnimation : ''}`}
+          >
+            Links ({matchedCards.length})
+          </button>
+          <Link to="/profile" className={`${styles.bottomNavIconStyle} ${styles.ballButton} genericButton klnkl-icon-nav-button klnkl-nav-profile`} aria-label="Perfil" title="Perfil">
+            👤
+          </Link>
+        </div>
+        {/* BOTÃO "CRIE SEU KINK" - AGORA É IRMÃO DO bottomNavContainer, ABAIXO DELE */}
+        <button
+          onClick={openCreateUserCardModal}
+          className={`${styles.createKinkButtonInNav} klnkl-create-kink-btn genericButton`}
+          title="Criar novo Kink"
+          aria-label="Criar novo Kink"
+        >
+          Criar Kink
+        </button>
       </div>
-      {/* Contadores de cartas voltam a ser um elemento simples */}
+
+      {/* Contadores de cartas - Sempre visíveis */}
       {/* Estes contadores também devem estar dentro do painel temático da página */}
       <div className={`${styles.cardCounters} klnkl-card-counters`}>
         <span className={`${styles.counterItem} klnkl-counter-item`}>

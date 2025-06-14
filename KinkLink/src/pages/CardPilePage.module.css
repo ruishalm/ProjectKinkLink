@@ -115,40 +115,15 @@
   filter: brightness(90%);
 }
 
-
-.createKinkMiniButton {
-  background-color: var(--cor-primaria);
-  color: var(--cor-texto-sobre-primaria);
-  border-radius: 8px;
-  width: 60px;
-  height: 60px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  text-align: center;
-  transition: transform 0.1s ease-out, filter 0.2s ease; /* Adicionado filter à transição */
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  padding: 5px;
-  box-sizing: border-box;
-}
-.createKinkMiniButton:hover {
-  filter: brightness(90%);
-}
-
-
-.createKinkMiniCardBackWrapper {
- /* O CardBack interno já tem tamanho, não precisa definir aqui se o CardBack tem defaults */
- /* Se precisar forçar: width: 30px; height: 42px; */
-  margin-bottom: 2px;
-}
-
-.createKinkMiniTextOverlay {
-  font-size: 0.6em;
-  font-weight: bold;
-  line-height: 1.1;
-  color: var(--cor-texto-sobre-primaria); /* Garante que o texto use a cor da paleta */
+.createKinkButtonInNav {
+  /* Esta classe é para o <button> "Criar Kink" quando está na barra de navegação.
+     O estilo visual de "mini carta" virá da classe global "klnkl-create-kink-btn".
+     Esta classe do CSS Modules deve ter o MÍNIMO de estilos para não conflitar.
+     Use principalmente para margens ou ajustes de posicionamento se o `gap` do `bottomNavPanel` não for suficiente.
+     A altura, largura, padding, background, etc., DEVEM vir do CSS global.
+     As margens verticais (top/bottom) devem vir do estilo global. */
+  align-self: center; /* Garante que ele se centralize no eixo cruzado (horizontal) */
+  /* Não defina width, height, padding, background-color, color aqui. */
 }
 
 .bottomNavContainer {
@@ -307,12 +282,28 @@
 }
 
 .allButtonsPanel {
-  /* Esta classe pode ficar vazia por enquanto,
-     ou você pode adicionar estilos depois se precisar.
-     Exemplo:
-     display: flex;
-     flex-direction: column;
-     align-items: center;
-     width: 100%;
-  */
+  /* Painel UNIFICADO para todos os botões abaixo da carta - Só aparece com carta */
+  /* klnkl-themed-panel é aplicado no JSX para o tema base */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centraliza o .buttonContainer e o botão "Criar Kink" */
+  gap: 15px; /* Espaço entre o .buttonContainer e o botão "Criar Kink" */
+  padding: 20px 15px; /* Aumentado padding vertical */
+  margin-top: 10px; /* Espaço acima deste painel, abaixo da pilha de cartas */
+  width: 100%; /* Ocupa a largura disponível */
+  box-sizing: border-box;
+}
+
+.bottomNavPanel {
+  /* Estilos para o novo painel da barra de navegação inferior */
+  display: flex;
+  flex-direction: column; /* Empilha o .bottomNavContainer e o botão "Criar Kink" */
+  align-items: center;   /* Centraliza os itens empilhados */
+  /* gap: 15px; */       /* Removido gap, usar margens no botão (o global já tem) */
+  /* klnkl-themed-panel é aplicado no JSX para o tema base */
+  padding: 10px 15px; /* Padding interno do painel */
+  margin-top: 15px; /* Espaço acima deste painel, separando-o do conteúdo acima (seja cardActionsPanel ou noCardsViewContainer) */
+  width: 100%; /* Ocupa a largura disponível */
+  box-sizing: border-box;
+  /* A classe .bottomNavContainer dentro dele já tem display:flex e centraliza os botões */
 }

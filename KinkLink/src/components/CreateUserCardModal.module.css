@@ -150,8 +150,11 @@
 }
 
 .buttonContainer {
-  text-align: center;
+  display: flex; /* Adicionado para melhor controle de alinhamento */
+  justify-content: flex-end; /* Alinha botões à direita, ou use 'center' */
+  gap: 10px; /* Espaço entre os botões */
   margin-top: 20px;
+  /* text-align: center; /* Removido em favor do flex */
 }
 
 .button {
@@ -163,4 +166,18 @@
   /* Outras propriedades como border-radius, cursor, font-weight, transition
      são agora primariamente herdados de 'genericButton'.
      'border: none;' é importante se genericButton adicionar uma borda e você não a quiser aqui. */
+}
+
+.buttonSecondary {
+  /* Estilos base (border-radius, cursor, font-weight, transition)
+     são herdados de 'genericButton'. */
+  background-color: var(--cor-fundo-botao-secundario, #6c757d); /* Cor de fundo para botão secundário */
+  color: var(--cor-texto-sobre-secundaria, white); /* Cor do texto */
+  padding: 12px 25px; /* Mesmo padding do botão primário para consistência */
+  font-size: 1.1em;   /* Mesmo tamanho de fonte */
+  border: none; /* Garante ausência de borda, sobrescrevendo genericButton se necessário. */
+}
+
+.buttonSecondary:hover:not(:disabled) {
+  background-color: var(--cor-fundo-botao-secundario-hover, #5a6268);
 }

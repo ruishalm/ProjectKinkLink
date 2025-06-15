@@ -72,3 +72,33 @@
   color: #ef9a9a;
   margin-top: 10px;
 }
+
+.inviteLinkContainer {
+  margin-top: 20px; /* Espaço acima da seção do link */
+  width: 100%; /* Para ocupar a largura e centralizar o conteúdo */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px; /* Espaço entre o texto, input e botão de copiar */
+}
+
+.linkDisplayInput {
+  width: 100%; /* Ocupa a largura disponível no container */
+  max-width: 350px; /* Limita a largura máxima para não ficar muito extenso em telas largas */
+  padding: 10px;
+  background-color: var(--cor-fundo-input, #222); /* Reutiliza variáveis de tema se disponíveis */
+  color: var(--cor-texto-input, #ccc);
+  border: 1px solid var(--cor-borda, #555);
+  border-radius: 4px;
+  box-sizing: border-box;
+  text-align: center; /* Centraliza o texto do link */
+  font-size: 0.9em;
+  cursor: pointer; /* Indica que pode ser clicado para selecionar */
+}
+
+.copyLinkButton {
+  /* Estilos específicos para o botão de copiar link, se necessário. */
+  /* Por exemplo, pode ser um pouco menor que o botão de "Concluído / Voltar" */
+  padding: 8px 16px;
+  min-width: 120px; /* Largura mínima menor */
+}

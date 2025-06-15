@@ -15,7 +15,12 @@ const CreateLink: React.FC<CreateLinkProps> = ({ onLinkCreated, onCancel }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+
   // Funções Manipuladoras
+  // A URL base do seu aplicativo. Para um app Firebase hospedado, window.location.origin é uma boa opção.
+  // Ou você pode hardcodar se preferir: const baseUrl = "https://kinklink-a4607.web.app";
+  const getBaseUrl = () => window.location.origin;
+
   const handleCreateLink = async () => {
     if (!user) {
       setError("Você precisa estar logado para criar um link.");
@@ -38,6 +43,17 @@ const CreateLink: React.FC<CreateLinkProps> = ({ onLinkCreated, onCancel }) => {
     }
   };
 
+  // Constrói a URL de convite quando linkCode estiver disponível
+  const inviteUrl = linkCode ? `${getBaseUrl()}/link-couple?inviteCode=${linkCode}` : null;
+
+  const handleCopyLink = () => {
+    if (inviteUrl) {
+      navigator.clipboard.writeText(inviteUrl)
+        .then(() => alert('Link de convite copiado para a área de transferência!'))
+        .catch(err => console.error('Erro ao copiar o link: ', err));
+    }
+  };
+
   // Lógica de Renderização e JSX
   return (
     <div className={styles.section}>
@@ -50,6 +66,13 @@ const CreateLink: React.FC<CreateLinkProps> = ({ onLinkCreated, onCancel }) => {
         <div>
           <p className={styles.infoText}>Compartilhe este código com seu parceiro(a):</p>
           <p className={styles.codeDisplay}>{linkCode}</p>
+          {inviteUrl && (
+            <div className={styles.inviteLinkContainer}>
+              <p className={styles.infoText}>Ou envie este link direto:</p>
+              <input type="text" readOnly value={inviteUrl} className={styles.linkDisplayInput} onClick={(e) => e.currentTarget.select()} />
+              <button onClick={handleCopyLink} className={`${styles.secondaryButton} ${styles.copyLinkButton}`}>Copiar Link</button>
+            </div>
+          )}
         </div>
       )}
       {error && <p className={styles.errorText}>{error}</p>}

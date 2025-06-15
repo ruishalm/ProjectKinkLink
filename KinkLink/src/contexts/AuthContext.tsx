@@ -436,7 +436,8 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       seenCards: [],
       conexaoAccepted: 0,
       conexaoRejected: 0,
-      unlockedSkinIds: defaultUnlockedSkins
+      unlockedSkinIds: defaultUnlockedSkins,
+      userCreatedCards: [] // Adiciona esta linha para limpar as cartas criadas pelo usuário
     });
     console.log(`[AuthContext] Dados do usuário ${user.id} (incluindo skins desbloqueadas) marcados para reset.`);
 
@@ -506,7 +507,8 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
           seenCards: [],
           conexaoAccepted: 0,
           conexaoRejected: 0,
-          unlockedSkinIds: defaultUnlockedSkins
+          unlockedSkinIds: defaultUnlockedSkins,
+          userCreatedCards: [] // Também atualiza o estado local
         };
       });
     } catch (error) {

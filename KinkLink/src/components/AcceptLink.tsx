@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom'; // Para ler query params
 import { acceptLink } from '../services/linkService'; // Ajuste o caminho se necessário
 import styles from './AcceptLink.module.css'; // Importa os CSS Modules
 
@@ -13,7 +14,21 @@ const AcceptLink: React.FC<AcceptLinkProps> = ({ onLinkAccepted, onCancel }) => 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const location = useLocation(); // Hook para obter informações da URL atual
+
   // Funções Manipuladoras
+
+  useEffect(() => {
+    // Este efeito será executado quando o componente montar ou location.search mudar
+    const queryParams = new URLSearchParams(location.search);
+    const codeFromUrl = queryParams.get('inviteCode'); // 'inviteCode' é o nome do parâmetro que definimos em CreateLink.tsx
+    if (codeFromUrl) {
+      setLinkCode(codeFromUrl.toUpperCase()); // Preenche o estado com o código da URL, em maiúsculas
+      // Opcional: você poderia até tentar submeter o formulário automaticamente aqui se desejado,
+      // mas preencher o campo já é uma grande melhoria de UX.
+    }
+  }, [location.search]); // Dependência: location.search
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!linkCode.trim()) {

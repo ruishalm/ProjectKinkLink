@@ -62,8 +62,14 @@ const LinkCouplePage: React.FC = () => {
         const coupleDocRef = doc(db, 'couples', user.coupleId);
 
         // 1. Atualiza o documento do usuário atual
-        batch.update(currentUserDocRef, { linkedPartnerId: null, coupleId: null });
-
+        batch.update(currentUserDocRef, {
+          linkedPartnerId: null,
+          coupleId: null,
+          seenCards: [], // Limpa as cartas vistas
+          conexaoAccepted: 0, // Reseta contador de aceitas
+          conexaoRejected: 0, // Reseta contador de rejeitadas
+          userCreatedCards: [] // Limpa as cartas criadas pelo usuário
+        });
         // 2. Deleta o documento do casal
         // A regra de segurança permite que um membro delete o documento do casal.
         batch.delete(coupleDocRef);

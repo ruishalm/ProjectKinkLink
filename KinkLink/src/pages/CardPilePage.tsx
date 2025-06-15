@@ -59,17 +59,19 @@ function CardPilePage() {
     return (allConexaoCards || []).filter(card => seenCards.includes(card.id));
   }, [allConexaoCards, seenCards]);
 
-  const cardForDisplay: PlayingCardDataType | null = currentCard
-    ? {
+  const cardForDisplay: PlayingCardDataType | null = useMemo(() => {
+    if (!currentCard) return null;
+    return {
         id: currentCard.id,
         text: currentCard.text,
         category: currentCard.category,
         intensity: currentCard.intensity,
-        creatorId: (currentCard as any).createdBy, // Mapeia createdBy para creatorId
+        creatorId: (currentCard as Card & { createdBy?: string }).createdBy, // Mapeia createdBy para creatorId de forma mais segura
         isCreatorSuggestion: currentCard.isCreatorSuggestion, // Passa a nova flag
-        isHot: matchedCards.find(mc => mc.id === currentCard.id)?.isHot || false,
-      }
-    : null;
+      isHot: matchedCards.find(mc => mc.id === currentCard.id)?.isHot || false,
+    };
+  }, [currentCard, matchedCards]);
+
 
   useEffect(() => {
     const lastSeenMatchesCount = parseInt(localStorage.getItem('kinklink_lastSeenMatchesCount') || '0', 10);

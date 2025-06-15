@@ -18,14 +18,14 @@
   gap: 30px; /* Adicionado: Espaçamento entre os filhos diretos (.header, .section, .categoryCarouselsGrid) */
 }
 
-.header {
-  position: relative; /* Necessário para o posicionamento absoluto do título */
+.pageHeaderControls { /* Renomeado de .header e ajustado para o JSX existente */
   display: flex;
-  justify-content: flex-end; /* Alinha o botão "Voltar" à direita */
-  align-items: flex-start; /* Alinha o botão "Cartas" ao topo */
+  align-items: center; /* Alinha os botões verticalmente ao centro */
+  justify-content: space-between; /* Coloca um botão em cada extremidade */
   /* margin-bottom: 20px; /* Removido em favor do gap no .page */
-  padding-bottom: 10px; /* Adiciona um pouco de espaço se o título for alto */
   width: 100%; /* Garante que o header ocupe a largura total */
+  padding-bottom: 15px; /* Espaço abaixo da linha de borda */
+  border-bottom: 1px solid var(--cor-borda, #444); /* Linha separadora */
 }
 
 .pageTitle {
@@ -339,6 +339,22 @@
   outline-offset: -5px;
   box-shadow: 0 0 15px var(--toplinks-highlight-color), 0 0 25px var(--toplinks-border-outer-color); /* Brilho mais intenso */
   background-color: var(--toplinks-background-tint-level4, var(--cor-fundo-elemento, #2c2c2c));
+}
+
+/* Estilos para a Seção de Cartas Realizadas */
+.completedSection {
+  width: 100%;
+  margin-top: 40px; /* Espaçamento acima da seção de realizadas */
+  padding: 20px;
+  background-color: var(--cor-fundo-elemento-sutil, #25282d); /* Um fundo ligeiramente diferente */
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.sectionTitleCompleted {
+  composes: sectionTitle; /* Herda estilos base de sectionTitle */
+  color: var(--cor-sucesso, #4CAF50); /* Cor verde para o título "Realizadas" */
+  border-bottom-color: var(--cor-sucesso, #4CAF50);
 }
 
 /* Media queries para responsividade dos carrosséis e grid de matches */

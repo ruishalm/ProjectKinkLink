@@ -32,6 +32,7 @@ import {
 
 export interface MatchedCard extends Card {
   isHot?: boolean;
+  isCompleted?: boolean; // Novo campo para marcar cartas como realizadas
 }
 
 export interface UserFeedback {

@@ -10,6 +10,7 @@ export interface CardData {
   isHot?: boolean;
   creatorId?: string; // ID do criador da carta (para usercards)
   isCreatorSuggestion?: boolean; // Flag para sugestão do parceiro
+  isCompleted?: boolean; // Adicionado para compatibilidade com MatchedCard
 }
 
 interface PlayingCardProps {

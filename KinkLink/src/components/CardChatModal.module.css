@@ -19,8 +19,8 @@
   border-radius: 12px; /* Raio similar ao CardBack */
   border: 8px solid #b71c1c; /* Borda vermelha escura, como no CardBack */
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  width: 380px; /* Largura aumentada para formato de carta */
-  height: 532px; /* Altura aumentada para formato de carta (proporção ~2.5:3.5) */
+  width: 420px; /* Largura ligeiramente aumentada */
+  height: 580px; /* Altura ligeiramente aumentada */
   max-width: 95vw; /* Garante que não ultrapasse 95% da largura da viewport */
   max-height: 90vh; /* Garante que não ultrapasse 90% da altura da viewport */
   display: flex;
@@ -31,21 +31,126 @@
   box-sizing: border-box; /* Para que a borda não aumente o tamanho total */
 }
 
-.closeButton {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: transparent;
-  border: none;
-  color: #aaa;
-  cursor: pointer;
-  padding: 5px;
-  line-height: 1;
-  z-index: 10; /* Sobre o header do chat, se houver */
+.modalHeaderActions {
+  display: flex;
+  /* justify-content: flex-end; Removido para permitir que actionButtonsGroup ocupe a largura total */
+  align-items: center;
+  padding: 10px 12px 5px; /* Ajuste no padding, especialmente inferior */
+  position: relative; /* Para o z-index do closeButton funcionar bem */
+  flex-shrink: 0;
+  min-height: 40px; /* Garante uma altura mínima para o cabeçalho, considerando o padding do grupo */
 }
 
-.closeButton:hover {
+.actionButtonsGroup { /* Antigo .leftHeaderActions, agora com fundo e contendo todos os 3 botões */
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Espaço entre os botões de ação da esquerda */
+  background-color: rgba(0, 0, 0, 0.55); /* Fundo mais escuro para o grupo */
+  padding: 6px 10px; /* Padding interno do grupo ligeiramente aumentado */
+  border-radius: 8px; /* Bordas arredondadas para o grupo */
+  border: 1px solid rgba(255, 255, 255, 0.08); /* Borda ainda mais sutil para o grupo */
+  width: 100%; /* Faz o grupo de botões ocupar toda a largura do modalHeaderActions */
+  box-sizing: border-box; /* Garante que o padding não aumente a largura total */
+}
+
+.headerActionButton { /* Classe base para botões no header do modal */
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ccc;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  font-size: 0.9em; /* Tamanho de fonte base para botões de ação */
+}
+
+.closeButtonInGroup { /* Estilo para o botão X quando está dentro do grupo */
+  /* Herda de .headerActionButton mas com algumas modificações */
+  background: transparent; /* Sem fundo próprio, usa o do grupo */
+  border: 1px solid transparent; /* Sem borda própria */
+  color: #aaa;
+  padding: 3px 7px; /* Padding um pouco menor para o X */
+  font-size: 1.1em; /* 'X' um pouco maior */
+  line-height: 1;
+  margin-left: auto; /* Empurra o botão X para a direita dentro do grupo */
+}
+.closeButtonInGroup:hover {
   color: #fff;
+  background-color: rgba(255, 255, 255, 0.1); /* Leve destaque no hover */
+  border-color: rgba(255,255,255,0.2);
+}
+
+/* Estilos para o botão de Favoritar (foguinho) */
+.favoriteButtonInChat {
+  /* Herda de headerActionButton */
+  /* Estilos específicos para o estado 'isHot' e hover já estão abaixo */
+}
+
+.favoriteIcon {
+  font-size: 1.1em; /* Tamanho do emoji de fogo */
+  filter: grayscale(100%); /* Ícone cinza por padrão */
+  opacity: 0.7;
+  transition: filter 0.2s, opacity 0.2s;
+}
+
+.favoriteText {
+  font-size: 0.8em; /* Tamanho do texto "Favoritar" */
+  font-weight: bold;
+}
+
+.favoriteButtonInChat.isHot .favoriteIcon {
+  filter: none; /* Remove o grayscale quando está "hot" */
+  opacity: 1;
+}
+
+.favoriteButtonInChat.isHot {
+  background-color: rgba(255, 107, 107, 0.3); /* Fundo avermelhado quando "hot" */
+  color: #ffdddd; /* Texto mais claro quando "hot" */
+  border-color: rgba(255, 107, 107, 0.7); /* Borda avermelhada quando "hot" */
+  box-shadow: 0 0 8px rgba(255, 107, 107, 0.5); /* Brilho sutil quando "hot" */
+}
+
+.favoriteButtonInChat:hover:not(.isHot) {
+  background-color: rgba(255, 255, 255, 0.15); /* Leve destaque no hover quando não está "hot" */
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.favoriteButtonInChat:disabled {
+  background-color: rgba(100, 100, 100, 0.2);
+  border-color: rgba(150, 150, 150, 0.2);
+  color: #777;
+  cursor: not-allowed;
+}
+.favoriteButtonInChat:disabled .favoriteIcon {
+  filter: grayscale(100%);
+  opacity: 0.5;
+}
+
+/* Estilos para o botão de Realizada/Repetir */
+.completedButtonInChat {
+  /* Herda de headerActionButton */
+  /* Cores e ícones são dinâmicos baseados no estado isCompleted */
+}
+
+.completedIcon {
+  font-size: 1.1em;
+}
+
+.completedText {
+  font-size: 0.8em;
+  font-weight: bold;
+}
+
+.completedButtonInChat.isCompletedAction { /* Quando o botão é "Repetir?!" */
+  background-color: rgba(76, 175, 80, 0.3); /* Fundo esverdeado */
+  color: #d0f0d0; /* Texto claro esverdeado */
+  border-color: rgba(76, 175, 80, 0.7);
+}
+.completedButtonInChat.isCompletedAction:hover {
+  background-color: rgba(76, 175, 80, 0.5);
 }
 
 /* Ajuste para o chatContainer (do CardChat.module.css) quando dentro do modalContent */
@@ -57,10 +162,9 @@
 }
 
 .destructiveButton {
-  /* background-color e color devem vir de genericButtonDestructive.
-     Se precisar de um override específico:
-     background-color: var(--cor-acao-negativa, #d9534f);
-     color: var(--cor-texto-acao-negativa, white); */
+  /* Estilos base para garantir que tenha aparência destrutiva, mesmo que classes genéricas falhem */
+  background-color: var(--cor-acao-negativa, #c0392b); /* Vermelho escuro */
+  color: var(--cor-texto-sobre-acao-negativa, white);
   /* border, cursor, font-weight, transition
      são herdados de genericButton. */
   text-align: center;
@@ -73,6 +177,6 @@
 }
 
 .destructiveButton:hover {
-  /* O hover (ex: filter: brightness(90%)) virá de genericButton/genericButtonDestructive.
-     Se um hover específico de cor for necessário, defina aqui: background-color: #c9302c; */
+  background-color: var(--cor-acao-negativa-hover, #a93226); /* Vermelho mais escuro no hover */
+  filter: brightness(110%); /* Um leve brilho no hover */
 }

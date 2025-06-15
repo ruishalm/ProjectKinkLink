@@ -29,7 +29,7 @@ const MatchCardItem: React.FC<MatchCardItemProps> = ({
       className={`${styles.cardItemWrapper} ${isUnread ? styles.unreadMatch : ''}`}
       onClick={onClick}
       onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
-      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+      onMouseLeave={(e) => e.currentTarget.style.transform = ''} // Remove a transformação inline ao sair
       role="button"
       tabIndex={0}
       aria-label={`Link: ${card.text.substring(0,30)}... ${isUnread ? ' (Não lido)' : ''}`}

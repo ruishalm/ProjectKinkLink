@@ -1,5 +1,5 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\MatchesPage.tsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, type MatchedCard } from '../contexts/AuthContext';
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
@@ -20,10 +20,11 @@ interface MatchCardItemProps {
   isUnread: boolean;
   onToggleHot?: (cardId: string, event: React.MouseEvent) => void;
   lastMessageSnippet?: string;
+  isCompletedCard?: boolean; // Nova prop para indicar se é uma carta da seção "Realizadas"
 }
 
-function MatchCardItem({ card, onClick, isHot, isUnread, onToggleHot, lastMessageSnippet }: MatchCardItemProps) {
-  const scaleFactor = isHot ? 0.55 : 0.5;
+function MatchCardItem({ card, onClick, isHot, isUnread, onToggleHot, lastMessageSnippet, isCompletedCard }: MatchCardItemProps) {
+  const scaleFactor = isHot && !isCompletedCard ? 0.55 : 0.5; // Não aplica scale maior se for completada
   const cardWidth = 250 * scaleFactor;
   const cardHeight = 350 * scaleFactor;
   return (
@@ -31,7 +32,7 @@ function MatchCardItem({ card, onClick, isHot, isUnread, onToggleHot, lastMessag
       className={`${styles.cardItemWrapper} ${isUnread ? styles.unreadMatch : ''}`}
       onClick={onClick}
       onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
-      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+      onMouseLeave={(e) => e.currentTarget.style.transform = ''} // Remove o scale(1) para deixar o CSS controlar
       role="button"
       tabIndex={0}
       aria-label={`Link: ${card.text.substring(0,30)}... ${isUnread ? ' (Não lido)' : ''}`}
@@ -42,7 +43,7 @@ function MatchCardItem({ card, onClick, isHot, isUnread, onToggleHot, lastMessag
         targetWidth={cardWidth}
         targetHeight={cardHeight}
         isFlipped={false}
-        onToggleHot={onToggleHot}
+        onToggleHot={!isCompletedCard ? onToggleHot : undefined} // Não passa onToggleHot se for carta completada
       />
       {isUnread && lastMessageSnippet && (
         <div className={styles.matchCardSnippet}>
@@ -56,7 +57,7 @@ function MatchCardItem({ card, onClick, isHot, isUnread, onToggleHot, lastMessag
 
 function MatchesPage() {
   const { user } = useAuth();
-  const { matchedCards: userMatchedCards, toggleHotStatus } = useUserCardInteractions();
+  const { matchedCards: userMatchedCards, toggleHotStatus, toggleCompletedStatus, repeatCard } = useUserCardInteractions(); // Adicionar toggleCompletedStatus e repeatCard
   const navigate = useNavigate();
   const { isLoadingSkins } = useSkin(); // activeSkins não é mais usado diretamente aqui para o fundo
   const { cardChatsData, isLoading: isLoadingCardChats, error: cardChatsError } = useCoupleCardChats(user?.coupleId);
@@ -66,6 +67,7 @@ function MatchesPage() {
   const [unreadStatuses, setUnreadStatuses] = useState<{ [key: string]: boolean }>({});
   const [forceUpdateUnreadKey, setForceUpdateUnreadKey] = useState(0);
   const [hasUnseenGlobalMatches, setHasUnseenGlobalMatches] = useState(false);
+  const completedSectionRef = useRef<HTMLDivElement>(null); // Ref para a seção de cartas realizadas
 
   const isFirestoreTimestamp = (value: unknown): value is Timestamp => {
     return !!value && typeof (value as Timestamp).toDate === 'function' && typeof (value as Timestamp).seconds === 'number' && typeof (value as Timestamp).nanoseconds === 'number';
@@ -154,6 +156,7 @@ function MatchesPage() {
         category: card.category,
         intensity: card.intensity,
         isHot: card.isHot,
+        isCompleted: card.isCompleted, // Passa o status de completada
     };
     setSelectedCardForChat(cardForModal);
     setIsChatModalOpen(true);
@@ -181,9 +184,15 @@ function MatchesPage() {
     return <div className={styles.page}><p>Erro ao carregar dados dos chats: {cardChatsError}</p></div>;
   }
 
-  const hotMatches = userMatchedCards.filter(card => card.isHot);
-  const otherMatches = userMatchedCards.filter(card => !card.isHot);
-  const noMatchesCondition = hotMatches.length === 0 && otherMatches.length === 0;
+  // Filtragem das cartas
+  const completedMatches = userMatchedCards.filter(card => card.isCompleted);
+  const activeMatches = userMatchedCards.filter(card => !card.isCompleted);
+  
+  const hotMatches = activeMatches.filter(card => card.isHot);
+  const otherMatches = activeMatches.filter(card => !card.isHot);
+  
+  const noActiveMatchesCondition = hotMatches.length === 0 && otherMatches.length === 0;
+
 
   const groupCardsByCategory = (cards: MatchedCard[]) => {
     return cards.reduce((acc, card) => {
@@ -238,6 +247,7 @@ function MatchesPage() {
     <div className={styles.page}>
       <main className={styles.mainContent}> {/* Conteúdo principal da página */}
         <div className={styles.pageHeaderControls}> {/* Novo container para título e botão */}
+          {/* Botão existente para voltar às cartas */}
           <button onClick={handleMatchesButtonClick} className={`${styles.backToCardsButton} genericButton ${hasUnseenGlobalMatches ? styles.shakeAnimation : ''}`} aria-label="Voltar para as cartas">
             {hasUnseenGlobalMatches && <span className={styles.navNotificationDot}></span>}
             Cartas
@@ -245,7 +255,7 @@ function MatchesPage() {
         </div>
 
         {/* O restante do conteúdo da página continua aqui dentro do main */}
-      {noMatchesCondition ? (
+      {noActiveMatchesCondition && completedMatches.length === 0 ? (
         <p className={styles.noMatchesText}>
           Você ainda não tem Links. Continue explorando as cartas!
         </p>
@@ -265,6 +275,7 @@ function MatchesPage() {
                       isUnread={unreadStatuses[card.id] || false}
                       onToggleHot={handleToggleHot}
                       lastMessageSnippet={unreadStatuses[card.id] ? cardChatsData[card.id]?.lastMessageTextSnippet : undefined}
+                      isCompletedCard={false} // Não é uma carta completada
                     />
                   ))}
                 </div>
@@ -272,10 +283,10 @@ function MatchesPage() {
             </section>
           )}
 
-          {Object.keys(otherCardsByCategory).length > 0 && (
+          {otherMatches.length > 0 && (
             <section className={styles.section} style={hotMatches.length > 0 ? { marginTop: '40px' } : {}}>
               <h2 className={`${styles.sectionTitle} ${styles.sectionTitleOthers}`}>
-                {hotMatches.length > 0 ? 'Nossos Links' : 'Seus Links por Categoria'}
+                {hotMatches.length > 0 ? 'Outros Links' : 'Seus Links por Categoria'}
               </h2>
               <div className={styles.categoryCarouselsGrid}>
                 {fixedCarouselOrder.map(categoryName => {
@@ -290,6 +301,7 @@ function MatchesPage() {
                           onToggleHot={handleToggleHot}
                           unreadStatuses={unreadStatuses}
                           cardChatsData={cardChatsData}
+                          // isCompletedCard para MatchCardItem dentro do Carousel será false por padrão
                         />
                       </div>
                     );
@@ -310,6 +322,7 @@ function MatchesPage() {
                             onToggleHot={handleToggleHot}
                             unreadStatuses={unreadStatuses}
                             cardChatsData={cardChatsData}
+                            // isCompletedCard para MatchCardItem dentro do Carousel será false por padrão
                           />
                         </div>
                       );
@@ -319,6 +332,31 @@ function MatchesPage() {
               </div>
             </section>
           )}
+
+          {/* Seção de Cartas Realizadas */}
+          <section className={styles.completedSection} ref={completedSectionRef}>
+            <h2 className={styles.sectionTitleCompleted}>✅ Cartas Realizadas</h2>
+            {completedMatches.length > 0 ? (
+              <div className={styles.matchesGrid}>
+                {completedMatches.map((card: MatchedCard) => (
+                  <MatchCardItem
+                    key={card.id}
+                    card={card}
+                    onClick={() => handleCardClick(card)}
+                    isHot={false} // Cartas completadas não são "hot" visualmente aqui
+                    isUnread={unreadStatuses[card.id] || false} // Pode ainda ter mensagens não lidas
+                    // onToggleHot não é passado, ou é passado como undefined
+                    lastMessageSnippet={unreadStatuses[card.id] ? cardChatsData[card.id]?.lastMessageTextSnippet : undefined}
+                    isCompletedCard={true} // Indica que é uma carta completada
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className={styles.noMatchesText} style={{ marginTop: '20px', fontSize: '1em' }}>
+                Nenhuma carta marcada como realizada ainda.
+              </p>
+            )}
+          </section>
         </>
       )}
       </main>
@@ -336,6 +374,30 @@ function MatchesPage() {
               : null
           }
           onChatSeen={handleChatSeen}
+          // Adiciona o status de 'hot' da carta selecionada
+          isHot={userMatchedCards.find(card => card.id === selectedCardForChat.id)?.isHot || false}
+          // Adiciona a função para alternar o status de 'hot'
+          onToggleHot={() => {
+            if (selectedCardForChat?.id) {
+              toggleHotStatus(selectedCardForChat.id);
+            }
+          }}
+          // Adiciona o status de 'completed' da carta selecionada
+          isCompleted={userMatchedCards.find(card => card.id === selectedCardForChat.id)?.isCompleted || false}
+          // Adiciona a função para alternar o status de 'completed'
+          onToggleCompleted={() => {
+            if (selectedCardForChat?.id) {
+              // A função toggleCompletedStatus espera o novo estado 'completed'
+              // Então, se está completada, passamos false para desmarcar, e vice-versa.
+              const currentCard = userMatchedCards.find(card => card.id === selectedCardForChat.id);
+              toggleCompletedStatus(selectedCardForChat.id, !currentCard?.isCompleted);
+            }
+          }}
+          onRepeatCard={() => {
+            if (selectedCardForChat?.id) {
+              repeatCard(selectedCardForChat.id);
+            }
+          }}
         />
       )}
     </div>

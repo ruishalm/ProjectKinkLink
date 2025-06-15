@@ -60,6 +60,11 @@
   position: relative; /* Para posicionamento correto das setas de navegação */
 }
 
+/* Define um z-index base para todos os slides do Swiper */
+.swiperContainer :global(.swiper-slide) {
+  z-index: 1;
+}
+
 /* Estilo para cada slide do Swiper */
 .swiperSlide {
   display: flex;
@@ -73,10 +78,12 @@
   width: 7.8125rem !important; /* (125px) Largura EXATA da MatchCardItem */
   
   /* Efeito para slides não ativos (os que estão "espiando") */
-  transform: scale(0.85);
+  /* Inclui translateZ(0) para coexistir com as otimizações do Swiper e garantir que este transform seja aplicado */
+  transform: translateY(20px) scale(0.85) translateZ(0) !important; /* Adicionado !important para diagnóstico */
   opacity: 0.6;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Transição suave */
   will-change: transform, opacity; /* Otimização para transições */
+  /* z-index: 0; /* Removido daqui, pois o :global(.swiper-slide) agora controla o z-index base */
 }
 
 /* Estilo para o slide ativo (visível) - o conteúdo dentro dele */
@@ -84,15 +91,17 @@
 .swiperContainer :global(.swiper-slide-active) {
   /* O position:relative já estava aqui, pode ser útil para ::after se necessário no futuro */
   /* pointer-events: auto !important; foi movido para o seletor abaixo para maior especificidade */
+  z-index: 2; /* Slide ativo na frente. O !important pode não ser necessário se a base é 1. */
   position: relative !important; 
 }
 
 /* Estilos para o CONTEÚDO DENTRO do slide ativo (o nosso .swiperSlide que contém o MatchCardItem) */
 .swiperContainer :global(.swiper-slide-active) > .swiperSlide, /* Para quando o .swiperSlide é filho direto */
 .swiperContainer :global(.swiper-slide-active).swiperSlide { /* Para quando o .swiperSlide é o próprio elemento ativo */
-  transform: scale(1) !important; /* Tamanho normal */
+  /* Garante que translateZ(0) também esteja presente para consistência */
+  transform: translateY(0) scale(1) translateZ(0) !important; 
   opacity: 1 !important;          /* Totalmente opaco */
-  z-index: 1 !important;          /* Garante que o slide ativo fique por cima */
+  /* z-index: 1 !important; /* Removido daqui, pois o :global(.swiper-slide-active) já tem z-index:1 */
   pointer-events: auto !important;  /* Garante que o slide ativo seja clicável */
 }
 
@@ -130,8 +139,9 @@
 .singleActiveSlideOverride {
   /* Força os estilos de ativo se for o único slide,
      caso o Swiper não aplique swiper-slide-active corretamente neste cenário. */
-  transform: scale(1) !important;
-  opacity: 1 !important;
+  /* Garante que translateZ(0) também esteja presente */
+  transform: translateY(0) scale(1) translateZ(0) !important; 
+  opacity: 1 !important; 
   pointer-events: auto !important;
-  z-index: 1 !important; /* Para garantir que fique na frente se houver outros elementos */
+  /* z-index: 1 !important; /* O :global(.swiper-slide-active) deve cobrir isso, ou se não, o .swiperContainer :global(.swiper-slide) já tem z-index:0, então este não precisa de z-index se for o único */
 }

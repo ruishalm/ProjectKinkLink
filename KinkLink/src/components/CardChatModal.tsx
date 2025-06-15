@@ -15,6 +15,11 @@ interface CardChatModalProps {
   onClose: () => void;
   currentChatLastMessageTimestamp?: Timestamp | null; // Timestamp da última mensagem no chat
   onChatSeen?: (cardId: string) => void; // Callback para notificar que o chat foi visto
+  isHot?: boolean; // Status de favorito da carta
+  onToggleHot?: () => void; // Função para alternar o status de favorito
+  isCompleted?: boolean; // Status de "realizada" da carta
+  onToggleCompleted?: () => void; // Função para marcar/desmarcar como realizada
+  onRepeatCard?: () => void; // Função para "Vamos Repetir?!"
 }
 
 function CardChatModal({
@@ -24,6 +29,11 @@ function CardChatModal({
   onClose,
   currentChatLastMessageTimestamp,
   onChatSeen,
+  isHot,
+  onToggleHot,
+  isCompleted,
+  onToggleCompleted,
+  onRepeatCard,
 }: CardChatModalProps) {
   const { user } = useAuth();
   const { messages, sendMessage, isLoading, error: chatError } = useCardChat(cardId); // Usa o cardId para o hook
@@ -80,6 +90,25 @@ function CardChatModal({
     }
   };
 
+  const handleToggleHot = () => {
+    if (onToggleHot) {
+      onToggleHot();
+    }
+  };
+
+  const handleToggleCompleted = () => {
+    if (onToggleCompleted) {
+      onToggleCompleted();
+    }
+  };
+
+  const handleRepeatCard = () => {
+    if (onRepeatCard) {
+      onRepeatCard();
+      // onClose(); // Opcional: fechar o modal após clicar em "Vamos Repetir?!"
+    }
+  };
+
   const handleDesfazerLink = async () => {
     if (cardId && window.confirm(`Tem certeza que deseja desfazer o Link com a carta "${cardTitle || 'esta carta'}"? Esta carta voltará para a pilha de ambos.`)) {
       await deleteMatch(cardId);
@@ -94,7 +123,44 @@ function CardChatModal({
   return (
     <div className={styles.modalOverlay} onClick={onClose}> {/* Overlay pode fechar ao clicar */}
       <div className={`${styles.modalContent} klnkl-themed-panel`} ref={modalContentRef} onClick={(e) => e.stopPropagation()}>
-        <button className={styles.closeButton} onClick={onClose} aria-label="Fechar chat">X</button>
+        {/* Cabeçalho com ações e botão de fechar */}
+        <div className={styles.modalHeaderActions}>
+          <div className={styles.actionButtonsGroup}> {/* Renomeado de leftHeaderActions e agora contém todos os 3 botões */}
+            {/* Botão de Marcar como Realizada / Repetir (AGORA PRIMEIRO) */}
+            {cardId && (onToggleCompleted || onRepeatCard) && (
+              <button
+                onClick={isCompleted ? handleRepeatCard : handleToggleCompleted}
+                className={`${styles.headerActionButton} ${styles.completedButtonInChat} ${isCompleted ? styles.isCompletedAction : ''}`}
+                aria-label={isCompleted ? "Vamos Repetir?!" : "Marcar como Realizada"}
+                title={isCompleted ? "Mover para Top Links e marcar como não realizada" : "Marcar esta carta como já realizada"}
+              >
+                <span className={styles.completedIcon}>{isCompleted ? '🔁' : '✅'}</span>
+                <span className={styles.completedText}>{isCompleted ? "Repetir?!" : "Realizada"}</span>
+              </button>
+            )}
+
+            {/* Botão de Favoritar (AGORA SEGUNDO) */}
+            {cardId && onToggleHot && (
+              <button
+                onClick={handleToggleHot}
+                className={`${styles.headerActionButton} ${styles.favoriteButtonInChat} ${isHot ? styles.isHot : ''}`}
+                aria-label={isHot ? "Remover dos Top Links" : "Adicionar aos Top Links"}
+                title={isHot ? "Remover dos Top Links" : "Adicionar aos Top Links"}
+                disabled={isCompleted} // Desabilitado se a carta estiver completada
+              >
+                <span className={styles.favoriteIcon}>🔥</span>
+                <span className={styles.favoriteText}>Favoritar</span>
+              </button>
+            )}
+
+            {/* Botão de Fechar (AGORA DENTRO DO GRUPO) */}
+            <button
+              className={`${styles.headerActionButton} ${styles.closeButtonInGroup}`} // Nova classe para o X dentro do grupo
+              onClick={onClose}
+              aria-label="Fechar chat"
+            >X</button>
+          </div>
+        </div>
         
         <div className={chatStyles.chatContainer}>
           <div className={chatStyles.chatHeader}>

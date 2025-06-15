@@ -155,7 +155,13 @@ service cloud.firestore {
                              resource.data.isMatch == true &&
                              request.resource.data.isMatch == true && 
                              request.resource.data.likedByUIDs == resource.data.likedByUIDs && 
-                             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isHot', 'lastActivity'])
+                             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isHot', 'lastActivity']) // Apenas isHot e lastActivity
+                           ) ||
+                           ( // Caso 3: Alternando 'isCompleted' (e 'isHot' condicionalmente) em um match existente
+                             resource.data.isMatch == true &&
+                             request.resource.data.isMatch == true && // Garante que continua sendo um match
+                             request.resource.data.likedByUIDs == resource.data.likedByUIDs && // likedByUIDs não deve mudar aqui
+                             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isCompleted', 'isHot', 'lastActivity']) // Permite alterar isCompleted, isHot e lastActivity
                            )
                          );
         

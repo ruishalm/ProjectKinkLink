@@ -1,5 +1,5 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\hooks\useUserCardInteractions.ts
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAuth, type User, type MatchedCard as AuthMatchedCard } from '../contexts/AuthContext';
 import type { Card } from '../data/cards';
 import { db } from '../firebase';
@@ -30,6 +30,7 @@ export function useUserCardInteractions() {
   const seenCards = user?.seenCards || [];
   const conexaoAcceptedCount = user?.conexaoAccepted || 0;
   const conexaoRejectedCount = user?.conexaoRejected || 0;
+  const lastProcessedMatchedStringRef = useRef<string | null>(null);
 
   // Listener para a subcoleção likedInteractions do casal
   useEffect(() => {
@@ -56,24 +57,23 @@ export function useUserCardInteractions() {
               category: interactionData.cardData.category,
               intensity: interactionData.cardData.intensity,
               isHot: interactionData.isHot || false,
+              isCompleted: interactionData.isCompleted || false, // Adiciona o campo isCompleted
             });
           } else {
             console.warn(`[SubcollectionListener] Documento ${docSnap.id} em ${likedInteractionsPath} não possui cardData ou é inválido.`, interactionData);
           }
         });
         
-        const currentLocalMatchedString = (user.matchedCards || [])
-          .map(m => `${m.id}-${m.isHot || false}`) 
-          .sort()
-          .join(',');
-        const newMatchedStringFromListener = newMatchesFromListener
-          .map(m => `${m.id}-${m.isHot || false}`) 
-          .sort()
+        // Ordena as cartas por ID antes de criar a string para garantir consistência na comparação
+        const sortedNewMatches = [...newMatchesFromListener].sort((a, b) => a.id.localeCompare(b.id));
+        const newMatchedStringFromListener = sortedNewMatches
+          .map(m => `${m.id}-${m.isHot || false}-${m.isCompleted || false}`) // String de comparação correta
           .join(',');
 
-        if (currentLocalMatchedString !== newMatchedStringFromListener) {
+        if (newMatchedStringFromListener !== lastProcessedMatchedStringRef.current) {
           console.log(`[SubcollectionListener] User ${user.id.substring(0,5)} - Updating user with new matches (or hot status change). Count: ${newMatchesFromListener.length}`);
           updateUser({ matchedCards: newMatchesFromListener });
+          lastProcessedMatchedStringRef.current = newMatchedStringFromListener;
         } else {
           // console.log(`[SubcollectionListener] User ${user.id.substring(0,5)} - No changes detected in matched cards.`);
         }
@@ -88,7 +88,12 @@ export function useUserCardInteractions() {
         unsubscribeFromMatchListener();
       }
     };
-  }, [user, updateUser]);
+  // Only re-subscribe if user.id or user.coupleId changes, or if updateUser function reference changes.
+  // The onSnapshot callback will use the latest `updateUser` and `lastProcessedMatchedStringRef`
+  // from its closure, which are stable or updated correctly.
+  // Note: `user` object itself is not in dependency array to avoid re-subscribing on every `matchedCards` update.
+  // The logic inside `onSnapshot` now uses a ref to compare, mitigating issues with stale `user.matchedCards` in closure.
+  }, [user?.id, user?.coupleId, updateUser]);
 
   const updateUserProfileInFirestore = async (userId: string, data: PartialWithFieldValue<User>) => {
     if (!userId) return;
@@ -146,6 +151,54 @@ export function useUserCardInteractions() {
     }
   };
 
+  const toggleCompletedStatus = async (cardId: string, completed: boolean) => {
+    if (!user || !user.coupleId) {
+      console.warn("[toggleCompletedStatus] Usuário ou coupleId não encontrado.");
+      return;
+    }
+    const interactionDocRef = doc(db, 'couples', user.coupleId, 'likedInteractions', cardId);
+    try {
+      const docSnap = await getDoc(interactionDocRef);
+      if (!docSnap.exists() || !docSnap.data().isMatch) {
+        console.warn(`[toggleCompletedStatus] Nenhum match ativo encontrado para a carta ${cardId} no casal ${user.coupleId}`);
+        return;
+      }
+      await updateDoc(interactionDocRef, {
+        isCompleted: completed,
+        isHot: completed ? false : docSnap.data().isHot, // Se está completando, remove de hot. Se está descompletando, mantém o status hot anterior.
+        lastActivity: Timestamp.now(),
+      });
+      console.log(`Firestore: Status 'isCompleted' atualizado para ${completed} para a carta ${cardId} do casal ${user.coupleId}`);
+      // O listener onSnapshot pegará essa mudança do Firestore e confirmará o estado.
+    } catch (error) {
+      console.error(`Firestore: Erro ao atualizar isCompleted para a carta ${cardId} do casal ${user.coupleId}:`, error);
+    }
+  };
+
+  const repeatCard = async (cardId: string) => {
+    if (!user || !user.coupleId) {
+      console.warn("[repeatCard] Usuário ou coupleId não encontrado.");
+      return;
+    }
+    const interactionDocRef = doc(db, 'couples', user.coupleId, 'likedInteractions', cardId);
+    try {
+      const docSnap = await getDoc(interactionDocRef);
+      if (!docSnap.exists() || !docSnap.data().isMatch) {
+        console.warn(`[repeatCard] Nenhum match ativo encontrado para a carta ${cardId} no casal ${user.coupleId} para repetir.`);
+        return;
+      }
+      await updateDoc(interactionDocRef, {
+        isHot: true,
+        isCompleted: false,
+        lastActivity: Timestamp.now(),
+      });
+      console.log(`Firestore: Carta ${cardId} marcada como 'isHot: true' e 'isCompleted: false' para o casal ${user.coupleId}`);
+      // O listener onSnapshot pegará essa mudança do Firestore e confirmará o estado.
+    } catch (error) {
+      console.error(`Firestore: Erro ao marcar carta ${cardId} para repetir para o casal ${user.coupleId}:`, error);
+    }
+  };
+
   const handleRegularCardInteraction = async (card: Card, liked: boolean): Promise<boolean> => {
     if (!user || !user.id || !user.coupleId) {
       console.warn("[Interaction] Tentativa de interação sem usuário, ID ou coupleId.", { userId: user?.id, coupleId: user?.coupleId });
@@ -170,6 +223,7 @@ export function useUserCardInteractions() {
           likedByUIDs: [user.id],
           isMatch: false,
           isHot: false,
+          isCompleted: false, // Inicializa isCompleted como false
           lastActivity: Timestamp.now(),
           createdAt: Timestamp.now(),
         };
@@ -339,5 +393,7 @@ export function useUserCardInteractions() {
     handleConexaoCardInteraction,
     handleCreateUserCard,
     deleteMatch,
+    toggleCompletedStatus, // Exporta a nova função
+    repeatCard,            // Exporta a nova função
   };
 }

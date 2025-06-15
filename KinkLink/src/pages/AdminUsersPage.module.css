@@ -77,6 +77,12 @@
   min-width: 120px; /* Para que os botões tenham uma largura mínima */
   /* As cores virão do .genericButton e suas variantes (positiva/negativa) */
 }
+.actionsCell {
+  display: flex;
+  gap: 8px; /* Espaço entre os botões na célula de ações */
+  align-items: center;
+  flex-wrap: wrap; /* Permite que os botões quebrem linha se não couberem */
+}
 
 .errorText {
   color: var(--cor-aviso, #ff7b7b);
@@ -103,3 +109,87 @@
     min-width: auto; /* Permite que os botões fiquem menores */
   }
 }
+
+/* Estilos para a linha expandida e detalhes dos tickets */
+.expandedTicketsRow td { /* Aplica à td que usa colSpan */
+  padding: 0; /* Remove padding padrão da célula, o container interno cuidará disso */
+  background-color: var(--cor-fundo-elemento-secundario, #252525); /* Um fundo ligeiramente diferente */
+  border-top: 2px solid var(--cor-primaria-escura, #4a90e2); /* Linha divisória visual */
+}
+
+.ticketsDetailContainer {
+  padding: 15px 20px;
+  color: var(--cor-texto-primario, #e0e0e0);
+}
+
+.ticketsDetailContainer h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: var(--cor-primaria-clara, #82cfff);
+  font-size: 1.3em;
+  border-bottom: 1px solid var(--cor-borda-leve, #4f4f4f);
+  padding-bottom: 8px;
+}
+
+.ticketList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.ticketItem {
+  background-color: var(--cor-fundo-elemento, #2c2c2c);
+  border: 1px solid var(--cor-borda, #444);
+  border-radius: 6px;
+  padding: 12px 15px;
+  margin-bottom: 12px;
+  font-size: 0.95em;
+}
+
+.ticketItem p {
+  margin: 6px 0;
+  line-height: 1.5;
+}
+
+.ticketItem strong {
+  color: var(--cor-texto-secundario, #b0b0b0);
+  margin-right: 5px;
+}
+
+.ticketIdText {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+  color: var(--cor-texto-terciario, #888);
+}
+
+.ticketStatus {
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  text-transform: capitalize;
+}
+
+.ticketStatus-new {
+  background-color: var(--cor-aviso, #FFC107);
+  color: var(--cor-texto-sobre-aviso, #333);
+}
+.ticketStatus-seen {
+  background-color: var(--cor-destaque, #64b5f6);
+  color: var(--cor-texto-sobre-destaque, #111);
+}
+.ticketStatus-resolved {
+  background-color: var(--cor-acao-positiva, #4CAF50);
+  color: var(--cor-texto-sobre-acao-positiva, white);
+}
+
+.ticketActions {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Os botões dentro de .ticketActions herdarão de .actionButton e .genericButton */
+.markSeenButton { /* Estilo específico se necessário, ex: cor diferente */ }
+.markResolvedButton { /* Estilo específico se necessário */ }

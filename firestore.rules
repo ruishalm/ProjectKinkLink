@@ -64,6 +64,12 @@ service cloud.firestore {
           (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == resource.data.isAdmin) && // Admin não pode mudar isAdmin de outros
           request.resource.data.diff(resource.data).affectedKeys().hasAny(['isSupporter', 'bio', 'username', 'unlockedSkinIds' /* adicione outros campos que o admin pode editar */])
         ) ||
+        // NOVA CONDIÇÃO ESPECÍFICA PARA ADMIN ATUALIZAR feedbackTickets de OUTRO usuário
+        (
+          isUserAdmin() &&
+          userId != request.auth.uid && // Admin está atualizando OUTRO usuário
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['feedbackTickets'])
+        ) || // << ADICIONADO '||' AQUI PARA CONECTAR COM A PRÓXIMA CONDIÇÃO
         // 5. Admin atualizando seu PRÓPRIO documento (pode mudar seu próprio isAdmin, por exemplo, para se remover de admin).
         (
           isUserAdmin() &&

@@ -230,18 +230,25 @@ export function useUserCardInteractions() {
     await updateUserProfileInFirestore(user.id, firestoreUpdate);
   };
 
-  const handleCreateUserCard = async (category: Card['category'], text: string, intensity?: number) => {
+  const handleCreateUserCard = async (
+    category: Card['category'],
+    text: string,
+    intensity?: number,
+    isCreatorSuggestion?: boolean // Novo parâmetro
+  ) => {
     if (!user || !user.id || !text.trim() || !user.coupleId || !user.linkedPartnerId) {
         console.warn("Tentativa de criar carta sem usuário, texto, coupleId ou parceiro vinculado.");
         return;
     }
-    const newCardData: Omit<Card, 'id'> & { createdBy: string, coupleId: string, createdAt: Timestamp } = {
+    // Ajuste para incluir o novo campo opcional no tipo
+    const newCardData: Omit<Card, 'id'> & { createdBy: string, coupleId: string, createdAt: Timestamp, isCreatorSuggestion?: boolean } = {
       category: category,
       text: text.trim(),
       ...(intensity !== undefined && { intensity: intensity }),
       createdBy: user.id,
       coupleId: user.coupleId,
       createdAt: Timestamp.now(),
+      ...(isCreatorSuggestion !== undefined && { isCreatorSuggestion: isCreatorSuggestion }), // Adiciona o novo campo
     };
     try {
       const userCardsCollectionRef = collection(db, 'userCards');
@@ -253,6 +260,7 @@ export function useUserCardInteractions() {
         text: newCardData.text,
         category: newCardData.category,
         intensity: newCardData.intensity,
+        isCreatorSuggestion: newCardData.isCreatorSuggestion, // Passa para a interação também
       };
       await handleRegularCardInteraction(newCardForInteraction, true);
       console.log(`[Interaction] Like automático registrado para a carta criada ${docRef.id} pelo usuário ${user.id.substring(0,5)}`);
@@ -265,6 +273,7 @@ export function useUserCardInteractions() {
             text: newCardData.text,
             category: newCardData.category,
             intensity: newCardData.intensity,
+            isCreatorSuggestion: newCardData.isCreatorSuggestion, // Inclui no cardData para o parceiro
           },
           forUserId: user.linkedPartnerId, 
           timestamp: Timestamp.now() 

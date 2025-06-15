@@ -8,6 +8,8 @@ export interface CardData {
   category: string;
   intensity?: number;
   isHot?: boolean;
+  creatorId?: string; // ID do criador da carta (para usercards)
+  isCreatorSuggestion?: boolean; // Flag para sugestão do parceiro
 }
 
 interface PlayingCardProps {
@@ -24,6 +26,7 @@ interface PlayingCardProps {
     active: boolean;
     dir: number;
   };
+  currentUserId?: string; // ID do usuário que está visualizando a carta
 }
 
 const getCategoryStyles = (category: string): { backgroundColor: string; color: string; borderColor: string } => {
@@ -40,7 +43,16 @@ const getCategoryStyles = (category: string): { backgroundColor: string; color: 
 };
 
 const PlayingCard: React.FC<PlayingCardProps> = ({
-  data, targetWidth = 250, targetHeight = 350, onToggleHot, exitDirection, onAnimationComplete, isFlipped, onClick, dragVisuals
+  data,
+  targetWidth = 250,
+  targetHeight = 350,
+  onToggleHot,
+  exitDirection,
+  onAnimationComplete,
+  isFlipped,
+  onClick,
+  dragVisuals,
+  currentUserId
 }) => {
   const textContentRef = useRef<HTMLParagraphElement>(null);
   const textAreaRef = useRef<HTMLDivElement>(null);
@@ -161,6 +173,14 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
   const displayIntensity = typeof data.intensity === 'number' && !isNaN(data.intensity) ? data.intensity : '-';
   const displayCategoryName = data.category.charAt(0).toUpperCase() + data.category.slice(1).toLowerCase();
 
+  const showPartnerSuggestionNotice =
+    (data.category?.toLowerCase() === 'usercard' || data.category?.toLowerCase() === 'userCard') &&
+    data.isCreatorSuggestion &&
+    data.creatorId &&
+    currentUserId &&
+    data.creatorId !== currentUserId;
+
+
   return (
     <div
       style={flipperContainerDynamicStyle}
@@ -176,6 +196,12 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
           {dragVisuals && dragVisuals.active && dragVisuals.dir !== 0 && (
             <div className={styles.swipeFeedbackOverlay} style={swipeFeedbackOverlayDynamicStyle}>
               {dragVisuals.dir > 0 ? 'Topo!' : 'Passo'}
+            </div>
+          )}
+
+          {showPartnerSuggestionNotice && (
+            <div className={styles.partnerSuggestionNotice} style={{ fontSize: `${0.7 * visualScaleFactor}em`}}>
+              💌 Sugestão do Par!
             </div>
           )}
 

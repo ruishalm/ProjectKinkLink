@@ -1,6 +1,7 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\CardPilePage.tsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { useDrag } from '@use-gesture/react';
+import { useAuth } from '../contexts/AuthContext'; // Importar useAuth
 import { Link, useNavigate } from 'react-router-dom';
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
 import MatchModal from '../components/MatchModal';
@@ -32,6 +33,7 @@ function CardPilePage() {
     allConexaoCards,
   } = useCardPileLogic();
   const { isLoadingSkins } = useSkin();
+  const { user } = useAuth(); // Obter o usuário atual
 
   const { matchedCards, seenCards, handleCreateUserCard, toggleHotStatus } = useUserCardInteractions();
   const navigate = useNavigate();
@@ -63,6 +65,8 @@ function CardPilePage() {
         text: currentCard.text,
         category: currentCard.category,
         intensity: currentCard.intensity,
+        creatorId: (currentCard as any).createdBy, // Mapeia createdBy para creatorId
+        isCreatorSuggestion: currentCard.isCreatorSuggestion, // Passa a nova flag
         isHot: matchedCards.find(mc => mc.id === currentCard.id)?.isHot || false,
       }
     : null;
@@ -184,9 +188,9 @@ function CardPilePage() {
         <CreateUserCardModal
           isOpen={showCreateUserCardModal}
           onClose={closeCreateUserCardModal}
-          onSubmit={(category: Card['category'], text: string, intensity: number) => {
+          onSubmit={(category: Card['category'], text: string, intensity: number, notifyAsCreator: boolean) => { // Atualiza a assinatura
             if (handleCreateUserCard) {
-                 handleCreateUserCard(category, text, intensity);
+                 handleCreateUserCard(category, text, intensity, notifyAsCreator); // Passa o novo parâmetro
             }
             closeCreateUserCardModal();
           }}
@@ -228,6 +232,7 @@ function CardPilePage() {
                     targetHeight={cardDimensions.height}
                     dragVisuals={dragVisuals}
                     isFlipped={exitingCard && exitingCard.id === cardForDisplay.id ? false : isCardFlipped}
+                    currentUserId={user?.id} // Passa o ID do usuário atual
                     exitDirection={exitingCard && exitingCard.id === cardForDisplay.id ? exitingCard.direction : null}
                   onAnimationComplete={() => {
                     if (exitingCard) {

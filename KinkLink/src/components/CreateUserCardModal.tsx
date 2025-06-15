@@ -6,7 +6,7 @@ import styles from './CreateUserCardModal.module.css'; // Importa os CSS Modules
 interface CreateUserCardModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (category: Card['category'], text: string, intensity: number) => void;
+  onSubmit: (category: Card['category'], text: string, intensity: number, notifyAsCreator: boolean) => void;
 }
 
 // Categorias permitidas para criação pelo usuário (sem 'conexao' por enquanto)
@@ -29,6 +29,7 @@ function CreateUserCardModal({ isOpen, onClose, onSubmit }: CreateUserCardModalP
   const [cardText, setCardText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<Exclude<Card['category'], 'conexao'>>('sensorial');
   const [intensity, setIntensity] = useState<number>(1);
+  const [notifyPartnerAsCreator, setNotifyPartnerAsCreator] = useState(true); // Novo estado
 
   // Efeito para resetar os campos quando o modal é aberto
   useEffect(() => {
@@ -37,6 +38,7 @@ function CreateUserCardModal({ isOpen, onClose, onSubmit }: CreateUserCardModalP
       setCardText('');
       setSelectedCategory('sensorial');
       setIntensity(1);
+      setNotifyPartnerAsCreator(true); // Resetar ao abrir
     }
   }, [isOpen]); // Este efeito depende apenas de isOpen
 
@@ -59,7 +61,7 @@ function CreateUserCardModal({ isOpen, onClose, onSubmit }: CreateUserCardModalP
   // Funções Manipuladoras
   const handleSubmit = () => {
     if (cardText.trim()) {
-      onSubmit(selectedCategory, cardText.trim(), intensity);
+      onSubmit(selectedCategory, cardText.trim(), intensity, notifyPartnerAsCreator); // Passa o novo estado
       // onClose(); // O fechamento agora é gerenciado pelo componente pai/hook que chama onSubmit
     }
   };
@@ -101,6 +103,20 @@ function CreateUserCardModal({ isOpen, onClose, onSubmit }: CreateUserCardModalP
               max="9" // Corrigido para permitir até 9, alinhado com a lógica do onChange
             />
           </div>
+        </div>
+
+        {/* Checkbox para notificar o parceiro */}
+        <div className={styles.notifyPartnerContainer}>
+          <input
+            type="checkbox"
+            id="notify-partner-checkbox"
+            checked={notifyPartnerAsCreator}
+            onChange={(e) => setNotifyPartnerAsCreator(e.target.checked)}
+            className={styles.checkboxInput}
+          />
+          <label htmlFor="notify-partner-checkbox" className={styles.checkboxLabel}>
+            Avisar parceiro(a) que esta carta é minha sugestão?
+          </label>
         </div>
 
         <div className={styles.cardPreviewContainer}>

@@ -108,3 +108,17 @@
   object-fit: contain; /* Garante que a imagem inteira caiba sem cortar, mantendo a proporção */
   opacity: 0.85; /* Uma leve transparência para integrar melhor com o fundo */
 }
+
+.partnerSuggestionNotice {
+  position: absolute;
+  top: 5px; /* Ajuste conforme necessário, considera o visualScaleFactor */
+  right: 5px; /* Ajuste conforme necessário, considera o visualScaleFactor */
+  background-color: rgba(0, 0, 0, 0.65); /* Fundo semi-transparente escuro */
+  color: #f0f0f0; /* Cor de texto clara */
+  padding: 3px 7px; /* Padding interno, pode ser ajustado com visualScaleFactor se necessário */
+  border-radius: 5px; /* Bordas arredondadas */
+  /* font-size é definido inline no TSX para usar visualScaleFactor */
+  z-index: 3; /* Para ficar acima de outros elementos do canto como .corner e .hotButton */
+  font-weight: bold;
+  line-height: 1.2; /* Para melhor espaçamento vertical se o texto quebrar */
+}

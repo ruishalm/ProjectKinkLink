@@ -35,12 +35,11 @@
 .button {
   background-color: #64b5f6;
   color: white;
-  border: none;
   margin: 5px;
-  /* padding, border-radius, cursor, font-size, font-weight, transition
-     são herdados de genericButton.
-     Mantenha 'padding: 12px 20px;' se for uma substituição intencional ao padding do genericButton.
-     'border: none;' é mantido para garantir que não haja borda, mesmo que genericButton adicione uma. */
+  /* Padronizando o tamanho com .actionButton */
+  padding: 15px 25px;
+  font-size: 1.1em;
+  border: none; /* Garante ausência de borda */
 }
 
 .actionButton {
@@ -58,8 +57,10 @@
   /* Herda de genericButton e genericButtonDestructive.
      A cor de fundo deve vir de genericButtonDestructive.
      Se precisar de um override específico ou se genericButtonDestructive não definir cor:
-     background-color: #f44336; */
+     background-color: var(--cor-acao-negativa, #f44336); */
   margin-top: 15px;
+  padding: 15px 25px; /* Padronizando o tamanho */
+  font-size: 1.1em;   /* Padronizando o tamanho */
   border: none; /* Garante ausência de borda */
 }
 

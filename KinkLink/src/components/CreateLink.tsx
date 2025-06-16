@@ -1,4 +1,4 @@
-// d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\CreateLink.tsx
+// CreateLink.tsx
 import React, { useState } from 'react';
 import { createLink as apiCreateLink } from '../services/linkService'; // Renomeado para evitar conflito
 import { useAuth } from '../contexts/AuthContext';
@@ -14,6 +14,7 @@ const CreateLink: React.FC<CreateLinkProps> = ({ onLinkCreated, onCancel }) => {
   const [linkCode, setLinkCode] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isCodeCopied, setIsCodeCopied] = useState(false); // Novo estado para feedback de cópia do código
   const { user } = useAuth();
 
   // Funções Manipuladoras
@@ -35,11 +36,32 @@ const CreateLink: React.FC<CreateLinkProps> = ({ onLinkCreated, onCancel }) => {
       const code = await apiCreateLink();
       setLinkCode(code);
       onLinkCreated(code); // Notifica o pai que o código foi criado
-    } catch (err) {
+    } catch (err: unknown) { // Changed 'any' to 'unknown' for better type safety
       console.error("Erro ao criar link:", err);
-      setError("Falha ao gerar o código. Tente novamente.");
+      let errorMessage = "Falha ao gerar o código. Tente novamente.";
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (typeof err === 'string') {
+        errorMessage = err;
+      }
+      // Se for um objeto de erro do Firebase com 'code', você pode querer tratar isso também, mas por agora, a mensagem de erro padrão é suficiente.
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleCopyCodeToClipboard = () => {
+    if (linkCode) {
+      navigator.clipboard.writeText(linkCode)
+        .then(() => {
+          setIsCodeCopied(true);
+          setTimeout(() => setIsCodeCopied(false), 2500); // Feedback dura 2.5 segundos
+        })
+        .catch(err => {
+          console.error('Falha ao copiar código: ', err);
+          alert('Não foi possível copiar o código. Por favor, tente manualmente.');
+        });
     }
   };
 
@@ -49,35 +71,45 @@ const CreateLink: React.FC<CreateLinkProps> = ({ onLinkCreated, onCancel }) => {
   const handleCopyLink = () => {
     if (inviteUrl) {
       navigator.clipboard.writeText(inviteUrl)
-        .then(() => alert('Link de convite copiado para a área de transferência!'))
+        .then(() => alert('Link de convite completo copiado!')) // Mensagem um pouco mais clara
         .catch(err => console.error('Erro ao copiar o link: ', err));
     }
   };
 
   // Lógica de Renderização e JSX
   return (
-    <div className={styles.section}>
+    <div className={`${styles.section} klnkl-themed-panel`}> {/* Adicionado klnkl-themed-panel */}
       <h2 className={styles.title}>Gerar Código de Vínculo</h2>
       {!linkCode ? (
-        <button onClick={handleCreateLink} disabled={isLoading} className={styles.primaryButton}>
+        <button onClick={handleCreateLink} disabled={isLoading} className={`${styles.primaryButton} genericButton`}>
           {isLoading ? 'Gerando...' : 'Gerar Meu Código'}
         </button>
       ) : (
-        <div>
-          <p className={styles.infoText}>Compartilhe este código com seu parceiro(a):</p>
-          <p className={styles.codeDisplay}>{linkCode}</p>
+        <>
+          {/* Seção do código com botão de copiar */}
+          <div className={styles.codeSection}>
+            <p className={styles.infoText}>Compartilhe este código com seu parceiro(a):</p>
+            <div className={styles.codeAndCopyContainer}>
+              <span className={styles.codeDisplay}>{linkCode}</span>
+              <button onClick={handleCopyCodeToClipboard} className={`${styles.copyCodeButton} genericButton`} disabled={isCodeCopied}>
+                {isCodeCopied ? 'Copiado!' : 'Copiar Código'}
+              </button>
+            </div>
+          </div>
+
+          {/* Seção do link de convite completo */}
           {inviteUrl && (
             <div className={styles.inviteLinkContainer}>
               <p className={styles.infoText}>Ou envie este link direto:</p>
               <input type="text" readOnly value={inviteUrl} className={styles.linkDisplayInput} onClick={(e) => e.currentTarget.select()} />
-              <button onClick={handleCopyLink} className={`${styles.secondaryButton} ${styles.copyLinkButton}`}>Copiar Link</button>
+              <button onClick={handleCopyLink} className={`${styles.secondaryButton} ${styles.copyLinkButton} genericButton`}>Copiar Link</button> {/* Added genericButton */}
             </div>
           )}
-        </div>
+        </>
       )}
       {error && <p className={styles.errorText}>{error}</p>}
       {/* Botão para chamar onCancel */}
-      <button onClick={onCancel} className={styles.secondaryButton}>
+      <button onClick={onCancel} className={`${styles.secondaryButton} genericButton`}>
         {linkCode ? 'Concluído / Voltar' : 'Cancelar'}
       </button>
     </div>

@@ -254,7 +254,8 @@ function SignupPage() {
             </label>
           </div>
           <p className={styles.infoTextSmall}>
-            Importante: Utilize um endereço de e-mail ao qual você tenha acesso. Ele será usado para recuperação de senha caso necessário.
+            Dica de Privacidade: Você pode usar um e-mail no formato "algo@provedor.com" se desejar.
+            No entanto, apenas e-mails válidos aos quais você tem acesso poderão ser usados para recuperação de senha.
           </p>
           <button type="submit" className={`${styles.button} genericButton`} disabled={isSubmitting || authIsLoading || !canSubmit}>
             {isSubmitting ? 'Cadastrando...' : 'Cadastrar'}

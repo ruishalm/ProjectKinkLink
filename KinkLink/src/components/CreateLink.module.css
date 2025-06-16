@@ -47,6 +47,22 @@
   min-width: 150px;
 }
 
+.codeSection { /* Novo container para agrupar o texto informativo, o código e o botão de copiar código */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px; /* Espaço entre o texto informativo e o codeAndCopyContainer */
+  width: 100%; /* Para que o infoText interno possa ser centralizado corretamente */
+  margin-top: 10px; /* Espaço acima desta seção */
+  margin-bottom: 10px; /* Espaço abaixo desta seção, antes do link de convite */
+}
+
+.codeAndCopyContainer { /* Novo container para o código e o botão de copiar adjacente */
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Espaço entre o código e o botão de copiar */
+}
+
 .codeDisplay {
   font-size: 1.8em;
   font-weight: bold;
@@ -54,12 +70,13 @@
   padding: 15px;
   background-color: #2a2a2a;
   border-radius: 6px;
-  display: inline-block; /* Mantido para que o fundo se ajuste ao conteúdo */
+  /* display: inline-block; /* Removido para melhor comportamento como flex item */
   /* margin-top: 15px; /* Removido em favor do gap */
   /* margin-bottom: 25px; /* Removido em favor do gap */
   letter-spacing: 2px;
   border: 1px dashed #81c784;
   text-align: center; /* Centraliza o texto do código */
+  min-width: 150px; /* Garante uma largura mínima para o código */
 }
 
 .infoText {
@@ -71,6 +88,20 @@
 .errorText {
   color: #ef9a9a;
   margin-top: 10px;
+}
+
+.copyCodeButton {
+  /* Herda estilos base de genericButton */
+  background-color: var(--cor-fundo-input, #3a3f47); /* Cor similar a um input ou secundária */
+  color: var(--cor-texto-primario, #e0e0e0);
+  padding: 8px 12px; /* Menor que os botões de ação principais */
+  font-size: 0.9em;
+  border: 1px solid var(--cor-borda, #555);
+  min-width: auto; /* Não precisa de largura mínima grande */
+}
+
+.copyCodeButton:hover {
+  filter: brightness(120%);
 }
 
 .inviteLinkContainer {

@@ -87,6 +87,7 @@ interface AuthContextData {
   clearNewlyUnlockedSkinsForModal: () => void;
   submitUserFeedback: (feedbackText: string) => Promise<void>; // Nova função
   unlinkCouple: () => Promise<void>; // Função para desvincular
+  resetNonMatchedSeenCards: () => Promise<void>; // Nova função para resetar cartas "Não Topo!"
   // isAdmin flag can be derived from user object: user?.isAdmin
 }
 
@@ -637,6 +638,37 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     // O setIsLoading(false) principal será tratado pelo onSnapshot ao receber os dados atualizados do usuário.
   }, [user, setIsLoading]); // updateUser não é necessário como dependência aqui pois o onSnapshot cuidará da atualização do estado local.
 
+  const resetNonMatchedSeenCards = useCallback(async () => {
+    if (!user || !user.id) {
+      console.warn("[AuthContext] resetNonMatchedSeenCards: Usuário não logado.");
+      throw new Error("Você precisa estar logado para realizar esta ação.");
+    }
+
+    const currentSeenCards = user.seenCards || [];
+    const currentMatchedCardIds = (user.matchedCards || []).map(mc => mc.id);
+
+    // Mantém em seenCards apenas aquelas que também são matches.
+    // Todas as outras (vistas mas não resultaram em match) serão removidas de seenCards.
+    const newSeenCards = currentSeenCards.filter(seenId => currentMatchedCardIds.includes(seenId));
+
+    if (newSeenCards.length === currentSeenCards.length) {
+      // Nenhuma carta foi efetivamente "descartada" (todas as vistas são matches, ou não há vistas/matches)
+      console.log("[AuthContext] Nenhuma carta 'Não Topo!' para resetar.");
+      // Poderia retornar uma mensagem para a UI aqui se quisesse.
+      // Por ora, apenas não faz a atualização se não houver mudança.
+      return;
+    }
+
+    try {
+      await updateUser({ seenCards: newSeenCards });
+      console.log(`[AuthContext] Cartas 'Não Topo!' resetadas para o usuário ${user.id}. Novas seenCards:`, newSeenCards);
+    } catch (error) {
+      console.error(`[AuthContext] Erro ao resetar cartas 'Não Topo!' para ${user.id}:`, error);
+      throw error; // Relança para a UI tratar
+    }
+  }, [user, updateUser]);
+
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -653,7 +685,8 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       newlyUnlockedSkinsForModal,
       clearNewlyUnlockedSkinsForModal,
       submitUserFeedback,
-      unlinkCouple // Adiciona a função de desvincular ao contexto
+      unlinkCouple,
+      resetNonMatchedSeenCards // Adiciona a nova função ao contexto
     }}>
       {children}
     </AuthContext.Provider>

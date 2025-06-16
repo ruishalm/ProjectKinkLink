@@ -7,7 +7,7 @@ import { doc, getDoc } from 'firebase/firestore'; // Import firestore functions
 import styles from './ProfilePage.module.css';
 
 function ProfilePage() {
-  const { user, logout, updateUser, isLoading: authIsLoading } = useAuth();
+  const { user, logout, updateUser, isLoading: authIsLoading, resetNonMatchedSeenCards } = useAuth(); // Adicionado resetNonMatchedSeenCards
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [username, setUsername] = useState('');
@@ -101,6 +101,20 @@ function ProfilePage() {
     setGender(initialGender); // Restaura gênero
     setIsEditing(false);
   };
+
+  const handleResetDisliked = async () => {
+    if (window.confirm("Tem certeza que deseja reavaliar todas as cartas que você marcou como 'Não Topo!' ou passou? Elas voltarão para a sua pilha.")) {
+      try {
+        await resetNonMatchedSeenCards();
+        alert("Cartas descartadas foram retornadas à pilha!");
+      } catch (error) {
+        alert("Falha ao reavaliar cartas. Tente novamente.");
+        console.error("Erro ao reavaliar cartas descartadas:", error);
+      }
+    }
+  };
+
+
 
   // Função comentada pois o botão que a utiliza está comentado
   // const handleResetTestData = async () => {
@@ -296,6 +310,14 @@ function ProfilePage() {
           <Link to="/skins" className={`${styles.actionButton} genericButton`}>
             Minhas Skins
           </Link>
+        </div>
+
+        {/* SEÇÃO DE REAVALIAR CARTAS */}
+        <div className={`${styles.section} klnkl-themed-panel`}>
+          <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>Opções de Jogo</h2>
+          <button onClick={handleResetDisliked} className={`${styles.actionButton} genericButton`}>
+            Reavaliar Cartas Descartadas
+          </button>
         </div>
 
         {/* SEÇÃO DE LOGOUT */}

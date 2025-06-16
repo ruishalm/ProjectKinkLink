@@ -4,12 +4,12 @@ import { useNavigate, Link } from 'react-router-dom'; // Restaurado Link
 import { useAuth, type User } from '../contexts/AuthContext';
 import CreateLink from '../components/CreateLink';
 import AcceptLink from '../components/AcceptLink';
-import { db } from '../firebase'; // Import db
-import { doc, getDoc, writeBatch } from 'firebase/firestore'; // Import firestore functions, removido deleteDoc
+import { db } from '../firebase'; 
+import { doc, getDoc } from 'firebase/firestore'; // writeBatch não é mais usado aqui diretamente
 import styles from './LinkCouplePage.module.css';
 
 const LinkCouplePage: React.FC = () => {
-  const { user, isLoading: authIsLoading, updateUser: updateAuthContextUser } = useAuth(); // Removido logout se não for mais usado
+  const { user, isLoading: authIsLoading, unlinkCouple: authUnlinkCouple } = useAuth(); // Adicionado unlinkCouple e removido updateUser se não for usado
   const navigate = useNavigate();
   const [showCreateLinkUI, setShowCreateLinkUI] = useState(false);
   const [showAcceptLinkUI, setShowAcceptLinkUI] = useState(false);
@@ -49,61 +49,24 @@ const LinkCouplePage: React.FC = () => {
   }
 
   const handleUnlink = async () => {
-    if (!user || !user.id || !user.partnerId || !user.coupleId) { // MODIFICADO: user.linkedPartnerId para user.partnerId
-      alert("Não foi possível identificar os dados do vínculo para desfazer.");
-      return;
-    }
-
     if (window.confirm("Tem certeza que deseja desfazer o vínculo com seu parceiro(a)?")) {
       setIsUnlinking(true);
       try {
-        const batch = writeBatch(db);
-        const currentUserDocRef = doc(db, 'users', user.id);
-        const partnerUserDocRef = doc(db, 'users', user.partnerId); // MODIFICADO: user.linkedPartnerId para user.partnerId
-        const coupleDocRef = doc(db, 'couples', user.coupleId);
-
-        // 1. Atualiza o documento do usuário atual
-        batch.update(currentUserDocRef, {
-          partnerId: null, // MODIFICADO: linkedPartnerId para partnerId
-          coupleId: null,
-          seenCards: [], // Limpa as cartas vistas
-          conexaoAccepted: 0, // Reseta contador de aceitas
-          conexaoRejected: 0, // Reseta contador de rejeitadas
-          userCreatedCards: [], // Limpa as cartas criadas pelo usuário
-          linkCode: null // Limpa qualquer linkCode pendente
-        });
-
-        // 2. Atualiza o documento do parceiro
-        batch.update(partnerUserDocRef, {
-          partnerId: null, // MODIFICADO: linkedPartnerId para partnerId
-          coupleId: null,
-          seenCards: [],
-          conexaoAccepted: 0,
-          conexaoRejected: 0,
-          userCreatedCards: [],
-          linkCode: null // Limpa qualquer linkCode pendente do parceiro
-        });
-
-        // 3. Deleta o documento do casal
-        // A regra de segurança permite que um membro delete o documento do casal.
-        batch.delete(coupleDocRef);
-        await batch.commit();
-        await updateAuthContextUser({ partnerId: null, coupleId: null }); // MODIFICADO: linkedPartnerId para partnerId
+        // Chama a função unlinkCouple do AuthContext
+        // A verificação de user, user.id, user.partnerId, user.coupleId já é feita dentro de authUnlinkCouple
+        await authUnlinkCouple();
         alert("Vínculo desfeito com sucesso!");
         // A página será re-renderizada devido à mudança no 'user' do AuthContext,
         // mostrando a UI para vincular novamente.
       } catch (error) {
         let errorMessage = "Ocorreu um erro ao tentar desfazer o vínculo.";
         if (error instanceof Error) {
-          errorMessage += ` Detalhes: ${error.message}`;
+          errorMessage += ` Detalhes: ${error.message || 'Erro desconhecido.'}`;
         } else if (typeof error === 'object' && error !== null && 'message' in error) {
           errorMessage += ` Detalhes: ${(error as { message: string }).message}`;
-        } else if (typeof error === 'object' && error !== null && 'code' in error) {
-          errorMessage += ` Código: ${(error as { code: string }).code}`;
         }
         console.error("Erro ao desfazer vínculo:", error); // Mantém o log completo do objeto de erro
-        alert(errorMessage + " Verifique o console para mais informações.");
-
+        alert(errorMessage);
       } finally {
         setIsUnlinking(false);
       }

@@ -40,7 +40,7 @@ service cloud.firestore {
           request.auth.uid == userId &&
           (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == resource.data.isAdmin) &&
           // Permite que o usuário atualize os campos listados, incluindo 'feedbackTickets'
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bio', 'username', 'unlockedSkinIds', 'gender', 'birthDate', 'linkCode', 'seenCards', 'conexaoAccepted', 'conexaoRejected', 'feedbackTickets', 'coupleId', 'partnerId'])
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bio', 'username', 'unlockedSkinIds', 'gender', 'birthDate', 'linkCode', 'seenCards', 'conexaoAccepted', 'conexaoRejected', 'feedbackTickets', 'coupleId', 'partnerId', 'userCreatedCards'])
         ) ||
         // 2. Usuário B (aceitante, request.auth.uid) atualizando documento do Usuário A (iniciador, userId) para completar o vínculo.
         //    Esta regra permite que o Usuário B (aceitante) defina o partnerId e coupleId do Usuário A (iniciador)
@@ -113,6 +113,9 @@ service cloud.firestore {
                           !('coupleId' in request.resource.data) &&
                           request.resource.data.initiatorUserId == resource.data.initiatorUserId)
                        );
+      // Permite que o iniciador delete seu próprio pendingLink se ele estiver 'completed'
+      allow delete: if request.auth != null &&
+                       request.auth.uid == resource.data.initiatorUserId && resource.data.status == 'completed';
     }
     
     // Regras para a coleção 'linkRequests' (Se ainda estiver em uso, caso contrário, pode ser removida)
@@ -133,26 +136,41 @@ service cloud.firestore {
                        request.resource.data.members[1] is string &&
                        request.resource.data.createdAt == request.time;
 
-      // Helper function para verificar se o usuário autenticado é membro deste casal
-      function isUserMemberOfCouple() {
+      // Helper function para verificar se o usuário autenticado está listado como membro
+      // no documento do casal que está sendo acessado.
+      function isUserListedAsMemberInCoupleDocument() {
         // Revertendo para usar o coupleId do escopo do match
         let coupleDoc = get(/databases/$(database)/documents/couples/$(coupleId));
         return coupleDoc.data != null && request.auth.uid in coupleDoc.data.members;
       }
-      allow read, update, delete: if request.auth != null && isUserMemberOfCouple();
-      
+
+      // Helper function para verificar se o documento do usuário autenticado
+      // tem seu campo 'coupleId' apontando para o 'targetCoupleId' (o ID do casal sendo acessado).
+      function isUserDocumentLinkedToThisCouple(targetCoupleId) {
+        return request.auth != null &&
+               get(/databases/$(database)/documents/users/$(request.auth.uid)).data.coupleId == targetCoupleId;
+      }
+
+      // Permite 'get' (leitura de um único documento) se o usuário for membro OU se seu user.coupleId apontar para este casal.
+      // Isso é crucial para o mecanismo de "self-healing" no AuthContext.
+      allow get: if request.auth != null && (isUserDocumentLinkedToThisCouple(coupleId) || isUserListedAsMemberInCoupleDocument());
+      // Listar todos os casais geralmente não é permitido para clientes.
+      allow list: if false;
+      // Atualizar ou deletar um casal ainda requer que o usuário seja um membro listado.
+      allow update, delete: if request.auth != null && isUserListedAsMemberInCoupleDocument();
+
       // Regras para a subcoleção 'likedInteractions'
       match /likedInteractions/{cardId} {
         // Restaurando a verificação de membro para leitura
-        allow read: if request.auth != null && isUserMemberOfCouple(); 
-        
-        allow create: if request.auth != null && isUserMemberOfCouple() &&
+        allow read: if request.auth != null && isUserListedAsMemberInCoupleDocument();
+
+        allow create: if request.auth != null && isUserListedAsMemberInCoupleDocument() &&
                         request.resource.data.likedByUIDs.size() == 1 &&
                         request.resource.data.likedByUIDs[0] == request.auth.uid &&
                         request.resource.data.isMatch == false &&
                         request.resource.data.keys().hasAll(['cardData', 'likedByUIDs', 'isMatch', 'isHot', 'lastActivity', 'createdAt']);
-        
-        allow update: if request.auth != null && isUserMemberOfCouple() &&
+
+        allow update: if request.auth != null && isUserListedAsMemberInCoupleDocument() &&
                          (
                            ( // Caso 1: Segundo usuário curte, formando um match
                              resource.data.likedByUIDs.size() == 1 &&
@@ -176,30 +194,30 @@ service cloud.firestore {
                              request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isCompleted', 'isHot', 'lastActivity']) // Permite alterar isCompleted, isHot e lastActivity
                            )
                          );
-        
-        allow delete: if request.auth != null && isUserMemberOfCouple();
+
+        allow delete: if request.auth != null && isUserListedAsMemberInCoupleDocument();
       }
 
       // Regras para a subcoleção 'cardChats' (chats de cada carta com match)
       match /cardChats/{cardId_do_match} {
         // Restaurando a verificação de membro para leitura e delete
-        allow read, delete: if request.auth != null && isUserMemberOfCouple();
+        allow read, delete: if request.auth != null && isUserListedAsMemberInCoupleDocument();
 
         // Permite a criação do documento do chat se o usuário for membro.
         // Os campos como lastMessage... serão definidos através de uma operação de update (set com merge).
-        allow create: if request.auth != null && isUserMemberOfCouple();
+        allow create: if request.auth != null && isUserListedAsMemberInCoupleDocument();
 
         // Permite a atualização dos detalhes da última mensagem.
-        allow update: if request.auth != null && isUserMemberOfCouple() &&
+        allow update: if request.auth != null && isUserListedAsMemberInCoupleDocument() &&
                          request.resource.data.lastMessageSenderId == request.auth.uid && // Garante que quem está atualizando é o remetente da "última mensagem"
                          request.resource.data.lastMessageTimestamp is timestamp &&
                          // Verifica se os campos que estão sendo escritos são apenas os permitidos
                          request.writeFields.hasOnly(['lastMessageSenderId', 'lastMessageTimestamp', 'lastMessageTextSnippet']);
 
         match /messages/{messageId} {
-          allow read: if request.auth != null && isUserMemberOfCouple();
-          allow create: if request.auth != null && 
-                        isUserMemberOfCouple() &&
+          allow read: if request.auth != null && isUserListedAsMemberInCoupleDocument();
+          allow create: if request.auth != null &&
+                        isUserListedAsMemberInCoupleDocument() &&
                         request.resource.data.userId == request.auth.uid && 
                         request.resource.data.keys().hasAll(['userId', 'username', 'text', 'timestamp']);
                         // request.resource.data.timestamp == request.time; // TEMPORARIAMENTE COMENTADO PARA TESTE

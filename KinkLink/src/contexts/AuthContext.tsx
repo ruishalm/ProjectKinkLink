@@ -86,6 +86,7 @@ interface AuthContextData {
   newlyUnlockedSkinsForModal: SkinDefinition[] | null;
   clearNewlyUnlockedSkinsForModal: () => void;
   submitUserFeedback: (feedbackText: string) => Promise<void>; // Nova função
+  unlinkCouple: () => Promise<void>; // Função para desvincular
   // isAdmin flag can be derived from user object: user?.isAdmin
 }
 
@@ -156,7 +157,69 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     });
     return () => unsubscribe();
   }, []);
-  
+
+  const updateUser = useCallback(async (updatedData: Partial<User>) => {
+    if (!user || !user.id) {
+      console.warn("updateUser chamado sem usuário logado ou ID do usuário.");
+      return;
+    }
+    
+    setUser(currentUser => {
+      if (!currentUser) return null;
+      return { ...currentUser, ...updatedData };
+    });
+
+    const userDocRef = doc(db, 'users', user.id);
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, matchedCards: _matchedCards, ...dataToPersist } = updatedData;
+      if (Object.keys(dataToPersist).length > 0) {
+        await updateDoc(userDocRef, dataToPersist);
+        console.log(`[AuthContext] Perfil do usuário ${user.id} atualizado no Firestore.`);
+      }
+    } catch (error) {
+      console.error(`[AuthContext] Firestore: Erro ao persistir atualização do perfil do usuário ${user.id}:`, error);
+    }
+  }, [user?.id]); // Depend on user.id for stability
+
+  // Efeito para auto-correção do vínculo (self-healing)
+  useEffect(() => {
+    const verifyAndHealLink = async () => {
+      // Verifica se o usuário está logado, possui um coupleId e um partnerId.
+      // A verificação de user.id garante que temos um usuário válido.
+      if (user && user.id && user.coupleId && user.partnerId) {
+        try {
+          const coupleDocRef = doc(db, 'couples', user.coupleId);
+          const coupleDocSnap = await getDoc(coupleDocRef);
+
+          let shouldClearLink = false;
+          if (!coupleDocSnap.exists()) {
+            console.log(`[AuthContext] Self-healing: Documento do casal ${user.coupleId} não encontrado. Limpando vínculo para usuário ${user.id}.`);
+            shouldClearLink = true;
+          } else {
+            const coupleData = coupleDocSnap.data();
+            // Verifica se o usuário atual ou o parceiro registrado ainda são membros do casal.
+            // Isso cobre o caso onde o documento do casal existe, mas os membros foram alterados.
+            if (!coupleData.members || !coupleData.members.includes(user.id) || (user.partnerId && !coupleData.members.includes(user.partnerId))) {
+              console.log(`[AuthContext] Self-healing: Usuário ${user.id} ou parceiro ${user.partnerId} não consta nos membros do casal ${user.coupleId}. Limpando vínculo.`);
+              shouldClearLink = true;
+            }
+          }
+
+          if (shouldClearLink) {
+            // Chama updateUser para limpar partnerId e coupleId no Firestore e no estado local.
+            // A condição no início deste if (user.coupleId && user.partnerId) previne loops desnecessários
+            // se o estado já estiver limpo mas o efeito rodar novamente por outra dependência.
+            await updateUser({ partnerId: null, coupleId: null });
+          }
+        } catch (error) {
+          console.error("[AuthContext] Erro durante a auto-correção do vínculo:", error);
+        }
+      }
+    };
+    verifyAndHealLink();
+  }, [user, updateUser]); // updateUser é memoizado com user.id, e 'user' é a dependência principal aqui.
+
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
@@ -311,30 +374,6 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       throw error;
     }
   };
-
-  const updateUser = useCallback(async (updatedData: Partial<User>) => {
-    if (!user || !user.id) {
-      console.warn("updateUser chamado sem usuário logado ou ID do usuário.");
-      return;
-    }
-    
-    setUser(currentUser => {
-      if (!currentUser) return null;
-      return { ...currentUser, ...updatedData };
-    });
-
-    const userDocRef = doc(db, 'users', user.id);
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id, matchedCards: _matchedCards, ...dataToPersist } = updatedData;
-      if (Object.keys(dataToPersist).length > 0) {
-        await updateDoc(userDocRef, dataToPersist);
-        console.log(`[AuthContext] Perfil do usuário ${user.id} atualizado no Firestore.`);
-      }
-    } catch (error) {
-      console.error(`[AuthContext] Firestore: Erro ao persistir atualização do perfil do usuário ${user.id}:`, error);
-    }
-  }, [user?.id]); // Depend on user.id for stability
 
   const checkAndUnlockSkins = useCallback(async (allSkinsData: SkinDefinition[]): Promise<SkinDefinition[] | null> => {
     // Use user from closure, but depend on user.id for stability if needed by other hooks.
@@ -551,6 +590,53 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     }
   }, [user?.id]); // Depend on user.id
 
+  const unlinkCouple = useCallback(async () => {
+    if (!user || !user.id || !user.coupleId) {
+      console.warn("[AuthContext] unlinkCouple: Usuário não está em um casal ou dados do usuário estão incompletos para desvincular.");
+      // Pode ser útil lançar um erro para a UI tratar, se apropriado.
+      // Ex: throw new Error("Você não está atualmente vinculado ou não foi possível obter seus dados.");
+      return;
+    }
+
+    // Considerar um estado de loading específico para desvinculação se for uma operação demorada
+    // e o isLoading global for muito genérico. Por ora, usamos o global.
+    setIsLoading(true);
+    const currentUserId = user.id;
+    const coupleIdToDelete = user.coupleId;
+    const partnerIdBeingUnlinked = user.partnerId; // Para log
+
+    const batch = writeBatch(db);
+
+    // 1. Atualiza o documento do usuário atual
+    const currentUserDocRef = doc(db, 'users', currentUserId);
+    batch.update(currentUserDocRef, {
+      partnerId: null,
+      coupleId: null,
+      // Adicionar outros campos a serem resetados no desvínculo, se necessário (ex: seenCards, etc.)
+      // como já está sendo feito na LinkCouplePage.tsx
+      seenCards: [],
+      conexaoAccepted: 0,
+      conexaoRejected: 0,
+      userCreatedCards: [],
+      linkCode: null
+    });
+
+    // 2. Exclui o documento do casal
+    const coupleDocRef = doc(db, 'couples', coupleIdToDelete);
+    batch.delete(coupleDocRef);
+
+    try {
+      await batch.commit();
+      console.log(`[AuthContext] Usuário ${currentUserId} desvinculado via unlinkCouple. Casal ${coupleIdToDelete} removido. Ex-parceiro ${partnerIdBeingUnlinked || 'N/A'} será atualizado via self-healing.`);
+      // O estado local do usuário atual será atualizado pelo listener onSnapshot.
+    } catch (error) {
+      console.error(`[AuthContext] Erro ao desvincular (usuário: ${currentUserId}, casal: ${coupleIdToDelete}):`, error);
+      setIsLoading(false); // Garante que o loading pare em caso de erro.
+      throw error; // Relança o erro para a UI poder tratar, se necessário.
+    }
+    // O setIsLoading(false) principal será tratado pelo onSnapshot ao receber os dados atualizados do usuário.
+  }, [user, setIsLoading]); // updateUser não é necessário como dependência aqui pois o onSnapshot cuidará da atualização do estado local.
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -566,7 +652,8 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       checkAndUnlockSkins,
       newlyUnlockedSkinsForModal,
       clearNewlyUnlockedSkinsForModal,
-      submitUserFeedback // Adiciona a nova função ao contexto
+      submitUserFeedback,
+      unlinkCouple // Adiciona a função de desvincular ao contexto
     }}>
       {children}
     </AuthContext.Provider>

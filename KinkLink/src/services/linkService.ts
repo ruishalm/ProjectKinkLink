@@ -247,9 +247,9 @@ export const completeLinkForInitiator = async (
     coupleId: completedPendingLink.coupleId,
   });
 
-  // Opcional: Deletar o pendingLink após a conclusão bem-sucedida por ambos os lados.
-  // const pendingLinkRefToDelete = doc(db, 'pendingLinks', completedPendingLink.linkCode);
-  // batch.delete(pendingLinkRefToDelete);
+  // Deletar o pendingLink após a conclusão bem-sucedida
+  const pendingLinkRefToDelete = doc(db, 'pendingLinks', completedPendingLink.linkCode);
+  batch.delete(pendingLinkRefToDelete);
 
   try {
     await batch.commit();
@@ -257,5 +257,6 @@ export const completeLinkForInitiator = async (
   } catch (error) {
     console.error("Erro ao completar vinculação para o iniciador (Usuário A):", error);
     throw error;
+    // Considere não deletar o pendingLink se o commit do batch falhar, para permitir nova tentativa.
   }
 };

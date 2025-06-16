@@ -13,7 +13,7 @@ const UnlinkedRoute: React.FC = () => {
 
   // Se o usuário está autenticado E está vinculado, redireciona para o perfil (ou outra página)
   // pois esta rota é para usuários NÃO vinculados.
-  if (user && user.linkedPartnerId) {
+  if (user && user.partnerId) {
     console.log('[UnlinkedRoute] Usuário está vinculado. Redirecionando do UnlinkedRoute.');
     return <Navigate to="/profile" state={{ from: location }} replace />;
   }

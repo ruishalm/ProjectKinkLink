@@ -40,20 +40,26 @@ service cloud.firestore {
           request.auth.uid == userId &&
           (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == resource.data.isAdmin) &&
           // Permite que o usuário atualize os campos listados, incluindo 'feedbackTickets'
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bio', 'username', 'unlockedSkinIds', 'gender', 'birthDate', 'linkCode', 'seenCards', 'conexaoAccepted', 'conexaoRejected', 'feedbackTickets', 'linkedPartnerId', 'coupleId', 'partnerId'])
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bio', 'username', 'unlockedSkinIds', 'gender', 'birthDate', 'linkCode', 'seenCards', 'conexaoAccepted', 'conexaoRejected', 'feedbackTickets', 'coupleId', 'partnerId'])
         ) ||
-        // 2. Parceiro pode atualizar campos de vínculo ('linkedPartnerId', 'coupleId') do outro usuário.
-        ( // Este bloco é para o parceiro atualizar os campos de vínculo do outro usuário.
-          request.auth.uid != userId && // O requisitante não é o dono do documento
-          request.resource.data.linkedPartnerId == request.auth.uid && // O campo linkedPartnerId no doc sendo atualizado aponta para o requisitante
-          (request.resource.data.coupleId == resource.data.coupleId || request.resource.data.coupleId is string) && // Consistência do coupleId
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['linkedPartnerId', 'coupleId']) // Apenas estes campos podem ser alterados
+        // 2. Usuário B (aceitante, request.auth.uid) atualizando documento do Usuário A (iniciador, userId) para completar o vínculo.
+        //    Esta regra permite que o Usuário B (aceitante) defina o partnerId e coupleId do Usuário A (iniciador)
+        //    e limpe o linkCode do Usuário A. Não impede múltiplos vínculos se a estrutura de dados e a lógica do cliente suportarem.
+        (
+          request.auth.uid != userId &&                                         // O requisitante (B) não é o dono do documento (A)
+          // As verificações sobre o estado anterior de partnerId/coupleId do Usuário A foram removidas
+          // para permitir flexibilidade para múltiplos vínculos no futuro (a lógica do cliente controlaria isso).
+          // O que está sendo atualizado:
+          request.resource.data.partnerId == request.auth.uid &&                // Novo partnerId de A é o UID de B
+          request.resource.data.coupleId is string &&                           // Novo coupleId de A é uma string
+          request.resource.data.linkCode == null &&                             // linkCode de A está sendo limpo
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['partnerId', 'coupleId', 'linkCode'])
         ) ||
         // 3. Parceiro pode atualizar o array 'seenCards' do outro usuário.
         ( 
           request.method == 'update' &&
           request.auth.uid != userId && // O requisitante não é o dono do documento
-          get(/databases/$(database)/documents/users/$(userId)).data.linkedPartnerId == request.auth.uid && // O documento sendo atualizado pertence ao parceiro atual do requisitante
+          get(/databases/$(database)/documents/users/$(userId)).data.partnerId == request.auth.uid && // O documento sendo atualizado pertence ao parceiro atual do requisitante
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seenCards']) // Apenas o campo 'seenCards' pode ser alterado nesta condição
         ) ||
         // 4. Admin pode atualizar campos específicos de OUTRO usuário (e.g., 'isSupporter', 'bio').

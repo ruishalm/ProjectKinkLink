@@ -124,16 +124,16 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
   // Efeito para buscar likes do parceiro não vistos pelo usuário atual
   useEffect(() => {
     const fetchUnseenPartnerLikes = async () => {
-      if (!user?.coupleId || !user?.linkedPartnerId || !user?.id || !seenCards) {
+      if (!user?.coupleId || !user?.partnerId || !user?.id || !seenCards) {
         setPartnerLikesQueue([]);
         return;
       }
-      console.log(`[useCardPileLogic] Buscando likes do parceiro ${user.linkedPartnerId.substring(0,5)} não vistos por ${user.id.substring(0,5)}`);
+      console.log(`[useCardPileLogic] Buscando likes do parceiro ${user.partnerId.substring(0,5)} não vistos por ${user.id.substring(0,5)}`);
       try {
         const interactionsRef = collection(db, 'couples', user.coupleId, 'likedInteractions');
         const qPartnerLikes = query(
           interactionsRef,
-          where('likedByUIDs', 'array-contains', user.linkedPartnerId)
+          where('likedByUIDs', 'array-contains', user.partnerId)
         );
         const snapshot = await getDocs(qPartnerLikes);
         const potentialPartnerLikedCards: Card[] = [];
@@ -150,7 +150,7 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
       }
     };
     fetchUnseenPartnerLikes();
-  }, [user?.coupleId, user?.linkedPartnerId, user?.id, seenCards]);
+  }, [user?.coupleId, user?.partnerId, user?.id, seenCards]);
 
   // Combina cartas e separa em "swipable" e "conexao"
   const { swipableCards, allConexaoCards } = useMemo((): { swipableCards: Card[]; allConexaoCards: Card[] } => {

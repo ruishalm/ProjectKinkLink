@@ -1,195 +1,63 @@
-/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\AdminUsersPage.module.css */
+/* src/pages/AdminUsersPage.module.css */
 .container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   padding: 20px;
-  box-sizing: border-box;
-  width: 100%;
-  min-height: calc(100vh - var(--header-height, 60px)); /* Considera a altura do header */
-  background-color: var(--cor-fundo-pagina, #1e1e1e);
-  color: var(--cor-texto-primario, #e0e0e0);
-  font-family: var(--font-family-main, "Trebuchet MS", sans-serif);
+  max-width: 1000px;
+  margin: 20px auto;
+  background-color: var(--klnkl-background-color, #f4f4f4);
+  color: var(--klnkl-text-color, #333);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .container h1 {
-  color: var(--cor-primaria, #64b5f6);
+  color: var(--klnkl-primary-color, #d6336c);
+  text-align: center;
   margin-bottom: 25px;
-  font-size: 2em;
 }
 
 .searchInput {
   width: 100%;
-  max-width: 500px;
-  padding: 10px 15px;
+  padding: 12px 15px;
   margin-bottom: 25px;
+  border: 1px solid var(--klnkl-secondary-color, #ccc);
   border-radius: 6px;
-  border: 1px solid var(--cor-borda, #555);
-  background-color: var(--cor-fundo-elemento, #2c2c2c);
-  color: var(--cor-texto-primario, #e0e0e0);
-  font-size: 1em;
   box-sizing: border-box;
-}
-
-.searchInput:focus {
-  outline: none;
-  border-color: var(--cor-primaria, #64b5f6);
-  box-shadow: 0 0 0 2px var(--cor-primaria-transparente, rgba(100, 181, 246, 0.3));
+  font-size: 1rem;
+  background-color: var(--klnkl-background-color, #fff);
+  color: var(--klnkl-text-color, #333);
 }
 
 .usersTable {
   width: 100%;
-  max-width: 900px; /* Limita a largura da tabela em telas grandes */
   border-collapse: collapse;
   margin-top: 20px;
-  background-color: var(--cor-fundo-elemento, #2c2c2c);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  border-radius: 8px;
-  overflow: hidden; /* Para que o border-radius funcione nas bordas da tabela */
 }
 
 .usersTable th,
 .usersTable td {
-  border: 1px solid var(--cor-borda, #444);
-  padding: 12px 15px;
+  border: 1px solid var(--klnkl-accent-color, #ddd);
+  padding: 10px 12px;
   text-align: left;
-  font-size: 0.95em;
+  vertical-align: middle;
 }
 
 .usersTable th {
-  background-color: var(--cor-fundo-header-tabela, #333); /* Cor de fundo para o cabeçalho da tabela */
-  color: var(--cor-texto-header-tabela, #e0e0e0); /* Cor do texto para o cabeçalho */
-  font-weight: 600;
-}
-
-.usersTable tr:nth-child(even) {
-  background-color: var(--cor-fundo-linha-par, #272727); /* Cor de fundo para linhas pares, se desejar alternância */
-}
-
-.usersTable tr:hover {
-  background-color: var(--cor-fundo-hover-linha, #3a3a3a); /* Cor de fundo ao passar o mouse */
+  background-color: var(--klnkl-primary-color-light, #f8c5d8);
+  color: var(--klnkl-primary-color-dark, #a61e4d);
+  font-weight: bold;
 }
 
 .actionButton {
-  /* Herda de .genericButton, mas podemos adicionar/sobrescrever aqui */
   padding: 8px 12px;
-  font-size: 0.9em;
-  min-width: 120px; /* Para que os botões tenham uma largura mínima */
-  /* As cores virão do .genericButton e suas variantes (positiva/negativa) */
-}
-.actionsCell {
-  display: flex;
-  gap: 8px; /* Espaço entre os botões na célula de ações */
-  align-items: center;
-  flex-wrap: wrap; /* Permite que os botões quebrem linha se não couberem */
+  cursor: pointer;
+  border-radius: 5px;
+  border: none;
+  font-weight: bold;
 }
 
 .errorText {
-  color: var(--cor-aviso, #ff7b7b);
-  background-color: rgba(255, 123, 123, 0.1);
-  border: 1px solid var(--cor-aviso, #ff7b7b);
-  padding: 15px;
-  border-radius: 6px;
-  margin-top: 20px;
-  width: 100%;
-  max-width: 600px;
+  color: var(--klnkl-error-color, #c92a2a);
   text-align: center;
-}
-
-/* Responsividade para a tabela */
-@media (max-width: 768px) {
-  .usersTable th,
-  .usersTable td {
-    font-size: 0.85em; /* Reduz o tamanho da fonte em telas menores */
-    padding: 8px 10px;
-  }
-  .actionButton {
-    padding: 6px 10px;
-    font-size: 0.8em;
-    min-width: auto; /* Permite que os botões fiquem menores */
-  }
-}
-
-/* Estilos para a linha expandida e detalhes dos tickets */
-.expandedTicketsRow td { /* Aplica à td que usa colSpan */
-  padding: 0; /* Remove padding padrão da célula, o container interno cuidará disso */
-  background-color: var(--cor-fundo-elemento-secundario, #252525); /* Um fundo ligeiramente diferente */
-  border-top: 2px solid var(--cor-primaria-escura, #4a90e2); /* Linha divisória visual */
-}
-
-.ticketsDetailContainer {
-  padding: 15px 20px;
-  color: var(--cor-texto-primario, #e0e0e0);
-}
-
-.ticketsDetailContainer h3 {
-  margin-top: 0;
-  margin-bottom: 15px;
-  color: var(--cor-primaria-clara, #82cfff);
-  font-size: 1.3em;
-  border-bottom: 1px solid var(--cor-borda-leve, #4f4f4f);
-  padding-bottom: 8px;
-}
-
-.ticketList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.ticketItem {
-  background-color: var(--cor-fundo-elemento, #2c2c2c);
-  border: 1px solid var(--cor-borda, #444);
-  border-radius: 6px;
-  padding: 12px 15px;
-  margin-bottom: 12px;
-  font-size: 0.95em;
-}
-
-.ticketItem p {
-  margin: 6px 0;
-  line-height: 1.5;
-}
-
-.ticketItem strong {
-  color: var(--cor-texto-secundario, #b0b0b0);
-  margin-right: 5px;
-}
-
-.ticketIdText {
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 0.9em;
-  color: var(--cor-texto-terciario, #888);
-}
-
-.ticketStatus {
+  margin-top: 15px;
   font-weight: bold;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 0.85em;
-  text-transform: capitalize;
 }
-
-.ticketStatus-new {
-  background-color: var(--cor-aviso, #FFC107);
-  color: var(--cor-texto-sobre-aviso, #333);
-}
-.ticketStatus-seen {
-  background-color: var(--cor-destaque, #64b5f6);
-  color: var(--cor-texto-sobre-destaque, #111);
-}
-.ticketStatus-resolved {
-  background-color: var(--cor-acao-positiva, #4CAF50);
-  color: var(--cor-texto-sobre-acao-positiva, white);
-}
-
-.ticketActions {
-  margin-top: 12px;
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-/* Os botões dentro de .ticketActions herdarão de .actionButton e .genericButton */
-.markSeenButton { /* Estilo específico se necessário, ex: cor diferente */ }
-.markResolvedButton { /* Estilo específico se necessário */ }

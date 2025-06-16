@@ -17,10 +17,10 @@ const LinkCouplePage: React.FC = () => {
   const [isUnlinking, setIsUnlinking] = useState(false);
 
   useEffect(() => {
-    if (user && user.linkedPartnerId && !partnerInfo) {
+    if (user && user.partnerId && !partnerInfo) { // MODIFICADO: user.linkedPartnerId para user.partnerId
       const fetchPartnerInfo = async () => {
         try {
-          const partnerDocRef = doc(db, 'users', user.linkedPartnerId!);
+          const partnerDocRef = doc(db, 'users', user.partnerId!); // MODIFICADO: user.linkedPartnerId para user.partnerId
           const partnerDocSnap = await getDoc(partnerDocRef);
           if (partnerDocSnap.exists()) {
             const partnerData = partnerDocSnap.data() as User;
@@ -35,10 +35,10 @@ const LinkCouplePage: React.FC = () => {
         }
       };
       fetchPartnerInfo();
-    } else if (user && !user.linkedPartnerId) {
+    } else if (user && !user.partnerId) { // MODIFICADO: user.linkedPartnerId para user.partnerId
       setPartnerInfo(null); // Limpa info do parceiro se desvinculado
     }
-  }, [user, user?.linkedPartnerId, partnerInfo]);
+  }, [user, user?.partnerId, partnerInfo]); // MODIFICADO: user.linkedPartnerId para user.partnerId
 
   if (authIsLoading) {
     return <div className={styles.page}><p className={styles.loadingText}>Carregando informações do usuário...</p></div>;
@@ -49,7 +49,7 @@ const LinkCouplePage: React.FC = () => {
   }
 
   const handleUnlink = async () => {
-    if (!user || !user.id || !user.linkedPartnerId || !user.coupleId) {
+    if (!user || !user.id || !user.partnerId || !user.coupleId) { // MODIFICADO: user.linkedPartnerId para user.partnerId
       alert("Não foi possível identificar os dados do vínculo para desfazer.");
       return;
     }
@@ -59,22 +59,36 @@ const LinkCouplePage: React.FC = () => {
       try {
         const batch = writeBatch(db);
         const currentUserDocRef = doc(db, 'users', user.id);
+        const partnerUserDocRef = doc(db, 'users', user.partnerId); // MODIFICADO: user.linkedPartnerId para user.partnerId
         const coupleDocRef = doc(db, 'couples', user.coupleId);
 
         // 1. Atualiza o documento do usuário atual
         batch.update(currentUserDocRef, {
-          linkedPartnerId: null,
+          partnerId: null, // MODIFICADO: linkedPartnerId para partnerId
           coupleId: null,
           seenCards: [], // Limpa as cartas vistas
           conexaoAccepted: 0, // Reseta contador de aceitas
           conexaoRejected: 0, // Reseta contador de rejeitadas
-          userCreatedCards: [] // Limpa as cartas criadas pelo usuário
+          userCreatedCards: [], // Limpa as cartas criadas pelo usuário
+          linkCode: null // Limpa qualquer linkCode pendente
         });
-        // 2. Deleta o documento do casal
+
+        // 2. Atualiza o documento do parceiro
+        batch.update(partnerUserDocRef, {
+          partnerId: null, // MODIFICADO: linkedPartnerId para partnerId
+          coupleId: null,
+          seenCards: [],
+          conexaoAccepted: 0,
+          conexaoRejected: 0,
+          userCreatedCards: [],
+          linkCode: null // Limpa qualquer linkCode pendente do parceiro
+        });
+
+        // 3. Deleta o documento do casal
         // A regra de segurança permite que um membro delete o documento do casal.
         batch.delete(coupleDocRef);
         await batch.commit();
-        await updateAuthContextUser({ linkedPartnerId: null, coupleId: null }); // Atualiza o AuthContext localmente
+        await updateAuthContextUser({ partnerId: null, coupleId: null }); // MODIFICADO: linkedPartnerId para partnerId
         alert("Vínculo desfeito com sucesso!");
         // A página será re-renderizada devido à mudança no 'user' do AuthContext,
         // mostrando a UI para vincular novamente.
@@ -96,12 +110,12 @@ const LinkCouplePage: React.FC = () => {
     }
   };
 
-  if (user.linkedPartnerId) {
+  if (user.partnerId) { // MODIFICADO: user.linkedPartnerId para user.partnerId
     return (
       <div className={styles.page}>
         <main className={`${styles.mainContent} klnkl-themed-panel`}> {/* Envolve o conteúdo principal */}
           <h1 className={styles.title}>Você já está Vinculado!</h1>
-          <p className={styles.partnerInfoText}>Seu parceiro(a) é: {partnerInfo?.username || partnerInfo?.email || user.linkedPartnerId.substring(0, 8) + "..."}</p>
+          <p className={styles.partnerInfoText}>Seu parceiro(a) é: {partnerInfo?.username || partnerInfo?.email || user.partnerId.substring(0, 8) + "..."}</p> {/* MODIFICADO: user.linkedPartnerId para user.partnerId */}
           <p className={styles.subText}>Agora vocês podem começar a usar o KinkLink juntos!</p>
           <button 
             onClick={() => {

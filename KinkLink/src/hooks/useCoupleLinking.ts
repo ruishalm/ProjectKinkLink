@@ -61,12 +61,12 @@ export function useCoupleLinking() {
         if (snapshot.empty) {
             // Se não há solicitações pendentes enviadas, verifica se alguma foi aceita/rejeitada recentemente
             // Isso é um pouco mais complexo, pois a request é deletada ao aceitar/rejeitar.
-            // A atualização do `user.linkedPartnerId` pelo `AuthContext` é a principal forma de saber se foi vinculado.
-            // Se o `user.linkedPartnerId` está preenchido e `sentRequestStatus` era 'pending', então foi aceita.
-            if (user.linkedPartnerId && sentRequestStatus === 'pending') {
+            // A atualização do `user.partnerId` pelo `AuthContext` é a principal forma de saber se foi vinculado.
+            // Se o `user.partnerId` está preenchido e `sentRequestStatus` era 'pending', então foi aceita.
+            if (user.partnerId && sentRequestStatus === 'pending') { // MODIFICADO: user.linkedPartnerId para user.partnerId
                 console.log('[useCoupleLinking] Solicitação enviada parece ter sido aceita (usuário vinculado).');
                 setSentRequestStatus('accepted'); // Target email remains to show who accepted
-            } else if (sentRequestStatus === 'pending' && !user.linkedPartnerId) {
+            } else if (sentRequestStatus === 'pending' && !user.partnerId) { // MODIFICADO: user.linkedPartnerId para user.partnerId
                 // Se era pending e agora está vazia, e não foi vinculado, pode ter sido rejeitada ou cancelada.
                 // Para simplificar, se não foi vinculado, resetamos.
                 console.log('[useCoupleLinking] Solicitação enviada não está mais pendente e não houve vínculo (rejeitada/cancelada).');
@@ -91,7 +91,7 @@ export function useCoupleLinking() {
   }, [user, sentRequestStatus]); // Adicionado sentRequestStatus para reavaliar se ele muda
 
   const requestLinkWithCode = async (codeToTry: string): Promise<boolean> => {
-    if (!user || !user.id || user.linkedPartnerId || !codeToTry.trim()) {
+    if (!user || !user.id || user.partnerId || !codeToTry.trim()) { // MODIFICADO: user.linkedPartnerId para user.partnerId
       console.warn("[useCoupleLinking] Não é possível solicitar vínculo: sem usuário, usuário já vinculado ou código vazio.");
       return false;
     }
@@ -104,7 +104,7 @@ export function useCoupleLinking() {
       const q = query(
         usersRef,
         where('linkCode', '==', normalizedCode),
-        where('linkedPartnerId', '==', null)
+        where('partnerId', '==', null) // MODIFICADO: linkedPartnerId para partnerId
       );
 
       const querySnapshot = await getDocs(q);
@@ -160,7 +160,7 @@ export function useCoupleLinking() {
   };
 
   const acceptLinkRequest = async (request: LinkRequest): Promise<boolean> => {
-    if (!user || !user.id || user.id !== request.targetId || user.linkedPartnerId) {
+    if (!user || !user.id || user.id !== request.targetId || user.partnerId) { // MODIFICADO: user.linkedPartnerId para user.partnerId
       console.warn("[useCoupleLinking] Não é possível aceitar solicitação: usuário inválido, não é o alvo, ou já vinculado.");
       return false;
     }
@@ -182,14 +182,14 @@ export function useCoupleLinking() {
       // 2. Atualizar o documento do usuário atual (aceitante)
       const currentUserDocRef = doc(db, 'users', user.id);
       batch.update(currentUserDocRef, {
-        linkedPartnerId: requesterId,
+        partnerId: requesterId, // MODIFICADO: linkedPartnerId para partnerId
         coupleId: newCoupleId, // Adiciona o coupleId oficial
       });
 
       // 3. Atualizar o documento do solicitante
       const requesterUserDocRef = doc(db, 'users', requesterId);
       batch.update(requesterUserDocRef, {
-        linkedPartnerId: user.id,
+        partnerId: user.id, // MODIFICADO: linkedPartnerId para partnerId
         coupleId: newCoupleId, // Adiciona o coupleId oficial
       });
 
@@ -198,11 +198,11 @@ export function useCoupleLinking() {
 
       await batch.commit();
       console.log(`[useCoupleLinking] Vínculo aceito e estabelecido entre ${user.id} e ${requesterId}.`);
-      // O AuthContext (onSnapshot) deve pegar a atualização do linkedPartnerId.
+      // O AuthContext (onSnapshot) deve pegar a atualização do partnerId.
       // A remoção da solicitação também será pega pelo listener de incomingRequests.
       // E o listener de sentRequest do parceiro também deve atualizar.
       // Explicitamente chamamos updateUser para garantir que o estado local reflita imediatamente.
-      await updateUser({ linkedPartnerId: requesterId, coupleId: newCoupleId });
+      await updateUser({ partnerId: requesterId, coupleId: newCoupleId }); // MODIFICADO: linkedPartnerId para partnerId
       setSentRequestStatus(null); // Limpa o status da solicitação enviada, pois agora está vinculado
       setSentRequestTargetEmail(null);
       return true;
@@ -227,16 +227,17 @@ export function useCoupleLinking() {
   };
 
   const unlinkPartner = async (): Promise<void> => {
-    if (!user || !user.id || !user.linkedPartnerId) {
+    if (!user || !user.id || !user.partnerId) { // MODIFICADO: user.linkedPartnerId para user.partnerId
       console.warn("[useCoupleLinking] Cannot unlink: no user or user not linked.");
       return;
     }
-    const partnerIdToUnlink = user.linkedPartnerId;
+    const partnerIdToUnlink = user.partnerId; // MODIFICADO: user.linkedPartnerId para user.partnerId
     console.log(`[useCoupleLinking] Iniciando desvinculação entre ${user.id} e ${partnerIdToUnlink}`);
     try {
       const batch = writeBatch(db);
       const commonUpdates = {
-        linkedPartnerId: null,
+        partnerId: null, // MODIFICADO: linkedPartnerId para partnerId
+        coupleId: null, // Adicionado para garantir que coupleId também seja limpo
         matchedCards: [],
         seenCards: [],
         conexaoAccepted: 0,
@@ -288,8 +289,8 @@ export function useCoupleLinking() {
 
 
   return {
-    isLinked: !!user?.linkedPartnerId,
-    linkedPartnerId: user?.linkedPartnerId,
+    isLinked: !!user?.partnerId, // MODIFICADO: user.linkedPartnerId para user.partnerId
+    partnerId: user?.partnerId, // MODIFICADO: linkedPartnerId para partnerId (nome da prop retornada)
     userLinkCode: user?.linkCode, // O código fixo do usuário
     requestLinkWithCode,
     unlinkPartner,

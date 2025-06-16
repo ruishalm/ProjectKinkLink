@@ -70,12 +70,15 @@ export function useUserCardInteractions() {
           .map(m => `${m.id}-${m.isHot || false}-${m.isCompleted || false}`) // String de comparação correta
           .join(',');
 
+        console.log(`[SubcollectionListener Debug] User ${user.id.substring(0,5)} - Current Ref:`, lastProcessedMatchedStringRef.current);
+        console.log(`[SubcollectionListener Debug] User ${user.id.substring(0,5)} - New String:`, newMatchedStringFromListener);
+
         if (newMatchedStringFromListener !== lastProcessedMatchedStringRef.current) {
           console.log(`[SubcollectionListener] User ${user.id.substring(0,5)} - Updating user with new matches (or hot status change). Count: ${newMatchesFromListener.length}`);
           updateUser({ matchedCards: newMatchesFromListener });
           lastProcessedMatchedStringRef.current = newMatchedStringFromListener;
         } else {
-          // console.log(`[SubcollectionListener] User ${user.id.substring(0,5)} - No changes detected in matched cards.`);
+          console.log(`[SubcollectionListener Debug] User ${user.id.substring(0,5)} - Strings are identical. No update to AuthContext for matchedCards.`);
         }
       }, (error) => {
         console.error(`[SubcollectionListener] Error listening to ${likedInteractionsPath}:`, error);
@@ -288,9 +291,9 @@ export function useUserCardInteractions() {
     category: Card['category'],
     text: string,
     intensity?: number,
-    isCreatorSuggestion?: boolean // Novo parâmetro
+    isCreatorSuggestion?: boolean
   ) => {
-    if (!user || !user.id || !text.trim() || !user.coupleId || !user.linkedPartnerId) {
+    if (!user || !user.id || !text.trim() || !user.coupleId || !user.partnerId) { // MODIFICADO AQUI
         console.warn("Tentativa de criar carta sem usuário, texto, coupleId ou parceiro vinculado.");
         return;
     }
@@ -302,7 +305,7 @@ export function useUserCardInteractions() {
       createdBy: user.id,
       coupleId: user.coupleId,
       createdAt: Timestamp.now(),
-      ...(isCreatorSuggestion !== undefined && { isCreatorSuggestion: isCreatorSuggestion }), // Adiciona o novo campo
+      ...(isCreatorSuggestion !== undefined && { isCreatorSuggestion: isCreatorSuggestion }),
     };
     try {
       const userCardsCollectionRef = collection(db, 'userCards');
@@ -329,11 +332,11 @@ export function useUserCardInteractions() {
             intensity: newCardData.intensity,
             isCreatorSuggestion: newCardData.isCreatorSuggestion, // Inclui no cardData para o parceiro
           },
-          forUserId: user.linkedPartnerId, 
+          forUserId: user.partnerId, // JÁ CORRIGIDO ANTERIORMENTE, MANTIDO
           timestamp: Timestamp.now() 
         }
       });
-      console.log(`[UserCardCreation] Sinalizado para parceiro ${user.linkedPartnerId.substring(0,5)} ver a carta ${docRef.id}`);
+      console.log(`[UserCardCreation] Sinalizado para parceiro ${user.partnerId.substring(0,5)} ver a carta ${docRef.id}`); // JÁ CORRIGIDO ANTERIORMENTE, MANTIDO
 
       // Verificar desbloqueio de skins após criar uma carta
       if (user && checkAndUnlockSkins) {
@@ -371,10 +374,10 @@ export function useUserCardInteractions() {
       console.log(`[deleteMatch] Card ${cardId} removido de seenCards do usuário ${user.id.substring(0,5)}.`);
 
       // 3. Remover cardId de seenCards do parceiro (se houver)
-      if (user.linkedPartnerId) {
-        const partnerDocRef = doc(db, 'users', user.linkedPartnerId);
+      if (user.partnerId) { // JÁ CORRIGIDO ANTERIORMENTE, MANTIDO
+        const partnerDocRef = doc(db, 'users', user.partnerId); // JÁ CORRIGIDO ANTERIORMENTE, MANTIDO
         await updateDoc(partnerDocRef, { seenCards: arrayRemove(cardId) });
-        console.log(`[deleteMatch] Card ${cardId} removido de seenCards do parceiro ${user.linkedPartnerId.substring(0,5)}.`);
+        console.log(`[deleteMatch] Card ${cardId} removido de seenCards do parceiro ${user.partnerId.substring(0,5)}.`); // JÁ CORRIGIDO ANTERIORMENTE, MANTIDO
       }
       // A atualização do estado local de seenCards e matchedCards será feita pelos listeners do AuthContext e deste hook.
     } catch (error) {

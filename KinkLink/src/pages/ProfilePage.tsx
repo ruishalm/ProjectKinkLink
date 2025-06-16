@@ -36,10 +36,10 @@ function ProfilePage() {
   }, [user, authIsLoading, navigate]);
 
   useEffect(() => {
-    if (user && user.linkedPartnerId && !partnerInfo) {
+    if (user && user.partnerId && !partnerInfo) { // MODIFICADO AQUI
       const fetchPartnerInfo = async () => {
         try {
-          const partnerDocRef = doc(db, 'users', user.linkedPartnerId!);
+          const partnerDocRef = doc(db, 'users', user.partnerId!); // MODIFICADO AQUI
           const partnerDocSnap = await getDoc(partnerDocRef);
           if (partnerDocSnap.exists()) {
             const partnerData = partnerDocSnap.data() as { username?: string; email?: string | null }; // Simplificando o tipo User aqui
@@ -54,10 +54,10 @@ function ProfilePage() {
         }
       };
       fetchPartnerInfo();
-    } else if (user && !user.linkedPartnerId) {
+    } else if (user && !user.partnerId) { // MODIFICADO AQUI
       setPartnerInfo(null); // Limpa info do parceiro se desvinculado
     }
-  }, [user, authIsLoading, navigate]);
+  }, [user, user?.partnerId, partnerInfo]); // MODIFICADO O ARRAY DE DEPENDÊNCIAS
 
   const handleLogout = async () => {
     try {
@@ -268,10 +268,10 @@ function ProfilePage() {
         {/* SEÇÃO DE VÍNCULO */}
         <div className={`${styles.section} klnkl-themed-panel`}>
           <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>Vínculo de Casal</h2>
-          {user.linkedPartnerId ? (
+          {user.partnerId ? ( // MODIFICADO AQUI
             <>
               <p className={styles.infoText}>
-                Você está vinculado com: <strong>{partnerInfo?.username || partnerInfo?.email || user.linkedPartnerId.substring(0, 8) + "..."}</strong>
+                Você está vinculado com: <strong>{partnerInfo?.username || partnerInfo?.email || user.partnerId.substring(0, 8) + "..."}</strong> 
               </p>
               <p className={styles.infoText} style={{fontSize: '0.9em', opacity: 0.8, marginTop: '-5px', marginBottom: '15px'}}>
                 Explore os Links e converse com seu par!

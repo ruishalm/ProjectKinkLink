@@ -1,5 +1,4 @@
-// d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\contexts\AuthContext.tsx
-import React, { createContext, useState, useContext, useEffect, type ReactNode } from 'react';
+import React, { createContext, useState, useContext, useEffect, type ReactNode, useCallback } from 'react'; // Adicionado useCallback
 import type { User as FirebaseUser } from 'firebase/auth';
 import {
   onAuthStateChanged,
@@ -48,9 +47,8 @@ export interface User {
   email: string | null;
   username?: string;
   bio?: string;
-  linkCode?: string | null;
-  linkedPartnerId?: string | null;
-  coupleId?: string | null;
+  linkCode?: string | null; // Código que o usuário gerou para ser usado por outro
+  coupleId?: string | null; // ID do documento do casal
   partnerId?: string | null; // Pode ser redundante com linkedPartnerId, verificar uso
   seenCards?: string[];
   conexaoAccepted?: number;
@@ -113,40 +111,41 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
 
           if (docSnap.exists()) {
             const firestoreData = docSnap.data() as Partial<User & { partnerId?: string | null; isSupporter?: boolean; isAdmin?: boolean }>;
-            setUser({
-              ...baseUserData,
-              ...firestoreData,
+            setUser(currentUserState => ({
+              ...baseUserData, // Dados base do Firebase Auth (id, email, username inicial)
+              ...firestoreData, // Dados do documento do Firestore
+              // Preserva campos gerenciados no cliente que não estão no documento do usuário no Firestore
+              matchedCards: currentUserState?.matchedCards || [], // Mantém os matchedCards existentes
+              userCreatedCards: currentUserState?.userCreatedCards || [], // Mantém os userCreatedCards existentes (se aplicável)
+              // Garante que os dados principais do Firebase Auth não sejam sobrescritos por dados possivelmente obsoletos do Firestore
               id: firebaseUser.uid,
               email: firebaseUser.email,
               username: firestoreData.username || baseUserData.username,
-              linkedPartnerId: firestoreData.linkedPartnerId || firestoreData.partnerId || null,
+              partnerId: firestoreData.partnerId || null,
               coupleId: firestoreData.coupleId || null,
               unlockedSkinIds: firestoreData.unlockedSkinIds || [],
-              // Incluir os novos campos se existirem no Firestore
               birthDate: firestoreData.birthDate || undefined,
               gender: firestoreData.gender || undefined,
-              isSupporter: firestoreData.isSupporter || false, // Carrega o status de apoiador
-              isAdmin: firestoreData.isAdmin || false, // Carrega o status de admin
-              feedbackTickets: firestoreData.feedbackTickets || [], // Carrega os tickets de feedback
-            } as User);
+              isSupporter: firestoreData.isSupporter || false,
+              isAdmin: firestoreData.isAdmin || false,
+              feedbackTickets: firestoreData.feedbackTickets || [],
+            } as User));
           } else {
-            // Se o documento não existe, isSupporter será false por padrão
-            // Também inicializa feedbackTickets
-            setUser({ ...baseUserData, isSupporter: false, isAdmin: false, feedbackTickets: [] } as User);
+            // Documento não existe, provavelmente novo usuário ou erro. Definir estado base.
+            // Também inicializa os campos gerenciados no cliente aqui
+            setUser({ ...baseUserData, isSupporter: false, isAdmin: false, feedbackTickets: [], matchedCards: [], userCreatedCards: [] } as User);
             console.warn(`[AuthContext] Documento do usuário ${firebaseUser.uid} não encontrado no Firestore via onSnapshot. Será criado no signup se necessário.`);
           }
           setIsLoading(false);
         }, (error) => {
           console.error("[AuthContext] Erro ao ouvir o perfil do usuário no Firestore:", error);
-          // Fallback com isSupporter como false
-          setUser({
-            id: firebaseUser.uid,
-            email: firebaseUser.email,
-            username: firebaseUser.displayName || undefined,
-            isSupporter: false,
-            isAdmin: false, // Fallback
-            feedbackTickets: [] // Fallback
-          } as User);
+          // Em caso de erro no listener do perfil, não resetar o 'user' state drasticamente.
+          // Apenas logar o erro. O Firebase tentará reconectar o listener.
+          // Se o erro for persistente (ex: permissões revogadas), o usuário pode precisar
+          // ser deslogado ou o app pode ficar em estado inconsistente.
+          // Por agora, evitamos limpar 'user.coupleId' ou 'user.matchedCards' que podem
+          // ter sido populados anteriormente.
+          // Apenas garantimos que isLoading seja false.
           setIsLoading(false);
         });
         return () => unsubscribeSnapshot();
@@ -196,7 +195,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         birthDate: birthDate, // Salvar data de nascimento
         gender: gender,       // Salvar gênero
         linkCode: newLinkCode,
-        linkedPartnerId: null,
+        partnerId: null, // MODIFICADO: linkedPartnerId para partnerId
         coupleId: null,
         seenCards: [],
         conexaoAccepted: 0,
@@ -252,8 +251,8 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
           email: firebaseUser.email,
           username: username,
           // birthDate, gender podem ser undefined ou ter um valor padrão "não informado"
-          linkCode: newLinkCode,
-          linkedPartnerId: null,
+          linkCode: newLinkCode, // Código para ser usado por outro
+          partnerId: null, // MODIFICADO: linkedPartnerId para partnerId
           coupleId: null,
           seenCards: [],
           conexaoAccepted: 0,
@@ -313,7 +312,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     }
   };
 
-  const updateUser = async (updatedData: Partial<User>) => {
+  const updateUser = useCallback(async (updatedData: Partial<User>) => {
     if (!user || !user.id) {
       console.warn("updateUser chamado sem usuário logado ou ID do usuário.");
       return;
@@ -335,17 +334,21 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     } catch (error) {
       console.error(`[AuthContext] Firestore: Erro ao persistir atualização do perfil do usuário ${user.id}:`, error);
     }
-  };
+  }, [user?.id]); // Depend on user.id for stability
 
-  const checkAndUnlockSkins = async (allSkinsData: SkinDefinition[]): Promise<SkinDefinition[] | null> => {
-    if (!user) {
+  const checkAndUnlockSkins = useCallback(async (allSkinsData: SkinDefinition[]): Promise<SkinDefinition[] | null> => {
+    // Use user from closure, but depend on user.id for stability if needed by other hooks.
+    // For this function, direct use of 'user' from closure is fine if its own stability isn't critical for other useEffects.
+    // However, it calls updateUser, so its stability matters if it's a dep elsewhere.
+    const currentUserId = user?.id;
+    if (!user || !currentUserId) {
       console.warn("[AuthContext] checkAndUnlockSkins chamado sem usuário logado.");
       return null;
     }
 
     const newlyUnlockedSkins: SkinDefinition[] = [];
     const currentUnlockedIds = user.unlockedSkinIds || [];
-    const isUserSupporter = user.isSupporter || false; // Pega o status de apoiador do objeto user
+    const isUserSupporter = user.isSupporter || false;
 
     allSkinsData.forEach(skin => {
       // Pula se a skin já estiver desbloqueada
@@ -397,28 +400,29 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       try {
         // O estado de `user` (incluindo `unlockedSkinIds`) será atualizado pelo onSnapshot
         // após a atualização bem-sucedida do Firestore.
-        await updateUser({ unlockedSkinIds: updatedUnlockedIds });
-        console.log(`[AuthContext] Novas skins desbloqueadas para ${user.id}:`, newlyUnlockedSkins.map(s => s.name));
+        await updateUser({ unlockedSkinIds: updatedUnlockedIds }); // updateUser will use its own captured user.id
+        console.log(`[AuthContext] Novas skins desbloqueadas para ${currentUserId}:`, newlyUnlockedSkins.map(s => s.name));
         setNewlyUnlockedSkinsForModal(newlyUnlockedSkins);
         return newlyUnlockedSkins;
       } catch (error) {
-        console.error(`[AuthContext] Erro ao atualizar skins desbloqueadas para ${user.id}:`, error);
+        console.error(`[AuthContext] Erro ao atualizar skins desbloqueadas para ${currentUserId}:`, error);
       }
     }    
     return newlyUnlockedSkins.length > 0 ? newlyUnlockedSkins : null;
-  };
+  }, [user, updateUser]); // Keep 'user' if it reads many fields from it. 'updateUser' is now stable.
 
-  const clearNewlyUnlockedSkinsForModal = () => {
-    setNewlyUnlockedSkinsForModal(null);
-  };
+  const clearNewlyUnlockedSkinsForModal = useCallback(() => {
+    setNewlyUnlockedSkinsForModal(null); // Não depende de nada externo, array vazio.
+  }, []);
 
-  const resetUserTestData = async () => {
-    if (!user || !user.id) {
+  const resetUserTestData = useCallback(async () => {
+    // Corrigido para usar user?.id consistentemente
+    const currentUserId = user?.id; // Use user.id from the captured 'user' state
+    if (!currentUserId) {
       console.warn("resetUserTestData chamado sem usuário logado.");
       return;
     }
-    console.log(`[AuthContext] Iniciando reset de dados de teste para o usuário ${user.id}`);
-
+    console.log(`[AuthContext] Iniciando reset de dados de teste para o usuário ${currentUserId}`);
     const batch = writeBatch(db);
     const userDocRef = doc(db, 'users', user.id);
 
@@ -439,17 +443,17 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       unlockedSkinIds: defaultUnlockedSkins,
       userCreatedCards: [] // Adiciona esta linha para limpar as cartas criadas pelo usuário
     });
-    console.log(`[AuthContext] Dados do usuário ${user.id} (incluindo skins desbloqueadas) marcados para reset.`);
+    console.log(`[AuthContext] Dados do usuário ${currentUserId} (incluindo skins desbloqueadas) marcados para reset.`);
 
-    const userInteractionsQuery = query(collection(db, 'cardInteractions'), where('userId', '==', user.id));
+    const userInteractionsQuery = query(collection(db, 'cardInteractions'), where('userId', '==', currentUserId));
     try {
       const userInteractionsSnap = await getDocs(userInteractionsQuery);
       userInteractionsSnap.forEach(docSnap => {
         batch.delete(docSnap.ref);
       });
-      if (userInteractionsSnap.size > 0) console.log(`[AuthContext] ${userInteractionsSnap.size} interações antigas (cardInteractions) do usuário ${user.id} marcadas para deleção.`);
+      if (userInteractionsSnap.size > 0) console.log(`[AuthContext] ${userInteractionsSnap.size} interações antigas (cardInteractions) do usuário ${currentUserId} marcadas para deleção.`);
     } catch (error) {
-      console.error(`[AuthContext] Erro ao buscar interações antigas (cardInteractions) do usuário ${user.id} para deleção:`, error);
+      console.error(`[AuthContext] Erro ao buscar interações antigas (cardInteractions) do usuário ${currentUserId} para deleção:`, error);
     }
 
     if (user.coupleId) {
@@ -499,7 +503,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
 
     try {
       await batch.commit();
-      console.log(`[AuthContext] Reset de dados de teste para ${user.id} (e parceiro, se aplicável) concluído no Firestore.`);
+      console.log(`[AuthContext] Reset de dados de teste para ${currentUserId} (e parceiro, se aplicável) concluído no Firestore.`);
       setUser(currentUser => {
         if (!currentUser) return null;
         return {
@@ -512,13 +516,14 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         };
       });
     } catch (error) {
-      console.error(`[AuthContext] Erro ao commitar o batch de reset para ${user.id}:`, error);
+      console.error(`[AuthContext] Erro ao commitar o batch de reset para ${currentUserId}:`, error);
       throw error;
     }
-  };
+  }, [user?.id, user?.coupleId, user?.isSupporter]); // Adicionado user?.isSupporter se defaultUnlockedSkins depender dele
 
-  const submitUserFeedback = async (feedbackText: string) => {
-    if (!user || !user.id) {
+  const submitUserFeedback = useCallback(async (feedbackText: string) => {
+    const currentUserId = user?.id;
+    if (!currentUserId) {
       console.warn("[AuthContext] submitUserFeedback chamado sem usuário logado.");
       throw new Error("Usuário não autenticado para enviar feedback.");
     }
@@ -529,22 +534,23 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       createdAt: Timestamp.now(), // Usa Timestamp.now() para consistência imediata
       status: 'new' as const
     };
-    const userDocRef = doc(db, 'users', user.id);
+    const userDocRef = doc(db, 'users', currentUserId);
     try {
       await updateDoc(userDocRef, {
         feedbackTickets: arrayUnion(newTicket)
       });
       // Atualiza o estado local do usuário para refletir o novo ticket
-      setUser(currentUser => currentUser ? ({
+      setUser(currentUser => (currentUser && currentUser.id === currentUserId) ? ({
         ...currentUser,
         feedbackTickets: [...(currentUser.feedbackTickets || []), newTicket]
-      }) : null);
-      console.log(`[AuthContext] Feedback enviado pelo usuário ${user.id}: ${newTicket.id}`);
+      }) : currentUser); // If condition not met, return current user, not null
+      console.log(`[AuthContext] Feedback enviado pelo usuário ${currentUserId}: ${newTicket.id}`);
     } catch (error) {
-      console.error(`[AuthContext] Erro ao enviar feedback para ${user.id}:`, error);
+      console.error(`[AuthContext] Erro ao enviar feedback para ${currentUserId}:`, error);
       throw error;
     }
-  };
+  }, [user?.id]); // Depend on user.id
+
   return (
     <AuthContext.Provider value={{
       user,

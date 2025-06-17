@@ -4,12 +4,12 @@
   "description": "Explore, conecte-se e descubra com seu parceiro(a) no KinkLink.",
   "icons": [
     {
-      "src": "/kinklogo192.png",
+      "src": "/icons/kinklogo192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "/kinklogo512.png",
+      "src": "/icons/kinklogo512.png",
       "type": "image/png",
       "sizes": "512x512"
     }

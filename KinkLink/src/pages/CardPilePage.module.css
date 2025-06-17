@@ -56,7 +56,7 @@
 }
 
 .playingCardWrapper {
-  position: relative; /* Para o z-index funcionar corretamente */
+  position: relative; /* Para o z-index funcionar corretamente e para o posicionamento absoluto do Oops */
   z-index: 2; /* Na frente da carta de fundo */
   display: flex;
   justify-content: center;
@@ -76,15 +76,37 @@
   margin-bottom: 10px; /* Espaço antes da barra de navegação inferior */
 }
 
+/* Container para o botão Oops! dentro do playingCardWrapper */
+.oopsButtonContainer {
+  position: absolute;
+  bottom: 10px; /* Distância da borda inferior da carta */
+  left: 10px;   /* Distância da borda esquerda da carta */
+  z-index: 10;  /* Para garantir que fique visível sobre a carta, mas não interfira com modais */
+}
+
 /* Estilos para o botão Oops! */
 .oopsButton {
-  background-color: var(--cor-aviso, #ffc107); /* Uma cor de aviso ou neutra */
-  color: var(--cor-texto-sobre-aviso, #333);
-  padding: 8px 15px; /* Um pouco menor que os botões principais */
-  font-size: 0.9em;
-  border-radius: 20px; /* Mais arredondado para diferenciar */
-  margin: 0 10px; /* Espaçamento se estiver entre os botões de like/dislike */
+  padding: 10px 18px; /* Ajustado para um tamanho bom */
+  font-size: 1em; 
+  font-weight: bold;
+  background-color: var(--cor-aviso, #ffc107); 
+  color: var(--cor-texto-sobre-aviso, #212529); 
+  border: none;
+  border-radius: 25px; 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: transform 0.1s ease-out, background-color 0.2s;
   /* Outros estilos que herda de genericButton */
+  /* margin: 0 10px; /* Removido, pois o posicionamento absoluto cuida disso */
+}
+
+.oopsButton:hover {
+  background-color: var(--cor-aviso-hover, #ffca2c); /* Use variável se definida, senão fallback */
+  transform: scale(1.05);
+}
+.oopsButton:active {
+  transform: scale(0.95);
+  background-color: var(--cor-aviso-active, #ffb300); /* Use variável se definida, senão fallback */
 }
 
 

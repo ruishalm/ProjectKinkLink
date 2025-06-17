@@ -127,6 +127,14 @@ function CardPilePage() {
     }
   }, [cardForDisplay, exitingCard, isCardFlipped]);
 
+  // Efeito para garantir que a carta "flipe" quando currentCard muda (ex: após "Oops!")
+  useEffect(() => {
+    if (currentCard && !exitingCard) {
+      // Força a carta a estar "virada" para que a animação de flip ocorra
+      setIsCardFlipped(true);
+    }
+  }, [currentCard?.id, exitingCard]); // Depende do ID da carta atual e do estado de exitingCard
+
   const triggerHapticFeedback = (pattern: number | number[] = 30) => {
     if (navigator.vibrate) {
       try {
@@ -251,6 +259,19 @@ function CardPilePage() {
                       }
                     }}
                 />
+
+                {/* Botão Oops! movido para ser filho do playingCardWrapper */}
+                {canUndoDislike && !areActionButtonsDisabled && cardForDisplay && (
+                  <div className={styles.oopsButtonContainer}> {/* Container para posicionamento */}
+                    <button
+                      onClick={undoLastDislike}
+                      className={`${styles.oopsButton} genericButton`}
+                      aria-label="Desfazer última ação Não Topo!"
+                    >
+                      Oops!
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -287,16 +308,6 @@ function CardPilePage() {
                   aria-label="Aceitar carta"
                   disabled={areActionButtonsDisabled} // Adiciona o estado de desabilitado
                 >
-              {/* Botão Oops! - Adicionado aqui, mas pode ser estilizado e posicionado melhor */}
-              {canUndoDislike && !areActionButtonsDisabled && (
-                <button
-                  onClick={undoLastDislike}
-                  className={`${styles.oopsButton} genericButton`} // Crie estilos para oopsButton
-                  aria-label="Desfazer última ação Não Topo!"
-                >
-                  Oops!
-                </button>
-              )}
               ❤️ Topo!
               </button>
             </div>

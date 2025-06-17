@@ -59,7 +59,8 @@
 
 .installButton,
 .supportButton,
-.feedbackButton { /* Adicionada a classe .feedbackButton aqui */
+.feedbackButton,
+.myTicketsButton { /* Adicionada a classe .myTicketsButton aqui */
   /* Estilos removidos/alterados para herdar do tema Cyberpunk */
   /* background-color, color, border, border-radius serão definidos pelo tema.
      O padding base vem do genericButton, mas podemos ajustar aqui. */
@@ -84,10 +85,19 @@
   /* As cores de fundo e texto virão do ck-theme-button */
 }
 
+/* Estilos mais específicos para o botão "Meus Chamados" */
+.myTicketsButton {
+  border-radius: 20px; /* Deixa o botão bem mais arredondado/formato de pílula */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); /* Sombra sutil para profundidade */
+  /* As cores de fundo e texto virão do ck-theme-button, mas você pode sobrescrever se quiser uma cor específica */
+  /* Exemplo: background-color: var(--cor-info-fundo, #17a2b8); */
+}
+
 /* Estilos para o botão de instalar PWA */
 .installButton:hover,
 .supportButton:hover,
-.feedbackButton:hover { /* Adicionada a classe .feedbackButton aqui */
+.feedbackButton:hover,
+.myTicketsButton:hover { /* Adicionada a classe .myTicketsButton aqui */
   /* O estilo de hover também será herdado do tema Cyberpunk: */
   filter: brightness(110%); /* Levemente mais claro no hover, funciona bem com cores de tema */
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12); /* Sombra um pouco mais pronunciada no hover */
@@ -104,7 +114,8 @@
   }
   .installButton,
   .supportButton,
-  .feedbackButton { /* Adicionada a classe .feedbackButton aqui */
+  .feedbackButton,
+  .myTicketsButton { /* Adicionada a classe .myTicketsButton aqui */
     padding: 7px 15px; /* Padding reduzido para mobile */
   }
 }
@@ -126,7 +137,8 @@
   }
   .installButton,
   .supportButton,
-  .feedbackButton { /* Adicionada a classe .feedbackButton aqui */
+  .feedbackButton,
+  .myTicketsButton { /* Adicionada a classe .myTicketsButton aqui */
     padding: 6px 10px; /* Padding menor para os botões */
     font-size: 0.85rem; /* Fonte um pouco menor se necessário */
   }

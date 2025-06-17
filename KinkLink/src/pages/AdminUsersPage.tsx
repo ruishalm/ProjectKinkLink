@@ -13,6 +13,7 @@ interface FirebaseError extends Error {
 function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [adminResponses, setAdminResponses] = useState<Record<string, string>>({}); // Para guardar o texto da resposta do admin por ticketId
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
@@ -92,6 +93,51 @@ function AdminUsersPage() {
       //   const firebaseError = error as FirebaseError;
       // }
       alert("Falha ao atualizar status de apoiador.");
+    }
+  };
+
+  const handleAdminResponseChange = (ticketId: string, responseText: string) => {
+    setAdminResponses(prev => ({ ...prev, [ticketId]: responseText }));
+  };
+
+  const handleSendAdminResponse = async (userId: string, ticketId: string) => {
+    const responseText = adminResponses[ticketId];
+    if (!responseText || responseText.trim() === "") {
+      alert("A resposta não pode estar vazia.");
+      return;
+    }
+
+    const userIndex = users.findIndex(u => u.id === userId);
+    if (userIndex === -1) {
+      alert("Erro: Usuário não encontrado.");
+      return;
+    }
+
+    const targetUser = users[userIndex];
+    const ticketIndex = targetUser.feedbackTickets?.findIndex(t => t.id === ticketId);
+
+    if (!targetUser.feedbackTickets || ticketIndex === undefined || ticketIndex === -1) {
+      alert("Erro: Ticket não encontrado para este usuário.");
+      return;
+    }
+
+    const updatedTickets = targetUser.feedbackTickets.map((ticket, index) =>
+      index === ticketIndex
+        ? { ...ticket, adminResponse: responseText, respondedAt: Timestamp.now(), status: 'admin_replied' as UserFeedback['status'] }
+        : ticket
+    );
+
+    try {
+      const userDocRef = doc(db, 'users', userId);
+      await updateDoc(userDocRef, { feedbackTickets: updatedTickets });
+      setUsers(prevUsers =>
+        prevUsers.map(u => (u.id === userId ? { ...u, feedbackTickets: updatedTickets } : u))
+      );
+      setAdminResponses(prev => ({ ...prev, [ticketId]: '' })); // Limpa o campo de resposta
+      alert("Resposta enviada com sucesso!");
+    } catch (error) {
+      console.error("Erro ao enviar resposta do admin:", error);
+      alert("Falha ao enviar resposta. Verifique o console.");
     }
   };
 
@@ -214,6 +260,26 @@ function AdminUsersPage() {
                               <p><strong>ID:</strong> <span className={styles.ticketIdText}>{ticket.id.substring(0, 8)}...</span></p>
                               <p><strong>Texto:</strong> {ticket.text}</p>
                               <p><strong>Data:</strong> {ticket.createdAt instanceof Timestamp ? ticket.createdAt.toDate().toLocaleString() : 'Data inválida'}</p>
+                              {ticket.adminResponse && (
+                                <p><strong>Resposta Admin:</strong> {ticket.adminResponse}</p>
+                              )}
+                              {ticket.respondedAt && (
+                                <p><strong>Respondido em:</strong> {formatFirestoreTimestamp(ticket.respondedAt)}</p>
+                              )}
+                                {!ticket.adminResponse && ticket.status !== 'resolved' && ( // Só mostra se não houver resposta e não estiver resolvido
+                                  <div className={styles.adminResponseArea}>
+                                    <textarea
+                                      placeholder="Digite sua resposta aqui..."
+                                      value={adminResponses[ticket.id] || ''}
+                                      onChange={(e) => handleAdminResponseChange(ticket.id, e.target.value)}
+                                      className={styles.adminResponseTextarea}
+                                    />
+                                    <button
+                                      onClick={() => handleSendAdminResponse(u.id, ticket.id)}
+                                      className={`${styles.actionButton} ${styles.sendResponseButton} genericButton`}
+                                    >Enviar Resposta</button>
+                                  </div>
+                                )}
                               <p><strong>Status:</strong> <span className={`${styles.ticketStatus} ${styles[`ticketStatus-${ticket.status}`]}`}>{ticket.status}</span></p>
                               <div className={styles.ticketActions}>
                                 {ticket.status === 'new' && (

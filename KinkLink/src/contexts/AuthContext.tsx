@@ -101,6 +101,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [newlyUnlockedSkinsForModal, setNewlyUnlockedSkinsForModal] = useState<SkinDefinition[] | null>(null);
+  const [fcmTokenProcessed, setFcmTokenProcessed] = useState(false); // Novo estado para controlar o processamento do FCM token
   // O estado 'isAdmin' separado não é mais necessário se 'user.isAdmin' for a fonte da verdade.
 
   useEffect(() => {
@@ -158,6 +159,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         return () => unsubscribeSnapshot();
       } else {
         setUser(null);
+        setFcmTokenProcessed(false); // Resetar ao deslogar
         setIsLoading(false);
       }
     });
@@ -165,11 +167,13 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   }, []);
 
   // NOVO Efeito para solicitar permissão de notificação e salvar token FCM
-  // Este efeito depende apenas do user.id para rodar apenas quando o usuário loga/desloga
   useEffect(() => {
     const setupFcm = async () => {
-      // Verifica se o usuário está logado e se o navegador suporta notificações e service workers
-      if (user && user.id && 'Notification' in window && 'serviceWorker' in navigator) {
+      // Só executa se:
+      // 1. Tiver um usuário logado (user && user.id)
+      // 2. O token FCM ainda não foi processado para este usuário nesta sessão (!fcmTokenProcessed)
+      // 3. O navegador suportar notificações e service workers
+      if (user && user.id && !fcmTokenProcessed && 'Notification' in window && 'serviceWorker' in navigator) {
         try {
           // Importa dinamicamente o SDK do Messaging (para reduzir o bundle inicial)
           const { getMessaging, getToken, onMessage } = await import("firebase/messaging");
@@ -199,12 +203,14 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
                 // Opcional: Atualizar o timestamp se quiser rastrear a última vez que o token foi visto
               } else { // Este else agora corresponde ao if (tokenDoc.exists())
                 // Salva o token com um timestamp e a plataforma (útil se você tiver apps nativos no futuro)
+                // A subcoleção fcmTokens deve ter regras de segurança que permitam ao usuário escrever seu próprio token.
                 await setDoc(tokenRef, { createdAt: serverTimestamp(), platform: 'web' });
                 console.log("[AuthContext] Token FCM salvo no Firestore para o usuário:", user.id);
               }
             } else { // Este else corresponde ao if (currentToken)
               console.log("[AuthContext] Não foi possível obter o token de registro FCM. Verifique se o service worker 'firebase-messaging-sw.js' está na pasta public e configurado.");
             }
+            setFcmTokenProcessed(true); // Marcar como processado após a tentativa (bem-sucedida ou não de obter/salvar)
 
             // Opcional: Lidar com mensagens recebidas enquanto o app está em primeiro plano
             // Este listener deve ser configurado apenas UMA VEZ por sessão do Service Worker.
@@ -215,6 +221,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
             // via `postMessage` e o cliente pode exibir um toast/banner.
             // Por enquanto, vamos manter o alert simples aqui, mas esteja ciente que pode duplicar.
             // Idealmente, este onMessage seria configurado fora deste useEffect ou com limpeza adequada.
+            // NOTA: Este onMessage pode ser registrado múltiplas vezes se o componente remontar. Idealmente, gerenciar no Service Worker.
             onMessage(messaging, (payload) => {
               console.log('[AuthContext] Mensagem FCM recebida em primeiro plano: ', payload);
               // Aqui você pode exibir uma notificação customizada no app (ex: um toast)
@@ -226,14 +233,17 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
 
           } else {
             console.log("[AuthContext] Permissão para notificação negada.");
+            setFcmTokenProcessed(true); // Marcar como processado mesmo se a permissão for negada, para não perguntar de novo na mesma sessão.
           }
         } catch (error) {
           console.error("[AuthContext] Erro ao configurar FCM:", error);
+          setFcmTokenProcessed(true); // Marcar como processado em caso de erro para não tentar repetidamente na mesma sessão.
         }
       }
     };
     setupFcm(); // Chama a função assíncrona
-  }, [user]); // Executa quando o usuário muda (ex: login)
+  // Dependências: user (para saber se há um usuário logado) e fcmTokenProcessed (para controlar a execução)
+  }, [user, fcmTokenProcessed]);
 
   const updateUser = useCallback(async (updatedData: Partial<User>) => {
     if (!user || !user.id) {
@@ -288,6 +298,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
             // A condição no início deste if (user.coupleId && user.partnerId) previne loops desnecessários
             // se o estado já estiver limpo mas o efeito rodar novamente por outra dependência.
             await updateUser({ partnerId: null, coupleId: null });
+            // Ao desvincular, o token FCM não precisa ser reprocessado imediatamente, mas se o usuário logar novamente, será.
           }
         } catch (error) {
           console.error("[AuthContext] Erro durante a auto-correção do vínculo:", error);
@@ -300,6 +311,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
+      setFcmTokenProcessed(false); // Força o reprocessamento do FCM token no login
       await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
       console.error("Erro no login:", error);
@@ -318,6 +330,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     console.log('[AuthContext] Iniciando signup para:', email, 'com username:', username, 'birthDate:', birthDate, 'gender:', gender);
     setIsLoading(true);
     try {
+      setFcmTokenProcessed(false); // Força o processamento do FCM token após signup e login automático
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
 
@@ -372,6 +385,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     });
 
     try {
+      setFcmTokenProcessed(false); // Força o reprocessamento do FCM token no login com Google
       const result = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;
 
@@ -434,6 +448,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   const logout = async () => {
     setIsLoading(true);
     try {
+      // setFcmTokenProcessed(false) já é chamado no onAuthStateChanged quando firebaseUser se torna null
       await firebaseSignOut(auth);
     } catch (error) {
       console.error("Erro no logout:", error);

@@ -61,3 +61,29 @@
   margin-top: 15px;
   font-weight: bold;
 }
+
+.adminResponseArea {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--klnkl-secondary-color, #ccc);
+}
+
+.adminResponseTextarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid var(--klnkl-secondary-color, #ccc);
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 0.95rem;
+  background-color: var(--klnkl-background-color, #fff);
+  color: var(--klnkl-text-color, #333);
+}
+
+.sendResponseButton {
+  background-color: var(--klnkl-success-color, #28a745); /* Cor de sucesso */
+  color: white;
+  /* Outros estilos podem ser herdados de actionButton ou genericButton */
+}

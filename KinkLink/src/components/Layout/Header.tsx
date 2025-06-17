@@ -1,7 +1,7 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\Layout\Header.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
-// import { useTranslation } from 'react-i18next'; // Removido
+import { useAuth } from '../../contexts/AuthContext'; // Adicionado para verificar autenticação
 import styles from './Header.module.css';
 
 // Supondo que o logo esteja em public/kinklogo.png ou um caminho acessível
@@ -14,6 +14,8 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOpenFeedbackModal }) => {
+  const { isAuthenticated } = useAuth(); // Obter o estado de autenticação
+
   // const { t } = useTranslation(); // Removido
   return (
     <header className={`${styles.appHeader} klnkl-themed-panel`}>
@@ -34,6 +36,11 @@ const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOp
             {/* Você pode adicionar um ícone aqui depois, quando tiver os ícones prontos */}
             {/* <img src="/icons/install-icon.svg" alt="" className={styles.buttonIcon} /> */}
           </button>
+        )}
+        {isAuthenticated && ( // Mostrar apenas se o usuário estiver autenticado
+          <Link to="/meus-tickets" className={`${styles.myTicketsButton} ck-theme-button genericButton`}>
+            Meus Chamados
+          </Link>
         )}
         {/* Adicionada a classe global ck-theme-button para aplicar o estilo do tema */}
         <button

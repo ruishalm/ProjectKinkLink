@@ -38,7 +38,9 @@ export interface UserFeedback {
   id: string; // ID único para o feedback, pode ser gerado no cliente
   text: string;
   createdAt: Timestamp;
-  status: 'new' | 'seen' | 'resolved'; // Status do feedback
+  status: 'new' | 'seen' | 'resolved' | 'admin_replied'; // Status do feedback
+  adminResponse?: string; // Resposta do administrador
+  respondedAt?: Timestamp; // Quando o administrador respondeu
 }
 
 
@@ -63,7 +65,8 @@ export interface User {
   isSupporter?: boolean; // Novo campo para indicar se o usuário é um apoiador
   isAdmin?: boolean; // Campo para status de admin lido do Firestore
   feedbackTickets?: UserFeedback[]; // Novo campo para os tickets de feedback
-}
+  fcmToken?: string | null; // Adiciona o token FCM ao estado local do usuário (opcional, mas útil)
+} // Adicionado fcmToken aqui
 
 interface AuthContextData {
   user: User | null;
@@ -87,7 +90,7 @@ interface AuthContextData {
   clearNewlyUnlockedSkinsForModal: () => void;
   submitUserFeedback: (feedbackText: string) => Promise<void>; // Nova função
   unlinkCouple: () => Promise<void>; // Função para desvincular
-  resetNonMatchedSeenCards: () => Promise<void>; // Nova função para resetar cartas "Não Topo!"
+  resetNonMatchedSeenCards: () => Promise<void>; // Nova função para resetar cartas "Não Topo!"  
   // requestNotificationPermission?: () => Promise<void>; // Opcional: se quiser um botão para pedir permissão
   // isAdmin flag can be derived from user object: user?.isAdmin
 }
@@ -132,6 +135,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
               isSupporter: firestoreData.isSupporter || false,
               isAdmin: firestoreData.isAdmin || false,
               feedbackTickets: firestoreData.feedbackTickets || [],
+              fcmToken: currentUserState?.fcmToken || null, // Mantém o token FCM no estado local se já existir
             } as User));
           } else {
             // Documento não existe, provavelmente novo usuário ou erro. Definir estado base.
@@ -160,13 +164,14 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  // Efeito para solicitar permissão de notificação e salvar token FCM
+  // NOVO Efeito para solicitar permissão de notificação e salvar token FCM
+  // Este efeito depende apenas do user.id para rodar apenas quando o usuário loga/desloga
   useEffect(() => {
     const setupFcm = async () => {
       // Verifica se o usuário está logado e se o navegador suporta notificações e service workers
       if (user && user.id && 'Notification' in window && 'serviceWorker' in navigator) {
         try {
-          // Importa dinamicamente o SDK do Messaging
+          // Importa dinamicamente o SDK do Messaging (para reduzir o bundle inicial)
           const { getMessaging, getToken, onMessage } = await import("firebase/messaging");
           const { app } = await import('../firebase'); // Sua inicialização do Firebase app
 
@@ -179,18 +184,37 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
 
             const vapidKey = "BOsyzlRobDa9Hv3_sctCdE4SPSMQZXtrEz7n84r3XjRF01UImZQ7fnd8YfbMz3uwZW2VLsD-M9QaxNu5Yid1x7Q"; // SUA VAPID KEY AQUI
             
+            // Obtém o token atual. O Firebase SDK gerencia a renovação.
             const currentToken = await getToken(messaging, { vapidKey });
+
             if (currentToken) {
               console.log("[AuthContext] Token FCM obtido:", currentToken);
+
+              // Verifica se este token já está salvo para este usuário
               const tokenRef = doc(db, `users/${user.id}/fcmTokens`, currentToken);
-              // Salva o token com um timestamp e a plataforma (útil se você tiver apps nativos no futuro)
-              await setDoc(tokenRef, { createdAt: serverTimestamp(), platform: 'web' });
-              console.log("[AuthContext] Token FCM salvo no Firestore para o usuário:", user.id);
-            } else {
+              const tokenDoc = await getDoc(tokenRef);
+
+              if (tokenDoc.exists()) {
+                console.log("[AuthContext] Token FCM já existe no Firestore. Não é necessário salvar novamente.");
+                // Opcional: Atualizar o timestamp se quiser rastrear a última vez que o token foi visto
+              } else { // Este else agora corresponde ao if (tokenDoc.exists())
+                // Salva o token com um timestamp e a plataforma (útil se você tiver apps nativos no futuro)
+                await setDoc(tokenRef, { createdAt: serverTimestamp(), platform: 'web' });
+                console.log("[AuthContext] Token FCM salvo no Firestore para o usuário:", user.id);
+              }
+            } else { // Este else corresponde ao if (currentToken)
               console.log("[AuthContext] Não foi possível obter o token de registro FCM. Verifique se o service worker 'firebase-messaging-sw.js' está na pasta public e configurado.");
             }
 
             // Opcional: Lidar com mensagens recebidas enquanto o app está em primeiro plano
+            // Este listener deve ser configurado apenas UMA VEZ por sessão do Service Worker.
+            // Colocá-lo aqui dentro deste useEffect que roda no cliente pode levar a múltiplos listeners.
+            // A melhor prática é ter o listener `onMessage` no Service Worker (`firebase-messaging-sw.js`)
+            // e usar `onBackgroundMessage` lá também.
+            // Para mensagens em primeiro plano, o Service Worker pode enviar uma mensagem para o cliente
+            // via `postMessage` e o cliente pode exibir um toast/banner.
+            // Por enquanto, vamos manter o alert simples aqui, mas esteja ciente que pode duplicar.
+            // Idealmente, este onMessage seria configurado fora deste useEffect ou com limpeza adequada.
             onMessage(messaging, (payload) => {
               console.log('[AuthContext] Mensagem FCM recebida em primeiro plano: ', payload);
               // Aqui você pode exibir uma notificação customizada no app (ex: um toast)
@@ -208,7 +232,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         }
       }
     };
-    setupFcm();
+    setupFcm(); // Chama a função assíncrona
   }, [user]); // Executa quando o usuário muda (ex: login)
 
   const updateUser = useCallback(async (updatedData: Partial<User>) => {

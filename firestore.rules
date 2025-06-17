@@ -84,6 +84,13 @@ service cloud.firestore {
       );
       // Deleção: Apenas admins podem deletar usuários. (Se não quiser permitir, mude para 'if false;')
       allow delete: if request.auth != null && isUserAdmin();
+
+      // Regras para a subcoleção 'fcmTokens' de cada usuário
+      match /fcmTokens/{tokenId} {
+        // Usuário pode ler, criar, atualizar e deletar seus próprios tokens FCM.
+        // O tokenId é o próprio token FCM, então setDoc com o mesmo token irá sobrescrever (update).
+        allow read, write, delete: if request.auth != null && request.auth.uid == userId;
+      }
     }
 
     // Regras para a coleção 'pendingLinks'

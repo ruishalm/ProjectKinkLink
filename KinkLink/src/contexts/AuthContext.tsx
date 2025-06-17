@@ -26,7 +26,7 @@ import {
   where,
   getDocs,
   getDoc,
-  arrayUnion // Importar arrayUnion
+  arrayUnion
 } from 'firebase/firestore';
 
 export interface MatchedCard extends Card {
@@ -88,6 +88,7 @@ interface AuthContextData {
   submitUserFeedback: (feedbackText: string) => Promise<void>; // Nova função
   unlinkCouple: () => Promise<void>; // Função para desvincular
   resetNonMatchedSeenCards: () => Promise<void>; // Nova função para resetar cartas "Não Topo!"
+  // requestNotificationPermission?: () => Promise<void>; // Opcional: se quiser um botão para pedir permissão
   // isAdmin flag can be derived from user object: user?.isAdmin
 }
 
@@ -158,6 +159,57 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     });
     return () => unsubscribe();
   }, []);
+
+  // Efeito para solicitar permissão de notificação e salvar token FCM
+  useEffect(() => {
+    const setupFcm = async () => {
+      // Verifica se o usuário está logado e se o navegador suporta notificações e service workers
+      if (user && user.id && 'Notification' in window && 'serviceWorker' in navigator) {
+        try {
+          // Importa dinamicamente o SDK do Messaging
+          const { getMessaging, getToken, onMessage } = await import("firebase/messaging");
+          const { app } = await import('../firebase'); // Sua inicialização do Firebase app
+
+          const messaging = getMessaging(app);
+
+          // Solicitar permissão
+          const permission = await Notification.requestPermission();
+          if (permission === "granted") {
+            console.log("[AuthContext] Permissão para notificação concedida.");
+
+            const vapidKey = "BOsyzlRobDa9Hv3_sctCdE4SPSMQZXtrEz7n84r3XjRF01UImZQ7fnd8YfbMz3uwZW2VLsD-M9QaxNu5Yid1x7Q"; // SUA VAPID KEY AQUI
+            
+            const currentToken = await getToken(messaging, { vapidKey });
+            if (currentToken) {
+              console.log("[AuthContext] Token FCM obtido:", currentToken);
+              const tokenRef = doc(db, `users/${user.id}/fcmTokens`, currentToken);
+              // Salva o token com um timestamp e a plataforma (útil se você tiver apps nativos no futuro)
+              await setDoc(tokenRef, { createdAt: serverTimestamp(), platform: 'web' });
+              console.log("[AuthContext] Token FCM salvo no Firestore para o usuário:", user.id);
+            } else {
+              console.log("[AuthContext] Não foi possível obter o token de registro FCM. Verifique se o service worker 'firebase-messaging-sw.js' está na pasta public e configurado.");
+            }
+
+            // Opcional: Lidar com mensagens recebidas enquanto o app está em primeiro plano
+            onMessage(messaging, (payload) => {
+              console.log('[AuthContext] Mensagem FCM recebida em primeiro plano: ', payload);
+              // Aqui você pode exibir uma notificação customizada no app (ex: um toast)
+              // Exemplo simples:
+              if (payload.notification) {
+                alert(`Nova notificação: ${payload.notification.title}\n${payload.notification.body}`);
+              }
+            });
+
+          } else {
+            console.log("[AuthContext] Permissão para notificação negada.");
+          }
+        } catch (error) {
+          console.error("[AuthContext] Erro ao configurar FCM:", error);
+        }
+      }
+    };
+    setupFcm();
+  }, [user]); // Executa quando o usuário muda (ex: login)
 
   const updateUser = useCallback(async (updatedData: Partial<User>) => {
     if (!user || !user.id) {

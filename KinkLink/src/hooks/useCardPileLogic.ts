@@ -15,6 +15,7 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { useUserCardInteractions } from './useUserCardInteractions';
+import { useCardTips } from './useCardTips'; // Importar useCardTips se for usar animateTipsIn
 import { exampleSkinsData } from '../config/skins'; // Importar dados das skins do index.ts
 
 // Interface para o tipo de retorno do hook
@@ -29,6 +30,8 @@ interface UseCardPileLogicReturn {
   currentConexaoCardForModal: Card | null;
   handleConexaoInteractionInModal: (accepted: boolean) => void;
   allConexaoCards: Card[]; // Para o modal Carinhos & Mimos
+  undoLastDislike: () => Promise<void>; // Nova função para desfazer
+  canUndoDislike: boolean; // Novo estado para habilitar o botão de desfazer
 }
 
 interface NextCardForPartnerData {
@@ -39,7 +42,7 @@ interface NextCardForPartnerData {
 }
 
 export function useCardPileLogic(): UseCardPileLogicReturn {
-  const { user, checkAndUnlockSkins } = useAuth(); // Adicionar checkAndUnlockSkins
+  const { user, checkAndUnlockSkins, updateUser: authContextUpdateUser } = useAuth(); // Adicionar updateUser do AuthContext
   const {
     matchedCards,
     seenCards,
@@ -67,6 +70,8 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
   const [partnerNewCard, setPartnerNewCard] = useState<Card | null>(null);
   const [partnerLikesQueue, setPartnerLikesQueue] = useState<Card[]>([]);
   const [cardSelectionCycle, setCardSelectionCycle] = useState(0); // 0, 1 = random; 2 = partner like
+  const [lastDislikedCard, setLastDislikedCard] = useState<Card | null>(null); // Novo estado
+  const { triggerAnimateTipsIn } = useCardTips(currentCard); // Mudado para usar a função trigger
 
   // Efeito para buscar todas as cartas (padrão e do usuário)
   useEffect(() => {
@@ -246,6 +251,11 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
     const interactedCardId = interactedCard.id;
 
     await markCardAsSeen(interactedCardId);
+    if (!liked) {
+      setLastDislikedCard(interactedCard); // Guarda a carta se foi "Não Topo!"
+    } else {
+      setLastDislikedCard(null); // Limpa se foi "Topo!"
+    }
 
     if (partnerNewCard && interactedCardId === partnerNewCard.id && user.coupleId) {
       console.log(`[useCardPileLogic] Carta do parceiro ${interactedCardId} foi vista. Limpando sinalizador.`);
@@ -317,6 +327,38 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
     setCurrentConexaoCardForModal(null);
   };
 
+  const undoLastDislike = useCallback(async () => {
+    if (!lastDislikedCard || !user?.id) {
+      console.warn("[useCardPileLogic] Nenhuma carta 'Não Topo!' para desfazer ou usuário não disponível.");
+      return;
+    }
+
+    const cardToRestore = lastDislikedCard;
+    const currentSeenCards = user.seenCards || [];
+
+    // Cria novo array seenCards sem a carta restaurada
+    const newSeenCards = currentSeenCards.filter(id => id !== cardToRestore.id);
+
+    try {
+      await authContextUpdateUser({ seenCards: newSeenCards }); // Atualiza Firestore & AuthContext
+
+      // Define a carta restaurada como a carta atual na pilha
+      setCurrentCard(cardToRestore);
+      // setIsCardFlipped(true); // Começa com o verso da carta - opcional, pode querer que ela apareça direto
+      setLastDislikedCard(null); // Limpa o estado de desfazer
+      // Verifica se triggerAnimateTipsIn é uma função antes de chamá-la
+      if (typeof triggerAnimateTipsIn === 'function') {
+        triggerAnimateTipsIn(); // Reativa a animação das dicas
+      } else {
+        console.warn("[useCardPileLogic] triggerAnimateTipsIn is not a function. Check the useCardTips.ts hook.");
+      }
+
+      console.log(`[useCardPileLogic] Ação 'Não Topo!' desfeita para a carta: ${cardToRestore.id}.`);
+    } catch (error) {
+      console.error("[useCardPileLogic] Erro ao desfazer 'Não Topo!':", error);
+    }
+  }, [lastDislikedCard, user, authContextUpdateUser, triggerAnimateTipsIn, setCurrentCard /*, setIsCardFlipped (se usado) */]);
+
   const unseenCardsCount = generalUnseen.length + partnerLikesQueue.filter(c => !seenCards.includes(c.id)).length + (partnerNewCard && !seenCards.includes(partnerNewCard.id) ? 1 : 0);
 
 
@@ -331,5 +373,7 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
     currentConexaoCardForModal,
     handleConexaoInteractionInModal,
     allConexaoCards,
+    undoLastDislike, // Expõe a nova função
+    canUndoDislike: !!lastDislikedCard, // Expõe um booleano para a UI
   };
 }

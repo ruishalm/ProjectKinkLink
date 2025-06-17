@@ -56,8 +56,8 @@
 .destructiveButton {
   /* Herda de genericButton e genericButtonDestructive.
      A cor de fundo deve vir de genericButtonDestructive.
-     Se precisar de um override específico ou se genericButtonDestructive não definir cor:
-     background-color: var(--cor-acao-negativa, #f44336); */
+     Se precisar de um override específico ou se genericButtonDestructive não definir cor: */
+  background-color: var(--cor-acao-negativa, #f44336); /* Garante um vermelho vivo */
   margin-top: 15px;
   padding: 15px 25px; /* Padronizando o tamanho */
   font-size: 1.1em;   /* Padronizando o tamanho */

@@ -1,15 +1,15 @@
 // src/hooks/useCardTips.ts
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react'; // Adicionado useCallback
 import { categorySpecificTips } from '../components/categorySpecificTips';
 import type { Card } from '../data/cards';
 
 export const useCardTips = (currentCard: Card | null) => {
   const [activeLeftTip, setActiveLeftTip] = useState<string | null>(null);
   const [activeRightTip, setActiveRightTip] = useState<string | null>(null);
-  const [animateTipsIn, setAnimateTipsIn] = useState(false);
+  const [_animateTipsInState, setAnimateTipsInState] = useState(false); // Renomeado o estado
 
   useEffect(() => {
-    setAnimateTipsIn(false);
+    setAnimateTipsInState(false);
 
     if (currentCard) {
       const tipsForCategory = categorySpecificTips[currentCard.category] || categorySpecificTips.default;
@@ -29,7 +29,7 @@ export const useCardTips = (currentCard: Card | null) => {
 
       const fadeInDelay = 5000;
       const timerId = setTimeout(() => {
-        setAnimateTipsIn(true);
+        setAnimateTipsInState(true);
       }, fadeInDelay);
 
       return () => clearTimeout(timerId);
@@ -39,5 +39,10 @@ export const useCardTips = (currentCard: Card | null) => {
     }
   }, [currentCard]);
 
-  return { activeLeftTip, activeRightTip, animateTipsIn };
+  // Função para ser chamada para iniciar a animação
+  const triggerAnimateTipsIn = useCallback(() => {
+    setAnimateTipsInState(true);
+  }, []);
+
+  return { activeLeftTip, activeRightTip, animateTipsIn: _animateTipsInState, triggerAnimateTipsIn }; // Retorna o estado e a função
 };

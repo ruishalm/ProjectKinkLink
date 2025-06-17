@@ -31,6 +31,8 @@ function CardPilePage() {
     currentConexaoCardForModal,
     handleConexaoInteractionInModal,
     allConexaoCards,
+    undoLastDislike, // Nova função do hook
+    canUndoDislike,  // Novo estado do hook
   } = useCardPileLogic();
   const { isLoadingSkins } = useSkin();
   const { user } = useAuth(); // Obter o usuário atual
@@ -285,6 +287,16 @@ function CardPilePage() {
                   aria-label="Aceitar carta"
                   disabled={areActionButtonsDisabled} // Adiciona o estado de desabilitado
                 >
+              {/* Botão Oops! - Adicionado aqui, mas pode ser estilizado e posicionado melhor */}
+              {canUndoDislike && !areActionButtonsDisabled && (
+                <button
+                  onClick={undoLastDislike}
+                  className={`${styles.oopsButton} genericButton`} // Crie estilos para oopsButton
+                  aria-label="Desfazer última ação Não Topo!"
+                >
+                  Oops!
+                </button>
+              )}
               ❤️ Topo!
               </button>
             </div>

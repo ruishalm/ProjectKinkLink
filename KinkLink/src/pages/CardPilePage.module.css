@@ -1,4 +1,4 @@
-/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\CardPilePage.module.css */
+/* CardPilePage.module.css */
 /* Estilos para CardPilePage */
 
 .page {
@@ -75,6 +75,18 @@
   padding-bottom: 15px; /* Mantém o padding inferior ou ajusta conforme necessário */
   margin-bottom: 10px; /* Espaço antes da barra de navegação inferior */
 }
+
+/* Estilos para o botão Oops! */
+.oopsButton {
+  background-color: var(--cor-aviso, #ffc107); /* Uma cor de aviso ou neutra */
+  color: var(--cor-texto-sobre-aviso, #333);
+  padding: 8px 15px; /* Um pouco menor que os botões principais */
+  font-size: 0.9em;
+  border-radius: 20px; /* Mais arredondado para diferenciar */
+  margin: 0 10px; /* Espaçamento se estiver entre os botões de like/dislike */
+  /* Outros estilos que herda de genericButton */
+}
+
 
 /* Nova classe para estilos compartilhados dos botões de decisão */
 .botaoDecisao {

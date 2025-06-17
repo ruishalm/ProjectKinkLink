@@ -1,0 +1,40 @@
+# .github/workflows/deploy-main.yml
+name: Deploy KinkLink to Firebase Hosting on Main
+
+on:
+  push:
+    branches:
+      - main # Mude para 'master' ou o nome do seu branch principal, se for diferente
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18' # Ou a versão do Node que seu projeto KinkLink usa
+
+      # Navega para a pasta KinkLink se o package.json estiver lá
+      - name: Install Dependencies
+        run: npm install
+        working-directory: ./KinkLink # REMOVA esta linha se o package.json estiver na raiz do repositório
+
+      # Navega para a pasta KinkLink se o package.json estiver lá
+      - name: Build React App
+        run: npm run build
+        working-directory: ./KinkLink # REMOVA esta linha se o package.json estiver na raiz do repositório
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}' # Opcional, mas recomendado
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KINKLINK }}' # O NOME DO SEGREDO QUE VOCÊ CRIOU NO GITHUB
+          projectId: 'kinklink-a4607' # O ID do seu projeto Firebase
+          channelId: live # Faz o deploy para o canal de produção 'live'
+          # O diretório a ser implantado é definido no seu firebase.json (hosting.public)
+          # Se o seu firebase.json está na raiz e aponta para "KinkLink/dist",
+          # e o build acima cria "KinkLink/dist" (relativo à raiz), está correto.

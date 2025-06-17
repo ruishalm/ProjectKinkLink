@@ -18,7 +18,7 @@
 .footerContent {
   display: flex;
   flex-direction: column; /* Empilha texto e logo em telas menores se necessário */
-  align-items: center;
+  align-items: center; /* Centraliza os filhos (supportSection e socialMediaSection) */
   gap: 10px; /* Espaço entre o texto e o logo */
   background-color: #282c34; /* Cinza escuro para o fundo do conteúdo (similar ao loading do App) */
   color: #e0e0e0;           /* Cor de texto clara para contraste */
@@ -28,6 +28,13 @@
   max-width: 90%; /* Evita que o painel interno fique muito largo em telas grandes */
   width: auto; /* Permite que encolha se o conteúdo for pequeno */
   min-width: 280px; /* Largura mínima para não ficar muito espremido */
+}
+
+.supportSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px; /* Espaço entre o texto de suporte e o logo do Catarse */
 }
 
 .supportText {
@@ -45,4 +52,36 @@
   height: 30px; /* Ajuste conforme o tamanho desejado para o logo */
   width: auto;
   vertical-align: middle; /* Ajuda a alinhar se o texto estiver na mesma linha */
+}
+
+.socialMediaSection {
+  margin-top: 15px; /* Espaço acima da seção de redes sociais, abaixo do Catarse */
+  padding-top: 15px; /* Espaço interno acima do texto "Siga nossas redes" */
+  border-top: 1px solid var(--cor-borda-sutil, #4a4a4a); /* Linha separadora sutil */
+  width: 100%; /* Faz a seção ocupar a largura do footerContent */
+  text-align: center; /* Centraliza o texto e os ícones */
+}
+
+.socialText {
+  font-size: 0.9em;
+  color: var(--cor-texto-secundario, #b0b0b0);
+  margin-bottom: 12px; /* Aumentado o espaço abaixo do texto */
+}
+
+.socialIconsContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 25px; /* Aumentado o espaço entre os ícones */
+}
+
+.socialIcon {
+  width: 32px; 
+  height: 32px;
+  transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out;
+}
+
+.socialIcon:hover {
+  transform: scale(1.15); /* Aumentado o efeito de hover */
+  filter: brightness(1.25); /* Aumentado o brilho no hover */
 }

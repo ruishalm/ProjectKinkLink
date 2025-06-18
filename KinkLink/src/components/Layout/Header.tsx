@@ -17,6 +17,11 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOpenFeedbackModal, onOpenUserTicketsModal }) => {
   const { isAuthenticated } = useAuth(); // Obter o estado de autenticação
 
+  // Verifica se há tickets com respostas do admin não lidas (status 'admin_replied')
+  const hasUnreadTicketResponses = isAuthenticated && user?.feedbackTickets?.some(
+    ticket => ticket.status === 'admin_replied'
+  );
+
   // const { t } = useTranslation(); // Removido
   return (
     <header className={`${styles.appHeader} klnkl-themed-panel`}>
@@ -44,7 +49,7 @@ const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOp
               e.stopPropagation();
               onOpenUserTicketsModal(); // <<< CHAMA A FUNÇÃO PARA ABRIR O MODAL
             }}
-            onKeyPress={(e) => { // Para acessibilidade (Enter/Espaço)
+            onKeyPress={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.stopPropagation();
                 onOpenUserTicketsModal(); // <<< CHAMA A FUNÇÃO PARA ABRIR O MODAL
@@ -52,9 +57,11 @@ const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOp
             }}
             role="button" // Define o papel semântico
             tabIndex={0}  // Torna o div focável
-            className={`${styles.myTicketsButton} ck-theme-button genericButton`} // Aplica os mesmos estilos
+            className={`${styles.myTicketsButton} ${styles.iconButton} ck-theme-button genericButton ${hasUnreadTicketResponses ? styles.shakeAnimation : ''}`}
+            title="Meus Chamados"
           >
-            Meus Chamados
+            ✉️
+            {hasUnreadTicketResponses && <span className={styles.notificationBadge}>!</span>}
           </div>
         )}
         {/* Adicionada a classe global ck-theme-button para aplicar o estilo do tema */}

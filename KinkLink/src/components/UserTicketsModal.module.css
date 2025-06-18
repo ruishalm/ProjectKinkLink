@@ -1,27 +1,50 @@
-/* src/pages/UserTicketsPage.module.css */
-.pageContainer {
+/* src/components/UserTicketsModal.module.css */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-index-modal, 1050); /* Garante que fique sobre outros conteúdos */
+}
+
+.modalContent {
   padding: 20px;
   max-width: 800px;
-  margin: 20px auto;
+  width: 90%; /* Responsivo */
   background-color: var(--cor-fundo-pagina, #2c2c2c);
   color: var(--cor-texto-primario, #e0e0e0);
   border-radius: 8px;
   font-family: var(--font-family-main, "Trebuchet MS", sans-serif);
+  position: relative; /* Para o botão de fechar absoluto */
+  max-height: 85vh; /* Altura máxima para evitar que o modal seja muito grande */
+  overflow-y: auto; /* Adiciona scroll se o conteúdo for maior */
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
-.pageTitle {
+.modalTitle { /* Renomeado de pageTitle */
   color: var(--cor-primaria, #64b5f6);
   text-align: center;
   margin-bottom: 25px;
+  margin-top: 10px; /* Espaço abaixo do botão de fechar */
   font-size: 1.8em;
 }
 
-.backButton {
-  display: inline-block;
-  margin-bottom: 20px;
-  background-color: var(--cor-secundaria, #757575);
-  color: var(--cor-texto-sobre-secundaria, white);
-  padding: 10px 15px;
+.closeButtonTop {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: var(--cor-texto-secundario, #aaa);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
 }
 
 .loadingOrEmpty {
@@ -125,4 +148,14 @@
   font-size: 0.8em;
   color: var(--cor-texto-secundario, #b0b0b0);
   text-align: right;
+}
+
+.deleteButton {
+  /* Herda de genericButton e genericButtonDestructive */
+  /* Adicione margem ou outros ajustes específicos se necessário */
+  margin-top: 15px;
+  padding: 8px 12px;
+  font-size: 0.9em;
+  display: block; /* Para ocupar a largura e permitir margem auto se necessário */
+  margin-left: auto; /* Alinha à direita se o container permitir */
 }

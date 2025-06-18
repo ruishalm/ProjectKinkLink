@@ -24,6 +24,7 @@ import { useLinkCompletionListener } from './hooks/useLinkCompletionListener';
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer'; // <<< IMPORT PARA O RODAPÉ
 import UnlockNotificationModal from './components/UnlockNotificationModal';
+import UserTicketsModal from './components/UserTicketsModal'; // <<< IMPORT DO NOVO MODAL
 import AdminRoute from './components/AdminRoute';
 import FeedbackModal from './components/FeedbackModal'; // <<< IMPORT PARA O MODAL
 // import { useTranslation } from 'react-i18next'; // Removido, pois não usaremos t() para os alertas aqui
@@ -50,6 +51,7 @@ function App() {
 
   // Estado para o modal de feedback - DEVE ESTAR NO TOPO DA FUNÇÃO
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [isUserTicketsModalOpen, setIsUserTicketsModalOpen] = useState(false); // <<< NOVO ESTADO
 
   // useEffect para o prompt de instalação PWA - ESTÁ SENDO USADO
   React.useEffect(() => {
@@ -85,6 +87,15 @@ function App() {
     setIsFeedbackModalOpen(false);
   }, []); // Dependência vazia é correta aqui
 
+  // Funções para o modal de UserTickets
+  const handleOpenUserTicketsModal = useCallback(() => {
+    if (user) setIsUserTicketsModalOpen(true);
+  }, [user]);
+
+  const handleCloseUserTicketsModal = useCallback(() => {
+    setIsUserTicketsModalOpen(false);
+  }, []);
+
   const handleSubmitFeedbackToContext = useCallback(async (feedbackText: string) => {
     if (!submitUserFeedback) {
         console.error("[App] Função submitUserFeedback não está disponível no AuthContext");
@@ -119,6 +130,7 @@ function App() {
           showInstallButton={showInstallButtonInHeader}
           onInstallClick={handleInstallClick}
           onOpenFeedbackModal={handleOpenFeedbackModal} // Passa a função para o Header
+          onOpenUserTicketsModal={handleOpenUserTicketsModal} // <<< NOVA PROP
         />
         <main className="appMainContent">
           <Suspense fallback={<div className="page-container-centered">Carregando página...</div>}>
@@ -134,7 +146,7 @@ function App() {
               {/* Rotas Protegidas por Autenticação */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/link-couple" element={<LinkCouplePage />} />
+                <Route path="/link-couple" element={<LinkCouplePage />} /> {/* Rota para Meus Tickets removida */}
 
                 {/* Rotas que exigem que o usuário esteja vinculado */}
                 <Route element={<LinkedRoute />}>
@@ -172,6 +184,13 @@ function App() {
             onSubmitFeedback={handleSubmitFeedbackToContext}
             // Opcional: preencher com último feedback não visto ou um rascunho
             // initialText={user.feedbackTickets?.find(ticket => ticket.status === 'new')?.text || ''}
+          />
+        )}
+        {/* Renderiza o modal de UserTickets */}
+        {isUserTicketsModalOpen && user && (
+          <UserTicketsModal
+            isOpen={isUserTicketsModalOpen}
+            onClose={handleCloseUserTicketsModal}
           />
         )}
         <Footer /> {/* <<< RODAPÉ ADICIONADO AQUI */}

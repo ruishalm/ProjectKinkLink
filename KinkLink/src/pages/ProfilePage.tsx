@@ -17,6 +17,7 @@ function ProfilePage() {
   const [initialGender, setInitialGender] = useState(''); // Novo estado para gênero inicial
   const [initialBio, setInitialBio] = useState('');
   const [partnerInfo, setPartnerInfo] = useState<{ username?: string; email?: string | null } | null>(null);
+  const [isLoadingPartner, setIsLoadingPartner] = useState(false); // Novo estado
   const [isPersonalInfoOpen, setIsPersonalInfoOpen] = useState(true); // Começa aberto
 
   useEffect(() => {
@@ -36,7 +37,10 @@ function ProfilePage() {
   }, [user, authIsLoading, navigate]);
 
   useEffect(() => {
-    if (user && user.partnerId && !partnerInfo) { // MODIFICADO AQUI
+    // Só busca se tiver user.partnerId e (partnerInfo for null OU o partnerId mudou)
+    if (user && user.partnerId) {
+      if (!partnerInfo || (partnerInfo.email !== user.partnerId && partnerInfo.username !== user.partnerId)) {
+        setIsLoadingPartner(true); // Inicia o carregamento
       const fetchPartnerInfo = async () => {
         try {
           const partnerDocRef = doc(db, 'users', user.partnerId!); // MODIFICADO AQUI
@@ -51,13 +55,17 @@ function ProfilePage() {
         } catch (error) {
           console.error('ProfilePage: Erro ao buscar informações do parceiro:', error);
           setPartnerInfo({ username: 'Erro ao buscar parceiro(a)' });
+        } finally {
+          setIsLoadingPartner(false); // Finaliza o carregamento
         }
       };
       fetchPartnerInfo();
+      }
     } else if (user && !user.partnerId) { // MODIFICADO AQUI
       setPartnerInfo(null); // Limpa info do parceiro se desvinculado
+      setIsLoadingPartner(false); // Garante que o loading seja falso se não houver parceiro
     }
-  }, [user, user?.partnerId, partnerInfo]); // MODIFICADO O ARRAY DE DEPENDÊNCIAS
+  }, [user, user?.partnerId]); // Removido partnerInfo da dependência para evitar loops desnecessários
 
   const handleLogout = async () => {
     try {
@@ -284,8 +292,13 @@ function ProfilePage() {
           <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>Vínculo de Casal</h2>
           {user.partnerId ? ( // MODIFICADO AQUI
             <>
-              <p className={styles.infoText}>
-                Você está vinculado com: <strong>{partnerInfo?.username || partnerInfo?.email || user.partnerId.substring(0, 8) + "..."}</strong> 
+              <p className={styles.infoText}> {/* Texto de vínculo com estado de carregamento */}
+                Você está vinculado com:{' '}
+                {isLoadingPartner ? (
+                  <span className={styles.loadingPartnerText}>Carregando parceiro...</span>
+                ) : (
+                  <strong>{partnerInfo?.username || partnerInfo?.email || user.partnerId.substring(0, 8) + "..."}</strong>
+                )}
               </p>
               <p className={styles.infoText} style={{fontSize: '0.9em', opacity: 0.8, marginTop: '-5px', marginBottom: '15px'}}>
                 Explore os Links e converse com seu par!

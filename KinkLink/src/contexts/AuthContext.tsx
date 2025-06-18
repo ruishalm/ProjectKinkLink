@@ -90,6 +90,7 @@ interface AuthContextData {
   clearNewlyUnlockedSkinsForModal: () => void;
   submitUserFeedback: (feedbackText: string) => Promise<void>; // Nova função
   unlinkCouple: () => Promise<void>; // Função para desvincular
+  deleteUserFeedbackTicket: (ticketId: string) => Promise<void>; // <<< NOVA FUNÇÃO PARA DELETAR TICKET
   resetNonMatchedSeenCards: () => Promise<void>; // Nova função para resetar cartas "Não Topo!"  
   // requestNotificationPermission?: () => Promise<void>; // Opcional: se quiser um botão para pedir permissão
   // isAdmin flag can be derived from user object: user?.isAdmin
@@ -158,6 +159,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         });
         return () => unsubscribeSnapshot();
       } else {
+        console.log('[AuthContext] onAuthStateChanged: firebaseUser é null. Definindo user como null.');
         setUser(null);
         setFcmTokenProcessed(false); // Resetar ao deslogar
         setIsLoading(false);
@@ -448,6 +450,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   const logout = async () => {
     setIsLoading(true);
     try {
+      console.log('[AuthContext] Função logout() chamada. Deslogando usuário...');
       // setFcmTokenProcessed(false) já é chamado no onAuthStateChanged quando firebaseUser se torna null
       await firebaseSignOut(auth);
     } catch (error) {
@@ -682,6 +685,35 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     }
   }, [user?.id]); // Depend on user.id
 
+  const deleteUserFeedbackTicket = useCallback(async (ticketId: string) => {
+    const currentUserId = user?.id;
+    if (!currentUserId) {
+      console.warn("[AuthContext] deleteUserFeedbackTicket chamado sem usuário logado.");
+      throw new Error("Usuário não autenticado para deletar o ticket.");
+    }
+    if (!user.feedbackTickets || user.feedbackTickets.length === 0) {
+      console.warn("[AuthContext] Nenhum ticket de feedback para deletar.");
+      return; // Não há tickets para deletar
+    }
+
+    const updatedTickets = user.feedbackTickets.filter(ticket => ticket.id !== ticketId);
+
+    if (updatedTickets.length === user.feedbackTickets.length) {
+      console.warn(`[AuthContext] Ticket com ID ${ticketId} não encontrado para o usuário ${currentUserId}.`);
+      // Pode lançar um erro ou apenas retornar se o ticket não foi encontrado
+      return;
+    }
+
+    try {
+      // updateUser já lida com a atualização do estado local e do Firestore
+      await updateUser({ feedbackTickets: updatedTickets });
+      console.log(`[AuthContext] Ticket ${ticketId} deletado para o usuário ${currentUserId}.`);
+    } catch (error) {
+      console.error(`[AuthContext] Erro ao deletar ticket ${ticketId} para ${currentUserId}:`, error);
+      throw error;
+    }
+  }, [user, updateUser]); // Depende de 'user' para ler os tickets e 'updateUser' para persistir
+
   const unlinkCouple = useCallback(async () => {
     if (!user || !user.id || !user.coupleId) {
       console.warn("[AuthContext] unlinkCouple: Usuário não está em um casal ou dados do usuário estão incompletos para desvincular.");
@@ -777,6 +809,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       clearNewlyUnlockedSkinsForModal,
       submitUserFeedback,
       unlinkCouple,
+      deleteUserFeedbackTicket, // <<< ADICIONA A FUNÇÃO AO CONTEXTO
       resetNonMatchedSeenCards // Adiciona a nova função ao contexto
     }}>
       {children}

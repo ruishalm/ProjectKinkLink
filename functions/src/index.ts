@@ -13,8 +13,98 @@ import * as logger from "firebase-functions/logger";
 // Inicializa o Firebase Admin SDK. Isso deve ser feito apenas uma vez.
 admin.initializeApp();
 
+const SITE_BASE_URL = "https://kinklink-a4607.firebaseapp.com"; //  <<< VERIFIQUE E USE SEU DOMÍNIO CORRETO AQUI
+const DEFAULT_ICON_URL = `${SITE_BASE_URL}/icons/kinklogo192.png`; //  <<< VERIFIQUE SE ESTE CAMINHO ESTÁ CORRETO
+
 const db = admin.firestore();
 const messaging = admin.messaging();
+
+// Função auxiliar para enviar notificação para um usuário específico
+async function sendNotificationToUser(
+  userId: string,
+  title: string,
+  body: string,
+  data: admin.messaging.DataMessagePayload = {},
+  iconUrl: string = DEFAULT_ICON_URL,
+  targetUrlBase: string = SITE_BASE_URL
+) {
+  logger.info(`Attempting to send notification to user ${userId}`, { title, body, data });
+  const tokensSnapshot = await db
+    .collection("users")
+    .doc(userId)
+    .collection("fcmTokens")
+    .get();
+
+  if (tokensSnapshot.empty) {
+    logger.info(`No FCM tokens found for user ${userId}.`);
+    return;
+  }
+
+  const tokens: string[] = tokensSnapshot.docs.map(doc => doc.id);
+
+  if (tokens.length === 0) {
+    logger.info(`Tokens array is empty for user ${userId} after processing snapshot.`);
+    return;
+  }
+
+  const message: admin.messaging.MulticastMessage = {
+    notification: { title, body }, // Ícone é configurado por plataforma abaixo
+    tokens: tokens,
+    data: data,
+    webpush: {
+      notification: {
+        icon: iconUrl, // Ícone para Web Push
+      },
+      fcmOptions: {
+        link: data?.url ? `${targetUrlBase}${data.url}` : targetUrlBase,
+      },
+    },
+    android: {
+      notification: {
+        icon: "ic_stat_notification", // Nome do ícone no drawable do Android
+        color: "#b71c1c",
+      },
+    },
+    apns: { // Configuração para iOS
+      payload: {
+        aps: {
+          badge: 1, // Ou gerencie dinamicamente
+          sound: "default",
+        },
+      },
+    },
+  };
+
+  try {
+    const response = await messaging.sendMulticast(message);
+    logger.info(
+      `Successfully sent ${response.successCount} messages to user ${userId}. Failure count: ${response.failureCount}`
+    );
+    if (response.failureCount > 0) {
+      response.responses.forEach((resp, idx) => {
+        if (!resp.success) {
+          // CORREÇÃO: Verificar se resp.error existe
+          if (resp.error) {
+            logger.error(
+              `Failed to send to token ${tokens[idx]} for user ${userId}: Code: ${resp.error.code}, Message: ${resp.error.message}`
+            );
+            if (resp.error.code === 'messaging/registration-token-not-registered' ||
+                resp.error.code === 'messaging/invalid-registration-token') {
+              logger.info(`Deleting invalid token: ${tokens[idx]} for user ${userId}`);
+              db.collection("users").doc(userId).collection("fcmTokens").doc(tokens[idx]).delete()
+                .catch(deleteErr => logger.error(`Error deleting token ${tokens[idx]} for user ${userId}:`, deleteErr));
+            }
+          } else {
+            // Caso resp.error seja undefined, mas resp.success é false
+            logger.error(`Failed to send to token ${tokens[idx]} for user ${userId} with an unknown error. Response:`, resp);
+          }
+        }
+      });
+    }
+  } catch (error) {
+    logger.error(`Error sending multicast message to user ${userId}:`, error);
+  }
+}
 
 /**
  * Cloud Function para notificar um usuário quando um novo match é formado.
@@ -34,10 +124,6 @@ export const onNewMatch = onDocumentWritten(
     const beforeSnapshotData = event.data?.before.data();
     const afterSnapshotData = event.data?.after.data();
 
-    // Verifica se é um novo match:
-    // 1. O documento deve existir após a escrita (afterSnapshotData deve existir).
-    // 2. 'isMatch' deve ser true no afterSnapshotData.
-    // 3. 'isMatch' não era true antes (ou o documento não existia antes com isMatch=true).
     const isNewDocument = !event.data?.before.exists;
     const wasNotMatchBefore = isNewDocument || beforeSnapshotData?.isMatch === false;
     const isMatchNow = afterSnapshotData?.isMatch === true;
@@ -71,12 +157,7 @@ export const onNewMatch = onDocumentWritten(
 
       logger.info(`Pioneer (to notify): ${pioneerUID}, Completador (triggered match): ${completadorUID}`);
 
-      const tokensSnapshot = await db.collection(`users/${pioneerUID}/fcmTokens`).get();
-      if (tokensSnapshot.empty) {
-        logger.info(`No FCM tokens found for pioneer user ${pioneerUID}.`);
-        return;
-      }
-      const tokens = tokensSnapshot.docs.map(doc => doc.id);
+      // Não precisamos buscar tokens aqui, sendNotificationToUser fará isso.
 
       let completadorUsername = "Alguém";
       try {
@@ -96,35 +177,19 @@ export const onNewMatch = onDocumentWritten(
         cardTitle = `um card de ${cardData.category}`;
       }
 
-      const payload = {
-        notification: {
-          title: "É um Match! ❤️",
-          body: `Você e ${completadorUsername} deram match no card "${cardTitle}". Confira!`,
-          icon: "/icons/kinklogo192.png",
-        },
-        data: {
+      // Usar a função sendNotificationToUser
+      await sendNotificationToUser(
+        pioneerUID,
+        "É um Match! ❤️",
+        `Você e ${completadorUsername} deram match no card "${cardTitle}". Confira!`,
+        { // data payload
           type: "match_notification",
           coupleId: event.params.coupleId,
           cardId: event.params.cardId,
-          url: `/matches#card-${event.params.cardId}` // Sugestão de URL para deep linking
-        },
-      };
-
-      logger.info(`Sending notification to ${pioneerUID} with tokens: ${tokens.join(', ')}`, { payload });
-      const response = await messaging.sendToDevice(tokens, payload);
-
-      response.results.forEach((result, index) => {
-        const error = result.error;
-        if (error) {
-          logger.error(`Failed to send notification to token ${tokens[index]} for user ${pioneerUID}:`, error.message);
-          if (error.code === 'messaging/invalid-registration-token' ||
-              error.code === 'messaging/registration-token-not-registered') {
-            logger.info(`Deleting invalid token: ${tokens[index]} for user ${pioneerUID}`);
-            db.collection(`users/${pioneerUID}/fcmTokens`).doc(tokens[index]).delete()
-              .catch(deleteErr => logger.error(`Error deleting token ${tokens[index]}:`, deleteErr));
-          }
+          url: `/matches#card-${event.params.cardId}`
         }
-      });
+        // iconUrl e targetUrlBase usarão os padrões definidos em sendNotificationToUser
+      );
     } else {
       logger.info("Event did not meet criteria for a new match notification.", {
         afterDataExists: !!afterSnapshotData,
@@ -180,13 +245,7 @@ export const onAdminTicketResponse = onDocumentWritten(
 
     for (const afterTicket of afterTickets) {
       const beforeTicket = beforeTickets.find(bt => bt.id === afterTicket.id);
-      // Condição para ser uma nova resposta do admin:
-      // 1. O ticket tem uma adminResponse no estado "depois".
-      // 2. O status do ticket no estado "depois" é 'admin_replied'.
-      // 3. O ticket NÃO tinha uma adminResponse antes OU o status antes NÃO era 'admin_replied'.
-      //    Isso garante que a notificação seja enviada apenas na primeira vez que o admin responde
-      //    ou se o status for explicitamente alterado para 'admin_replied' novamente (menos comum).
-      if (afterTicket.adminResponse && afterTicket.status === 'admin_replied' && 
+      if (afterTicket.adminResponse && afterTicket.status === 'admin_replied' &&
           (!beforeTicket || !beforeTicket.adminResponse || beforeTicket.status !== 'admin_replied')) {
         respondedTicket = afterTicket;
         logger.info(`New admin response detected for ticket ${respondedTicket.id} for user ${userId}.`);
@@ -195,43 +254,102 @@ export const onAdminTicketResponse = onDocumentWritten(
     }
 
     if (respondedTicket) {
-      const tokensSnapshot = await db.collection(`users/${userId}/fcmTokens`).get();
-      if (tokensSnapshot.empty) {
-        logger.info(`No FCM tokens found for user ${userId} to notify about ticket response.`);
-        return null;
-      }
-      const tokens = tokensSnapshot.docs.map(doc => doc.id);
+      // Não precisamos buscar tokens aqui, sendNotificationToUser fará isso.
+      // A verificação de tokens vazios também é feita em sendNotificationToUser.
 
       const ticketTitlePreview = respondedTicket.text.length > 50 ? respondedTicket.text.substring(0, 47) + "..." : respondedTicket.text;
 
-      const payload = {
-        notification: {
-          title: "Resposta do Suporte KinkLink 💬",
-          body: `Sua solicitação sobre "${ticketTitlePreview}" foi respondida.`,
-          icon: "/icons/kinklogo192.png",
-        },
-        data: {
+      await sendNotificationToUser(
+        userId,
+        "Resposta do Suporte KinkLink 💬",
+        `Sua solicitação sobre "${ticketTitlePreview}" foi respondida.`,
+        { // data payload
           type: "ticket_response_notification",
           ticketId: respondedTicket.id,
           url: `/meus-tickets#ticket-${respondedTicket.id}`
-        },
-      };
-
-      logger.info(`Sending ticket response notification to ${userId} with tokens: ${tokens.join(', ')}`, { payload });
-      const response = await messaging.sendToDevice(tokens, payload);
-
-      response.results.forEach((result, index) => {
-        const error = result.error;
-        if (error) {
-          logger.error(`Failed to send ticket response notification to token ${tokens[index]} for user ${userId}:`, error.message);
-          if (error.code === 'messaging/invalid-registration-token' || error.code === 'messaging/registration-token-not-registered') {
-            db.collection(`users/${userId}/fcmTokens`).doc(tokens[index]).delete().catch(deleteErr => logger.error(`Error deleting token ${tokens[index]}:`, deleteErr));
-          }
         }
-      });
+      );
     } else {
       logger.info("No new admin ticket response detected for user based on conditions.", { userId });
     }
+    return null;
+  }
+);
+
+export const onLinkCompletedSendNotification = onDocumentWritten(
+  {
+    region: "southamerica-east1",
+    document: "couples/{coupleId}",
+  },
+  async (event) => {
+    const coupleId = event.params.coupleId;
+    logger.info(`Couple document event for couple ${coupleId}. Checking for link completion.`, { eventId: event.id });
+
+    const beforeSnapshot = event.data?.before;
+    const afterSnapshot = event.data?.after;
+
+    if (!afterSnapshot?.exists) {
+      logger.info(`Couple document ${coupleId} was deleted or does not exist after update. No notification.`, { eventId: event.id });
+      return null;
+    }
+
+    const beforeData = beforeSnapshot?.data();
+    const afterData = afterSnapshot.data();
+
+    if (!afterData) {
+        logger.warn(`afterData is undefined for couple ${coupleId}, though snapshot exists. Exiting.`, { eventId: event.id });
+        return null;
+    }
+
+    const membersBefore = (beforeData?.members as string[]) || [];
+    const membersAfter = (afterData.members as string[]) || [];
+
+    const linkJustCompleted =
+      membersAfter.length === 2 &&
+      (!beforeSnapshot?.exists || membersBefore.length < 2);
+
+    if (!linkJustCompleted) {
+      logger.info(
+        `Couple ${coupleId} update did not signify a new completed link. Members before: ${membersBefore.length}, after: ${membersAfter.length}. Document existed before: ${beforeSnapshot?.exists}`,
+        { eventId: event.id }
+      );
+      return null;
+    }
+
+    const [user1Id, user2Id] = membersAfter;
+
+    logger.info(
+      `Link completed for couple ${coupleId}. Members: ${user1Id}, ${user2Id}. Sending notifications.`,
+      { eventId: event.id }
+    );
+
+    let user1Name = "Seu par";
+    let user2Name = "Seu par";
+
+    try {
+      const user1Doc = await db.collection("users").doc(user1Id).get();
+      if (user1Doc.exists) user1Name = user1Doc.data()?.username || user1Name;
+
+      const user2Doc = await db.collection("users").doc(user2Id).get();
+      if (user2Doc.exists) user2Name = user2Doc.data()?.username || user2Name;
+    } catch (error) {
+      logger.error(`Error fetching usernames for couple ${coupleId} notification:`, error, { eventId: event.id });
+    }
+
+    await sendNotificationToUser(
+      user1Id,
+      "Conexão Estabelecida! 🎉",
+      `Você e ${user2Name} agora estão conectados no KinkLink!`,
+      { url: "/matches", type: "link_completed", partnerId: user2Id }
+    );
+
+    await sendNotificationToUser(
+      user2Id,
+      "Conexão Estabelecida! 🎉",
+      `Você e ${user1Name} agora estão conectados no KinkLink!`,
+      { url: "/matches", type: "link_completed", partnerId: user1Id }
+    );
+
     return null;
   }
 );

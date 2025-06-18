@@ -20,6 +20,7 @@ import TermsOfServicePage from './pages/TermsOfServicePage';
 import SupportPage from './pages/SupportPage';
 import SkinsPage from './pages/SkinsPage';
 import { SkinProvider } from './contexts/SkinContext';
+import { NotificationProvider } from './contexts/NotificationContext'; // <<< IMPORTAR O NOVO PROVIDER
 import { useLinkCompletionListener } from './hooks/useLinkCompletionListener';
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer'; // <<< IMPORT PARA O RODAPÉ
@@ -125,75 +126,77 @@ function App() {
   return (
     <SkinProvider>
       <div className="appContainer">
-        <UnlockNotificationModal />
-        <Header
-          showInstallButton={showInstallButtonInHeader}
-          onInstallClick={handleInstallClick}
-          onOpenFeedbackModal={handleOpenFeedbackModal} // Passa a função para o Header
-          onOpenUserTicketsModal={handleOpenUserTicketsModal} // <<< NOVA PROP
-        />
-        <main className="appMainContent">
-          <Suspense fallback={<div className="page-container-centered">Carregando página...</div>}>
-            <Routes>
-              {/* Rotas Públicas */}
-              <Route path="/" element={<HomePage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignupPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/termos-de-servico" element={<TermsOfServicePage />} />
-              <Route path="/suporte" element={<SupportPage />} />
+        <NotificationProvider> {/* <<< ENVOLVER COM O NOTIFICATION PROVIDER */}
+          <UnlockNotificationModal />
+          <Header
+            showInstallButton={showInstallButtonInHeader}
+            onInstallClick={handleInstallClick}
+            onOpenFeedbackModal={handleOpenFeedbackModal} // Passa a função para o Header
+            onOpenUserTicketsModal={handleOpenUserTicketsModal} // <<< NOVA PROP
+          />
+          <main className="appMainContent">
+            <Suspense fallback={<div className="page-container-centered">Carregando página...</div>}>
+              <Routes>
+                {/* Rotas Públicas */}
+                <Route path="/" element={<HomePage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignupPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/termos-de-servico" element={<TermsOfServicePage />} />
+                <Route path="/suporte" element={<SupportPage />} />
 
-              {/* Rotas Protegidas por Autenticação */}
-              <Route element={<ProtectedRoute />}>
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/link-couple" element={<LinkCouplePage />} /> {/* Rota para Meus Tickets removida */}
+                {/* Rotas Protegidas por Autenticação */}
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/link-couple" element={<LinkCouplePage />} /> {/* Rota para Meus Tickets removida */}
 
-                {/* Rotas que exigem que o usuário esteja vinculado */}
-                <Route element={<LinkedRoute />}>
-                  <Route path="/cards" element={<CardPilePage />} />
-                  <Route path="/matches" element={<MatchesPage />} />
-                  <Route path="/skins" element={<SkinsPage />} />
+                  {/* Rotas que exigem que o usuário esteja vinculado */}
+                  <Route element={<LinkedRoute />}>
+                    <Route path="/cards" element={<CardPilePage />} />
+                    <Route path="/matches" element={<MatchesPage />} />
+                    <Route path="/skins" element={<SkinsPage />} />
+                  </Route>
+
+                  {/* Rotas que exigem que o usuário NÃO esteja vinculado */}
+                  <Route element={<UnlinkedRoute />}>
+                    {/* Outras rotas que só devem ser acessadas por usuários não vinculados podem ir aqui */}
+                  </Route>
                 </Route>
 
-                {/* Rotas que exigem que o usuário NÃO esteja vinculado */}
-                <Route element={<UnlinkedRoute />}>
-                  {/* Outras rotas que só devem ser acessadas por usuários não vinculados podem ir aqui */}
+                {/* ROTA DE ADMINISTRAÇÃO */}
+                <Route element={<AdminRoute />}>
+                  <Route path="/admin/users" element={<AdminUsersPage />} />
                 </Route>
-              </Route>
 
-              {/* ROTA DE ADMINISTRAÇÃO */}
-              <Route element={<AdminRoute />}>
-                <Route path="/admin/users" element={<AdminUsersPage />} />
-              </Route>
-
-              {/* Fallback para rotas não encontradas */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Suspense>
-          {location.pathname === '/cards' && (
-            <div className="actionButtons">
-              {/* Botões de ação para a página de cartas, se aplicável globalmente aqui */}
-            </div>
+                {/* Fallback para rotas não encontradas */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Suspense>
+            {location.pathname === '/cards' && (
+              <div className="actionButtons">
+                {/* Botões de ação para a página de cartas, se aplicável globalmente aqui */}
+              </div>
+            )}
+          </main>
+          {/* Renderiza o modal de feedback */}
+          {isFeedbackModalOpen && user && (
+            <FeedbackModal
+              isOpen={isFeedbackModalOpen}
+              onClose={handleCloseFeedbackModal}
+              onSubmitFeedback={handleSubmitFeedbackToContext}
+              // Opcional: preencher com último feedback não visto ou um rascunho
+              // initialText={user.feedbackTickets?.find(ticket => ticket.status === 'new')?.text || ''}
+            />
           )}
-        </main>
-        {/* Renderiza o modal de feedback */}
-        {isFeedbackModalOpen && user && (
-          <FeedbackModal
-            isOpen={isFeedbackModalOpen}
-            onClose={handleCloseFeedbackModal}
-            onSubmitFeedback={handleSubmitFeedbackToContext}
-            // Opcional: preencher com último feedback não visto ou um rascunho
-            // initialText={user.feedbackTickets?.find(ticket => ticket.status === 'new')?.text || ''}
-          />
-        )}
-        {/* Renderiza o modal de UserTickets */}
-        {isUserTicketsModalOpen && user && (
-          <UserTicketsModal
-            isOpen={isUserTicketsModalOpen}
-            onClose={handleCloseUserTicketsModal}
-          />
-        )}
-        <Footer /> {/* <<< RODAPÉ ADICIONADO AQUI */}
+          {/* Renderiza o modal de UserTickets */}
+          {isUserTicketsModalOpen && user && (
+            <UserTicketsModal
+              isOpen={isUserTicketsModalOpen}
+              onClose={handleCloseUserTicketsModal}
+            />
+          )}
+          <Footer /> {/* <<< RODAPÉ ADICIONADO AQUI */}
+        </NotificationProvider> {/* <<< FECHAR O NOTIFICATION PROVIDER */}
       </div>
     </SkinProvider>
   );

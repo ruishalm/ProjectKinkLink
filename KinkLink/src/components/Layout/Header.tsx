@@ -1,7 +1,7 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\Layout\Header.tsx
 import React from 'react';
 import { Link } from 'react-router-dom'; // useNavigate não é mais necessário aqui para os tickets
-import { useAuth } from '../../contexts/AuthContext'; // Adicionado para verificar autenticação
+import { useAuth, type UserFeedback } from '../../contexts/AuthContext'; // Adicionado para verificar autenticação e UserFeedback
 import styles from './Header.module.css';
 
 // Supondo que o logo esteja em public/kinklogo.png ou um caminho acessível
@@ -15,11 +15,11 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOpenFeedbackModal, onOpenUserTicketsModal }) => {
-  const { isAuthenticated } = useAuth(); // Obter o estado de autenticação
+  const { isAuthenticated, user } = useAuth(); // Obter o estado de autenticação e o usuário
 
   // Verifica se há tickets com respostas do admin não lidas (status 'admin_replied')
   const hasUnreadTicketResponses = isAuthenticated && user?.feedbackTickets?.some(
-    ticket => ticket.status === 'admin_replied'
+    (ticket: UserFeedback) => ticket.status === 'admin_replied'
   );
 
   // const { t } = useTranslation(); // Removido

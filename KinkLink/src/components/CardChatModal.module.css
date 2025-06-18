@@ -163,20 +163,24 @@
 
 .destructiveButton {
   /* Estilos base para garantir que tenha aparência destrutiva, mesmo que classes genéricas falhem */
-  background-color: var(--cor-acao-negativa, #c0392b); /* Vermelho escuro */
-  color: var(--cor-texto-sobre-acao-negativa, white);
+  background-color: transparent; /* Remove o fundo para parecer um link */
+  color: var(--cor-acao-negativa, #c0392b); /* Mantém a cor vermelha para o texto */
   /* border, cursor, font-weight, transition
      são herdados de genericButton. */
+  border: none; /* Remove a borda */
   text-align: center;
   /* margin: 0; /* Removido em favor do gap no .modalContent */
-  width: 100%; 
+  width: auto; /* Permite que o tamanho se ajuste ao conteúdo */
   box-sizing: border-box;
   flex-shrink: 0; /* Impede que o botão encolha */
-  padding: 12px 25px; /* Padronizando o tamanho do botão */
-  font-size: 1.1em;    /* Padronizando o tamanho da fonte */
+  padding: 8px 15px; /* Padding reduzido */
+  font-size: 0.95em;    /* Fonte ligeiramente menor */
+  text-decoration: underline; /* Adiciona sublinhado para parecer um link */
+  align-self: center; /* Centraliza o link/botão se o container pai for flex */
 }
 
 .destructiveButton:hover {
-  background-color: var(--cor-acao-negativa-hover, #a93226); /* Vermelho mais escuro no hover */
-  filter: brightness(110%); /* Um leve brilho no hover */
+  background-color: rgba(192, 57, 43, 0.1); /* Fundo vermelho bem sutil no hover */
+  color: var(--cor-acao-negativa-hover, #a93226); /* Texto vermelho mais escuro no hover */
+  text-decoration: underline; /* Mantém o sublinhado */
 }

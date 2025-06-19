@@ -15,23 +15,10 @@
     <!-- <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"> -->
     <link rel="apple-touch-icon" href="/kinklogo192.png"> <!-- Ícone para iOS -->
     <link rel="manifest" href="/manifest.json" /> <!-- Link para o Web App Manifest -->
+    <!-- O Vite injetará os links para os assets de build aqui -->
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- Adicione este script para registrar o Service Worker -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/service-worker.js') // Caminho para o SW na pasta public
-            .then(registration => {
-              console.log('KinkLink Service Worker registrado com sucesso:', registration.scope);
-            })
-            .catch(error => {
-              console.error('Erro ao registrar KinkLink Service Worker:', error);
-            });
-        });
-      }
-    </script>
   </body>
 </html>

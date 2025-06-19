@@ -23,6 +23,26 @@ if (!firebase.apps.length) {
 
 const messaging = firebase.messaging();
 
+// Eventos do ciclo de vida do PWA integrados
+self.addEventListener('install', (event) => {
+  console.log('[firebase-messaging-sw.js] KinkLink PWA: Instalado');
+  // Força o service worker a ativar imediatamente
+  event.waitUntil(self.skipWaiting()); 
+});
+
+self.addEventListener('activate', (event) => {
+  console.log('[firebase-messaging-sw.js] KinkLink PWA: Ativado');
+  // Permite que o SW controle clientes não controlados imediatamente
+  event.waitUntil(self.clients.claim()); 
+});
+
+self.addEventListener('fetch', (event) => {
+  // Por enquanto, não faremos nada com o fetch, apenas deixamos a rede passar.
+  // Futuramente, estratégias de cache podem ser implementadas aqui.
+  // console.log('[firebase-messaging-sw.js] KinkLink PWA: Fetching', event.request.url);
+  // event.respondWith(fetch(event.request)); // Comportamento padrão já é este se não houver event.respondWith
+});
+
 // Callback para quando uma mensagem é recebida enquanto o app está em segundo plano ou fechado
 messaging.onBackgroundMessage(function(payload) {
   console.log('[firebase-messaging-sw.js] Received background message ', payload);

@@ -12,8 +12,10 @@ import * as logger from "firebase-functions/logger";
 
 // Inicializa o Firebase Admin SDK. Isso deve ser feito apenas uma vez.
 admin.initializeApp();
+// Log para verificar o ID do projeto que o Admin SDK está usando
+logger.info("Firebase Admin SDK initialized. Project ID from default app:", admin.app().options.projectId);
 
-const SITE_BASE_URL = "https://kinklink-a4607.firebaseapp.com"; //  <<< VERIFIQUE E USE SEU DOMÍNIO CORRETO AQUI
+const SITE_BASE_URL = "https://kinklink-a4607.web.app";
 const DEFAULT_ICON_URL = `${SITE_BASE_URL}/icons/kinklogo192.png`; //  <<< VERIFIQUE SE ESTE CAMINHO ESTÁ CORRETO
 
 const db = admin.firestore();
@@ -47,7 +49,10 @@ async function sendNotificationToUser(
     return;
   }
 
-  const message: admin.messaging.MulticastMessage = {
+  // MENSAGEM MULTICAST ORIGINAL (MANTENHA PARA REFERÊNCIA OU COMENTE)
+  // Você pode querer reintroduzir esta estrutura completa ou partes dela
+  // agora que o envio simples funcionou.
+  const originalMessage: admin.messaging.MulticastMessage = {
     notification: { title, body }, // Ícone é configurado por plataforma abaixo
     tokens: tokens,
     data: data,
@@ -75,13 +80,28 @@ async function sendNotificationToUser(
     },
   };
 
+  // MENSAGEM MULTICAST SIMPLIFICADA PARA TESTE (USADA ANTERIORMENTE)
+  /*
+  const simplifiedMulticastMessage: admin.messaging.MulticastMessage = {
+    notification: { title, body },
+    tokens: tokens,
+    // Remova data, webpush, android, apns para este teste
+  };
+  */
+
+  // logger.info("[MULTICAST TEST] Using simplified message structure for user:", userId);
+  logger.info("Using original message structure for user:", userId);
+
+
   try {
-    const response = await messaging.sendMulticast(message);
+    // Alterado de sendMulticast para sendEachForMulticast
+    const response = await messaging.sendEachForMulticast(originalMessage); // Usando a mensagem original agora
     logger.info(
       `Successfully sent ${response.successCount} messages to user ${userId}. Failure count: ${response.failureCount}`
     );
     if (response.failureCount > 0) {
-      response.responses.forEach((resp, idx) => {
+      // Adicionando tipo explícito para resp e idx
+      response.responses.forEach((resp: admin.messaging.SendResponse, idx: number) => {
         if (!resp.success) {
           // CORREÇÃO: Verificar se resp.error existe
           if (resp.error) {
@@ -157,7 +177,28 @@ export const onNewMatch = onDocumentWritten(
 
       logger.info(`Pioneer (to notify): ${pioneerUID}, Completador (triggered match): ${completadorUID}`);
 
-      // Não precisamos buscar tokens aqui, sendNotificationToUser fará isso.
+      // BLOCO DE TESTE TEMPORÁRIO PARA ENVIO SIMPLES (REMOVIDO POIS O ENVIO SIMPLES FUNCIONOU)
+      // if (pioneerUID) {
+      //   try {
+      //     const testToken = "dS5kqNX20kzulHFTMDVU3Q:APA91bHuO93tTx9dYuf71M083L55UivnQC7tqCvcNcwPZ6-YQpDjDse15pb4NNjrwbf-L8eCyccyjVmyQjBPGlO8S7Br_XEMt3FXXpZBGVI2NHj4InlsIsM";
+      //     if (testToken.length > 50) {
+      //       logger.info(`[TESTE SIMPLES] Attempting to send a simple test notification to token: ${testToken.substring(0, 20)}...`);
+      //       const testResponse = await messaging.send({
+      //         notification: {
+      //           title: "KinkLink Teste Simples",
+      //           body: "Esta é uma mensagem de teste da Cloud Function (envio simples)."
+      //         },
+      //         token: testToken
+      //       });
+      //       logger.info(`[TESTE SIMPLES] Simple test notification sent successfully:`, testResponse);
+      //     } else {
+      //       logger.warn("[TESTE SIMPLES] Token de teste parece inválido (muito curto). Pulando envio simples.");
+      //     }
+      //   } catch (testError) {
+      //     logger.error(`[TESTE SIMPLES] Error sending simple test notification:`, testError);
+      //   }
+      // }
+      // FIM DO BLOCO DE TESTE TEMPORÁRIO
 
       let completadorUsername = "Alguém";
       try {
@@ -254,9 +295,6 @@ export const onAdminTicketResponse = onDocumentWritten(
     }
 
     if (respondedTicket) {
-      // Não precisamos buscar tokens aqui, sendNotificationToUser fará isso.
-      // A verificação de tokens vazios também é feita em sendNotificationToUser.
-
       const ticketTitlePreview = respondedTicket.text.length > 50 ? respondedTicket.text.substring(0, 47) + "..." : respondedTicket.text;
 
       await sendNotificationToUser(

@@ -7,6 +7,41 @@
   text-align: center;
   background-color: #282c34; /* Fundo escuro para contraste */
   color: #e0e0e0; /* Texto claro */
+  position: relative; /* Necessário para o posicionamento absoluto do watermarkContainer */
+  overflow: hidden; /* Para garantir que as marcas d'água rotacionadas não causem scroll */
+}
+
+.watermarkContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Para não interferir com cliques */
+  overflow: hidden; /* Garante que as marcas d'água fiquem contidas */
+  z-index: 0; /* Para ficar atrás do conteúdo principal */
+}
+
+.watermarkText {
+  position: absolute;
+  font-size: 4em; /* Tamanho base, pode ser ajustado por classes específicas */
+  color: rgba(255, 255, 255, 0.05); /* Cor bem sutil */
+  font-weight: bold;
+  text-transform: uppercase;
+  white-space: nowrap;
+  user-select: none; /* Para não ser selecionável */
+}
+
+.watermark1 { top: 10%; left: 5%; transform: rotate(-30deg); font-size: 3.5em; opacity: 0.8;}
+.watermark2 { top: 30%; right: -5%; transform: rotate(25deg); font-size: 5em; opacity: 0.7;}
+.watermark3 { bottom: 5%; left: 20%; transform: rotate(15deg); font-size: 2.5em; opacity: 0.9;}
+.watermark4 { top: 60%; left: -10%; transform: rotate(-40deg); font-size: 4.5em; opacity: 0.6;}
+.watermark5 { bottom: 25%; right: 10%; transform: rotate(-10deg); font-size: 3em; opacity: 0.75;}
+
+/* Ajusta o z-index do conteúdo principal para ficar acima da marca d'água */
+.demoContainer > *:not(.watermarkContainer) {
+  position: relative;
+  z-index: 1;
 }
 
 .tipsAndCardArea {

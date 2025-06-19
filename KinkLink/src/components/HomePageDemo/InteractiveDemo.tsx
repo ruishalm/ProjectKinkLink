@@ -125,7 +125,15 @@ const InteractiveDemo: React.FC = () => {
 
   return (
     <div className={styles.demoContainer}>
-      <h3 className={styles.demoTitle}>Experimente o KinkLink!</h3>
+      {/* Container para as marcas d'água */}
+      <div className={styles.watermarkContainer}>
+        <span className={`${styles.watermarkText} ${styles.watermark1}`}>demonstração</span>
+        <span className={`${styles.watermarkText} ${styles.watermark2}`}>demonstração</span>
+        <span className={`${styles.watermarkText} ${styles.watermark3}`}>demonstração</span>
+        <span className={`${styles.watermarkText} ${styles.watermark4}`}>demonstração</span>
+        <span className={`${styles.watermarkText} ${styles.watermark5}`}>demonstração</span>
+      </div>
+      <h3 className={styles.demoTitle}>Entenda como funciona o KinkLink</h3>
 
       <p className={styles.partnerInfoText}>
         Descubra os seus interesses em comum (parceiro simulado)

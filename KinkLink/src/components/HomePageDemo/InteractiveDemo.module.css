@@ -1,0 +1,265 @@
+/* InteractiveDemo.module.css */
+.demoContainer {
+  padding: 20px;
+  border-radius: 12px;
+  margin: 20px auto;
+  max-width: 450px;
+  text-align: center;
+  background-color: #282c34; /* Fundo escuro para contraste */
+  color: #e0e0e0; /* Texto claro */
+}
+
+.tipsAndCardArea {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Centraliza a carta e as dicas */
+  position: relative; /* Para posicionamento absoluto das dicas */
+  margin-bottom: 20px;
+  min-height: 280px; /* Altura da área da carta */
+}
+
+.sideTip {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8em;
+  color: #333; /* Texto escuro para contraste com fundo branco */
+  width: 90px; /* Aumentado um pouco a largura */
+  opacity: 0.85; 
+  padding: 8px; 
+  box-sizing: border-box;
+  line-height: 1.2;
+  background-color: #ffffff; 
+  border-radius: 6px; 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15); 
+}
+
+.leftTip { 
+  left: -20px; 
+  text-align: right; /* <<< IMPORTANTE: Texto alinhado à DIREITA */
+}
+.rightTip { 
+  right: -20px;
+  text-align: left;  /* <<< IMPORTANTE: Texto alinhado à ESQUERDA */
+}
+
+.demoCardArea {
+  cursor: grab; 
+}
+
+.demoCard {
+  background-color: #fff; 
+  border: 8px solid #ccc; 
+  border-radius: 12px;
+  padding: 10px; 
+  min-height: 250px;
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.demoCardHeader {
+  position: absolute;
+  text-align: center;
+  line-height: 1;
+  font-weight: bold;
+  z-index: 2;
+  padding: 5px;
+}
+
+.topLeft {
+  top: 5px;  
+  left: 5px; 
+}
+
+.bottomRight {
+  bottom: 5px; 
+  right: 5px;  
+  transform: rotate(180deg);
+}
+
+.demoCardIntensity {
+  display: block;
+  font-size: 1.8em;
+}
+
+.demoCardCategory {
+  display: block;
+  font-size: 0.7em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.cardContent { 
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px 5px; 
+  box-sizing: border-box;
+  width: 100%; 
+}
+
+.demoCardText p {
+  font-size: 1em;
+  margin: 0;
+  color: #333; 
+  word-wrap: break-word; 
+  overflow-wrap: break-word;
+}
+
+.feedbackMessage {
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-top: 15px;
+  min-height: 1.5em;
+}
+
+.interactionButtons {
+  margin-top: 10px; 
+}
+
+.interactionButtons button {
+  margin: 0 10px;
+  padding: 10px 20px;
+  font-size: 1.1em;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  border: none;
+}
+
+.interactionButtons button.like {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.interactionButtons button.dislike {
+  background-color: #f44336;
+  color: white;
+}
+
+.demoTitle {
+  margin-bottom: 15px;
+  color: #64b5f6;
+}
+
+.partnerInfoText {
+  font-size: 0.95em;
+  margin-bottom: 20px;
+  color: #b0b0b0;
+}
+
+/* Estilo para o texto de funcionalidades extras dentro da demo */
+.demoExtraFeaturesText {
+  margin-top: 20px; /* Espaço acima do texto */
+  margin-bottom: 15px; /* Espaço abaixo do texto */
+  font-size: 1rem; /* Tamanho adequado para dentro da demo */
+  color: #81c784; /* Cor verde para destaque, ou ajuste */
+  text-align: center;
+  line-height: 1.5;
+}
+.demoExtraFeaturesText strong {
+  color: #a5d6a7; /* Um tom de verde mais claro para o "Confira!" ou mantenha o mesmo */
+}
+
+.demoDisclaimer {
+  font-size: 0.85em;
+  color: #888;
+  margin-top: 20px;
+}
+
+.loginLinkInDemo,
+.signupLinkInDemo {
+  color: #64b5f6;
+  text-decoration: underline;
+  font-weight: normal;
+  margin: 0 3px;
+}
+
+.loginLinkInDemo:hover,
+.signupLinkInDemo:hover {
+  color: #81c784;
+}
+
+/* Cores das Cartas (IGUAIS ao PlayingCard.tsx) */
+.cardCategory_sensorial { background-color: #FFD700; border-color: #B8860B; }
+.cardCategory_sensorial .demoCardHeader, .cardCategory_sensorial .demoCardText p { color: #4A3B00; }
+
+.cardCategory_poder { background-color: #E53935; border-color: #B71C1C; }
+.cardCategory_poder .demoCardHeader, .cardCategory_poder .demoCardText p { color: #FFFFFF; }
+
+.cardCategory_fantasia { background-color: #5E35B1; border-color: #311B92; }
+.cardCategory_fantasia .demoCardHeader, .cardCategory_fantasia .demoCardText p { color: #FFFFFF; }
+
+.cardCategory_exposicao { background-color: #43A047; border-color: #1B5E20; }
+.cardCategory_exposicao .demoCardHeader, .cardCategory_exposicao .demoCardText p { color: #FFFFFF; }
+
+/* Nova categoria "voceescolhe" */
+.cardCategory_voceescolhe { background-color: #0b5351; border-color: #073e3c; } 
+.cardCategory_voceescolhe .demoCardHeader, .cardCategory_voceescolhe .demoCardText p { color: #FFFFFF; }
+
+/* Fallback ou categoria "Outras" */
+.cardCategory_outros { background-color: #ECEFF1; border-color: #B0BEC5; }
+.cardCategory_outros .demoCardHeader, .cardCategory_outros .demoCardText p { color: #263238; }
+
+
+/* Estilos para o modal simulado de feedback de "Link!" */
+.feedbackModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75); 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  cursor: pointer;
+  padding: 20px; 
+  box-sizing: border-box;
+}
+
+.feedbackModalContent {
+  background-color: #3a3f47; 
+  color: #e0e0e0;
+  padding: 30px 40px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+  font-size: 1.2em; 
+  max-width: 90%;
+  width: auto; 
+  min-width: 280px; 
+  cursor: default; 
+}
+
+.feedbackModalContent strong { 
+  color: #61dafb; 
+  font-size: 1.5em; 
+  display: block;
+  margin-bottom: 10px;
+}
+
+.feedbackModalContent p {
+  margin: 0; 
+  line-height: 1.5;
+}
+
+/* Media query para telas menores - esconder as dicas laterais */
+@media (max-width: 550px) { 
+  .sideTip {
+    display: none; 
+  }
+  .tipsAndCardArea {
+    margin-left: 0; 
+    margin-right: 0;
+  }
+}

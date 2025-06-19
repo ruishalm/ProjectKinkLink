@@ -1,40 +1,54 @@
-/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\HomePage.module.css */
+/* HomePage.module.css */
 .pageContainer {
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* Organiza o conteúdo em coluna */
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* Alinha ao topo, permitindo scroll */
   width: 100%;
-  min-height: calc(100vh - 150px); /* Ajusta altura considerando o header e um pouco de padding */
-  padding: 40px 20px;
+  min-height: calc(100vh - 120px); /* Ajusta altura considerando o header e footer (se houver) */
+  padding: 20px 20px 40px 20px; /* Adiciona padding inferior maior */
   text-align: center;
   font-family: "Trebuchet MS", sans-serif;
   color: #e0e0e0;
+  background-color: #1e1e1e; /* Fundo escuro consistente */
+  overflow-y: auto; /* Permite scroll vertical se o conteúdo exceder a altura */
   box-sizing: border-box;
+}
+
+.mainContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 
 .title {
   font-size: 3em;
   color: #64b5f6; /* Azul claro */
-  margin-bottom: 15px;
+  margin-bottom: 10px; /* Menor margem inferior para o título */
 }
 
 .subTitle {
   font-size: 1.3em;
   color: #b0b0b0;
-  margin-bottom: 40px;
+  margin-bottom: 25px; /* Margem abaixo do subtítulo */
   max-width: 600px;
+  line-height: 1.5; /* Melhora a legibilidade */
 }
 
 .buttonContainer {
   display: flex;
   gap: 20px;
+  margin-bottom: 20px; /* Espaço abaixo dos botões de login/cadastro */
 }
 
-.button {
-  padding: 15px 30px;
-  font-size: 1.2em;
-  border-radius: 8px;
+/* Estilos para os botões principais */
+.primaryButton,
+.secondaryButton {
+  padding: 8px 16px; /* Reduz o padding para diminuir o tamanho */
+  font-size: 0.9rem; /* Reduz o tamanho da fonte */
+  margin: 5px; /* Ajusta a margem se necessário */
+  border-radius: 6px;
   border: none;
   cursor: pointer;
   font-weight: bold;
@@ -43,15 +57,52 @@
 }
 
 .primaryButton {
-  composes: button;
   background-color: #64b5f6;
   color: #2c2c2c;
 }
 
 .secondaryButton {
-  composes: button;
   background-color: #4caf50; /* Verde */
   color: white;
+}
+
+.primaryButton:hover, 
+.secondaryButton:hover {
+  transform: translateY(-1px);
+}
+
+/* Novo estilo para o texto de funcionalidades extras */
+.extraFeaturesText {
+  margin-top: 25px; /* Espaço acima do texto (após os botões) */
+  margin-bottom: 25px; /* Espaço abaixo do texto */
+  font-size: 1.2rem; /* Um pouco maior para destaque */
+  color: #81c784; /* Cor verde para destaque, ajuste conforme seu tema */
+  text-align: center;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+/* Novo estilo para o texto introdutório da demo */
+.demoIntroText {
+  margin-top: 30px; /* Espaço acima do texto (após o extraFeaturesText) */
+  margin-bottom: 15px; /* Espaço abaixo do texto, antes da demo */
+  font-size: 1.1rem;
+  color: #e0e0e0; /* Cor clara, ajuste conforme seu tema */
+  text-align: center;
+  max-width: 600px; /* Limita a largura para melhor leitura */
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.5;
+}
+
+/* Estilos para a seção da demo */
+.demoSection {
+  margin-top: 20px; /* Espaço acima da seção da demo */
+  width: 100%; /* Faz a seção ocupar a largura disponível */
+  display: flex;
+  justify-content: center; /* Centraliza o componente InteractiveDemo */
 }
 
 /* Media Query para telas menores (ex: até 768px de largura) */
@@ -63,6 +114,7 @@
   .subTitle {
     font-size: 1em; /* Diminui um pouco mais o subtítulo */
     margin-bottom: 30px;
+    padding: 0 10px; /* Evita que o texto cole nas bordas */
   }
 
   .buttonContainer {
@@ -71,5 +123,18 @@
     max-width: 320px; /* Limita a largura máxima dos botões empilhados */
     gap: 15px; /* Reduz o espaço entre os botões empilhados */
   }
-  /* Os botões (.button, .primaryButton, .secondaryButton) já têm width: 100% implícito pelo compose, então se ajustarão ao .buttonContainer */
+  .primaryButton, 
+  .secondaryButton {
+    width: 100%; /* Faz os botões ocuparem a largura do container */
+    font-size: 1rem; /* Pode aumentar um pouco a fonte em mobile para melhor toque */
+    padding: 10px 15px;
+  }
+  .extraFeaturesText {
+    font-size: 1.1rem; /* Ajuste para mobile */
+    padding: 0 10px;
+  }
+  .demoIntroText {
+    font-size: 1rem;
+    padding: 0 10px; /* Evita que o texto cole nas bordas */
+  }
 }

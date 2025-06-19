@@ -1,6 +1,6 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\MatchesPage.tsx
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom'; // Importar useLocation
 import { useAuth, type MatchedCard } from '../contexts/AuthContext';
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
 import { useCoupleCardChats } from '../hooks/useCoupleCardChats';
@@ -60,6 +60,7 @@ function MatchesPage() {
   const { matchedCards: userMatchedCards, toggleHotStatus, toggleCompletedStatus, repeatCard } = useUserCardInteractions(); // Adicionar toggleCompletedStatus e repeatCard
   const navigate = useNavigate();
   const { isLoadingSkins } = useSkin(); // activeSkins não é mais usado diretamente aqui para o fundo
+  const location = useLocation(); // Hook para acessar a URL atual
   const { cardChatsData, isLoading: isLoadingCardChats, error: cardChatsError } = useCoupleCardChats(user?.coupleId);
 
   const [selectedCardForChat, setSelectedCardForChat] = useState<PlayingCardDataType | null>(null);
@@ -68,6 +69,30 @@ function MatchesPage() {
   const [forceUpdateUnreadKey, setForceUpdateUnreadKey] = useState(0);
   const [hasUnseenGlobalMatches, setHasUnseenGlobalMatches] = useState(false);
   const completedSectionRef = useRef<HTMLDivElement>(null); // Ref para a seção de cartas realizadas
+
+  // Efeito para abrir o modal de chat se a URL tiver um hash #card-CARD_ID
+  useEffect(() => {
+    if (location.hash && location.hash.startsWith('#card-')) {
+      const cardIdFromHash = location.hash.substring('#card-'.length);
+      if (cardIdFromHash && userMatchedCards) {
+        const cardToOpen = userMatchedCards.find(card => card.id === cardIdFromHash);
+        if (cardToOpen) {
+          // Atraso mínimo para garantir que a UI possa ter sido renderizada
+          // e para evitar que o modal abra e feche muito rapidamente se houver outros efeitos.
+          setTimeout(() => {
+            handleCardClick(cardToOpen);
+            // Opcional: remover o hash da URL após abrir o modal para não reabrir em refresh simples
+            // navigate(location.pathname, { replace: true });
+          }, 100);
+        } else {
+          console.warn(`[MatchesPage] Card com ID ${cardIdFromHash} do hash não encontrado nos matches.`);
+        }
+      }
+    }
+    // Queremos que este efeito rode quando a página carrega ou se o hash mudar,
+    // e quando userMatchedCards estiver disponível.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.hash, userMatchedCards]); // Não incluir navigate ou handleCardClick para evitar loops
 
   const isFirestoreTimestamp = (value: unknown): value is Timestamp => {
     return !!value && typeof (value as Timestamp).toDate === 'function' && typeof (value as Timestamp).seconds === 'number' && typeof (value as Timestamp).nanoseconds === 'number';

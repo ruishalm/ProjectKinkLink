@@ -29,7 +29,8 @@ function MatchModal({ card, onClose }: MatchModalProps) {
   // Funções Manipuladoras
   const handleGoToChat = () => {
     onClose(); // Fecha o MatchModal
-    navigate('/matches', { state: { openChatForCardId: card.id, cardDataForChat: card } });
+    // Navega para a página de matches com o hash do cardId para abrir o chat diretamente
+    navigate(`/matches#card-${card.id}`);
   };
 
   // Lógica de Renderização e JSX

@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import React, { useEffect } from 'react'; // Removido CSSProperties
 import styles from './HomePage.module.css'; // Importa os CSS Modules
+import InteractiveDemo from '../components/HomePageDemo/InteractiveDemo'; // <<< ADICIONE ESTE IMPORT
 
 function HomePage() {
   const { user, isLoading } = useAuth();
@@ -33,6 +34,11 @@ function HomePage() {
           <Link to="/login" className={styles.primaryButton}>Login</Link>
           <Link to="/signup" className={styles.secondaryButton}>Cadastre-se</Link>
         </div>
+
+        {/* Seção da Demonstração Interativa */}
+        <section className={styles.demoSection}> {/* Você pode adicionar estilos para demoSection em HomePage.module.css se necessário */}
+          <InteractiveDemo />
+        </section>
       </main>
     </div>
   );

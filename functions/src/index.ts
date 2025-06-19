@@ -7,6 +7,7 @@
  */
 
 import {onDocumentWritten} from "firebase-functions/v2/firestore";
+import {onSchedule} from "firebase-functions/v2/scheduler"; // Import para funções agendadas
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 
@@ -210,19 +211,26 @@ export const onNewMatch = onDocumentWritten(
         logger.error(`Error fetching completador's (${completadorUID}) username:`, error);
       }
 
+      // Garantir que temos a categoria do card para a nova mensagem
       const cardData = afterSnapshotData.cardData as { text?: string; category?: string } | undefined;
-      let cardTitle = "um card";
-      if (cardData?.text) {
-        cardTitle = cardData.text.length > 50 ? cardData.text.substring(0, 47) + "..." : cardData.text;
-      } else if (cardData?.category) {
-        cardTitle = `um card de ${cardData.category}`;
+      let cardCategoryForNotification = "categoria desconhecida"; // Fallback
+      if (cardData?.category) {
+        cardCategoryForNotification = cardData.category;
+      } else if (cardData?.text) {
+        // Se não houver categoria, mas houver texto, podemos usar um placeholder ou omitir
+        // Por enquanto, manteremos o fallback "categoria desconhecida" se category não estiver presente.
+        // Ou você pode decidir usar o cardData.text aqui de alguma forma.
+        // Exemplo: cardCategoryForNotification = `descrita como "${cardData.text.substring(0,20)}..."`;
       }
+
+      const notificationTitle = "Novo Link! 🔗";
+      const notificationBody = `Você e ${completadorUsername} têm um novo Link!🔗 numa carta de ${cardCategoryForNotification}.`;
 
       // Usar a função sendNotificationToUser
       await sendNotificationToUser(
         pioneerUID,
-        "É um Match! ❤️",
-        `Você e ${completadorUsername} deram match no card "${cardTitle}". Confira!`,
+        notificationTitle,
+        notificationBody,
         { // data payload
           type: "match_notification",
           coupleId: event.params.coupleId,
@@ -238,7 +246,86 @@ export const onNewMatch = onDocumentWritten(
         wasNotMatchBefore,
       });
     }
-    return null;
+  }
+);
+
+/**
+ * Cloud Function agendada para enviar uma sugestão de link para casais
+ * toda sexta-feira às 16h.
+ */
+export const sendWeeklyLinkSuggestion = onSchedule(
+  {
+    schedule: "0 16 * * 5", // Toda sexta-feira às 16:00
+    timeZone: "America/Sao_Paulo", // Fuso horário de São Paulo
+    region: "southamerica-east1", // Manter a mesma região das outras funções
+    // memory: "512MiB", // Opcional: Aumentar memória se houver muitos casais
+  },
+  async (event) => {
+    // Tentativa de correção para event.id e event.time:
+    // O objeto 'event' para onSchedule pode não ter 'id' e 'time' diretamente.
+    // O 'jobName' pode ser um identificador útil, e o timestamp da execução pode ser obtido de outras formas se necessário,
+    // ou simplesmente logar o evento inteiro para inspeção.
+    // Por agora, vamos logar o que é garantido existir ou o evento completo.
+    logger.info("Executing sendWeeklyLinkSuggestion", { scheduleTime: event.scheduleTime, jobName: event.jobName, eventDetails: event });
+    try {
+      const couplesSnapshot = await db.collection("couples").get();
+      if (couplesSnapshot.empty) {
+        logger.info("No couples found. Exiting sendWeeklyLinkSuggestion.");
+        return; // Retorna void
+      }
+
+      let notificationsAttempted = 0;
+
+      for (const coupleDoc of couplesSnapshot.docs) {
+        const coupleData = coupleDoc.data();
+        const coupleId = coupleDoc.id;
+
+        // Verifica se o casal tem dois membros (está ativo)
+        if (coupleData.members && coupleData.members.length === 2) {
+          const memberUIDs = coupleData.members as string[];
+
+          // Busca os "links" (matches) para este casal
+          const likedInteractionsSnapshot = await db
+            .collection("couples")
+            .doc(coupleId)
+            .collection("likedInteractions")
+            .where("isMatch", "==", true)
+            .get();
+
+          if (likedInteractionsSnapshot.empty) {
+            logger.info(`Couple ${coupleId} has no matched links. Skipping.`);
+            continue; // Pula para o próximo casal
+          }
+
+          // Seleciona uma carta aleatória da lista de matches
+          const matchedCardsDocs = likedInteractionsSnapshot.docs;
+          const randomIndex = Math.floor(Math.random() * matchedCardsDocs.length);
+          const randomMatchDoc = matchedCardsDocs[randomIndex];
+          // const randomMatchData = randomMatchDoc.data(); // Descomente se precisar de cardData.text, etc.
+          const cardIdForNotification = randomMatchDoc.id;
+
+          const notificationTitle = "KinkLink FDS 🎲";
+          const notificationBody = "Sextou! Que tal esta sugestão para o fim de semana? 😉";
+          const notificationData = {
+            url: `/matches#card-${cardIdForNotification}`, // URL para abrir o chat da carta específica
+            type: "weekend_suggestion_notification", // Tipo para identificação no cliente, se necessário
+            cardId: cardIdForNotification,
+          };
+
+          logger.info(`Selected card ${cardIdForNotification} for couple ${coupleId}. Sending to members: ${memberUIDs.join(", ")}`);
+
+          for (const userId of memberUIDs) {
+            await sendNotificationToUser(userId, notificationTitle, notificationBody, notificationData);
+            notificationsAttempted++;
+          }
+        } else {
+          logger.info(`Couple ${coupleId} does not have 2 members or 'members' field is missing. Skipping.`);
+        }
+      }
+      logger.info(`sendWeeklyLinkSuggestion finished. Total notifications attempted: ${notificationsAttempted}`);
+    } catch (error) {
+      logger.error("Error in sendWeeklyLinkSuggestion:", error);
+    }
   }
 );
 
@@ -263,7 +350,7 @@ export const onAdminTicketResponse = onDocumentWritten(
 
     if (!beforeSnapshot?.exists || !afterSnapshot?.exists) {
       logger.info("Document before or after snapshot does not exist (e.g., creation or deletion). Exiting ticket response check.", { userId, eventId: event.id });
-      return null;
+      return; // Retorna void
     }
 
     const beforeData = beforeSnapshot.data();
@@ -271,12 +358,12 @@ export const onAdminTicketResponse = onDocumentWritten(
 
     if (!beforeData || !afterData) {
       logger.info("beforeData or afterData is undefined. Exiting ticket response check.", { userId, eventId: event.id });
-      return null;
+      return; // Retorna void
     }
 
     if (!afterData.feedbackTickets) {
       logger.info("No feedbackTickets in afterData. Exiting.", { userId });
-      return null;
+      return; // Retorna void
     }
 
     const beforeTickets = (beforeData.feedbackTickets || []) as Array<{ id: string; adminResponse?: string; status: string; text: string }>;
@@ -310,7 +397,6 @@ export const onAdminTicketResponse = onDocumentWritten(
     } else {
       logger.info("No new admin ticket response detected for user based on conditions.", { userId });
     }
-    return null;
   }
 );
 
@@ -328,7 +414,7 @@ export const onLinkCompletedSendNotification = onDocumentWritten(
 
     if (!afterSnapshot?.exists) {
       logger.info(`Couple document ${coupleId} was deleted or does not exist after update. No notification.`, { eventId: event.id });
-      return null;
+      return; // Retorna void
     }
 
     const beforeData = beforeSnapshot?.data();
@@ -336,12 +422,11 @@ export const onLinkCompletedSendNotification = onDocumentWritten(
 
     if (!afterData) {
         logger.warn(`afterData is undefined for couple ${coupleId}, though snapshot exists. Exiting.`, { eventId: event.id });
-        return null;
+        return; // Retorna void
     }
 
     const membersBefore = (beforeData?.members as string[]) || [];
     const membersAfter = (afterData.members as string[]) || [];
-
     const linkJustCompleted =
       membersAfter.length === 2 &&
       (!beforeSnapshot?.exists || membersBefore.length < 2);
@@ -351,7 +436,7 @@ export const onLinkCompletedSendNotification = onDocumentWritten(
         `Couple ${coupleId} update did not signify a new completed link. Members before: ${membersBefore.length}, after: ${membersAfter.length}. Document existed before: ${beforeSnapshot?.exists}`,
         { eventId: event.id }
       );
-      return null;
+      return; // Retorna void
     }
 
     const [user1Id, user2Id] = membersAfter;
@@ -387,7 +472,5 @@ export const onLinkCompletedSendNotification = onDocumentWritten(
       `Você e ${user1Name} agora estão conectados no KinkLink!`,
       { url: "/matches", type: "link_completed", partnerId: user1Id }
     );
-
-    return null;
   }
 );

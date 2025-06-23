@@ -1,4 +1,4 @@
-// d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\CategoryCarousel.tsx
+// CategoryCarousel.tsx
 import React from 'react';
 import { type MatchedCard } from '../contexts/AuthContext'; // Usaremos o tipo MatchedCard
 import MatchCardItem, { type MatchCardItemProps } from './MatchCardItem'; // Importa o componente refatorado
@@ -22,10 +22,11 @@ interface CategoryCarouselProps {
   onToggleHot: (cardId: string, event: React.MouseEvent) => void;
   // Precisamos saber quais cartas estão não lidas e seus snippets
   unreadStatuses: { [key: string]: boolean };
-  cardChatsData: { [key: string]: { lastMessageTextSnippet?: string } }; // Apenas o snippet é necessário aqui
+  cardChatsData: { [key: string]: { lastMessageTextSnippet?: string } };
+  newlyMatchedCardIds: string[]; // NOVO: IDs das cartas recém-combinadas
 }
 
-const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCardClick, onToggleHot, unreadStatuses, cardChatsData }) => {
+const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCardClick, onToggleHot, unreadStatuses, cardChatsData, newlyMatchedCardIds }) => {
   if (cards.length === 0) {
     return (
       <div className={styles.carouselSection}>
@@ -80,6 +81,7 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCar
                   isHot={card.isHot || false}
                   onToggleHot={onToggleHot}
                   isUnread={unreadStatuses[card.id] || false}
+                  isNewlyMatched={newlyMatchedCardIds.includes(card.id)} // Passa a nova prop
                   lastMessageSnippet={unreadStatuses[card.id] ? cardChatsData[card.id]?.lastMessageTextSnippet : undefined}
                 />
               </SwiperSlide>

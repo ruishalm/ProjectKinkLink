@@ -1,10 +1,11 @@
-// d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\MatchesPage.tsx
+// MatchesPage.tsx
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom'; // Importar useLocation
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, type MatchedCard } from '../contexts/AuthContext';
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
 import { useCoupleCardChats } from '../hooks/useCoupleCardChats';
-import PlayingCard, { type CardData as PlayingCardDataType } from '../components/PlayingCard';
+// CORREÇÃO: Importa apenas o tipo CardData, pois o componente PlayingCard não é usado diretamente aqui.
+import { type CardData as PlayingCardDataType } from '../components/PlayingCard';
 import CardChatModal from '../components/CardChatModal';
 import CategoryCarousel from '../components/CategoryCarousel';
 import { getLastSeenTimestampForCard, markChatAsSeen } from '../utils/chatNotificationStore';
@@ -12,63 +13,29 @@ import { useSkin } from '../contexts/SkinContext';
 import styles from './MatchesPage.module.css';
 import { Timestamp } from 'firebase/firestore';
 
-
-interface MatchCardItemProps {
-  card: PlayingCardDataType;
-  onClick: () => void;
-  isHot: boolean;
-  isUnread: boolean;
-  onToggleHot?: (cardId: string, event: React.MouseEvent) => void;
-  lastMessageSnippet?: string;
-  isCompletedCard?: boolean; // Nova prop para indicar se é uma carta da seção "Realizadas"
-}
-
-function MatchCardItem({ card, onClick, isHot, isUnread, onToggleHot, lastMessageSnippet, isCompletedCard }: MatchCardItemProps) {
-  const scaleFactor = isHot && !isCompletedCard ? 0.55 : 0.5; // Não aplica scale maior se for completada
-  const cardWidth = 250 * scaleFactor;
-  const cardHeight = 350 * scaleFactor;
-  return (
-    <div
-      className={`${styles.cardItemWrapper} ${isUnread ? styles.unreadMatch : ''}`}
-      onClick={onClick}
-      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
-      onMouseLeave={(e) => e.currentTarget.style.transform = ''} // Remove o scale(1) para deixar o CSS controlar
-      role="button"
-      tabIndex={0}
-      aria-label={`Link: ${card.text.substring(0,30)}... ${isUnread ? ' (Não lido)' : ''}`}
-    >
-      {isUnread && <div className={styles.unreadIndicator}></div>}
-      <PlayingCard
-        data={card}
-        targetWidth={cardWidth}
-        targetHeight={cardHeight}
-        isFlipped={false}
-        onToggleHot={!isCompletedCard ? onToggleHot : undefined} // Não passa onToggleHot se for carta completada
-      />
-      {isUnread && lastMessageSnippet && (
-        <div className={styles.matchCardSnippet}>
-          <span>✉️ {lastMessageSnippet}</span>
-        </div>
-      )}
-    </div>
-  );
-}
+// MatchCardItem é importado e usado, mas sua interface MatchCardItemProps não precisa ser importada separadamente aqui.
+// A interface MatchCardItemProps é exportada pelo MatchCardItem.tsx e usada lá.
+import MatchCardItem from '../components/MatchCardItem';
 
 
 function MatchesPage() {
   const { user } = useAuth();
-  const { matchedCards: userMatchedCards, toggleHotStatus, toggleCompletedStatus, repeatCard } = useUserCardInteractions(); // Adicionar toggleCompletedStatus e repeatCard
+  const { matchedCards: userMatchedCards, toggleHotStatus, toggleCompletedStatus, repeatCard } = useUserCardInteractions();
   const navigate = useNavigate();
-  const { isLoadingSkins } = useSkin(); // activeSkins não é mais usado diretamente aqui para o fundo
-  const location = useLocation(); // Hook para acessar a URL atual
+  const { isLoadingSkins } = useSkin(); // CORREÇÃO: isLoadingSkins é usado, então não precisa de eslint-disable
+  const location = useLocation();
   const { cardChatsData, isLoading: isLoadingCardChats, error: cardChatsError } = useCoupleCardChats(user?.coupleId);
 
-  const [selectedCardForChat, setSelectedCardForChat] = useState<PlayingCardDataType | null>(null);
+  // O tipo PlayingCardDataType é usado apenas para selectedCardForChat, que é passado para CardChatModal.
+  type CardDataForModal = PlayingCardDataType; // Renomeando para clareza no contexto local
+
+  const [selectedCardForChat, setSelectedCardForChat] = useState<CardDataForModal | null>(null);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [unreadStatuses, setUnreadStatuses] = useState<{ [key: string]: boolean }>({});
+  const [newlyMatchedCardIds, setNewlyMatchedCardIds] = useState<string[]>([]);
   const [forceUpdateUnreadKey, setForceUpdateUnreadKey] = useState(0);
   const [hasUnseenGlobalMatches, setHasUnseenGlobalMatches] = useState(false);
-  const completedSectionRef = useRef<HTMLDivElement>(null); // Ref para a seção de cartas realizadas
+  const completedSectionRef = useRef<HTMLDivElement>(null);
 
   // Efeito para abrir o modal de chat se a URL tiver um hash #card-CARD_ID
   useEffect(() => {
@@ -77,43 +44,58 @@ function MatchesPage() {
       if (cardIdFromHash && userMatchedCards) {
         const cardToOpen = userMatchedCards.find(card => card.id === cardIdFromHash);
         if (cardToOpen) {
-          // Atraso mínimo para garantir que a UI possa ter sido renderizada
-          // e para evitar que o modal abra e feche muito rapidamente se houver outros efeitos.
           setTimeout(() => {
             handleCardClick(cardToOpen);
-            // Opcional: remover o hash da URL após abrir o modal para não reabrir em refresh simples
-            // navigate(location.pathname, { replace: true });
           }, 100);
         } else {
           console.warn(`[MatchesPage] Card com ID ${cardIdFromHash} do hash não encontrado nos matches.`);
         }
       }
     }
-    // Queremos que este efeito rode quando a página carrega ou se o hash mudar,
-    // e quando userMatchedCards estiver disponível.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.hash, userMatchedCards]); // Não incluir navigate ou handleCardClick para evitar loops
+  }, [location.hash, userMatchedCards]);
+
+  // Efeito para identificar cartas recém-combinadas (newly matched)
+  useEffect(() => {
+    if (userMatchedCards && userMatchedCards.length > 0) {
+      const lastVisitedMatchIdsString = localStorage.getItem('kinklink_lastVisitedMatchIds');
+      const lastVisitedMatchIds: string[] = lastVisitedMatchIdsString ? JSON.parse(lastVisitedMatchIdsString) : [];
+
+      const currentMatchIds = userMatchedCards.map(card => card.id);
+      const newMatches = currentMatchIds.filter(id => !lastVisitedMatchIds.includes(id));
+
+      setNewlyMatchedCardIds(newMatches);
+      // Se houver qualquer match novo, a flag global de "não visto" é true
+      if (newMatches.length > 0) {
+        setHasUnseenGlobalMatches(true);
+      } else {
+        setHasUnseenGlobalMatches(false); // Se não há novos matches, garante que a flag global seja false
+      }
+
+      // ATUALIZA O LOCALSTORAGE IMEDIATAMENTE APÓS CALCULAR OS NOVOS MATCHES.
+      // Isso marca todos os matches ATUAIS como "vistos" para a próxima vez que a página for carregada.
+      localStorage.setItem('kinklink_lastVisitedMatchIds', JSON.stringify(currentMatchIds));
+
+    } else {
+      setNewlyMatchedCardIds([]);
+      setHasUnseenGlobalMatches(false);
+      // Se não há matches, limpa também o localStorage para evitar que matches futuros sejam marcados como "vistos"
+      localStorage.removeItem('kinklink_lastVisitedMatchIds');
+    }
+  }, [userMatchedCards]); // Depende apenas de userMatchedCards
 
   const isFirestoreTimestamp = (value: unknown): value is Timestamp => {
     return !!value && typeof (value as Timestamp).toDate === 'function' && typeof (value as Timestamp).seconds === 'number' && typeof (value as Timestamp).nanoseconds === 'number';
   };
 
-  useEffect(() => {
-    if (userMatchedCards) {
-      const lastSeenMatchesCount = parseInt(localStorage.getItem('kinklink_lastSeenMatchesCount') || '0', 10);
-      if (userMatchedCards.length > lastSeenMatchesCount) {
-        setHasUnseenGlobalMatches(true);
-      } else {
-        setHasUnseenGlobalMatches(false);
-      }
-    }
-  }, [userMatchedCards]);
-
   const handleMatchesButtonClick = () => {
+    // Esta função é chamada ao clicar no botão "Cartas" para voltar para a CardPilePage.
+    // A atualização de 'kinklink_lastVisitedMatchIds' já é feita no useEffect acima,
+    // garantindo que todos os matches na MatchesPage sejam marcados como vistos.
+    // Aqui, apenas atualizamos a contagem para o botão da CardPilePage e navegamos.
     if (userMatchedCards) {
       localStorage.setItem('kinklink_lastSeenMatchesCount', String(userMatchedCards.length));
     }
-    setHasUnseenGlobalMatches(false);
+    setHasUnseenGlobalMatches(false); // Zera a flag global para o botão "Cartas"
     navigate('/cards');
   };
 
@@ -152,7 +134,7 @@ function MatchesPage() {
                 lastMessageDate = null;
               }
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            } catch (_e: unknown) { 
+            } catch (_e: unknown) { // CORREÇÃO: Adicionado eslint-disable-next-line para _e
               lastMessageDate = null;
             }
           }
@@ -175,22 +157,38 @@ function MatchesPage() {
   }, [user, userMatchedCards, cardChatsData, isLoadingCardChats, isChatModalOpen, selectedCardForChat, forceUpdateUnreadKey]);
 
   const handleCardClick = (card: MatchedCard) => { 
-    const cardForModal: PlayingCardDataType = {
+    const cardForModal: PlayingCardDataType = { // PlayingCardDataType é importado para este uso
         id: card.id,
         text: card.text,
         category: card.category,
         intensity: card.intensity,
         isHot: card.isHot,
-        isCompleted: card.isCompleted, // Passa o status de completada
+        isCompleted: card.isCompleted,
     };
     setSelectedCardForChat(cardForModal);
     setIsChatModalOpen(true);
+
+    // Quando uma carta é clicada, ela não é mais considerada "recém-combinada"
+    setNewlyMatchedCardIds(prevIds => {
+      const updatedIds = prevIds.filter(id => id !== card.id);
+      // Se todos os matches novos foram vistos, atualiza a flag global
+      if (updatedIds.length === 0) {
+        setHasUnseenGlobalMatches(false);
+      }
+      // ATUALIZA O LOCALSTORAGE para persistir que esta carta foi vista
+      const currentVisitedIdsString = localStorage.getItem('kinklink_lastVisitedMatchIds');
+      const currentVisitedIds: string[] = currentVisitedIdsString ? JSON.parse(currentVisitedIdsString) : [];
+      if (!currentVisitedIds.includes(card.id)) {
+        currentVisitedIds.push(card.id);
+        localStorage.setItem('kinklink_lastVisitedMatchIds', JSON.stringify(currentVisitedIds));
+      }
+      return updatedIds;
+    });
   };
 
   const handleChatSeen = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    (_seenCardId: string) => { 
-      setForceUpdateUnreadKey(prev => prev + 1);
+    (_seenCardId: string) => { // eslint-disable-line @typescript-eslint/no-unused-vars
+          setForceUpdateUnreadKey(prev => prev + 1);
     }, 
     [] 
   );
@@ -232,7 +230,7 @@ function MatchesPage() {
   const otherCardsByCategory = groupCardsByCategory(otherMatches);
 
   // Define a ordem fixa e as únicas categorias a serem exibidas nos carrosséis
-  const fixedCarouselOrder: string[] = ['Poder', 'Fantasia', 'Exposição', 'Sensorial']; // Ordem corrigida
+  const fixedCarouselOrder: string[] = ['Poder', 'Fantasia', 'Exposição', 'Sensorial'];
 
 
   // Função auxiliar para obter a classe CSS da categoria
@@ -259,9 +257,9 @@ function MatchesPage() {
     if (cardCount >= 2 && cardCount <= 4) {
       borderLevelClass = styles.topLinksBorderLevel1;
     } else if (cardCount >= 5 && cardCount <= 9) {
-      borderLevelClass = styles.topLinksBorderLevel2;
+      borderLevelClass = styles.borderLevel2;
     } else if (cardCount >= 10 && cardCount <= 14) {
-      borderLevelClass = styles.topLinksBorderLevel3;
+      borderLevelClass = styles.borderLevel3;
     } else if (cardCount >= 15) {
       borderLevelClass = styles.topLinksBorderLevel4;
     }
@@ -270,16 +268,14 @@ function MatchesPage() {
 
   return (
     <div className={styles.page}>
-      <main className={styles.mainContent}> {/* Conteúdo principal da página */}
-        <div className={styles.pageHeaderControls}> {/* Novo container para título e botão */}
-          {/* Botão existente para voltar às cartas */}
+      <main className={styles.mainContent}>
+        <div className={styles.pageHeaderControls}>
           <button onClick={handleMatchesButtonClick} className={`${styles.backToCardsButton} genericButton ${hasUnseenGlobalMatches ? styles.shakeAnimation : ''}`} aria-label="Voltar para as cartas">
             {hasUnseenGlobalMatches && <span className={styles.navNotificationDot}></span>}
             Cartas
           </button>
         </div>
 
-        {/* O restante do conteúdo da página continua aqui dentro do main */}
       {noActiveMatchesCondition && completedMatches.length === 0 ? (
         <p className={styles.noMatchesText}>
           Você ainda não tem Links. Continue explorando as cartas!
@@ -298,9 +294,10 @@ function MatchesPage() {
                       onClick={() => handleCardClick(card)}
                       isHot={true}
                       isUnread={unreadStatuses[card.id] || false}
+                      isNewlyMatched={newlyMatchedCardIds.includes(card.id)}
                       onToggleHot={handleToggleHot}
                       lastMessageSnippet={unreadStatuses[card.id] ? cardChatsData[card.id]?.lastMessageTextSnippet : undefined}
-                      isCompletedCard={false} // Não é uma carta completada
+                      isCompletedCard={false}
                     />
                   ))}
                 </div>
@@ -315,7 +312,7 @@ function MatchesPage() {
               </h2>
               <div className={styles.categoryCarouselsGrid}>
                 {fixedCarouselOrder.map(categoryName => {
-                  const cardsForCategory = otherCardsByCategory[categoryName]; // Busca as cartas para a categoria da ordem fixa
+                  const cardsForCategory = otherCardsByCategory[categoryName];
                   if (cardsForCategory && cardsForCategory.length > 0) {
                     return (
                       <div key={categoryName} className={`${styles.carouselCell} ${getCarouselCellClasses(categoryName, cardsForCategory.length)}`}>
@@ -325,15 +322,14 @@ function MatchesPage() {
                           onCardClick={handleCardClick}
                           onToggleHot={handleToggleHot}
                           unreadStatuses={unreadStatuses}
+                          newlyMatchedCardIds={newlyMatchedCardIds}
                           cardChatsData={cardChatsData}
-                          // isCompletedCard para MatchCardItem dentro do Carousel será false por padrão
                         />
                       </div>
                     );
                   }
                   return null;
                 })}
-                {/* Loop para renderizar outras categorias que não estão na fixedCarouselOrder */}
                 {Object.entries(otherCardsByCategory)
                   .filter(([categoryName]) => !fixedCarouselOrder.includes(categoryName))
                   .map(([categoryName, cardsForCategory]) => {
@@ -346,8 +342,8 @@ function MatchesPage() {
                             onCardClick={handleCardClick}
                             onToggleHot={handleToggleHot}
                             unreadStatuses={unreadStatuses}
+                            newlyMatchedCardIds={newlyMatchedCardIds}
                             cardChatsData={cardChatsData}
-                            // isCompletedCard para MatchCardItem dentro do Carousel será false por padrão
                           />
                         </div>
                       );
@@ -358,7 +354,6 @@ function MatchesPage() {
             </section>
           )}
 
-          {/* Seção de Cartas Realizadas */}
           <section className={styles.completedSection} ref={completedSectionRef}>
             <h2 className={styles.sectionTitleCompleted}>✅ Cartas Realizadas</h2>
             {completedMatches.length > 0 ? (
@@ -368,11 +363,11 @@ function MatchesPage() {
                     key={card.id}
                     card={card}
                     onClick={() => handleCardClick(card)}
-                    isHot={false} // Cartas completadas não são "hot" visualmente aqui
-                    isUnread={unreadStatuses[card.id] || false} // Pode ainda ter mensagens não lidas
-                    // onToggleHot não é passado, ou é passado como undefined
+                    isHot={false}
+                    isUnread={unreadStatuses[card.id] || false}
+                    isNewlyMatched={newlyMatchedCardIds.includes(card.id)}
                     lastMessageSnippet={unreadStatuses[card.id] ? cardChatsData[card.id]?.lastMessageTextSnippet : undefined}
-                    isCompletedCard={true} // Indica que é uma carta completada
+                    isCompletedCard={true}
                   />
                 ))}
               </div>
@@ -399,21 +394,15 @@ function MatchesPage() {
               : null
           }
           onChatSeen={handleChatSeen}
-          // Adiciona o status de 'hot' da carta selecionada
           isHot={userMatchedCards.find(card => card.id === selectedCardForChat.id)?.isHot || false}
-          // Adiciona a função para alternar o status de 'hot'
           onToggleHot={() => {
             if (selectedCardForChat?.id) {
               toggleHotStatus(selectedCardForChat.id);
             }
           }}
-          // Adiciona o status de 'completed' da carta selecionada
           isCompleted={userMatchedCards.find(card => card.id === selectedCardForChat.id)?.isCompleted || false}
-          // Adiciona a função para alternar o status de 'completed'
           onToggleCompleted={() => {
             if (selectedCardForChat?.id) {
-              // A função toggleCompletedStatus espera o novo estado 'completed'
-              // Então, se está completada, passamos false para desmarcar, e vice-versa.
               const currentCard = userMatchedCards.find(card => card.id === selectedCardForChat.id);
               toggleCompletedStatus(selectedCardForChat.id, !currentCard?.isCompleted);
             }

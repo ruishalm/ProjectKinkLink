@@ -55,9 +55,9 @@ const InteractiveDemo: React.FC = () => {
 
     if (liked) {
       if (currentCard && simulatedPartnerLikes.includes(currentCard.id)) {
-        message = "🎉 Link! ✨ É assim que você e seu parceiro alinham seus interesses!";
-        setFeedbackMessage(message);
-        setShowMatchModal(true);
+        // A mensagem é apenas para o conteúdo do modal. A flag `showMatchModal` controla a exibição.
+        setFeedbackMessage("É assim que você e seu parceiro alinham seus interesses!");
+        setShowMatchModal(true); // Apenas ativa o modal
         return; // Não avança a carta imediatamente, espera o modal ser fechado
       } else {
         message = "Você topou! 👍";
@@ -189,10 +189,12 @@ const InteractiveDemo: React.FC = () => {
       </p>
 
       {/* Modal Simulado para "Link!" */}
-      {showMatchModal && feedbackMessage && feedbackMessage.startsWith("🎉 Link!") && (
+      {showMatchModal && (
         <div className={styles.feedbackModalOverlay} onClick={handleCloseMatchModal}>
           <div className={styles.feedbackModalContent} onClick={(e) => e.stopPropagation()}>
-            <p><strong>🎉 Link! ✨</strong><br />É assim que você e seu parceiro alinham seus interesses!</p>
+            {/* O conteúdo do modal agora é mais estruturado e usa o estado do feedback */}
+            <strong>🎉 Link! ✨</strong>
+            <p>{feedbackMessage}</p>
           </div>
         </div>
       )}

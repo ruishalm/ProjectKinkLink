@@ -175,11 +175,12 @@
 .navNotificationDot {
   height: 8px;
   width: 8px;
-  background-color: var(--cor-aviso); /* Usa cor de aviso da paleta */
+  background-color: #FF0000; /* Vermelho */
   border-radius: 50%;
-  display: inline-block;
-  margin-right: 5px;
-  vertical-align: middle;
+  display: inline-block; /* Faz com que o span se comporte como um bloco na linha */
+  margin-left: 5px; /* Espaço à esquerda do ponto */
+  position: relative; /* Permite ajustar a posição com 'top' */
+  top: -4px; /* Move a bolinha 4px para cima */
 }
 
 /* Animação de "shake" usada, por exemplo, no botão de Links */

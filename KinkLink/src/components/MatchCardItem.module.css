@@ -1,28 +1,30 @@
-/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\MatchCardItem.module.css */
+/* MatchCardItem.module.css */
 .cardItemWrapper {
   display: inline-block;
   cursor: pointer;
   transition: transform 0.15s ease-out;
-  position: relative; 
-  overflow: hidden; 
+  position: relative; /* ESSENCIAL: Para que .unreadIndicator possa ser posicionado absolutamente */
+  overflow: hidden; /* Garante que a bolinha não vaze se for posicionada ligeiramente fora */
 }
 
 .unreadMatch .cardItemWrapper { 
-  /* Se você quiser um estilo específico para o wrapper quando não lido,
-     mas a classe .unreadMatch pode ser aplicada diretamente no wrapper no JSX se preferir.
-     Por enquanto, deixaremos assim, assumindo que .unreadMatch é uma classe condicional no wrapper. */
+  /* Estilos para o wrapper quando a carta tem mensagens não lidas.
+     Você pode adicionar um brilho ou borda aqui se quiser um destaque extra. */
 }
 
 .unreadIndicator {
-  position: absolute;
-  bottom: 18px; 
-  left: 12px;   
-  width: 6px;    
-  height: 6px;   
-  background-color: #ff4757; 
+  position: absolute; /* Posiciona a bolinha em relação ao .cardItemWrapper */
+  top: 0px; /* Alinha com a borda superior */
+  right: 0px; /* Alinha com a borda direita */
+  width: 10px;
+  height: 10px;
+  background-color: #FF0000; /* Vermelho */
   border-radius: 50%;
-  z-index: 10; 
-  box-shadow: 0 0 3px #ff4757; 
+  z-index: 10; /* Garante que fique acima da carta */
+  border: 1px solid white; /* Borda branca para destaque */
+  /* Ajusta a transformação para que a bolinha fique ligeiramente fora do canto,
+     como um "selo" ou "badge" */
+  transform: translate(50%, -50%);
 }
 
 .matchCardSnippet {
@@ -30,15 +32,15 @@
   bottom: 5px; 
   left: 5px;   
   right: 5px;  
-  background-color: rgba(0, 0, 0, 0.65); 
-  color: white; 
+  background-color: rgba(0, 0, 0, 0.65); /* Fundo semi-transparente */
+  color: white; /* Texto branco */
   padding: 4px 7px; 
   border-radius: 4px; 
   font-size: 0.65em; 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  z-index: 1; 
+  z-index: 1; /* Garante que o snippet fique acima da carta */
   text-align: left; 
   box-sizing: border-box; 
 }

@@ -341,6 +341,7 @@ function CardPilePage() {
             className={`${styles.matchesNavButton} ${styles.linkButton} genericButton klnkl-nav-matches ${hasUnseenMatches ? styles.shakeAnimation : ''}`}
           >
             Links ({matchedCards.length})
+            {hasUnseenMatches && <span className={styles.navNotificationDot}></span>}
           </button>
           <Link to="/profile" className={`${styles.bottomNavIconStyle} ${styles.ballButton} genericButton klnkl-icon-nav-button klnkl-nav-profile`} aria-label="Perfil" title="Perfil">
             👤

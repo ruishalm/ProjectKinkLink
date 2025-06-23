@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, type MatchedCard } from '../contexts/AuthContext';
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
 import { useCoupleCardChats } from '../hooks/useCoupleCardChats';
-// CORREÇÃO: Importa apenas o tipo CardData, pois o componente PlayingCard não é usado diretamente aqui.
+// Importa apenas o tipo CardData, pois o componente PlayingCard não é usado diretamente aqui.
 import { type CardData as PlayingCardDataType } from '../components/PlayingCard';
 import CardChatModal from '../components/CardChatModal';
 import CategoryCarousel from '../components/CategoryCarousel';
@@ -22,14 +22,12 @@ function MatchesPage() {
   const { user } = useAuth();
   const { matchedCards: userMatchedCards, toggleHotStatus, toggleCompletedStatus, repeatCard } = useUserCardInteractions();
   const navigate = useNavigate();
-  const { isLoadingSkins } = useSkin(); // CORREÇÃO: isLoadingSkins é usado, então não precisa de eslint-disable
+  const { isLoadingSkins } = useSkin();
   const location = useLocation();
   const { cardChatsData, isLoading: isLoadingCardChats, error: cardChatsError } = useCoupleCardChats(user?.coupleId);
 
   // O tipo PlayingCardDataType é usado apenas para selectedCardForChat, que é passado para CardChatModal.
-  type CardDataForModal = PlayingCardDataType; // Renomeando para clareza no contexto local
-
-  const [selectedCardForChat, setSelectedCardForChat] = useState<CardDataForModal | null>(null);
+  const [selectedCardForChat, setSelectedCardForChat] = useState<PlayingCardDataType | null>(null);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [unreadStatuses, setUnreadStatuses] = useState<{ [key: string]: boolean }>({});
   const [newlyMatchedCardIds, setNewlyMatchedCardIds] = useState<string[]>([]);
@@ -71,9 +69,9 @@ function MatchesPage() {
         setHasUnseenGlobalMatches(false); // Se não há novos matches, garante que a flag global seja false
       }
 
-      // ATUALIZA O LOCALSTORAGE IMEDIATAMENTE APÓS CALCULAR OS NOVOS MATCHES.
-      // Isso marca todos os matches ATUAIS como "vistos" para a próxima vez que a página for carregada.
-      localStorage.setItem('kinklink_lastVisitedMatchIds', JSON.stringify(currentMatchIds));
+      // REMOVIDO: localStorage.setItem('kinklink_lastVisitedMatchIds', JSON.stringify(currentMatchIds));
+      // Esta linha causava o bug de marcar todas as cartas como vistas imediatamente.
+      // A atualização do localStorage agora ocorre apenas em handleCardClick e handleMatchesButtonClick.
 
     } else {
       setNewlyMatchedCardIds([]);
@@ -89,10 +87,10 @@ function MatchesPage() {
 
   const handleMatchesButtonClick = () => {
     // Esta função é chamada ao clicar no botão "Cartas" para voltar para a CardPilePage.
-    // A atualização de 'kinklink_lastVisitedMatchIds' já é feita no useEffect acima,
-    // garantindo que todos os matches na MatchesPage sejam marcados como vistos.
-    // Aqui, apenas atualizamos a contagem para o botão da CardPilePage e navegamos.
+    // A atualização de 'kinklink_lastVisitedMatchIds' é feita aqui para marcar todas as cartas como vistas.
     if (userMatchedCards) {
+      localStorage.setItem('kinklink_lastVisitedMatchIds', JSON.stringify(userMatchedCards.map(card => card.id)));
+      // Mantém a atualização da contagem para o botão na CardPilePage (se ainda usado lá)
       localStorage.setItem('kinklink_lastSeenMatchesCount', String(userMatchedCards.length));
     }
     setHasUnseenGlobalMatches(false); // Zera a flag global para o botão "Cartas"
@@ -157,7 +155,7 @@ function MatchesPage() {
   }, [user, userMatchedCards, cardChatsData, isLoadingCardChats, isChatModalOpen, selectedCardForChat, forceUpdateUnreadKey]);
 
   const handleCardClick = (card: MatchedCard) => { 
-    const cardForModal: PlayingCardDataType = { // PlayingCardDataType é importado para este uso
+    const cardForModal: PlayingCardDataType = {
         id: card.id,
         text: card.text,
         category: card.category,
@@ -257,9 +255,9 @@ function MatchesPage() {
     if (cardCount >= 2 && cardCount <= 4) {
       borderLevelClass = styles.topLinksBorderLevel1;
     } else if (cardCount >= 5 && cardCount <= 9) {
-      borderLevelClass = styles.borderLevel2;
+      borderLevelClass = styles.topLinksBorderLevel2;
     } else if (cardCount >= 10 && cardCount <= 14) {
-      borderLevelClass = styles.borderLevel3;
+      borderLevelClass = styles.topLinksBorderLevel3;
     } else if (cardCount >= 15) {
       borderLevelClass = styles.topLinksBorderLevel4;
     }

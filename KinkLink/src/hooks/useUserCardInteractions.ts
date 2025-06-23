@@ -11,13 +11,12 @@ import {
   query,
   where,
   getDoc,
-  Timestamp,
+  Timestamp, // Keep Timestamp as it's used for createdAt and lastActivity
   setDoc,
-  addDoc, // Para userCards
+  writeBatch,
   type PartialWithFieldValue,
   onSnapshot,
   orderBy,
-  deleteDoc,
   increment,
   arrayRemove, // Importar arrayRemove
 } from 'firebase/firestore';
@@ -294,51 +293,53 @@ export function useUserCardInteractions() {
     isCreatorSuggestion?: boolean
   ) => {
     if (!user || !user.id || !text.trim() || !user.coupleId || !user.partnerId) { // MODIFICADO AQUI
-        console.warn("Tentativa de criar carta sem usuário, texto, coupleId ou parceiro vinculado.");
-        return;
+      console.warn("Tentativa de criar carta sem usuário, texto, coupleId ou parceiro vinculado.");
+      return;
     }
-    // Ajuste para incluir o novo campo opcional no tipo
-    const newCardData: Omit<Card, 'id'> & { createdBy: string, coupleId: string, createdAt: Timestamp, isCreatorSuggestion?: boolean } = {
-      category: category,
-      text: text.trim(),
-      ...(intensity !== undefined && { intensity: intensity }),
-      createdBy: user.id,
-      coupleId: user.coupleId,
-      createdAt: Timestamp.now(),
-      ...(isCreatorSuggestion !== undefined && { isCreatorSuggestion: isCreatorSuggestion }),
-    };
+
     try {
-      const userCardsCollectionRef = collection(db, 'userCards');
-      const docRef = await addDoc(userCardsCollectionRef, newCardData);
-      console.log("Firestore: Carta personalizada criada com sucesso!", { id: docRef.id, ...newCardData });
+      // Inicia um batch para garantir que todas as operações sejam atômicas
+      const batch = writeBatch(db);
 
-      const newCardForInteraction: Card = {
-        id: docRef.id,
-        text: newCardData.text,
-        category: newCardData.category,
-        intensity: newCardData.intensity,
-        isCreatorSuggestion: newCardData.isCreatorSuggestion, // Passa para a interação também
+      // 1. Cria a nova carta na coleção 'userCards'
+      const newUserCardRef = doc(collection(db, 'userCards')); // Gera um novo ID
+      const newCardData: Omit<Card, 'id'> & { createdBy: string, coupleId: string, createdAt: Timestamp, isCreatorSuggestion?: boolean } = {
+        category: category,
+        text: text.trim(),
+        ...(intensity !== undefined && { intensity }),
+        createdBy: user.id,
+        coupleId: user.coupleId,
+        createdAt: Timestamp.now(),
+        ...(isCreatorSuggestion !== undefined && { isCreatorSuggestion }),
       };
-      await handleRegularCardInteraction(newCardForInteraction, true);
-      console.log(`[Interaction] Like automático registrado para a carta criada ${docRef.id} pelo usuário ${user.id.substring(0,5)}`);
+      batch.set(newUserCardRef, newCardData);
 
+      // 2. Cria a interação de "like" inicial para a carta recém-criada
+      const interactionDocRef = doc(db, 'couples', user.coupleId, 'likedInteractions', newUserCardRef.id);
+      const newInteractionData = {
+        cardData: { text: newCardData.text, category: newCardData.category, intensity: newCardData.intensity, isCreatorSuggestion: newCardData.isCreatorSuggestion },
+        likedByUIDs: [user.id],
+        isMatch: false, isHot: false, isCompleted: false,
+        lastActivity: Timestamp.now(), createdAt: Timestamp.now(),
+      };
+      batch.set(interactionDocRef, newInteractionData);
+
+      // 3. Sinaliza para o parceiro que há uma nova carta para ele ver
       const coupleDocRef = doc(db, 'couples', user.coupleId);
-      await updateDoc(coupleDocRef, {
+      batch.update(coupleDocRef, {
         nextCardForPartner: {
-          cardId: docRef.id,
-          cardData: { 
-            text: newCardData.text,
-            category: newCardData.category,
-            intensity: newCardData.intensity,
-            isCreatorSuggestion: newCardData.isCreatorSuggestion, // Inclui no cardData para o parceiro
-          },
-          forUserId: user.partnerId, // JÁ CORRIGIDO ANTERIORMENTE, MANTIDO
-          timestamp: Timestamp.now() 
+          cardId: newUserCardRef.id,
+          cardData: { text: newCardData.text, category: newCardData.category, intensity: newCardData.intensity, isCreatorSuggestion: newCardData.isCreatorSuggestion },
+          forUserId: user.partnerId,
+          timestamp: Timestamp.now()
         }
       });
-      console.log(`[UserCardCreation] Sinalizado para parceiro ${user.partnerId.substring(0,5)} ver a carta ${docRef.id}`); // JÁ CORRIGIDO ANTERIORMENTE, MANTIDO
 
-      // Verificar desbloqueio de skins após criar uma carta
+      // 4. Executa todas as operações do batch
+      await batch.commit();
+      console.log(`[UserCardCreation] Carta ${newUserCardRef.id} criada, interação registrada e parceiro notificado atomicamente.`);
+
+      // 5. Verificar desbloqueio de skins após a operação bem-sucedida
       if (user && checkAndUnlockSkins) {
         try {
           const newlyUnlocked = await checkAndUnlockSkins(exampleSkinsData);
@@ -360,26 +361,28 @@ export function useUserCardInteractions() {
       return;
     }
 
-    console.log(`[deleteMatch] Iniciando remoção do match/link para card ${cardId} do casal ${user.coupleId}`);
-
     try {
-      // 1. Deletar o documento de interação (match)
+      // Inicia um batch para garantir que todas as operações sejam atômicas
+      const batch = writeBatch(db);
+
+      // 1. Deleta o documento de interação (match)
       const interactionDocRef = doc(db, 'couples', user.coupleId, 'likedInteractions', cardId);
-      await deleteDoc(interactionDocRef);
-      console.log(`[deleteMatch] Documento likedInteraction ${cardId} do casal ${user.coupleId} deletado.`);
+      batch.delete(interactionDocRef);
 
-      // 2. Remover cardId de seenCards do usuário atual
+      // 2. Remove cardId de seenCards do usuário atual
       const currentUserDocRef = doc(db, 'users', user.id);
-      await updateDoc(currentUserDocRef, { seenCards: arrayRemove(cardId) });
-      console.log(`[deleteMatch] Card ${cardId} removido de seenCards do usuário ${user.id.substring(0,5)}.`);
+      batch.update(currentUserDocRef, { seenCards: arrayRemove(cardId) });
 
-      // 3. Remover cardId de seenCards do parceiro (se houver)
+      // 3. Remove cardId de seenCards do parceiro (se houver)
       if (user.partnerId) { // JÁ CORRIGIDO ANTERIORMENTE, MANTIDO
         const partnerDocRef = doc(db, 'users', user.partnerId); // JÁ CORRIGIDO ANTERIORMENTE, MANTIDO
-        await updateDoc(partnerDocRef, { seenCards: arrayRemove(cardId) });
-        console.log(`[deleteMatch] Card ${cardId} removido de seenCards do parceiro ${user.partnerId.substring(0,5)}.`); // JÁ CORRIGIDO ANTERIORMENTE, MANTIDO
+        batch.update(partnerDocRef, { seenCards: arrayRemove(cardId) });
       }
-      // A atualização do estado local de seenCards e matchedCards será feita pelos listeners do AuthContext e deste hook.
+
+      // 4. Executa todas as operações do batch
+      await batch.commit();
+      console.log(`[deleteMatch] Match ${cardId} e referências em seenCards removidos atomicamente para o casal ${user.coupleId}.`);
+
     } catch (error) {
       console.error(`Firestore: Erro ao deletar likedInteraction e atualizar seenCards para card ${cardId} do casal ${user.coupleId}:`, error);
     }

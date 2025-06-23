@@ -1,4 +1,4 @@
-/* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\CreateUserCardModal.module.css */
+/* CreateUserCardModal.module.css */
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -51,26 +51,69 @@
   flex-grow: 1;
 }
 
-.controlGroupIntensity {
-  /* Específico para o grupo de intensidade se precisar de menos espaço */
+/* Estilos para o novo contador de intensidade */
+.intensityCounter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--cor-fundo-elemento-sutil); /* Fundo sutil para o contador */
+  border-radius: 8px;
+  overflow: hidden; /* Garante que os cantos arredondados funcionem */
+  border: 1px solid var(--cor-borda);
+  height: 40px; /* Altura fixa para o contador */
 }
 
-.select {
-  width: 100%;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #555;
-  background-color: #3a3f47;
-  color: #e0e0e0;
-  font-size: 1em;
-  box-sizing: border-box;
+.counterButton {
+  background-color: var(--cor-acao-secundaria); /* Cor de destaque para os botões */
+  color: var(--cor-texto-sobre-acao-secundaria);
+  border: none;
+  padding: 0 15px;
+  font-size: 1.5em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease, filter 0.2s ease;
+  height: 100%; /* Ocupa a altura total do container */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.counterButton:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.counterButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.counterValueDisplay {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: var(--cor-texto-primario);
+  padding: 0 15px;
+  min-width: 30px; /* Garante espaço para números de 1 a 9 */
+  text-align: center;
+}
+
+/* Checkbox para notificar o parceiro */
+.notifyPartnerContainer {
+  display: flex;
+  align-items: center;
+  margin-bottom: 25px;
+  font-size: 0.95em;
+  color: #b0b0b0;
+}
+
+.checkboxInput {
+  margin-right: 10px;
+  width: 18px;
+  height: 18px;
   cursor: pointer;
 }
 
-.inputNumber {
-  composes: select;
-  width: 80px;
-  text-align: center;
+.checkboxLabel {
+  cursor: pointer;
 }
 
 .cardPreviewContainer {

@@ -1,3 +1,4 @@
+// CreateUserCardModal.tsx
 import React, { useState, useEffect } from 'react';
 import type { Card } from '../data/cards'; // Importa o tipo Card para usar a união de categorias
 import CardBack from './CardBack'; // Importa o CardBack
@@ -91,17 +92,31 @@ function CreateUserCardModal({ isOpen, onClose, onSubmit }: CreateUserCardModalP
               ))}
             </select>
           </div>
-          <div className={styles.controlGroupIntensity}>
+          <div className={styles.controlGroup}> {/* Usar controlGroup genérico */}
             <label className={styles.label} htmlFor="card-intensity">Intensidade:</label>
-            <input
-              type="number"
-              id="card-intensity"
-              className={styles.inputNumber}
-              value={intensity}
-              onChange={(e) => setIntensity(Math.max(1, Math.min(9, parseInt(e.target.value, 10) || 1)))} // Limita entre 1 e 9
-              min="1"
-              max="9" // Corrigido para permitir até 9, alinhado com a lógica do onChange
-            />
+            <div className={styles.intensityCounter}>
+              <button
+                type="button"
+                className={styles.counterButton}
+                onClick={() => setIntensity(prev => Math.max(1, prev - 1))}
+                disabled={intensity <= 1}
+                aria-label="Diminuir intensidade"
+              >
+                -
+              </button>
+              <span className={styles.counterValueDisplay} id="card-intensity" aria-live="polite">
+                {intensity}
+              </span>
+              <button
+                type="button"
+                className={styles.counterButton}
+                onClick={() => setIntensity(prev => Math.min(9, prev + 1))}
+                disabled={intensity >= 9}
+                aria-label="Aumentar intensidade"
+              >
+                +
+              </button>
+            </div>
           </div>
         </div>
 

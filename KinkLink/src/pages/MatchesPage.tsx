@@ -191,6 +191,16 @@ function MatchesPage() {
     [] 
   );
 
+  const handleCloseChat = () => {
+    setIsChatModalOpen(false);
+    setSelectedCardForChat(null);
+
+    // Se a URL ainda tiver o hash da carta, limpa-o para evitar reabertura ao navegar.
+    if (location.hash.startsWith('#card-')) {
+      navigate(location.pathname, { replace: true });
+    }
+  };
+
   const handleToggleHot = async (cardId: string, event: React.MouseEvent) => {
     event.stopPropagation(); 
     if (user && user.coupleId) {
@@ -382,7 +392,7 @@ function MatchesPage() {
       {isChatModalOpen && selectedCardForChat && user && (
         <CardChatModal
           isOpen={isChatModalOpen} 
-          onClose={() => { setIsChatModalOpen(false); setSelectedCardForChat(null); }}
+          onClose={handleCloseChat}
           cardId={selectedCardForChat.id}
           cardTitle={selectedCardForChat.text} 
           currentChatLastMessageTimestamp={

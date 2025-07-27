@@ -7,6 +7,8 @@ import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
 import MatchModal from '../components/MatchModal';
 import PlayingCard, { type CardData as PlayingCardDataType } from '../components/PlayingCard';
 import CreateUserCardModal from '../components/CreateUserCardModal';
+import toast from 'react-hot-toast'; // Importa o toast
+import PeekInvitation from '../components/PeekInvitation/PeekInvitation'; // Importa o novo componente
 import ConexaoCardModal from '../components/ConexaoCardModal';
 import { useCardPileLogic } from '../hooks/useCardPileLogic';
 import CarinhosMimosModal from '../components/CarinhosMimosModal';
@@ -33,6 +35,9 @@ function CardPilePage() {
     allConexaoCards,
     undoLastDislike, // Nova função do hook
     canUndoDislike,  // Novo estado do hook
+    cardToPeek,      // Carta para espiar
+    acceptPeek,      // Função para aceitar espiar
+    rejectPeek,      // Função para rejeitar espiar
   } = useCardPileLogic();
   const { isLoadingSkins } = useSkin();
   const { user } = useAuth(); // Obter o usuário atual
@@ -171,6 +176,16 @@ function CardPilePage() {
   // Determina se os botões de ação da carta devem ser desabilitados
   const areActionButtonsDisabled = !!exitingCard || isCardFlipped;
 
+  const handleAcceptPeek = () => {
+    acceptPeek();
+    // Substitui o alert por um toast
+    toast("Considere realinhar seu filtro: com consentimento e parceria vários mundos podem ser alcançados!", {
+      icon: '🤫',
+    });
+  };
+
+  // A função rejectPeek do hook já faz o que é preciso, então não precisamos de um wrapper.
+
   if (isLoadingSkins) {
     return <div className={styles.page}><p>Carregando skins...</p></div>;
   }
@@ -181,6 +196,13 @@ function CardPilePage() {
         <MatchModal
           card={currentMatchCard}
           onClose={() => setShowMatchModal(false)}
+        />
+      )}
+
+      {cardToPeek && (
+        <PeekInvitation
+          onAccept={handleAcceptPeek}
+          onReject={rejectPeek}
         />
       )}
 

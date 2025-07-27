@@ -36,6 +36,18 @@
         "description": "Incluir um quinto tipo de carta ('Conexão', category: 'conexao') misturada às outras na pilha. Essas cartas contêm sugestões de pequenos gestos, carinhos ou ações positivas para o parceiro. Elas não geram match. O aceite ou rejeição da sugestão é registrado internamente em contadores (`conexaoAccepted`, `conexaoRejected`) no documento do usuário na coleção `users`.",
         "category": "Engagement/Relationship Nurturing",
         "implementationNotes": "Gatilho de exibição baseado em contadores de likes/matches (resetam por sessão no MVP). Modal 'Carinhos & Mimos' lista cartas de conexão vistas com checklist individual (localStorage)."
+      },
+      {
+        "id": "F2-MVP",
+        "name": "Notificações Push (Básico)",
+        "description": "Notifica usuários sobre eventos importantes como novos 'Links' (matches), quando o casal é vinculado, e sugestões semanais. Implementado via Firebase Cloud Functions (FCM).",
+        "status": "Concluído"
+      },
+      {
+        "id": "F3-MVP",
+        "name": "Gamificação de Temas/Skins (Básico)",
+        "description": "Permite a personalização visual do app (temas, fundos, etc.). A estrutura inicial e alguns temas (Cyberpunk, Windows XP) já estão implementados, com a lógica de desbloqueio baseada em engajamento planejada para o futuro.",
+        "status": "Implementação Inicial Concluída"
       }
     ],
     "future": [
@@ -47,10 +59,8 @@
       "Sugestão de Cartas pelo Usuário (com moderação/curadoria para uso geral)",
       "Vinculação via QR Code / Palavras Amigáveis (alternativa ao código)",
       "Categorias/Filtros para Cartas (na hora do swipe)",
-      "Notificações Push (PWA/Capacitor - ex: novo match)",
       "Tela 'Novidades em Breve'",
       "Onboarding visual (GIF/Tutorial pós-vinculação, talvez mini-game)",
-      "Gamificação de Temas/Skins: Liberar personalizações visuais (temas do app, fundos de carta, variações do logo) baseadas em checkpoints de engajamento do casal (nº de 'Links', interações em cartas 'Conexão', atividade no chat, etc.). A célula que envolve cada carrossel de categoria na tela de 'Links' (`.carouselCell`) será um alvo para aplicação de skins ('paninhos').",
       "Funcionalidades PWA completas (instalação, offline básico para matches/perfil).",
       "Transformar em App de Celular (iOS/Android) usando Capacitor para distribuição em lojas e acesso a funcionalidades nativas.",
       "Gerenciamento/Limpeza automática de `pendingLinks` expirados (via Cloud Function agendada, se necessário)",
@@ -242,7 +252,7 @@
     "Estratégia de lançamento e marketing inicial"
   ],
   "communicationNotes": "Explique os passos de forma extremamente detalhada, como se eu fosse um iniciante completo idiota ou tivesse acabado de ter um AVC. Usar linguagem simples e dividir em passos bem pequenos.",
-"lastUpdated": "2024-06-16T12:00:00Z",
+"lastUpdated": "2024-07-25T18:00:00Z",
   "developmentPrinciples": {
     "modularity": {
       "goal": "Manter o código organizado, reutilizável e fácil de manter.",
@@ -317,13 +327,11 @@
     "3. (Após os dois acima) TESTAR O FLUXO DE VINCULAÇÃO COMPLETO com duas contas recém-criadas e funcionais."
   ],
   "sessionCheckpointNotes": [
-    "SESSION CHECKPOINT & NEXT STEPS FOCUS (Data: 2024-06-16)",
+    "SESSION CHECKPOINT & NEXT STEPS FOCUS (Data: 2024-07-25)",
     "",
     "STATUS ATUAL:",
-    "- Funcionalidade de desvincular casais foi corrigida e testada, incluindo o 'self-healing' para o ex-parceiro e a deleção do 'pendingLink' após a conclusão do vínculo.",
-    "- Botão 'Oops!' para desfazer o último 'Não Topo!' implementado na CardPilePage.",
-    "- Melhorias de UI/UX: Botão 'Copiar Código' no CreateLink, padronização de botões na LinkCouplePage, botão de desvincular destacado em vermelho, mensagem de privacidade no SignupPage.",
-    "- Discussão sobre futura funcionalidade: 'Sala de Convidados' (Modo 'Mesa de Poker') para interação social com amigos.",
+    "- Funcionalidades de Notificações Push e Gamificação de Temas/Skins foram movidas de 'future' para 'mvp' para refletir o estado atual do código.",
+    "- O arquivo README.md do frontend foi atualizado para incluir as novas funcionalidades e corrigir a descrição do chat.",
     "",
     "PRÓXIMOS PASSOS (Quando retomarmos):",
     "1. Considerar a implementação da 'Sala de Convidados' em fases, começando com um MVP.",

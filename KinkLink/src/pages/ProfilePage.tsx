@@ -2,9 +2,10 @@
 import React, { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { db } from '../firebase'; // Import db
-import { doc, getDoc } from 'firebase/firestore'; // Import firestore functions
+import { db } from '../firebase';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import styles from './ProfilePage.module.css';
+import IntensitySelector from '../components/IntensitySelector/IntensitySelector';
 
 function ProfilePage() {
   const { user, logout, updateUser, isLoading: authIsLoading, resetNonMatchedSeenCards } = useAuth(); // Adicionado resetNonMatchedSeenCards
@@ -122,6 +123,19 @@ function ProfilePage() {
     }
   };
 
+  const handleIntensityChange = async (newLevel: number) => {
+    if (user?.id) {
+      const userDocRef = doc(db, 'users', user.id);
+      try {
+        await updateDoc(userDocRef, { maxIntensity: newLevel });
+        // Opcional: Adicionar um toast/feedback de sucesso
+        console.log(`[ProfilePage] Intensidade atualizada para o nível ${newLevel}`);
+      } catch (error) {
+        console.error("Erro ao atualizar a intensidade:", error);
+        // Opcional: Adicionar um toast/feedback de erro
+      }
+    }
+  };
 
 
   // Função comentada pois o botão que a utiliza está comentado
@@ -323,6 +337,15 @@ function ProfilePage() {
           <Link to="/skins" className={`${styles.actionButton} genericButton`}>
             Minhas Skins
           </Link>
+        </div>
+
+        {/* SEÇÃO DE FILTRO DE INTENSIDADE */}
+        <div className={`${styles.section} klnkl-themed-panel`}>
+          <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>Filtro de Intensidade</h2>
+          <IntensitySelector
+            currentLevel={user?.maxIntensity ?? 8} // Usa 8 (mostrar tudo) como padrão se não definido
+            onLevelChange={handleIntensityChange}
+          />
         </div>
 
         {/* SEÇÃO DE REAVALIAR CARTAS */}

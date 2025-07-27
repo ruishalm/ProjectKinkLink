@@ -32,6 +32,9 @@ interface UseCardPileLogicReturn {
   allConexaoCards: Card[]; // Para o modal Carinhos & Mimos
   undoLastDislike: () => Promise<void>; // Nova função para desfazer
   canUndoDislike: boolean; // Novo estado para habilitar o botão de desfazer
+  cardToPeek: Card | null; // Carta de alta intensidade para "espiar"
+  acceptPeek: () => void; // Função para aceitar espiar
+  rejectPeek: () => void; // Função para rejeitar espiar
 }
 
 interface NextCardForPartnerData {
@@ -58,6 +61,7 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [currentMatchCard, setCurrentMatchCard] = useState<Card | null>(null);
   const [currentCard, setCurrentCard] = useState<Card | null>(null);
+  const [cardToPeek, setCardToPeek] = useState<Card | null>(null);
 
   const [conexaoCardsPool, setConexaoCardsPool] = useState<Card[]>([]);
   const [unseenConexaoCards, setUnseenConexaoCards] = useState<Card[]>([]);
@@ -78,15 +82,25 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
     const fetchCards = async () => {
       setIsLoadingCards(true);
       try {
-        const cardsCollectionRef = collection(db, 'cards');
-        const cardsSnapshot = await getDocs(cardsCollectionRef);
+        // Define a intensidade máxima, com um padrão de 8 (mostrar tudo) se não estiver definida no usuário.
+        const maxIntensity = user?.maxIntensity ?? 8;
+
+        const standardCardsQuery = query(
+          collection(db, 'cards'),
+          where('intensity', '<=', maxIntensity)
+        );
+        const cardsSnapshot = await getDocs(standardCardsQuery);
         const fetchedStandardCards = cardsSnapshot.docs.map(d => ({ id: d.id, ...d.data() } as Card));
         setAllCardsFromDb(fetchedStandardCards);
-        console.log('[useCardPileLogic] Cartas padrão carregadas:', fetchedStandardCards.length);
+        console.log(`[useCardPileLogic] Cartas padrão (até intensidade ${maxIntensity}) carregadas:`, fetchedStandardCards.length);
 
         if (user?.coupleId) {
-          const userCardsQuery = query(collection(db, 'userCards'), where('coupleId', '==', user.coupleId));
-          const userCardsSnapshot = await getDocs(userCardsQuery);
+          const userCardsRef = query(
+            collection(db, 'userCards'),
+            where('coupleId', '==', user.coupleId),
+            where('intensity', '<=', maxIntensity)
+          );
+          const userCardsSnapshot = await getDocs(userCardsRef);
           const fetchedUserCards = userCardsSnapshot.docs.map(d => ({ id: d.id, ...d.data() } as Card));
           setUserCreatedCards(fetchedUserCards);
           console.log('[useCardPileLogic] Cartas do usuário carregadas:', fetchedUserCards.length);
@@ -102,7 +116,7 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
       }
     };
     fetchCards();
-  }, [user?.coupleId]);
+  }, [user?.coupleId, user?.maxIntensity]);
 
   // Efeito para ouvir por carta nova criada pelo parceiro
   useEffect(() => {
@@ -207,11 +221,19 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
 
     // Prioridade 2: Likes do parceiro (se for a vez no ciclo)
     if (!nextCard && cardSelectionCycle === 2 && partnerLikesQueue.length > 0) {
-      const partnerLikedCard = partnerLikesQueue.find((card: Card) => card.id !== excludeCardId && !seenCards.includes(card.id));
+      const partnerLikedCard = partnerLikesQueue.find((card: Card) => card.id !== excludeCardId); // Não precisa checar seenCards aqui, pois a fila já é de não vistos
       if (partnerLikedCard) {
-        nextCard = partnerLikedCard;
-        console.log(`[useCardPileLogic] Priorizando like do parceiro: ${nextCard.id}`);
-        setPartnerLikesQueue(prev => prev.filter(card => card.id !== nextCard?.id));
+        const maxIntensity = user?.maxIntensity ?? 8; // Usa 8 (mostrar tudo) como padrão
+        if ((partnerLikedCard.intensity ?? 0) > maxIntensity) {
+          console.log(`[useCardPileLogic] Like do parceiro com intensidade alta detectado. Acionando 'peek'. Card: ${partnerLikedCard.id}`);
+          setCardToPeek(partnerLikedCard);
+          setCurrentCard(null); // Garante que a pilha não mostre nada enquanto o modal de peek é exibido.
+          return; // Para a seleção aqui.
+        } else {
+          nextCard = partnerLikedCard;
+          console.log(`[useCardPileLogic] Priorizando like do parceiro: ${nextCard.id}`);
+          setPartnerLikesQueue(prev => prev.filter(card => card.id !== nextCard?.id));
+        }
       }
     }
 
@@ -231,8 +253,8 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
     if (!isLoadingCards) {
       setCurrentCard(nextCard);
     }
-    setCardSelectionCycle(prev => (prev + 1) % 3);
-  }, [generalUnseen, isLoadingCards, partnerNewCard, seenCards, user?.coupleId, cardSelectionCycle, partnerLikesQueue]);
+    setCardSelectionCycle(prev => (prev + 1) % 3); // Ciclo 0, 1, 2
+  }, [generalUnseen, isLoadingCards, partnerNewCard, seenCards, user?.coupleId, cardSelectionCycle, partnerLikesQueue, user?.maxIntensity]); // Adicionado user?.maxIntensity
 
   // Efeito para selecionar a primeira carta
   useEffect(() => {
@@ -327,6 +349,21 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
     setCurrentConexaoCardForModal(null);
   };
 
+  // Funções para lidar com a "espiada"
+  const acceptPeek = useCallback(() => {
+    if (!cardToPeek) return;
+    setCurrentCard(cardToPeek);
+    setCardToPeek(null);
+    setPartnerLikesQueue(prev => prev.filter(card => card.id !== cardToPeek.id)); // Remove da fila de prioridade
+  }, [cardToPeek]);
+
+  const rejectPeek = useCallback(() => {
+    if (!cardToPeek) return;
+    const rejectedCardId = cardToPeek.id;
+    setCardToPeek(null);
+    selectNextCard(rejectedCardId); // Seleciona a próxima carta, excluindo a que foi rejeitada
+  }, [cardToPeek, selectNextCard]);
+
   const undoLastDislike = useCallback(async () => {
     if (!lastDislikedCard || !user?.id) {
       console.warn("[useCardPileLogic] Nenhuma carta 'Não Topo!' para desfazer ou usuário não disponível.");
@@ -375,5 +412,8 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
     allConexaoCards,
     undoLastDislike, // Expõe a nova função
     canUndoDislike: !!lastDislikedCard, // Expõe um booleano para a UI
+    cardToPeek,
+    acceptPeek,
+    rejectPeek,
   };
 }

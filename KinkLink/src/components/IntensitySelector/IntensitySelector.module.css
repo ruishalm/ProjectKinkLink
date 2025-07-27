@@ -1,0 +1,79 @@
+.selectorContainer {
+  position: relative;
+  width: 100%;
+  max-width: 350px;
+  margin: 1rem auto;
+}
+
+.mainLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--cor-texto-primario);
+}
+
+.selectorDisplay {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--cor-borda);
+  border-radius: 8px;
+  background-color: var(--cor-fundo-elemento);
+  color: var(--cor-texto-primario);
+  font-size: 1em;
+  cursor: pointer;
+  text-align: left;
+}
+
+.arrow {
+  transition: transform 0.2s ease-in-out;
+}
+
+.arrowUp {
+  transform: rotate(180deg);
+}
+
+.optionsList {
+  position: absolute;
+  top: 105%;
+  left: 0;
+  right: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  background-color: var(--cor-fundo-elemento);
+  z-index: 10;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.optionItem {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.optionItem:last-child {
+  border-bottom: none;
+}
+
+.optionItem:hover {
+  background-color: var(--cor-primaria);
+  color: var(--cor-texto-sobre-primaria);
+}
+
+.intensityWarning {
+  font-size: 0.8em;
+  opacity: 0.8;
+  margin: 4px 0 0 0;
+  color: var(--cor-aviso);
+}
+
+.optionItem:hover .intensityWarning {
+  color: var(--cor-texto-sobre-primaria);
+  opacity: 0.9;
+}

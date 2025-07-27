@@ -78,14 +78,15 @@ Inicia um servidor local para pré-visualizar a build de produção contida na p
 * Criação de cartas personalizadas pelo casal, visíveis apenas para eles.
 * Detecção de "match" quando ambos os parceiros curtem a mesma carta (exceto "Conexão").
 * Lista de matches compartilhada.
-* Chat básico para cartas que deram match (simulado no frontend no MVP).
+* Chat interno para cada match, com persistência de mensagens no Firestore.
 * Desvinculação de contas.
 * Tela de perfil básica com opção de troca de tema.
 * Aviso de conteúdo NSFW.
+* Notificações Push para novos matches, mensagens e outras atividades.
+* Sistema de Temas/Skins para personalização da interface.
 
 ## Próximos Passos (Desenvolvimento)
 
 O desenvolvimento seguirá os marcos definidos no arquivo `project_context.json`, focando na integração com o backend Firebase e na implementação completa das funcionalidades do MVP.
 
 ---
-

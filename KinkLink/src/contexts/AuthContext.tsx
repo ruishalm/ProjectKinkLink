@@ -65,6 +65,7 @@ export interface User {
   isSupporter?: boolean; // Novo campo para indicar se o usuário é um apoiador
   isAdmin?: boolean; // Campo para status de admin lido do Firestore
   feedbackTickets?: UserFeedback[]; // Novo campo para os tickets de feedback
+  maxIntensity?: number; // Filtro de intensidade máxima para as cartas
   // fcmToken?: string | null; // Removido - será gerenciado pelo NotificationContext se necessário
 } // Adicionado fcmToken aqui
 
@@ -137,6 +138,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
               isSupporter: firestoreData.isSupporter || false,
               isAdmin: firestoreData.isAdmin || false,
               feedbackTickets: firestoreData.feedbackTickets || [],
+              maxIntensity: firestoreData.maxIntensity ?? 8, // Adiciona o campo com fallback
               // fcmToken: currentUserState?.fcmToken || null, // Removido
             } as User));
           } else {
@@ -291,6 +293,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         isSupporter: false, // Apoiador padrão é false no signup
         isAdmin: false, // Usuários padrão não são admins
         feedbackTickets: [], // Inicializa feedbackTickets como array vazio
+        maxIntensity: 8, // Filtro desativado por padrão
         createdAt: serverTimestamp() as Timestamp,
       };
       await setDoc(newUserDocRef, userData);
@@ -349,6 +352,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
           isSupporter: false, // Apoiador padrão é false no signup com Google
           isAdmin: false, // Usuários padrão não são admins
           feedbackTickets: [], // Inicializa feedbackTickets como array vazio
+          maxIntensity: 8, // Filtro desativado por padrão
           createdAt: serverTimestamp() as Timestamp,
         };
         await setDoc(userDocRef, userData);

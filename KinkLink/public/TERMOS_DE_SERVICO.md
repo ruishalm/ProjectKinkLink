@@ -1,6 +1,6 @@
 Termos de Serviço KinkLink
 
-Última atualização: [Data da Última Atualização]
+Última atualização: 25 de Julho de 2024
 
 Bem-vindo(a) ao KinkLink!
 
@@ -10,6 +10,7 @@ Estes Termos de Serviço ("Termos") governam o seu acesso e uso do aplicativo m�
 
 Idade e Natureza do Serviço: Você declara e garante que tem pelo menos 18 anos de idade (ou a maioridade legal aplicável em sua jurisdição) para criar uma conta e usar o Serviço. O KinkLink é uma plataforma destinada a adultos e para uso por casais. O Serviço pode conter temas e conteúdos de natureza adulta, sexualmente explícitos e não apropriados para menores (NSFW). Ao usar o Serviço, você confirma que está ciente e aceita a natureza do conteúdo que pode encontrar.
 Exclusivamente para Casais: O Serviço é projetado e se destina ao uso por indivíduos em um relacionamento consensual de casal.
+**Níveis de Intensidade e Conteúdo:** As cartas e atividades no KinkLink são classificadas por níveis de intensidade. Você reconhece que, a partir do nível 4, as sugestões podem incluir ou fazer referência à interação com terceiros. A participação em tais atividades é de sua inteira responsabilidade e requer o consentimento explícito de todas as partes envolvidas.
 [...] (manter o restante da seção 2 do esboço anterior: Cadastro, Segurança da Conta, Vinculação de Contas)
 
 O SERVIÇO É FORNECIDO "COMO ESTÁ" E "CONFORME DISPONÍVEL", SEM GARANTIAS DE QUALQUER TIPO, SEJAM EXPRESSAS OU IMPLÍCITAS, INCLUINDO, MAS NÃO SE LIMITANDO A, GARANTIAS IMPLÍCITAS DE COMERCIALIZAÇÃO, ADEQUAÇÃO A UM PROPÓSITO ESPECÍFICO, NÃO VIOLAÇÃO OU CURSO DE DESEMPENHO.

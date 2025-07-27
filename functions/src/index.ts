@@ -474,3 +474,106 @@ export const onLinkCompletedSendNotification = onDocumentWritten(
     );
   }
 );
+
+/**
+ * Cloud Function para notificar um usuário quando uma nova mensagem de chat é enviada.
+ * Acionada quando um documento é criado em 'couples/{coupleId}/cardChats/{cardId}/messages/{messageId}'.
+ */
+export const onNewChatMessage = onDocumentWritten(
+  {
+    region: "southamerica-east1",
+    document: "couples/{coupleId}/cardChats/{cardId}/messages/{messageId}",
+  },
+  async (event) => {
+    // Só aciona na criação de uma nova mensagem
+    if (!event.data?.after.exists || event.data.before.exists) {
+      return;
+    }
+
+    const messageData = event.data.after.data();
+    if (!messageData) {
+      logger.info("No message data found.");
+      return;
+    }
+
+    const { coupleId, cardId } = event.params;
+    const senderId = messageData.userId;
+    const messageText = messageData.text || "Nova mensagem";
+
+    // Busca o documento do casal para encontrar o destinatário
+    const coupleDoc = await db.doc(`couples/${coupleId}`).get();
+    if (!coupleDoc.exists) {
+      logger.error(`Couple document ${coupleId} not found.`);
+      return;
+    }
+
+    const coupleData = coupleDoc.data();
+    if (!coupleData || !Array.isArray(coupleData.members)) {
+      logger.error(`Couple data or members array is undefined for couple ${coupleId}.`);
+      return;
+    }
+    const members = coupleData.members as string[];
+    const recipientId = members.find((id) => id !== senderId);
+
+    if (!recipientId) {
+      logger.error(`Recipient not found for message in couple ${coupleId}.`);
+      return;
+    }
+
+    // Busca o nome de usuário do remetente para uma notificação mais amigável
+    let senderUsername = "Seu par";
+    try {
+      const senderDoc = await db.doc(`users/${senderId}`).get();
+      if (senderDoc.exists) {
+        senderUsername = senderDoc.data()?.username || "Seu par";
+      }
+    } catch (error) {
+      logger.error("Error fetching sender's username:", error);
+    }
+
+    const notificationTitle = `Nova mensagem de ${senderUsername}`;
+    const notificationBody = `"${messageText.substring(0, 80)}${messageText.length > 80 ? "..." : ""}"`;
+
+    await sendNotificationToUser(
+      recipientId,
+      notificationTitle,
+      notificationBody,
+      {
+        type: "chat_message",
+        coupleId: coupleId,
+        cardId: cardId,
+        url: `/matches#card-${cardId}`,
+      }
+    );
+  }
+);
+
+/**
+ * Cloud Function para notificar um usuário quando seu parceiro cria uma nova carta.
+ * Acionada quando o campo 'nextCardForPartner' é escrito no documento do casal.
+ */
+export const onNewUserCardSuggestion = onDocumentWritten(
+  {
+    region: "southamerica-east1",
+    document: "couples/{coupleId}",
+  },
+  async (event) => {
+    const beforeData = event.data?.before.data();
+    const afterData = event.data?.after.data();
+
+    // Aciona apenas se 'nextCardForPartner' foi adicionado ou alterado
+    const afterCard = afterData?.nextCardForPartner;
+    if (afterCard && JSON.stringify(beforeData?.nextCardForPartner) !== JSON.stringify(afterCard)) {
+      const recipientId = afterCard.forUserId;
+      const cardText = afterCard.cardData?.text || "uma nova carta";
+
+      const notificationTitle = "Nova sugestão do seu par! 💌";
+      const notificationBody = `Seu par criou uma nova carta para vocês: "${cardText.substring(0, 100)}${cardText.length > 100 ? "..." : ""}"`;
+
+      await sendNotificationToUser(recipientId, notificationTitle, notificationBody, {
+        type: "new_card_suggestion",
+        url: "/cards", // Direciona o usuário para a pilha de cartas
+      });
+    }
+  }
+);

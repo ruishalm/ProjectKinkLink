@@ -2,6 +2,7 @@
 import React, { Suspense, lazy, useState, useCallback } from 'react'; // Adicionado useState, useCallback, useEffect
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import './App.css';
+import { Toaster } from 'react-hot-toast';
 import './config/skins/styles/panel-styles.css';
 import './config/skins/styles/button-styles.css';
 import { useAuth } from './contexts/AuthContext';
@@ -127,6 +128,17 @@ function App() {
     <SkinProvider>
       <div className="appContainer">
         <NotificationProvider> {/* <<< ENVOLVER COM O NOTIFICATION PROVIDER */}
+          <Toaster
+            position="bottom-center"
+            toastOptions={{
+              style: {
+                background: 'var(--cor-fundo-elemento)',
+                color: 'var(--cor-texto-primario)',
+                border: '1px solid var(--cor-borda)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              },
+            }}
+          />
           <UnlockNotificationModal />
           <Header
             showInstallButton={showInstallButtonInHeader}

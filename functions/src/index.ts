@@ -549,31 +549,45 @@ export const onNewChatMessage = onDocumentWritten(
 );
 
 /**
- * Cloud Function para notificar um usuário quando seu parceiro cria uma nova carta.
- * Acionada quando o campo 'nextCardForPartner' é escrito no documento do casal.
+ * Lógica para enviar a notificação mensal de apoio.
+ * Busca todos os usuários e envia a notificação para cada um.
  */
-export const onNewUserCardSuggestion = onDocumentWritten(
+async function enviarNotificacaoDeApoio() {
+  logger.info("Iniciando envio da notificação mensal de apoio.");
+
+  const usersSnapshot = await db.collection("users").get();
+  if (usersSnapshot.empty) {
+    logger.info("Nenhum usuário encontrado para notificar.");
+    return;
+  }
+
+  const notificationTitle = "💖 Um convite do KinkLink!";
+  const notificationBody = "Se você curte o app, que tal nos apoiar? Toque para saber mais!";
+  const notificationData = {
+    type: "support_notification",
+    url: "/#openSupportModal", // URL para o frontend identificar e abrir o modal
+  };
+
+  for (const userDoc of usersSnapshot.docs) {
+    await sendNotificationToUser(userDoc.id, notificationTitle, notificationBody, notificationData);
+  }
+  logger.info(`Notificação de apoio enviada para ${usersSnapshot.size} usuários.`);
+}
+
+/**
+ * Cloud Function agendada para rodar todo dia 10 do mês às 16:00.
+ * Envia uma notificação convidando os usuários a apoiarem o projeto.
+ */
+export const notificacaoMensalDeApoio = onSchedule(
   {
+    schedule: "0 16 10 * *",
+    timeZone: "America/Sao_Paulo",
     region: "southamerica-east1",
-    document: "couples/{coupleId}",
   },
   async (event) => {
-    const beforeData = event.data?.before.data();
-    const afterData = event.data?.after.data();
-
-    // Aciona apenas se 'nextCardForPartner' foi adicionado ou alterado
-    const afterCard = afterData?.nextCardForPartner;
-    if (afterCard && JSON.stringify(beforeData?.nextCardForPartner) !== JSON.stringify(afterCard)) {
-      const recipientId = afterCard.forUserId;
-      const cardText = afterCard.cardData?.text || "uma nova carta";
-
-      const notificationTitle = "Nova sugestão do seu par! 💌";
-      const notificationBody = `Seu par criou uma nova carta para vocês: "${cardText.substring(0, 100)}${cardText.length > 100 ? "..." : ""}"`;
-
-      await sendNotificationToUser(recipientId, notificationTitle, notificationBody, {
-        type: "new_card_suggestion",
-        url: "/cards", // Direciona o usuário para a pilha de cartas
-      });
-    }
+    logger.info("Executando a notificação mensal de apoio agendada.", { scheduleTime: event.scheduleTime });
+    await enviarNotificacaoDeApoio().catch((error) => {
+      logger.error("Erro ao executar a notificação mensal de apoio:", error);
+    });
   }
 );

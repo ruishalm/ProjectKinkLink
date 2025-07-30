@@ -241,8 +241,10 @@ service cloud.firestore {
       }
       allow create: if request.auth != null &&
                        isMemberOfTheCoupleForUserCard(request.resource.data.coupleId);
-      allow read, update, delete: if request.auth != null && 
-                                     isMemberOfTheCoupleForUserCard(resource.data.coupleId);
+      // Admins podem ler todas as cartas de usuário para exportação, membros podem ler as suas.
+      allow read: if (request.auth != null && isMemberOfTheCoupleForUserCard(resource.data.coupleId)) || isUserAdmin();
+      // Apenas membros podem atualizar ou deletar.
+      allow update, delete: if request.auth != null && isMemberOfTheCoupleForUserCard(resource.data.coupleId);
     }
 
     // Regra para a coleção 'cards'

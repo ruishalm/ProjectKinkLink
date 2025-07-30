@@ -1,11 +1,12 @@
-// firebase-messaging-sw.js
+/* eslint-disable no-restricted-globals */
 
 // Scripts para o SDK do Firebase (versões compat, mais simples para service workers)
 importScripts('https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging-compat.js');
 
+
 const firebaseConfig = {
-  apiKey: "AIzaSyACNoydfN7XVHtfck5eFWrIsf4LhtFyLeQ", // Sua chave de API
+  apiKey: "AIzaSyACNoydfN7XVHtfck5eFWrIsf4LhtFyLeQ",
   authDomain: "kinklink-a4607.firebaseapp.com",
   projectId: "kinklink-a4607",
   storageBucket: "kinklink-a4607.firebasestorage.app",
@@ -23,79 +24,46 @@ if (!firebase.apps.length) {
 
 const messaging = firebase.messaging();
 
-// Eventos do ciclo de vida do PWA integrados
-self.addEventListener('install', (event) => {
-  console.log('[firebase-messaging-sw.js] KinkLink PWA: Instalado');
-  // Força o service worker a ativar imediatamente
-  event.waitUntil(self.skipWaiting()); 
-});
+// Opcional: Manipulador para mensagens recebidas enquanto o app está em segundo plano.
+messaging.onBackgroundMessage((payload) => {
+  console.log(
+    "[firebase-messaging-sw.js] Received background message ",
+    payload
+  );
 
-self.addEventListener('activate', (event) => {
-  console.log('[firebase-messaging-sw.js] KinkLink PWA: Ativado');
-  // Permite que o SW controle clientes não controlados imediatamente
-  event.waitUntil(self.clients.claim()); 
-});
-
-self.addEventListener('fetch', (event) => {
-  // Por enquanto, não faremos nada com o fetch, apenas deixamos a rede passar.
-  // Futuramente, estratégias de cache podem ser implementadas aqui.
-  // console.log('[firebase-messaging-sw.js] KinkLink PWA: Fetching', event.request.url);
-  // event.respondWith(fetch(event.request)); // Comportamento padrão já é este se não houver event.respondWith
-});
-
-// Callback para quando uma mensagem é recebida enquanto o app está em segundo plano ou fechado
-messaging.onBackgroundMessage(function(payload) {
-  console.log('[firebase-messaging-sw.js] Received background message ', payload);
-
-  // Customize a notificação aqui
-  const notificationTitle = payload.notification?.title || 'Nova Notificação KinkLink';
+  // Customize notification here
+  const notificationTitle = payload.notification.title;
   const notificationOptions = {
-    body: payload.notification?.body || 'Você tem uma nova atividade!',
-    icon: '/icons/kinklogo192.png', // Atualizado para usar seu logo
-    // Você pode adicionar mais opções como 'badge', 'image', 'actions', etc.
-    // Passa os dados do payload original ou um URL padrão para uso no 'notificationclick'
-    data: payload.data || { url: '/' } 
+    body: payload.notification.body,
+    icon: payload.notification.icon || "/icons/kinklogo192.png", // Fallback icon
+    data: payload.data, // Passa todos os dados para o evento de clique
   };
 
-  // Adicionando logs e try-catch para depuração do showNotification
-  try {
-    console.log('[firebase-messaging-sw.js] Attempting to show notification with title:', notificationTitle, 'and options:', notificationOptions);
-    // self.registration.showNotification é a função que exibe a notificação
-    // Ela retorna uma Promise, então podemos usar await ou .then/.catch
-    return self.registration.showNotification(notificationTitle, notificationOptions)
-      .then(() => {
-        console.log('[firebase-messaging-sw.js] Notification shown successfully.');
-      })
-      .catch(err => {
-        console.error('[firebase-messaging-sw.js] Error showing notification:', err);
-      });
-  } catch (e) {
-    console.error('[firebase-messaging-sw.js] Synchronous error during showNotification setup:', e);
-  }
+  self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// Opcional: Adicionar um event listener para cliques na notificação
-self.addEventListener('notificationclick', function(event) {
-  console.log('[firebase-messaging-sw.js] Notification click Received.', event.notification);
-  event.notification.close(); // Fecha a notificação
+// ESTE É O EVENTO QUE LIDA COM O CLIQUE
+self.addEventListener("notificationclick", (event) => {
+  console.log("Notification clicked:", event.notification);
 
-  // Exemplo de como abrir uma URL específica ou focar em uma janela existente:
-  const urlToOpen = event.notification.data?.url || '/'; // Pega a URL dos dados da notificação ou usa a raiz
+  // Fecha a notificação
+  event.notification.close();
+
+  // Pega a URL do payload de dados
+  const targetUrl = event.notification.data?.url || "/";
+
+  // Procura por uma janela/aba do app já aberta
   event.waitUntil(
-    clients.matchAll({
-      type: "window",
-      includeUncontrolled: true
-    }).then(function(clientList) {
-      for (var i = 0; i < clientList.length; i++) {
-        var client = clientList[i];
-        // Se uma janela do app já estiver aberta com a URL correta, foca nela
-        if (client.url === self.location.origin + urlToOpen && 'focus' in client) {
-          return client.focus();
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+      // Se uma janela já estiver aberta, foca nela e navega para a URL
+      for (const client of clientList) {
+        if (client.url.includes(self.location.origin) && "focus" in client) {
+          return client.focus().then(c => c.navigate(targetUrl));
         }
       }
-      // Se nenhuma janela estiver aberta ou com a URL correta, abre uma nova
+      // Se nenhuma janela estiver aberta, abre uma nova
       if (clients.openWindow) {
-        return clients.openWindow(urlToOpen);
+        return clients.openWindow(targetUrl);
       }
     })
   );

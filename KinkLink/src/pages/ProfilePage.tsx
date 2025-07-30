@@ -2,10 +2,23 @@
 import React, { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { db } from '../firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from '../firebase'; // Mantém a importação do db
+import { doc, getDoc, updateDoc, collection, getDocs } from 'firebase/firestore'; // Adiciona collection e getDocs
 import styles from './ProfilePage.module.css';
 import IntensitySelector from '../components/IntensitySelector/IntensitySelector';
+
+// Interface para a carta serializada, onde Timestamps são convertidos para string.
+// Isso evita o uso de 'any' e fornece um tipo claro para o array.
+interface ExtractedUserCard {
+  id: string;
+  text: string;
+  category: string; // Usando string genérico para simplicidade
+  intensity?: number;
+  createdBy?: string;
+  coupleId?: string;
+  createdAt?: string; // Timestamps são convertidos para string
+  isCreatorSuggestion?: boolean;
+}
 
 function ProfilePage() {
   const { user, logout, updateUser, isLoading: authIsLoading, resetNonMatchedSeenCards } = useAuth(); // Adicionado resetNonMatchedSeenCards
@@ -134,6 +147,52 @@ function ProfilePage() {
         console.error("Erro ao atualizar a intensidade:", error);
         // Opcional: Adicionar um toast/feedback de erro
       }
+    }
+  };
+
+  const handleExtractUserCards = async () => {
+    alert("Iniciando extração de 'userCards'. Isso pode levar um momento.");
+    try {
+      const userCardsQuery = collection(db, 'userCards');
+      const querySnapshot = await getDocs(userCardsQuery);
+
+      if (querySnapshot.empty) {
+        alert("Nenhuma carta de usuário encontrada para extrair.");
+        return;
+      }
+
+      const allUserCards: ExtractedUserCard[] = [];
+      querySnapshot.forEach((doc) => {
+        // Converte Timestamps para strings ISO para melhor serialização
+        const data = doc.data();
+        const serializableData = { ...data };
+        if (data.createdAt && data.createdAt.toDate) {
+          serializableData.createdAt = data.createdAt.toDate().toISOString();
+        }
+
+        allUserCards.push({
+          id: doc.id,
+          ...serializableData,
+        } as ExtractedUserCard);
+      });
+
+      // Cria um blob com o JSON
+      const jsonString = JSON.stringify(allUserCards, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+
+      // Cria um link para download e simula o clique
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'userCards_export.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+    } catch (error) {
+      console.error("Erro ao extrair cartas de usuário:", error);
+      alert("Ocorreu um erro ao extrair as cartas. Verifique o console.");
     }
   };
 
@@ -376,6 +435,15 @@ function ProfilePage() {
           </p>
         </div>
         */}
+        {/* SEÇÃO DE FERRAMENTAS DE DESENVOLVEDOR (APENAS PARA ADMINS) */}
+        {user?.isAdmin && (
+          <div className={`${styles.section} ${styles.textCenter} klnkl-themed-panel`}>
+            <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>Ferramentas de Desenvolvedor</h2>
+            <button onClick={handleExtractUserCards} className={`${styles.actionButton} genericButton`}>
+              Extrair UserCards (JSON)
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );

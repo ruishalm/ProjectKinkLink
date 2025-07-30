@@ -25,6 +25,7 @@ import { NotificationProvider } from './contexts/NotificationContext'; // <<< IM
 import { useLinkCompletionListener } from './hooks/useLinkCompletionListener';
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer'; // <<< IMPORT PARA O RODAPÉ
+import SupportModal from './components/modals/SupportModal';
 import UnlockNotificationModal from './components/UnlockNotificationModal';
 import UserTicketsModal from './components/UserTicketsModal'; // <<< IMPORT DO NOVO MODAL
 import AdminRoute from './components/AdminRoute';
@@ -51,6 +52,7 @@ function App() {
   const [showInstallButtonInHeader, setShowInstallButtonInHeader] = React.useState(false);
   // const { t } = useTranslation(); // Removido
 
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   // Estado para o modal de feedback - DEVE ESTAR NO TOPO DA FUNÇÃO
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [isUserTicketsModalOpen, setIsUserTicketsModalOpen] = useState(false); // <<< NOVO ESTADO
@@ -67,6 +69,14 @@ function App() {
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
   }, []);
 
+  // Efeito para abrir o modal de apoio baseado no hash da URL
+  React.useEffect(() => {
+    if (location.hash === '#openSupportModal') {
+      setIsSupportModalOpen(true);
+      // Limpa o hash para não reabrir em um refresh
+      window.history.replaceState(null, '', location.pathname + location.search);
+    }
+  }, [location]);
   // Hook customizado, chamado incondicionalmente
   useLinkCompletionListener(
     user,
@@ -206,6 +216,11 @@ function App() {
               isOpen={isUserTicketsModalOpen}
               onClose={handleCloseUserTicketsModal}
             />
+          )}
+          {isSupportModalOpen && (
+            <SupportModal
+              isOpen={isSupportModalOpen}
+              onClose={() => setIsSupportModalOpen(false)} />
           )}
           <Footer /> {/* <<< RODAPÉ ADICIONADO AQUI */}
         </NotificationProvider> {/* <<< FECHAR O NOTIFICATION PROVIDER */}

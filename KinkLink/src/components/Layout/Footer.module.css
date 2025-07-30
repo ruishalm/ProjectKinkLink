@@ -34,7 +34,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px; /* Espaço entre o texto de suporte e o logo do Catarse */
+  gap: 8px; /* Espaço entre o texto de suporte e os logos */
 }
 
 .supportText {
@@ -44,14 +44,38 @@
   /* A cor é herdada de .footerContent */
 }
 
-.catarseLink {
-  display: inline-block; /* Para melhor controle de layout da imagem */
+.supportLogosContainer {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.supportLink {
+  display: inline-block;
 }
 
 .catarseLogo {
   height: 30px; /* Ajuste conforme o tamanho desejado para o logo */
   width: auto;
   vertical-align: middle; /* Ajuda a alinhar se o texto estiver na mesma linha */
+  filter: grayscale(100%) contrast(0%) brightness(1.5);
+  transition: filter 0.3s ease;
+}
+
+.supportLink:hover .catarseLogo {
+  filter: none;
+}
+
+.apoiaseLogo {
+  height: 30px;
+  width: auto;
+  vertical-align: middle;
+  transition: transform 0.2s ease-in-out;
+  border-radius: 4px; /* Opcional, para suavizar as bordas do logo */
+}
+
+.supportLink:hover .apoiaseLogo {
+  transform: scale(1.05);
 }
 
 .socialMediaSection {
@@ -84,4 +108,14 @@
 .socialIcon:hover {
   transform: scale(1.15); /* Aumentado o efeito de hover */
   filter: brightness(1.25); /* Aumentado o brilho no hover */
+}
+
+@media (max-width: 480px) {
+  .footerContent {
+    padding: 15px 20px;
+  }
+
+  .catarseLogo, .apoiaseLogo {
+    height: 25px; /* Logos um pouco menores em telas pequenas */
+  }
 }

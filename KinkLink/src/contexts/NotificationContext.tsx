@@ -80,10 +80,19 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
             onMessage(messaging, (payload) => {
               console.log('[NotificationContext] Mensagem FCM recebida em primeiro plano:', payload);
               if (payload.notification && payload.notification.title) {
-                // Usa o react-hot-toast para uma notificação elegante
                 toast.success(
                   (t) => (
-                    <div onClick={() => toast.dismiss(t.id)} style={{ cursor: 'pointer' }}>
+                    <div
+                      onClick={() => { // eslint-disable-line @typescript-eslint/no-misused-promises
+                        if (payload.data?.url) {
+                          // Em vez de navigate(), usamos window.location.href para forçar a navegação.
+                          // Isso resolve o erro de contexto do Router.
+                          window.location.href = payload.data.url;
+                        }
+                        toast.dismiss(t.id); // Fecha o toast
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
                       <b>{payload.notification?.title}</b>
                       <p style={{ margin: '4px 0 0' }}>{payload.notification?.body}</p>
                     </div>

@@ -1,6 +1,6 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\CardChatModal.tsx
 import React, { useState, useEffect, useRef } from 'react';
-import { useCardChat, type ChatMessage } from '../hooks/useCardChat';
+import { useCardChat, type ChatMessage } from '../hooks/useCardChat'; // Importa o hook e o tipo
 import { useAuth } from '../contexts/AuthContext';
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
 import styles from './CardChatModal.module.css';
@@ -50,12 +50,14 @@ function CardChatModal({
       }
     };
     const handleClickOutside = (event: MouseEvent) => {
-      if (modalContentRef.current && !modalContentRef.current.contains(event.target as Node)) {
+      // A verificação de isOpen garante que a lógica de limpeza da URL não seja chamada desnecessariamente
+      if (isOpen && modalContentRef.current && !modalContentRef.current.contains(event.target as Node)) {
         onClose();
       }
     };
 
     if (isOpen) {
+      // Adiciona os listeners apenas quando o modal está aberto
       document.addEventListener('keydown', handleEscape);
       document.addEventListener('mousedown', handleClickOutside);
     }
@@ -63,6 +65,13 @@ function CardChatModal({
     return () => {
       document.removeEventListener('keydown', handleEscape);
       document.removeEventListener('mousedown', handleClickOutside);
+
+      // <<< CORREÇÃO PRINCIPAL >>>
+      // Limpa o hash da URL quando o modal é fechado, não importa como.
+      // Isso é feito na função de limpeza do useEffect, que roda quando o componente desmonta ou `isOpen` muda para `false`.
+      if (window.location.hash.startsWith('#card-')) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
     };
   }, [isOpen, onClose]);
 

@@ -1,7 +1,9 @@
-// src/contexts/NotificationContext.tsx
+// d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\contexts\NotificationContext.tsx
+
 import React, { createContext, useState, useContext, useEffect, type ReactNode } from 'react';
 import { useAuth } from './AuthContext'; // Para acessar o usuário logado
 // Importações do Firebase necessárias para FCM
+import toast from 'react-hot-toast';
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { app as firebaseApp, db } from '../firebase';
 import { doc, setDoc, getDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
@@ -76,10 +78,17 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
             // A limpeza do listener não é trivial com onMessage, pois ele não retorna uma função de unsubscribe.
             // No entanto, o objeto `messaging` é instanciado uma vez por `getMessaging(firebaseApp)`.
             onMessage(messaging, (payload) => {
-              console.log('[NotificationContext] Mensagem FCM recebida em primeiro plano: ', payload);
-              if (payload.notification) {
-                // TODO: Substituir por um sistema de Toast/Notificação interna
-                alert(`Nova notificação: ${payload.notification.title}\n${payload.notification.body}`);
+              console.log('[NotificationContext] Mensagem FCM recebida em primeiro plano:', payload);
+              if (payload.notification && payload.notification.title) {
+                // Usa o react-hot-toast para uma notificação elegante
+                toast.success(
+                  (t) => (
+                    <div onClick={() => toast.dismiss(t.id)} style={{ cursor: 'pointer' }}>
+                      <b>{payload.notification?.title}</b>
+                      <p style={{ margin: '4px 0 0' }}>{payload.notification?.body}</p>
+                    </div>
+                  ), { duration: 6000 } // O toast some após 6 segundos
+                );
               }
             });
 

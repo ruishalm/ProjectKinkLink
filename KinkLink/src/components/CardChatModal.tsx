@@ -13,7 +13,6 @@ interface CardChatModalProps {
   cardId: string | null; // Pode ser null se nenhum chat estiver selecionado
   cardTitle?: string; // Título da carta, opcional
   onClose: () => void;
-  isHot?: boolean; // Status de favorito da carta
   onToggleHot?: () => void; // Função para alternar o status de favorito
   isCompleted?: boolean; // Status de "realizada" da carta
   onToggleCompleted?: () => void; // Função para marcar/desmarcar como realizada
@@ -25,7 +24,6 @@ function CardChatModal({
   cardId,
   cardTitle,
   onClose,
-  isHot,
   onToggleHot,
   isCompleted,
   onToggleCompleted,
@@ -33,6 +31,7 @@ function CardChatModal({
 }: CardChatModalProps) {
   const { user } = useAuth();
   const { messages, sendMessage, isLoading, error: chatError } = useCardChat(cardId); // Usa o cardId para o hook
+  const { matchedCards } = useUserCardInteractions(); // Pega os matched cards para saber o status de isHot
   const [newMessage, setNewMessage] = useState(''); 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const modalContentRef = useRef<HTMLDivElement>(null); // Ref para o conteúdo do modal
@@ -121,6 +120,9 @@ function CardChatModal({
       onClose();
     }
   };
+
+  // Determina o status de "isHot" buscando nos dados mais recentes do hook
+  const isHot = matchedCards.find(card => card.id === cardId)?.isHot || false;
 
   if (!isOpen || !cardId) { // Se não estiver aberto ou não tiver cardId, não renderiza nada
     return null;

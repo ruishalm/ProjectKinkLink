@@ -1,6 +1,7 @@
 // CategoryCarousel.tsx
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext'; // <<< ADICIONADO
+import { type Timestamp } from 'firebase/firestore';
 import { type MatchedCard } from '../contexts/AuthContext'; // Usaremos o tipo MatchedCard
 import { type CoupleCardChats } from '../hooks/useCoupleCardChats'; // Importa o tipo
 import MatchCardItem, { type MatchCardItemProps } from './MatchCardItem'; // Importa o componente refatorado
@@ -12,7 +13,6 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, A11y } from 'swiper/modules'; // A11y para acessibilidade
 
 // Import Swiper styles
-import { Timestamp } from 'firebase/firestore';
 // @ts-expect-error ts eh doido
 import 'swiper/css';
 // @ts-expect-error ts eh doido
@@ -22,11 +22,12 @@ interface CategoryCarouselProps {
   title: string;
   cards: MatchedCard[];
   onCardClick: (card: MatchedCard) => void;
+  onToggleHot: (cardId: string, event: React.MouseEvent) => void; // <<< ADICIONADO
   cardChatsData: CoupleCardChats; // Dados dos chats para verificar novas mensagens
   userLastVisitedMatchesPage?: Timestamp; // Timestamp da última visita do usuário
 }
 
-const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCardClick, cardChatsData, userLastVisitedMatchesPage }) => {
+const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCardClick, onToggleHot, cardChatsData, userLastVisitedMatchesPage }) => {
   const { user } = useAuth(); // <<< ADICIONADO
 
   // Função auxiliar para determinar o status de notificação de cada carta
@@ -106,6 +107,7 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCar
                   isNewMatch={getCardNotificationStatus(card).isNewMatch} // Passa se é um novo match
                   hasNewMessage={getCardNotificationStatus(card).hasNewMessage} // Passa se tem nova mensagem
                   lastMessageSnippet={getCardNotificationStatus(card).hasNewMessage ? cardChatsData[card.id]?.lastMessageTextSnippet : undefined} // Passa o snippet
+                  onToggleHot={onToggleHot} // <<< ADICIONADO
                 />
               </SwiperSlide>
             );

@@ -12,7 +12,7 @@ import CategoryCarousel from '../components/CategoryCarousel';
 import { useSkin } from '../contexts/SkinContext';
 import { db } from '../firebase'; // <<< ADICIONADO
 import styles from './MatchesPage.module.css';
-import { Timestamp, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import {doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
 // MatchCardItem é importado e usado, mas sua interface MatchCardItemProps não precisa ser importada separadamente aqui.
 // A interface MatchCardItemProps é exportada pelo MatchCardItem.tsx e usada lá.
@@ -98,13 +98,8 @@ function MatchesPage() {
         }).catch(console.error);
       }
     };
-  }, [user?.id, userMatchedCards, cardChatsData]);
-
-
-  const isFirestoreTimestamp = (value: unknown): value is Timestamp => {
-    return !!value && typeof (value as Timestamp).toDate === 'function' && typeof (value as Timestamp).seconds === 'number' && typeof (value as Timestamp).nanoseconds === 'number';
-  };
-
+  }, [user?.id, user?.lastVisitedMatchesPage, userMatchedCards, cardChatsData]);
+  
   const handleCardClick = (card: MatchedCard) => { 
     const cardForModal: PlayingCardDataType = {
         id: card.id,
@@ -233,7 +228,7 @@ function MatchesPage() {
                       isNewMatch={getCardNotificationStatus(card).isNewMatch}
                       hasNewMessage={getCardNotificationStatus(card).hasNewMessage}
                       lastMessageSnippet={getCardNotificationStatus(card).hasNewMessage ? cardChatsData[card.id]?.lastMessageTextSnippet : undefined}
-                      onToggleHot={handleToggleHot}
+                      onToggleHot={(cardId, event) => handleToggleHot(cardId, event)}
                       isCompletedCard={false}
                     />
                   ))}
@@ -257,6 +252,7 @@ function MatchesPage() {
                           title={categoryName}
                           cards={cardsForCategory}
                           onCardClick={handleCardClick}
+                          onToggleHot={handleToggleHot}
                           cardChatsData={cardChatsData} // Passa para o carrossel
                           userLastVisitedMatchesPage={user?.lastVisitedMatchesPage} // Passa para o carrossel
                         />
@@ -276,6 +272,7 @@ function MatchesPage() {
                             title={categoryName}
                             cards={cardsForCategory}
                             onCardClick={handleCardClick}
+                            onToggleHot={handleToggleHot}
                             cardChatsData={cardChatsData} // Passa para o carrossel
                             userLastVisitedMatchesPage={user?.lastVisitedMatchesPage} // Passa para o carrossel
                           />
@@ -320,13 +317,6 @@ function MatchesPage() {
           onClose={handleCloseChat}
           cardId={selectedCardForChat.id}
           cardTitle={selectedCardForChat.text} 
-          currentChatLastMessageTimestamp={
-            cardChatsData?.[selectedCardForChat.id]?.lastMessageTimestamp &&
-            isFirestoreTimestamp(cardChatsData[selectedCardForChat.id].lastMessageTimestamp)
-              ? cardChatsData[selectedCardForChat.id].lastMessageTimestamp
-              : null
-          }
-          isHot={userMatchedCards.find(card => card.id === selectedCardForChat.id)?.isHot || false}
           onToggleHot={() => {
             if (selectedCardForChat?.id) {
               toggleHotStatus(selectedCardForChat.id);
@@ -344,7 +334,6 @@ function MatchesPage() {
               repeatCard(selectedCardForChat.id);
             }
           }}
-          onChatSeen={() => { /* Não precisa mais forçar update, o estado do chat é local */ }}
         />
       )}
     </div>

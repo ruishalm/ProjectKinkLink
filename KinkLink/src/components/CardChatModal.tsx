@@ -2,10 +2,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useCardChat, type ChatMessage } from '../hooks/useCardChat'; // Importa o hook e o tipo
 import { useAuth } from '../contexts/AuthContext';
+import { Timestamp } from 'firebase/firestore'; // <<< ADICIONADO
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
 import styles from './CardChatModal.module.css';
 import chatStyles from './CardChat.module.css';
-import { Timestamp } from 'firebase/firestore'; // Importa Timestamp
 import { markChatAsSeen } from '../utils/chatNotificationStore'; // Importa a função
 
 interface CardChatModalProps {
@@ -13,8 +13,6 @@ interface CardChatModalProps {
   cardId: string | null; // Pode ser null se nenhum chat estiver selecionado
   cardTitle?: string; // Título da carta, opcional
   onClose: () => void;
-  currentChatLastMessageTimestamp?: Timestamp | null; // Timestamp da última mensagem no chat
-  onChatSeen?: (cardId: string) => void; // Callback para notificar que o chat foi visto
   isHot?: boolean; // Status de favorito da carta
   onToggleHot?: () => void; // Função para alternar o status de favorito
   isCompleted?: boolean; // Status de "realizada" da carta
@@ -27,8 +25,6 @@ function CardChatModal({
   cardId,
   cardTitle,
   onClose,
-  currentChatLastMessageTimestamp,
-  onChatSeen,
   isHot,
   onToggleHot,
   isCompleted,
@@ -37,7 +33,7 @@ function CardChatModal({
 }: CardChatModalProps) {
   const { user } = useAuth();
   const { messages, sendMessage, isLoading, error: chatError } = useCardChat(cardId); // Usa o cardId para o hook
-  const [newMessage, setNewMessage] = useState('');
+  const [newMessage, setNewMessage] = useState(''); 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const modalContentRef = useRef<HTMLDivElement>(null); // Ref para o conteúdo do modal
   const { deleteMatch } = useUserCardInteractions();
@@ -77,12 +73,14 @@ function CardChatModal({
 
   // Efeito para marcar o chat como visto ao abrir
   useEffect(() => {
-    if (isOpen && cardId && user?.id && currentChatLastMessageTimestamp) {
-      // Reativado: Marca o chat como visto usando o timestamp da última mensagem
-      markChatAsSeen(cardId, currentChatLastMessageTimestamp);
-      onChatSeen?.(cardId); // Notifica a página pai para que ela possa atualizar a UI
+    if (isOpen && cardId) {
+      // Ao abrir o modal, marca o chat como visto usando a data e hora atuais.
+      // Isso é mais simples e garante que qualquer mensagem vista ao abrir
+      // não será mais notificada.
+      const nowAsTimestamp = Timestamp.now();
+      markChatAsSeen(cardId, nowAsTimestamp);
     }
-  }, [isOpen, cardId, user?.id, currentChatLastMessageTimestamp, onChatSeen]); // Mantém as dependências
+  }, [isOpen, cardId]);
 
 
   const scrollToBottom = () => {

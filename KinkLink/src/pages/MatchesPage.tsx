@@ -31,7 +31,6 @@ function MatchesPage() {
   const [selectedCardForChat, setSelectedCardForChat] = useState<PlayingCardDataType | null>(null);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const completedSectionRef = useRef<HTMLDivElement>(null);
-  const [forceUpdate, setForceUpdate] = useState(0); // <<< ADICIONADO para forçar re-renderização
   const [hasUnseenGlobalMatches, setHasUnseenGlobalMatches] = useState(false); // Para o botão "Cartas"
 
   // Efeito para abrir o modal de chat se a URL tiver um hash #card-CARD_ID
@@ -99,7 +98,7 @@ function MatchesPage() {
         }).catch(console.error);
       }
     };
-  }, [user?.id, userMatchedCards, cardChatsData, forceUpdate]);
+  }, [user?.id, userMatchedCards, cardChatsData]);
 
 
   const isFirestoreTimestamp = (value: unknown): value is Timestamp => {
@@ -117,10 +116,6 @@ function MatchesPage() {
     };
     setSelectedCardForChat(cardForModal);
     setIsChatModalOpen(true);
-
-    // Força a re-renderização para que o status de "não lido" seja reavaliado
-    // após o modal ser aberto e o chat ser marcado como visto.
-    setForceUpdate(prev => prev + 1);
   };
 
   const handleCloseChat = () => {
@@ -349,7 +344,7 @@ function MatchesPage() {
               repeatCard(selectedCardForChat.id);
             }
           }}
-          onChatSeen={() => setForceUpdate(prev => prev + 1)} // <<< ADICIONADO
+          onChatSeen={() => { /* Não precisa mais forçar update, o estado do chat é local */ }}
         />
       )}
     </div>

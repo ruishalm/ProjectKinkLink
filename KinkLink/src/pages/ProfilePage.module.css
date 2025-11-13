@@ -196,6 +196,117 @@
   color: var(--cor-texto-primario);
 }
 
+.notificationToggleContainer {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid var(--cor-borda);
+  /* Alterado para permitir que o texto fique abaixo */
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Espaço entre o header e o texto de prompt */
+}
+
+.notificationManageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.notificationPromptText {
+  color: var(--cor-aviso);
+  text-decoration: underline;
+  font-weight: bold;
+  cursor: pointer;
+  text-align: center;
+  font-size: 0.95em;
+}
+
+.notificationPromiseText {
+  display: block;
+  font-weight: normal;
+  font-style: italic;
+  font-size: 0.9em;
+  opacity: 0.8;
+  text-decoration: none; /* Remove o sublinhado da parte entre parênteses */
+  margin-top: 4px;
+}
+
+.toggleWrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.processingText {
+  font-size: 0.8em;
+  color: var(--cor-texto-secundario);
+  font-style: italic;
+}
+
+.permissionDeniedText {
+  width: 100%;
+  font-size: 0.8em;
+  color: var(--cor-aviso);
+  margin-top: 5px;
+  text-align: right;
+}
+
+/* Estilos para o Toggle Switch */
+.toggleSwitch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+}
+
+.toggleSwitch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--cor-secundaria);
+  transition: .4s;
+  border-radius: 28px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+.toggleSwitch input:checked + .slider {
+  background-color: var(--cor-acao-positiva);
+}
+
+.toggleSwitch input:focus + .slider {
+  box-shadow: 0 0 1px var(--cor-acao-positiva);
+}
+
+.toggleSwitch input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+.toggleSwitch input:disabled + .slider {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .marginTop30 { margin-top: 30px; }
 .marginTop50 { margin-top: 50px; }
 .paddingTop20 { padding-top: 20px; }

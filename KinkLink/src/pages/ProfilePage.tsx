@@ -2,6 +2,7 @@
 import React, { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useNotification } from '../contexts/NotificationContext'; // <<< ADICIONADO
 import { db } from '../firebase';
 import { doc, getDoc, updateDoc, collection, getDocs } from 'firebase/firestore';
 import styles from './ProfilePage.module.css';
@@ -22,6 +23,7 @@ interface ExtractedUserCard {
 
 function ProfilePage() {
   const { user, userSymbol, logout, updateUser, isLoading: authIsLoading, resetNonMatchedSeenCards } = useAuth(); // Adicionado userSymbol do contexto
+  const { appNotificationStatus, isNotificationProcessing, enableNotifications, disableNotifications } = useNotification(); // <<< ALTERADO
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [username, setUsername] = useState('');
@@ -33,6 +35,7 @@ function ProfilePage() {
   const [partnerInfo, setPartnerInfo] = useState<{ username?: string; email?: string | null } | null>(null);
   const [isLoadingPartner, setIsLoadingPartner] = useState(false); // Novo estado
   const [isPersonalInfoOpen, setIsPersonalInfoOpen] = useState(true); 
+  const [isNotificationControlVisible, setIsNotificationControlVisible] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -150,6 +153,14 @@ function ProfilePage() {
     }
   };
 
+  const handleNotificationToggle = async () => {
+    if (appNotificationStatus === 'enabled') { // <<< ALTERADO
+      await disableNotifications();
+    } else {
+      await enableNotifications();
+    }
+  };
+
   const handleExtractUserCards = async () => {
     alert("Iniciando extração de 'userCards'. Isso pode levar um momento.");
     try {
@@ -192,6 +203,47 @@ function ProfilePage() {
 
     } catch (error) {
       console.error("Erro ao extrair cartas de usuário:", error);
+      alert("Ocorreu um erro ao extrair as cartas. Verifique o console.");
+    }
+  };
+
+  const handleExtractMainCards = async () => {
+    alert("Iniciando extração de 'cards' principais. Isso pode levar um momento.");
+    try {
+      const cardsQuery = collection(db, 'cards');
+      const querySnapshot = await getDocs(cardsQuery);
+
+      if (querySnapshot.empty) {
+        alert("Nenhuma carta principal encontrada para extrair.");
+        return;
+      }
+
+      const allMainCards: ExtractedUserCard[] = []; // Reutilizando a interface
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const serializableData = { ...data };
+        if (data.createdAt && data.createdAt.toDate) {
+          serializableData.createdAt = data.createdAt.toDate().toISOString();
+        }
+
+        allMainCards.push({
+          id: doc.id,
+          ...serializableData,
+        } as ExtractedUserCard);
+      });
+
+      const jsonString = JSON.stringify(allMainCards, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'main_cards_export.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Erro ao extrair cartas principais:", error);
       alert("Ocorreu um erro ao extrair as cartas. Verifique o console.");
     }
   };
@@ -362,6 +414,42 @@ function ProfilePage() {
                 </button>
               </div>
             )}
+            {/* Seção do Toggle de Notificação */}
+            {!isEditing && (
+              !isNotificationControlVisible ? (
+                <div className={styles.notificationToggleContainer}>
+                  <div className={styles.notificationManageHeader}>
+                    <label className={styles.formLabel}>Notificações Push</label>
+                    <button onClick={() => setIsNotificationControlVisible(true)} className={`${styles.button} genericButton`}>
+                      Gerenciar
+                    </button>
+                  </div>
+                  {appNotificationStatus === 'disabled' && (
+                    <p className={styles.notificationPromptText} onClick={() => setIsNotificationControlVisible(true)}>
+                      Ative as notificações para uma experiência completa do nosso app
+                      <span className={styles.notificationPromiseText}>(a gente promete que não vai ser chato)</span>
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className={styles.notificationToggleContainer}>
+                  <label className={styles.formLabel}>Notificações Push</label>
+                  <div className={styles.toggleWrapper}>
+                    <label className={styles.toggleSwitch}>
+                      <input
+                        type="checkbox"
+                        onChange={handleNotificationToggle}
+                        checked={appNotificationStatus === 'enabled'}
+                        disabled={isNotificationProcessing || appNotificationStatus === 'denied'}
+                      />
+                      <span className={styles.slider}></span>
+                    </label>
+                    {isNotificationProcessing && <span className={styles.processingText}>Processando...</span>}
+                  </div>
+                  {appNotificationStatus === 'denied' && <p className={styles.permissionDeniedText}>As notificações estão bloqueadas nas configurações do seu navegador.</p>}
+                </div>
+              )
+            )}
           </div>
         </div>
 
@@ -453,6 +541,9 @@ function ProfilePage() {
             <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>Ferramentas de Desenvolvedor</h2>
             <button onClick={handleExtractUserCards} className={`${styles.actionButton} genericButton`}>
               Extrair UserCards (JSON)
+            </button>
+            <button onClick={handleExtractMainCards} className={`${styles.actionButton} genericButton`} style={{marginTop: '10px'}}>
+              Extrair Cartas Principais (JSON)
             </button>
           </div>
         )}

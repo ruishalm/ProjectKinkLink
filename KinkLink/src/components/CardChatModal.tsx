@@ -77,13 +77,12 @@ function CardChatModal({
 
   // Efeito para marcar o chat como visto ao abrir
   useEffect(() => {
-    // console.log("[CardChatModal] useEffect for marking chat as read. isOpen:", isOpen, "cardId:", cardId, "userId:", user?.id, "currentChatLastMessageTimestamp:", currentChatLastMessageTimestamp);
     if (isOpen && cardId && user?.id && currentChatLastMessageTimestamp) {
-      // console.log(`[CardChatModal] Marking chat ${cardId} as seen.`);
+      // Reativado: Marca o chat como visto usando o timestamp da última mensagem
       markChatAsSeen(cardId, currentChatLastMessageTimestamp);
-      onChatSeen?.(cardId); // Notifica o pai que o chat foi visto para atualizar a UI
+      onChatSeen?.(cardId); // Notifica a página pai para que ela possa atualizar a UI
     }
-  }, [isOpen, cardId, user?.id, currentChatLastMessageTimestamp, onChatSeen]);
+  }, [isOpen, cardId, user?.id, currentChatLastMessageTimestamp, onChatSeen]); // Mantém as dependências
 
 
   const scrollToBottom = () => {

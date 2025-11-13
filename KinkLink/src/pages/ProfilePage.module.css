@@ -252,6 +252,14 @@
   text-align: right;
 }
 
+.notificationHelpText {
+  width: 100%;
+  font-size: 0.75em;
+  color: var(--cor-texto-secundario);
+  margin-top: 10px;
+  text-align: center;
+}
+
 /* Estilos para o Toggle Switch */
 .toggleSwitch {
   position: relative;

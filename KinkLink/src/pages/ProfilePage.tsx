@@ -447,6 +447,9 @@ function ProfilePage() {
                     {isNotificationProcessing && <span className={styles.processingText}>Processando...</span>}
                   </div>
                   {appNotificationStatus === 'denied' && <p className={styles.permissionDeniedText}>As notificações estão bloqueadas nas configurações do seu navegador.</p>}
+                  <p className={styles.notificationHelpText}>
+                    A permissão de notificação é gerenciada pelo seu navegador. Para revogá-la completamente, você precisa acessar as configurações do site no seu navegador.
+                  </p>
                 </div>
               )
             )}

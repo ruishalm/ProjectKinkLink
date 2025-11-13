@@ -6,6 +6,7 @@ import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
 import { useCoupleCardChats } from '../hooks/useCoupleCardChats';
 // Importa apenas o tipo CardData, pois o componente PlayingCard não é usado diretamente aqui.
 import { type CardData as PlayingCardDataType } from '../components/PlayingCard'; // Mantido para o modal
+import { getLastSeenTimestampForCard } from '../utils/chatNotificationStore'; // <<< REATIVADO
 import CardChatModal from '../components/CardChatModal'; // Mantido para o modal
 import CategoryCarousel from '../components/CategoryCarousel';
 import { useSkin } from '../contexts/SkinContext';
@@ -30,6 +31,7 @@ function MatchesPage() {
   const [selectedCardForChat, setSelectedCardForChat] = useState<PlayingCardDataType | null>(null);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const completedSectionRef = useRef<HTMLDivElement>(null);
+  const [forceUpdate, setForceUpdate] = useState(0); // <<< ADICIONADO para forçar re-renderização
   const [hasUnseenGlobalMatches, setHasUnseenGlobalMatches] = useState(false); // Para o botão "Cartas"
 
   // Efeito para abrir o modal de chat se a URL tiver um hash #card-CARD_ID
@@ -49,26 +51,6 @@ function MatchesPage() {
     }
   }, [location.hash, userMatchedCards]);
 
-  // Passo 2: Atualiza o timestamp da última visita à página de matches
-  useEffect(() => {
-    if (user?.id) {
-      // Usamos um pequeno delay para garantir que o onSnapshot do AuthContext
-      // tenha tempo de pegar o user.lastVisitedMatchesPage antes de atualizarmos.
-      // Isso é uma otimização para evitar que a data de visita seja atualizada
-      // antes que a lógica de "novo" tenha a chance de usar a data antiga.
-      const timer = setTimeout(() => {
-        const userDocRef = doc(db, 'users', user.id);
-        updateDoc(userDocRef, {
-          lastVisitedMatchesPage: serverTimestamp()
-        }).catch(error => {
-          console.error("Erro ao atualizar o timestamp de 'lastVisitedMatchesPage':", error);
-        });
-      }, 500); // 500ms de delay
-
-      return () => clearTimeout(timer); // Limpa o timer se o componente desmontar
-    }
-  }, [user?.id, db]);
-
   // Lógica para determinar se há novos matches ou novas mensagens
   const getCardNotificationStatus = (card: MatchedCard) => {
     const lastVisited = user?.lastVisitedMatchesPage?.toDate();
@@ -77,20 +59,25 @@ function MatchesPage() {
 
     let isNewMatch = false;
     let hasNewMessage = false;
+    const lastSeenByClientISO = getLastSeenTimestampForCard(card.id);
 
     if (lastVisited) {
       // Um match é novo se foi criado DEPOIS da última visita
-      if (matchCreatedAt && matchCreatedAt > lastVisited) {
+      // E se não foi visto ainda no localStorage (para o caso de o usuário não ter aberto a carta)
+      if (matchCreatedAt && matchCreatedAt > lastVisited && (!lastSeenByClientISO || new Date(lastSeenByClientISO) < matchCreatedAt)) {
         isNewMatch = true;
       }
-      // Uma mensagem é nova se a última mensagem foi enviada DEPOIS da última visita
-      if (chatLastMessageTimestamp && chatLastMessageTimestamp > lastVisited) {
-        // E se a última mensagem não foi enviada pelo próprio usuário
+    }
+
+    // Lógica para novas mensagens, agora usando o localStorage
+    if (chatLastMessageTimestamp) {
+      if (!lastSeenByClientISO || new Date(lastSeenByClientISO) < chatLastMessageTimestamp) {
         if (cardChatsData[card.id]?.lastMessageSenderId !== user?.id) {
           hasNewMessage = true;
         }
       }
     }
+
     return { isNewMatch, hasNewMessage };
   };
 
@@ -101,7 +88,18 @@ function MatchesPage() {
       return isNewMatch || hasNewMessage;
     });
     setHasUnseenGlobalMatches(anyNew);
-  }, [user?.id]);
+
+    // Atualiza o timestamp da última visita APENAS quando o usuário sai da página.
+    // Isso garante que os "novos matches" sejam marcados como vistos na próxima visita.
+    return () => {
+      if (user?.id) {
+        const userDocRef = doc(db, 'users', user.id);
+        updateDoc(userDocRef, {
+          lastVisitedMatchesPage: serverTimestamp()
+        }).catch(console.error);
+      }
+    };
+  }, [user?.id, userMatchedCards, cardChatsData, forceUpdate]);
 
 
   const isFirestoreTimestamp = (value: unknown): value is Timestamp => {
@@ -119,6 +117,10 @@ function MatchesPage() {
     };
     setSelectedCardForChat(cardForModal);
     setIsChatModalOpen(true);
+
+    // Força a re-renderização para que o status de "não lido" seja reavaliado
+    // após o modal ser aberto e o chat ser marcado como visto.
+    setForceUpdate(prev => prev + 1);
   };
 
   const handleCloseChat = () => {
@@ -328,7 +330,7 @@ function MatchesPage() {
             isFirestoreTimestamp(cardChatsData[selectedCardForChat.id].lastMessageTimestamp)
               ? cardChatsData[selectedCardForChat.id].lastMessageTimestamp
               : null
-          } 
+          }
           isHot={userMatchedCards.find(card => card.id === selectedCardForChat.id)?.isHot || false}
           onToggleHot={() => {
             if (selectedCardForChat?.id) {
@@ -347,6 +349,7 @@ function MatchesPage() {
               repeatCard(selectedCardForChat.id);
             }
           }}
+          onChatSeen={() => setForceUpdate(prev => prev + 1)} // <<< ADICIONADO
         />
       )}
     </div>

@@ -8,3 +8,115 @@ typings/
 # Node.js dependency directory
 node_modules/
 *.local
+
+# Firebase service account key
+serviceAccountKey.json
+// Exemplo em um componente principal
+import { useState, useEffect } from 'react';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from './services/firebase'; // Importe sua instância do DB
+
+// ... dentro do seu componente
+// Supondo que você já tenha:
+// const { currentUser } = useAuth(); // (seu hook de autenticação)
+// const { coupleData } = useCouple(); // (seu hook que busca dados do casal)
+
+const [userSymbol, setUserSymbol] = useState<string | null>(null);
+
+useEffect(() => {
+  // Verifica se temos os dados necessários
+  if (currentUser?.uid && coupleData?.memberSymbols) {
+    const symbol = coupleData.memberSymbols[currentUser.uid];
+    if (symbol) {
+      setUserSymbol(symbol);
+    }
+  }
+}, [currentUser, coupleData]); // Roda sempre que o usuário ou os dados do casal mudarem
+
+// Agora, passe o `userSymbol` para o seu componente de cabeçalho
+// <Header userSymbol={userSymbol} />
+// Dentro do seu arquivo Header.tsx (exemplo)
+
+interface HeaderProps {
+  userSymbol: string | null;
+  // ...outras props que seu header já usa
+}
+
+const Header: React.FC<HeaderProps> = ({ userSymbol }) => {
+  return (
+    <header className={styles.appHeader}>
+      {/* Seu logo e outros itens do header */}
+      <div className={styles.logoContainer}>
+        {/* ... seu logo aqui ... */}
+      </div>
+
+      {/* NOVO: Indicador de Símbolo */}
+      {userSymbol && (
+        <div className={styles.userSymbolIndicator}>
+          Você é {userSymbol}
+        </div>
+      )}
+
+      {/* Outros itens do header, como menu de perfil */}
+    </header>
+  );
+};
+/* Exemplo de estilo para o indicador */
+.userSymbolIndicator {
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 16px;
+  background-color: rgba(0, 0, 0, 0.05);// Dentro do seu arquivo Header.tsx (exemplo)
+  
+  interface HeaderProps {
+    userSymbol: string | null;
+    // ...outras props que seu header já usa
+  }
+  
+  const Header: React.FC<HeaderProps> = ({ userSymbol }) => {
+    return (
+      <header className={styles.appHeader}>
+        {/* Seu logo e outros itens do header */}
+        <div className={styles.logoContainer}>
+          {/* ... seu logo aqui ... */}
+        </div>
+  
+        {/* NOVO: Indicador de Símbolo */}
+        {userSymbol && (
+          <div className={styles.userSymbolIndicator}>
+            Você é {userSymbol}
+          </div>
+        )}
+  
+        {/* Outros itens do header, como menu de perfil */}
+      </header>
+    );
+  };
+  /* Exemplo de estilo para o indicador */
+  .userSymbolIndicator {
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 16px;
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--cor-texto-escuro);
+    margin-left: 16px; /* Ajuste o espaçamento conforme necessário */
+  }
+  
+  /* Para tema escuro, se você tiver um */
+  .dark-theme .userSymbolIndicator {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--cor-texto-claro);
+  }
+  
+  color: var(--cor-texto-escuro);
+  margin-left: 16px; /* Ajuste o espaçamento conforme necessário */
+}
+
+/* Para tema escuro, se você tiver um */
+.dark-theme .userSymbolIndicator {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--cor-texto-claro);
+}
+kinklink-a4607-firebase-adminsdk-fbsvc-13400b61c8.json

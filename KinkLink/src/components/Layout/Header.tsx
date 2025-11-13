@@ -15,7 +15,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOpenFeedbackModal, onOpenUserTicketsModal }) => {
-  const { isAuthenticated, user } = useAuth(); // Obter o estado de autenticação e o usuário
+  const { isAuthenticated, user, userSymbol } = useAuth(); // Obter o estado de autenticação, o usuário e o SÍMBOLO
 
   // Verifica se há tickets com respostas do admin não lidas (status 'admin_replied')
   const hasUnreadTicketResponses = isAuthenticated && user?.feedbackTickets?.some(
@@ -30,6 +30,14 @@ const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOp
           <img src={logoSrc} alt="KinkLink Logo" className={styles.logoImage} />
           <span className={styles.betaText}>BETA</span>
         </Link>
+      </div>
+      {/* NOVO: Indicador de Símbolo */}
+      <div className={styles.userSymbolContainer}>
+        {userSymbol && (
+          <div className={styles.userSymbolIndicator}>
+            Você é {userSymbol}
+          </div>
+        )}
       </div>
       <div className={styles.actionsContainer}> {/* Renomeado para acomodar mais botões */}
         {showInstallButton && (

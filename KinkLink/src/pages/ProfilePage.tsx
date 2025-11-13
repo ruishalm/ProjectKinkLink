@@ -2,8 +2,8 @@
 import React, { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { db } from '../firebase'; // Mantém a importação do db
-import { doc, getDoc, updateDoc, collection, getDocs } from 'firebase/firestore'; // Adiciona collection e getDocs
+import { db } from '../firebase';
+import { doc, getDoc, updateDoc, collection, getDocs } from 'firebase/firestore';
 import styles from './ProfilePage.module.css';
 import IntensitySelector from '../components/IntensitySelector/IntensitySelector';
 
@@ -21,7 +21,7 @@ interface ExtractedUserCard {
 }
 
 function ProfilePage() {
-  const { user, logout, updateUser, isLoading: authIsLoading, resetNonMatchedSeenCards } = useAuth(); // Adicionado resetNonMatchedSeenCards
+  const { user, userSymbol, logout, updateUser, isLoading: authIsLoading, resetNonMatchedSeenCards } = useAuth(); // Adicionado userSymbol do contexto
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [username, setUsername] = useState('');
@@ -32,7 +32,7 @@ function ProfilePage() {
   const [initialBio, setInitialBio] = useState('');
   const [partnerInfo, setPartnerInfo] = useState<{ username?: string; email?: string | null } | null>(null);
   const [isLoadingPartner, setIsLoadingPartner] = useState(false); // Novo estado
-  const [isPersonalInfoOpen, setIsPersonalInfoOpen] = useState(true); // Começa aberto
+  const [isPersonalInfoOpen, setIsPersonalInfoOpen] = useState(true); 
 
   useEffect(() => {
     if (user) {
@@ -253,9 +253,14 @@ function ProfilePage() {
     <div className={styles.page}>
       <main className={styles.mainContent}> {/* Envolve o conteúdo principal */}
         <div className={styles.pageHeader}>
-          <h1 className={`${styles.title}`} style={{borderBottom: 'none', marginBottom: '0px', marginRight: 'auto'}}>
-            Meu Perfil
-          </h1>
+          <div className={styles.titleContainer}>
+            <h1 className={`${styles.title}`} style={{borderBottom: 'none', marginBottom: '0px', marginRight: 'auto'}}>
+              Meu Perfil
+            </h1>
+            {userSymbol && (
+              <div className={styles.userSymbolIndicator}>Você é {userSymbol}</div>
+            )}
+          </div>
           <button
             onClick={() => navigate('/cards')}
             className={`${styles.actionButton} ${styles.headerButton} genericButton`}
@@ -363,16 +368,23 @@ function ProfilePage() {
         {/* SEÇÃO DE VÍNCULO */}
         <div className={`${styles.section} klnkl-themed-panel`}>
           <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>Vínculo de Casal</h2>
-          {user.partnerId ? ( // MODIFICADO AQUI
+          {user.partnerId ? (
             <>
-              <p className={styles.infoText}> {/* Texto de vínculo com estado de carregamento */}
-                Você está vinculado com:{' '}
-                {isLoadingPartner ? (
-                  <span className={styles.loadingPartnerText}>Carregando parceiro...</span>
-                ) : (
-                  <strong>{partnerInfo?.username || partnerInfo?.email || user.partnerId.substring(0, 8) + "..."}</strong>
-                )}
-              </p>
+              {isLoadingPartner ? (
+                <p className={styles.infoText}>Carregando parceiro...</p>
+              ) : (
+                <>
+                  <p className={styles.infoText}>
+                    Você está vinculado com:{' '}
+                    <strong>
+                      {partnerInfo?.username || partnerInfo?.email || '...'} ({userSymbol === '★' ? '▲' : '★'})
+                    </strong>
+                  </p>
+                  <p className={styles.infoText}>
+                    Você está jogando como <strong>{userSymbol}</strong>
+                  </p>
+                </>
+              )}
               <p className={styles.infoText} style={{fontSize: '0.9em', opacity: 0.8, marginTop: '-5px', marginBottom: '15px'}}>
                 Explore os Links e converse com seu par!
               </p>

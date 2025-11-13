@@ -116,6 +116,24 @@
   transform: translateY(-1px); /* Efeito de leve "levantamento" */
 }
 
+/* Estilo para o indicador de símbolo */
+.userSymbolIndicator {
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 16px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--cor-texto-claro);
+  margin: 0 15px; /* Adiciona margem para não colar nos outros elementos */
+  white-space: nowrap;
+}
+
+/* Para tema claro, se você tiver um */
+.light-theme .userSymbolIndicator {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--cor-texto-escuro);
+}
+
 /* Media Query para telas menores (ex: até 768px de largura) */
 @media (max-width: 768px) {
   .logoImage {

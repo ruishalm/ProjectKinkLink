@@ -446,6 +446,21 @@ export const onLinkCompletedSendNotification = onDocumentWritten(
       { eventId: event.id }
     );
 
+    // --- NOVA LÓGICA: Atribuir símbolos ao casal ---
+    try {
+      const coupleDocRef = db.collection("couples").doc(coupleId);
+      await coupleDocRef.update({
+        memberSymbols: {
+          [user1Id]: "★", // Estrela para o primeiro membro
+          [user2Id]: "▲", // Triângulo para o segundo membro
+        },
+      });
+      logger.info(`Símbolos atribuídos para o casal ${coupleId}.`, { eventId: event.id });
+    } catch (error) {
+      logger.error(`Falha ao atribuir símbolos para o casal ${coupleId}:`, error, { eventId: event.id });
+    }
+    // --- FIM DA NOVA LÓGICA ---
+
     let user1Name = "Seu par";
     let user2Name = "Seu par";
 

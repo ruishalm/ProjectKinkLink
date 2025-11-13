@@ -22,6 +22,7 @@ import {
   onSnapshot,
   writeBatch,
   collection,
+  type DocumentSnapshot,
   query,
   where,
   getDocs,
@@ -71,6 +72,7 @@ export interface User {
 
 interface AuthContextData {
   user: User | null;
+  userSymbol: string | null; // <<< ADICIONADO
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
@@ -102,6 +104,7 @@ const AuthContext = createContext<AuthContextData | undefined>(undefined);
 export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [userSymbol, setUserSymbol] = useState<string | null>(null); // <<< ADICIONADO
   const [newlyUnlockedSkinsForModal, setNewlyUnlockedSkinsForModal] = useState<SkinDefinition[] | null>(null);
   // const [fcmTokenProcessed, setFcmTokenProcessed] = useState(false); // REMOVIDO - Movido para NotificationContext
   // O estado 'isAdmin' separado não é mais necessário se 'user.isAdmin' for a fonte da verdade.
@@ -172,6 +175,29 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
 
   // NOVO Efeito para solicitar permissão de notificação e salvar token FCM
   // O useEffect para setupFcm foi MOVIDO para NotificationContext.tsx
+
+  // <<< ADICIONADO: useEffect para buscar o símbolo do usuário
+  useEffect(() => {
+    if (user?.coupleId && user.id) {
+      const coupleDocRef = doc(db, 'couples', user.coupleId);
+      const unsubscribe = onSnapshot(coupleDocRef, (docSnap: DocumentSnapshot) => {
+        if (docSnap.exists()) {
+          const coupleData = docSnap.data();
+          if (coupleData.memberSymbols) {
+            const symbol = coupleData.memberSymbols[user.id];
+            setUserSymbol(symbol || null);
+          }
+        } else {
+          setUserSymbol(null);
+        }
+      });
+      // Limpa o listener quando o usuário desloga ou o coupleId muda
+      return () => unsubscribe();
+    } else {
+      // Garante que o símbolo seja limpo se o usuário não tiver um coupleId
+      setUserSymbol(null);
+    }
+  }, [user?.id, user?.coupleId]);
 
   const updateUser = useCallback(async (updatedData: Partial<User>) => {
     if (!user || !user.id) {
@@ -723,6 +749,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   return (
     <AuthContext.Provider value={{
       user,
+      userSymbol, // <<< ADICIONADO
       isAuthenticated: !!user,
       isLoading,
       login,

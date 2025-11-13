@@ -35,6 +35,13 @@
   width: 100%;
 }
 
+/* Adicionado para o cabeçalho da página com o símbolo */
+.titleContainer {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* Espaço entre o título e o símbolo */
+}
+
 .textCenter {
   text-align: center;
 }
@@ -306,4 +313,20 @@
   .formActions > button:last-child {
     margin-bottom: 0;
   }
+}
+
+/* Estilo para o indicador de símbolo */
+.userSymbolIndicator {
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 16px;
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--cor-texto-escuro);
+}
+
+/* Para tema escuro, se você tiver um */
+.dark-theme .userSymbolIndicator {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--cor-texto-claro);
 }

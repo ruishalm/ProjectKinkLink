@@ -96,6 +96,29 @@
   overflow: hidden; 
 }
 
+/* Estilos para o indicador de "não lido" */
+.unreadMatch {
+  /* Adicione um brilho sutil ou borda para destacar a carta */
+  box-shadow: 0 0 8px var(--cor-aviso, #ff4757);
+  animation: pulseGlow 1.5s infinite alternate; /* Animação sutil */
+}
+
+@keyframes pulseGlow {
+  from { box-shadow: 0 0 8px var(--cor-aviso, #ff4757); }
+  to { box-shadow: 0 0 15px var(--cor-aviso, #ff4757); }
+}
+
+.unreadIndicator {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 12px;
+  height: 12px;
+  background-color: var(--cor-aviso, #ff4757);
+  border-radius: 50%;
+  z-index: 10;
+  border: 2px solid var(--cor-fundo-elemento); /* Borda para contraste */
+}
 .unreadMatch .cardItemWrapper { 
   /* Estilos para cartas não lidas, se necessário */
 }

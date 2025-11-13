@@ -1,6 +1,8 @@
 // CategoryCarousel.tsx
 import React from 'react';
+import { useAuth } from '../contexts/AuthContext'; // <<< ADICIONADO
 import { type MatchedCard } from '../contexts/AuthContext'; // Usaremos o tipo MatchedCard
+import { type CoupleCardChats } from '../hooks/useCoupleCardChats'; // Importa o tipo
 import MatchCardItem, { type MatchCardItemProps } from './MatchCardItem'; // Importa o componente refatorado
 import CardBack from './CardBack'; // Para a carta vazia
 import styles from './CategoryCarousel.module.css';
@@ -10,6 +12,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, A11y } from 'swiper/modules'; // A11y para acessibilidade
 
 // Import Swiper styles
+import { Timestamp } from 'firebase/firestore';
 // @ts-expect-error ts eh doido
 import 'swiper/css';
 // @ts-expect-error ts eh doido
@@ -19,14 +22,35 @@ interface CategoryCarouselProps {
   title: string;
   cards: MatchedCard[];
   onCardClick: (card: MatchedCard) => void;
-  onToggleHot: (cardId: string, event: React.MouseEvent) => void;
-  // Precisamos saber quais cartas estão não lidas e seus snippets
-  unreadStatuses: { [key: string]: boolean };
-  cardChatsData: { [key: string]: { lastMessageTextSnippet?: string } };
-  newlyMatchedCardIds: string[]; // NOVO: IDs das cartas recém-combinadas
+  cardChatsData: CoupleCardChats; // Dados dos chats para verificar novas mensagens
+  userLastVisitedMatchesPage?: Timestamp; // Timestamp da última visita do usuário
 }
 
-const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCardClick, onToggleHot, unreadStatuses, cardChatsData, newlyMatchedCardIds }) => {
+const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCardClick, cardChatsData, userLastVisitedMatchesPage }) => {
+  const { user } = useAuth(); // <<< ADICIONADO
+
+  // Função auxiliar para determinar o status de notificação de cada carta
+  const getCardNotificationStatus = (card: MatchedCard) => {
+    const lastVisited = userLastVisitedMatchesPage?.toDate();
+    const matchCreatedAt = card.createdAt?.toDate();
+    const chatLastMessageTimestamp = cardChatsData[card.id]?.lastMessageTimestamp?.toDate();
+    const lastMessageSenderId = cardChatsData[card.id]?.lastMessageSenderId;
+
+    let isNewMatch = false;
+    let hasNewMessage = false;
+
+    if (lastVisited) {
+      if (matchCreatedAt && matchCreatedAt > lastVisited) {
+        isNewMatch = true;
+      }
+      // Verifica se a última mensagem é mais recente que a visita E não foi enviada pelo próprio usuário
+      if (chatLastMessageTimestamp && chatLastMessageTimestamp > lastVisited && lastMessageSenderId !== user?.id) {
+        hasNewMessage = true;
+      }
+    }
+    return { isNewMatch, hasNewMessage };
+  };
+
   if (cards.length === 0) {
     return (
       <div className={styles.carouselSection}>
@@ -78,11 +102,10 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCar
                     console.log(`CategoryCarousel: MatchCardItem clicado! Card ID: ${card.id}, Texto: "${card.text.substring(0,30)}..."`);
                     onCardClick(card);
                   }}
-                  isHot={card.isHot || false}
-                  onToggleHot={onToggleHot}
-                  isUnread={unreadStatuses[card.id] || false}
-                  isNewlyMatched={newlyMatchedCardIds.includes(card.id)} // Passa a nova prop
-                  lastMessageSnippet={unreadStatuses[card.id] ? cardChatsData[card.id]?.lastMessageTextSnippet : undefined}
+                  isHot={card.isHot} // Passa o status de hot
+                  isNewMatch={getCardNotificationStatus(card).isNewMatch} // Passa se é um novo match
+                  hasNewMessage={getCardNotificationStatus(card).hasNewMessage} // Passa se tem nova mensagem
+                  lastMessageSnippet={getCardNotificationStatus(card).hasNewMessage ? cardChatsData[card.id]?.lastMessageTextSnippet : undefined} // Passa o snippet
                 />
               </SwiperSlide>
             );

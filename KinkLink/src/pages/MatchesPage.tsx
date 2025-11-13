@@ -1,17 +1,17 @@
 // MatchesPage.tsx
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth, type MatchedCard } from '../contexts/AuthContext';
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
 import { useCoupleCardChats } from '../hooks/useCoupleCardChats';
 // Importa apenas o tipo CardData, pois o componente PlayingCard não é usado diretamente aqui.
-import { type CardData as PlayingCardDataType } from '../components/PlayingCard';
-import CardChatModal from '../components/CardChatModal';
+import { type CardData as PlayingCardDataType } from '../components/PlayingCard'; // Mantido para o modal
+import CardChatModal from '../components/CardChatModal'; // Mantido para o modal
 import CategoryCarousel from '../components/CategoryCarousel';
-import { getLastSeenTimestampForCard, markChatAsSeen } from '../utils/chatNotificationStore';
 import { useSkin } from '../contexts/SkinContext';
+import { db } from '../firebase'; // <<< ADICIONADO
 import styles from './MatchesPage.module.css';
-import { Timestamp } from 'firebase/firestore';
+import { Timestamp, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
 // MatchCardItem é importado e usado, mas sua interface MatchCardItemProps não precisa ser importada separadamente aqui.
 // A interface MatchCardItemProps é exportada pelo MatchCardItem.tsx e usada lá.
@@ -29,11 +29,8 @@ function MatchesPage() {
   // O tipo PlayingCardDataType é usado apenas para selectedCardForChat, que é passado para CardChatModal.
   const [selectedCardForChat, setSelectedCardForChat] = useState<PlayingCardDataType | null>(null);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
-  const [unreadStatuses, setUnreadStatuses] = useState<{ [key: string]: boolean }>({});
-  const [newlyMatchedCardIds, setNewlyMatchedCardIds] = useState<string[]>([]);
-  const [forceUpdateUnreadKey, setForceUpdateUnreadKey] = useState(0);
-  const [hasUnseenGlobalMatches, setHasUnseenGlobalMatches] = useState(false);
   const completedSectionRef = useRef<HTMLDivElement>(null);
+  const [hasUnseenGlobalMatches, setHasUnseenGlobalMatches] = useState(false); // Para o botão "Cartas"
 
   // Efeito para abrir o modal de chat se a URL tiver um hash #card-CARD_ID
   useEffect(() => {
@@ -52,107 +49,64 @@ function MatchesPage() {
     }
   }, [location.hash, userMatchedCards]);
 
-  // Efeito para identificar cartas recém-combinadas (newly matched)
+  // Passo 2: Atualiza o timestamp da última visita à página de matches
   useEffect(() => {
-    if (userMatchedCards && userMatchedCards.length > 0) {
-      const lastVisitedMatchIdsString = localStorage.getItem('kinklink_lastVisitedMatchIds');
-      const lastVisitedMatchIds: string[] = lastVisitedMatchIdsString ? JSON.parse(lastVisitedMatchIdsString) : [];
+    if (user?.id) {
+      // Usamos um pequeno delay para garantir que o onSnapshot do AuthContext
+      // tenha tempo de pegar o user.lastVisitedMatchesPage antes de atualizarmos.
+      // Isso é uma otimização para evitar que a data de visita seja atualizada
+      // antes que a lógica de "novo" tenha a chance de usar a data antiga.
+      const timer = setTimeout(() => {
+        const userDocRef = doc(db, 'users', user.id);
+        updateDoc(userDocRef, {
+          lastVisitedMatchesPage: serverTimestamp()
+        }).catch(error => {
+          console.error("Erro ao atualizar o timestamp de 'lastVisitedMatchesPage':", error);
+        });
+      }, 500); // 500ms de delay
 
-      const currentMatchIds = userMatchedCards.map(card => card.id);
-      const newMatches = currentMatchIds.filter(id => !lastVisitedMatchIds.includes(id));
-
-      setNewlyMatchedCardIds(newMatches);
-      // Se houver qualquer match novo, a flag global de "não visto" é true
-      if (newMatches.length > 0) {
-        setHasUnseenGlobalMatches(true);
-      } else {
-        setHasUnseenGlobalMatches(false); // Se não há novos matches, garante que a flag global seja false
-      }
-
-      // REMOVIDO: localStorage.setItem('kinklink_lastVisitedMatchIds', JSON.stringify(currentMatchIds));
-      // Esta linha causava o bug de marcar todas as cartas como vistas imediatamente.
-      // A atualização do localStorage agora ocorre apenas em handleCardClick e handleMatchesButtonClick.
-
-    } else {
-      setNewlyMatchedCardIds([]);
-      setHasUnseenGlobalMatches(false);
-      // Se não há matches, limpa também o localStorage para evitar que matches futuros sejam marcados como "vistos"
-      localStorage.removeItem('kinklink_lastVisitedMatchIds');
+      return () => clearTimeout(timer); // Limpa o timer se o componente desmontar
     }
-  }, [userMatchedCards]); // Depende apenas de userMatchedCards
+  }, [user?.id, db]);
+
+  // Lógica para determinar se há novos matches ou novas mensagens
+  const getCardNotificationStatus = (card: MatchedCard) => {
+    const lastVisited = user?.lastVisitedMatchesPage?.toDate();
+    const matchCreatedAt = card.createdAt?.toDate();
+    const chatLastMessageTimestamp = cardChatsData[card.id]?.lastMessageTimestamp?.toDate();
+
+    let isNewMatch = false;
+    let hasNewMessage = false;
+
+    if (lastVisited) {
+      // Um match é novo se foi criado DEPOIS da última visita
+      if (matchCreatedAt && matchCreatedAt > lastVisited) {
+        isNewMatch = true;
+      }
+      // Uma mensagem é nova se a última mensagem foi enviada DEPOIS da última visita
+      if (chatLastMessageTimestamp && chatLastMessageTimestamp > lastVisited) {
+        // E se a última mensagem não foi enviada pelo próprio usuário
+        if (cardChatsData[card.id]?.lastMessageSenderId !== user?.id) {
+          hasNewMessage = true;
+        }
+      }
+    }
+    return { isNewMatch, hasNewMessage };
+  };
+
+  // Efeito para atualizar a flag global de "não visto" para o botão "Cartas"
+  useEffect(() => {
+    const anyNew = userMatchedCards.some(card => {
+      const { isNewMatch, hasNewMessage } = getCardNotificationStatus(card);
+      return isNewMatch || hasNewMessage;
+    });
+    setHasUnseenGlobalMatches(anyNew);
+  }, [user?.id]);
+
 
   const isFirestoreTimestamp = (value: unknown): value is Timestamp => {
     return !!value && typeof (value as Timestamp).toDate === 'function' && typeof (value as Timestamp).seconds === 'number' && typeof (value as Timestamp).nanoseconds === 'number';
   };
-
-  const handleMatchesButtonClick = () => {
-    // Esta função é chamada ao clicar no botão "Cartas" para voltar para a CardPilePage.
-    // A atualização de 'kinklink_lastVisitedMatchIds' é feita aqui para marcar todas as cartas como vistas.
-    if (userMatchedCards) {
-      localStorage.setItem('kinklink_lastVisitedMatchIds', JSON.stringify(userMatchedCards.map(card => card.id)));
-      // Mantém a atualização da contagem para o botão na CardPilePage (se ainda usado lá)
-      localStorage.setItem('kinklink_lastSeenMatchesCount', String(userMatchedCards.length));
-    }
-    setHasUnseenGlobalMatches(false); // Zera a flag global para o botão "Cartas"
-    navigate('/cards');
-  };
-
-
-  useEffect(() => {
-    if (!user || !user.id || !user.coupleId || !userMatchedCards || userMatchedCards.length === 0 || isLoadingCardChats) {
-      setUnreadStatuses({});
-      return;
-    }
-    
-    const newUnreadStatuses: { [key: string]: boolean } = {};
-
-    userMatchedCards.forEach(card => {
-      const chatData = cardChatsData[card.id];
-      let isUnread = false;
-
-      if (chatData && chatData.lastMessageSenderId && chatData.lastMessageTimestamp) {
-        if (chatData.lastMessageSenderId !== user.id) {
-          let lastMessageDate: Date | null = null;
-          const ts = chatData.lastMessageTimestamp;
-
-          if (ts) {
-            try {
-              if (ts instanceof Date) {
-                lastMessageDate = ts;
-              } else if (isFirestoreTimestamp(ts)) {
-                lastMessageDate = ts.toDate();
-              } else if (typeof ts === 'string' || typeof ts === 'number') {
-                lastMessageDate = new Date(ts);
-              } else {
-                console.warn("[MatchesPage] lastMessageTimestamp não é um tipo reconhecido:", ts);
-                lastMessageDate = null;
-              }
-
-              if (lastMessageDate && isNaN(lastMessageDate.getTime())) {
-                lastMessageDate = null;
-              }
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            } catch (_e: unknown) { // CORREÇÃO: Adicionado eslint-disable-next-line para _e
-              lastMessageDate = null;
-            }
-          }
-
-          if (lastMessageDate) {
-            const lastSeenByClientISO = getLastSeenTimestampForCard(card.id);
-            if (!lastSeenByClientISO || new Date(lastSeenByClientISO) < lastMessageDate) {
-              isUnread = true;
-              if (isChatModalOpen && selectedCardForChat?.id === card.id && isFirestoreTimestamp(ts)) {
-                markChatAsSeen(card.id, ts); 
-                isUnread = false; 
-              }
-            }
-          }
-        }
-      }
-      newUnreadStatuses[card.id] = isUnread;
-    });
-    setUnreadStatuses(newUnreadStatuses);
-  }, [user, userMatchedCards, cardChatsData, isLoadingCardChats, isChatModalOpen, selectedCardForChat, forceUpdateUnreadKey]);
 
   const handleCardClick = (card: MatchedCard) => { 
     const cardForModal: PlayingCardDataType = {
@@ -165,31 +119,7 @@ function MatchesPage() {
     };
     setSelectedCardForChat(cardForModal);
     setIsChatModalOpen(true);
-
-    // Quando uma carta é clicada, ela não é mais considerada "recém-combinada"
-    setNewlyMatchedCardIds(prevIds => {
-      const updatedIds = prevIds.filter(id => id !== card.id);
-      // Se todos os matches novos foram vistos, atualiza a flag global
-      if (updatedIds.length === 0) {
-        setHasUnseenGlobalMatches(false);
-      }
-      // ATUALIZA O LOCALSTORAGE para persistir que esta carta foi vista
-      const currentVisitedIdsString = localStorage.getItem('kinklink_lastVisitedMatchIds');
-      const currentVisitedIds: string[] = currentVisitedIdsString ? JSON.parse(currentVisitedIdsString) : [];
-      if (!currentVisitedIds.includes(card.id)) {
-        currentVisitedIds.push(card.id);
-        localStorage.setItem('kinklink_lastVisitedMatchIds', JSON.stringify(currentVisitedIds));
-      }
-      return updatedIds;
-    });
   };
-
-  const handleChatSeen = useCallback(
-    (_seenCardId: string) => { // eslint-disable-line @typescript-eslint/no-unused-vars
-          setForceUpdateUnreadKey(prev => prev + 1);
-    }, 
-    [] 
-  );
 
   const handleCloseChat = () => {
     setIsChatModalOpen(false);
@@ -278,13 +208,15 @@ function MatchesPage() {
     <div className={styles.page}>
       <main className={styles.mainContent}>
         <div className={styles.pageHeaderControls}>
-          <button onClick={handleMatchesButtonClick} className={`${styles.backToCardsButton} genericButton ${hasUnseenGlobalMatches ? styles.shakeAnimation : ''}`} aria-label="Voltar para as cartas">
+          <Link to="/cards" className={`${styles.backToCardsButton} genericButton ${hasUnseenGlobalMatches ? styles.shakeAnimation : ''}`} aria-label="Voltar para as cartas">
             {hasUnseenGlobalMatches && <span className={styles.navNotificationDot}></span>}
             Cartas
-          </button>
+          </Link>
         </div>
 
       {noActiveMatchesCondition && completedMatches.length === 0 ? (
+        // Se não há matches ativos e nem completados
+        // (ou seja, o usuário não tem nenhum link ainda)
         <p className={styles.noMatchesText}>
           Você ainda não tem Links. Continue explorando as cartas!
         </p>
@@ -296,15 +228,15 @@ function MatchesPage() {
               <div className={getTopLinksContainerClasses(hotMatches.length)}>
                 <div className={styles.matchesGrid}>
                   {hotMatches.map((card: MatchedCard) => (
-                    <MatchCardItem
+                    <MatchCardItem // <<< AQUI
                       key={card.id}
                       card={card}
                       onClick={() => handleCardClick(card)}
                       isHot={true}
-                      isUnread={unreadStatuses[card.id] || false}
-                      isNewlyMatched={newlyMatchedCardIds.includes(card.id)}
+                      isNewMatch={getCardNotificationStatus(card).isNewMatch}
+                      hasNewMessage={getCardNotificationStatus(card).hasNewMessage}
+                      lastMessageSnippet={getCardNotificationStatus(card).hasNewMessage ? cardChatsData[card.id]?.lastMessageTextSnippet : undefined}
                       onToggleHot={handleToggleHot}
-                      lastMessageSnippet={unreadStatuses[card.id] ? cardChatsData[card.id]?.lastMessageTextSnippet : undefined}
                       isCompletedCard={false}
                     />
                   ))}
@@ -324,15 +256,14 @@ function MatchesPage() {
                   if (cardsForCategory && cardsForCategory.length > 0) {
                     return (
                       <div key={categoryName} className={`${styles.carouselCell} ${getCarouselCellClasses(categoryName, cardsForCategory.length)}`}>
-                        <CategoryCarousel
+                        <CategoryCarousel // <<< AQUI
                           title={categoryName}
                           cards={cardsForCategory}
                           onCardClick={handleCardClick}
-                          onToggleHot={handleToggleHot}
-                          unreadStatuses={unreadStatuses}
-                          newlyMatchedCardIds={newlyMatchedCardIds}
-                          cardChatsData={cardChatsData}
+                          cardChatsData={cardChatsData} // Passa para o carrossel
+                          userLastVisitedMatchesPage={user?.lastVisitedMatchesPage} // Passa para o carrossel
                         />
+
                       </div>
                     );
                   }
@@ -343,15 +274,13 @@ function MatchesPage() {
                   .map(([categoryName, cardsForCategory]) => {
                     if (cardsForCategory && cardsForCategory.length > 0) {
                       return (
-                        <div key={`other-${categoryName}`} className={`${styles.carouselCell} ${getCarouselCellClasses(categoryName, cardsForCategory.length)}`}>
-                          <CategoryCarousel
+                        <div key={`other-${categoryName}`} className={`${styles.carouselCell} ${getCarouselCellClasses(categoryName, cardsForCategory.length)}`}> 
+                          <CategoryCarousel // <<< AQUI
                             title={categoryName}
                             cards={cardsForCategory}
                             onCardClick={handleCardClick}
-                            onToggleHot={handleToggleHot}
-                            unreadStatuses={unreadStatuses}
-                            newlyMatchedCardIds={newlyMatchedCardIds}
-                            cardChatsData={cardChatsData}
+                            cardChatsData={cardChatsData} // Passa para o carrossel
+                            userLastVisitedMatchesPage={user?.lastVisitedMatchesPage} // Passa para o carrossel
                           />
                         </div>
                       );
@@ -369,12 +298,11 @@ function MatchesPage() {
                 {completedMatches.map((card: MatchedCard) => (
                   <MatchCardItem
                     key={card.id}
-                    card={card}
+                    card={card} // <<< AQUI
                     onClick={() => handleCardClick(card)}
                     isHot={false}
-                    isUnread={unreadStatuses[card.id] || false}
-                    isNewlyMatched={newlyMatchedCardIds.includes(card.id)}
-                    lastMessageSnippet={unreadStatuses[card.id] ? cardChatsData[card.id]?.lastMessageTextSnippet : undefined}
+                    isNewMatch={false} // Cartas completadas não são "novas"
+                    hasNewMessage={false} // Chats de cartas completadas não mostram "nova mensagem"
                     isCompletedCard={true}
                   />
                 ))}
@@ -400,8 +328,7 @@ function MatchesPage() {
             isFirestoreTimestamp(cardChatsData[selectedCardForChat.id].lastMessageTimestamp)
               ? cardChatsData[selectedCardForChat.id].lastMessageTimestamp
               : null
-          }
-          onChatSeen={handleChatSeen}
+          } 
           isHot={userMatchedCards.find(card => card.id === selectedCardForChat.id)?.isHot || false}
           onToggleHot={() => {
             if (selectedCardForChat?.id) {

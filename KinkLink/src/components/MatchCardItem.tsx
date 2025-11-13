@@ -6,23 +6,23 @@ import styles from './MatchCardItem.module.css'; // Usará seu próprio CSS modu
 export interface MatchCardItemProps { // Exportar a interface
   card: PlayingCardDataType;
   onClick: () => void;
-  isHot: boolean;
-  isUnread: boolean; // Para mensagens de chat não lidas
-  isNewlyMatched: boolean; // Para cartas de match recém-descobertas
+  isHot?: boolean; // Se é um Top Link
+  isNewMatch?: boolean; // Se o match é recém-formado
+  hasNewMessage?: boolean; // Se há novas mensagens no chat
   onToggleHot?: (cardId: string, event: React.MouseEvent) => void;
-  lastMessageSnippet?: string;
+  lastMessageSnippet?: string; // Trecho da última mensagem se houver
   isCompletedCard?: boolean; // Nova prop para indicar se é uma carta da seção "Realizadas"
 }
 
 const MatchCardItem: React.FC<MatchCardItemProps> = ({
   card,
   onClick,
-  isHot,
-  isUnread,
-  isNewlyMatched, // Desestruturado aqui
+  isHot, // Se é um Top Link
+  isNewMatch, // Se o match é recém-formado
+  hasNewMessage, // Se há novas mensagens no chat
   onToggleHot,
-  lastMessageSnippet,
-  isCompletedCard // Desestruturado aqui
+  lastMessageSnippet, // Trecho da última mensagem se houver
+  isCompletedCard // Se é uma carta da seção "Realizadas"
 }) => {
   // A escala agora considera se é uma carta completada para não aplicar o "hot" visual
   const scaleFactor = isHot && !isCompletedCard ? 0.55 : 0.5;
@@ -31,17 +31,17 @@ const MatchCardItem: React.FC<MatchCardItemProps> = ({
 
   return (
     <div
-      className={`${styles.cardItemWrapper} ${isUnread ? styles.unreadMatch : ''}`}
+      className={`${styles.cardItemWrapper} ${isNewMatch || hasNewMessage ? styles.unreadMatch : ''}`}
       onClick={onClick}
       onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
       onMouseLeave={(e) => e.currentTarget.style.transform = ''} // Remove a transformação inline ao sair
       role="button"
       tabIndex={0}
       // O aria-label agora reflete se a carta é nova OU tem mensagens não lidas
-      aria-label={`Link: ${card.text.substring(0,30)}... ${(isUnread || isNewlyMatched) ? ' (Novo ou não lido)' : ''}`}
+      aria-label={`Link: ${card.text.substring(0,30)}... ${isNewMatch ? ' (Novo Link!)' : ''} ${hasNewMessage ? ' (Nova Mensagem!)' : ''}`}
     >
-      {/* Mostra a bolinha se houver chat não lido OU for um match novo */}
-      {(isUnread || isNewlyMatched) && <div className={styles.unreadIndicator}></div>}
+      {/* Indicador de "Novo" ou "Não Lido" */}
+      {(isNewMatch || hasNewMessage) && <div className={styles.unreadIndicator}></div>}
       <PlayingCard
         data={card}
         targetWidth={cardWidth}
@@ -50,7 +50,7 @@ const MatchCardItem: React.FC<MatchCardItemProps> = ({
         // Não passa onToggleHot se for carta completada
         onToggleHot={!isCompletedCard ? onToggleHot : undefined}
       />
-      {isUnread && lastMessageSnippet && (
+      {hasNewMessage && lastMessageSnippet && (
         <div className={styles.matchCardSnippet}>
           <span>✉️ {lastMessageSnippet}</span>
         </div>

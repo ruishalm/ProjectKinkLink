@@ -33,6 +33,7 @@ import {
 export interface MatchedCard extends Card {
   isHot?: boolean;
   isCompleted?: boolean; // Novo campo para marcar cartas como realizadas
+  createdAt?: Timestamp; // <<< ADICIONADO
 }
 
 export interface UserFeedback {
@@ -67,6 +68,7 @@ export interface User {
   isAdmin?: boolean; // Campo para status de admin lido do Firestore
   feedbackTickets?: UserFeedback[]; // Novo campo para os tickets de feedback
   maxIntensity?: number; // Filtro de intensidade máxima para as cartas
+  lastVisitedMatchesPage?: Timestamp; // <<< NOVO CAMPO
   // fcmToken?: string | null; // Removido - será gerenciado pelo NotificationContext se necessário
 } // Adicionado fcmToken aqui
 

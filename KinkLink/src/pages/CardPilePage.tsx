@@ -48,8 +48,7 @@ function CardPilePage() {
   const [exitingCard, setExitingCard] = useState<{ id: string; direction: 'left' | 'right' } | null>(null);
   const [isCardFlipped, setIsCardFlipped] = useState(true);
   const [dragVisuals, setDragVisuals] = useState({ x: 0, active: false, dir: 0 });
-  const [cardDimensions, setCardDimensions] = useState({ width: 250, height: 350 });
-  const [hasUnseenMatches, setHasUnseenMatches] = useState(false);
+  const [cardDimensions, setCardDimensions] = useState({ width: 250, height: 350 }); 
 
   const { activeLeftTip, activeRightTip, animateTipsIn } = useCardTips(currentCard); // Usa o hook
 
@@ -78,22 +77,6 @@ function CardPilePage() {
       isHot: matchedCards.find(mc => mc.id === currentCard.id)?.isHot || false,
     };
   }, [currentCard, matchedCards]);
-
-
-  useEffect(() => {
-    const lastSeenMatchesCount = parseInt(localStorage.getItem('kinklink_lastSeenMatchesCount') || '0', 10);
-    if (matchedCards.length > lastSeenMatchesCount) {
-      setHasUnseenMatches(true);
-    } else {
-      setHasUnseenMatches(false);
-    }
-  }, [matchedCards]);
-
-  const handleMatchesButtonClick = () => {
-    localStorage.setItem('kinklink_lastSeenMatchesCount', String(matchedCards.length));
-    setHasUnseenMatches(false);
-    navigate('/matches');
-  };
 
   useEffect(() => {
     const calculateCardDimensions = () => {
@@ -357,13 +340,12 @@ function CardPilePage() {
         <div className={styles.bottomNavContainer}>
           <button className={`${styles.bottomNavIconStyle} ${styles.ballButton} genericButton klnkl-icon-nav-button klnkl-nav-cards`} onClick={openCarinhosMimosModal} title="Carinhos & Mimos">
             ❤️
-          </button>
+          </button> 
           <button
-            onClick={handleMatchesButtonClick}
-            className={`${styles.matchesNavButton} ${styles.linkButton} genericButton klnkl-nav-matches ${hasUnseenMatches ? styles.shakeAnimation : ''}`}
+            onClick={() => navigate('/matches')}
+            className={`${styles.matchesNavButton} ${styles.linkButton} genericButton klnkl-nav-matches`}
           >
             Links ({matchedCards.length})
-            {hasUnseenMatches && <span className={styles.navNotificationDot}></span>}
           </button>
           <Link to="/profile" className={`${styles.bottomNavIconStyle} ${styles.ballButton} genericButton klnkl-icon-nav-button klnkl-nav-profile`} aria-label="Perfil" title="Perfil">
             👤

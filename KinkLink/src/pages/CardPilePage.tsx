@@ -1,6 +1,7 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\CardPilePage.tsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { useDrag } from '@use-gesture/react';
+import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore'; // <<< ADICIONADO
 import { useAuth } from '../contexts/AuthContext'; // Importar useAuth
 import { Link, useNavigate } from 'react-router-dom';
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
@@ -16,6 +17,7 @@ import CardBack from '../components/CardBack';
 import type { Card } from '../data/cards';
 import { useSkin } from '../contexts/SkinContext';
 import { useCardTips } from '../hooks/useCardTips'; // Importa o novo hook
+import { db } from '../firebase'; // <<< ADICIONADO
 import { useCardPileModals } from '../hooks/useCardPileModals'; // Importa o hook dos modais
 // import { categorySpecificTips } from '../components/categorySpecificTips'; // Não é mais necessário aqui
 import SideTipMessages from '../components/SideTipMessages';
@@ -39,7 +41,7 @@ function CardPilePage() {
     acceptPeek,      // Função para aceitar espiar
     rejectPeek,      // Função para rejeitar espiar
   } = useCardPileLogic();
-  const { isLoadingSkins } = useSkin();
+  const { isLoadingSkins } = useSkin(); 
   const { user } = useAuth(); // Obter o usuário atual
 
   const { matchedCards, seenCards, handleCreateUserCard, toggleHotStatus } = useUserCardInteractions();
@@ -122,6 +124,43 @@ function CardPilePage() {
       setIsCardFlipped(true);
     }
   }, [currentCard?.id, exitingCard]); // Depende do ID da carta atual e do estado de exitingCard
+
+  // <<< NOVO: Listener para "Like do Parceiro"
+  useEffect(() => {
+    if (!user?.coupleId || !user.partnerId) {
+      return; // Sai se não houver casal ou parceiro
+    }
+
+    const interactionsRef = collection(db, `couples/${user.coupleId}/likedInteractions`);
+    // Ouve apenas por documentos criados a partir de agora
+    const q = query(interactionsRef, where('createdAt', '>', Timestamp.now()));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === 'added') {
+          const data = change.doc.data();
+          // Verifica se o primeiro like foi do parceiro
+          if (data.likedByUIDs && data.likedByUIDs[0] === user.partnerId) {
+            const cardText = data.cardData?.text || 'uma carta';
+            const truncatedText = cardText.length > 40 ? `${cardText.substring(0, 37)}...` : cardText;
+
+            toast.success(
+              (t) => (
+                <div onClick={() => toast.dismiss(t.id)} style={{ cursor: 'pointer' }}>
+                  <b>Seu par topou uma carta! 👀</b>
+                  <p style={{ margin: '4px 0 0' }}>A carta '{truncatedText}' foi curtida.</p>
+                </div>
+              ), { duration: 6000 }
+            );
+          }
+        }
+      });
+    });
+
+    // Limpa o listener quando o componente desmonta ou o usuário muda
+    return () => unsubscribe();
+
+  }, [user?.coupleId, user?.partnerId]);
 
   const triggerHapticFeedback = (pattern: number | number[] = 30) => {
     if (navigator.vibrate) {

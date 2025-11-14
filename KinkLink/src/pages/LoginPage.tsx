@@ -1,5 +1,5 @@
 import React, { useState, type FormEvent, useMemo } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './LoginPage.module.css'; // Importa os CSS Modules
 import ForgotPasswordModal from '../components/ForgotPasswordModal'; // Importa o modal
@@ -12,7 +12,6 @@ function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false); // Renomeado de isLoading para evitar conflito
   const { login, loginWithGoogle, isLoading: authIsLoading } = useAuth(); // Adiciona loginWithGoogle
   const navigate = useNavigate();
-  const location = useLocation();
 
   const [showEmailPasswordForm, setShowEmailPasswordForm] = useState(false); // Novo estado
 
@@ -25,9 +24,9 @@ function LoginPage() {
     setIsSubmitting(true); // Inicia o carregamento
 
     try {
-      const from = location.state?.from?.pathname || '/profile'; // Destino padrão após login
       await login(email, password); // Chama a função de login do AuthContext
-      navigate(from, { replace: true }); // Redireciona após login bem-sucedido
+      // Redireciona para o perfil com um estado para mostrar o tutorial
+      navigate('/profile', { replace: true, state: { showTutorial: true } });
     } catch (err: unknown) {
       console.error("Falha no login:", err); // Mantém o log completo do erro para debug
       let errorMessage = 'Falha ao tentar fazer login. Verifique suas credenciais e tente novamente.';
@@ -64,9 +63,9 @@ function LoginPage() {
     setError(null);
     setIsSubmitting(true); // Usar o mesmo estado de carregamento
     try {
-      const from = location.state?.from?.pathname || '/profile';
       await loginWithGoogle();
-      navigate(from, { replace: true });
+      // Redireciona para o perfil com um estado para mostrar o tutorial
+      navigate('/profile', { replace: true, state: { showTutorial: true } });
     } catch (err: unknown) {
       console.error("Falha no login com Google:", err);
       if (typeof err === 'object' && err !== null && 'message' in err) {

@@ -161,7 +161,12 @@ export const onNewMatch = onDocumentWritten(
       let pioneerUID: string | undefined;
       let completadorUID: string | undefined;
 
-      const beforeLikedByUIDs = beforeSnapshotData?.likedByUIDs as string[] | undefined;
+      // Acessar likedByUIDs do beforeData, não do beforeSnapshotData diretamente
+      const beforeLikedByUIDs = (beforeSnapshotData?.likedByUIDs as string[] | undefined) || [];
+
+      // Lógica para determinar quem deu o like primeiro e quem completou o match
+      // Isso funciona quando o documento é atualizado de 1 para 2 UIDs.
+      // O 'pioneiro' é quem já estava lá. O 'completador' é o novo UID.
 
       if (beforeLikedByUIDs && beforeLikedByUIDs.length === 1 && likedByUIDs.length === 2) {
         pioneerUID = beforeLikedByUIDs[0];
@@ -271,7 +276,7 @@ export const sendWeeklyLinkSuggestion = onSchedule(
       const couplesSnapshot = await db.collection("couples").get();
       if (couplesSnapshot.empty) {
         logger.info("No couples found. Exiting sendWeeklyLinkSuggestion.");
-        return; // Retorna void
+        return;
       }
 
       let notificationsAttempted = 0;
@@ -350,7 +355,7 @@ export const onAdminTicketResponse = onDocumentWritten(
 
     if (!beforeSnapshot?.exists || !afterSnapshot?.exists) {
       logger.info("Document before or after snapshot does not exist (e.g., creation or deletion). Exiting ticket response check.", { userId, eventId: event.id });
-      return; // Retorna void
+      return;
     }
 
     const beforeData = beforeSnapshot.data();
@@ -358,7 +363,7 @@ export const onAdminTicketResponse = onDocumentWritten(
 
     if (!beforeData || !afterData) {
       logger.info("beforeData or afterData is undefined. Exiting ticket response check.", { userId, eventId: event.id });
-      return; // Retorna void
+      return;
     }
 
     if (!afterData.feedbackTickets) {
@@ -414,7 +419,7 @@ export const onLinkCompletedSendNotification = onDocumentWritten(
 
     if (!afterSnapshot?.exists) {
       logger.info(`Couple document ${coupleId} was deleted or does not exist after update. No notification.`, { eventId: event.id });
-      return; // Retorna void
+      return;
     }
 
     const beforeData = beforeSnapshot?.data();
@@ -422,7 +427,7 @@ export const onLinkCompletedSendNotification = onDocumentWritten(
 
     if (!afterData) {
         logger.warn(`afterData is undefined for couple ${coupleId}, though snapshot exists. Exiting.`, { eventId: event.id });
-        return; // Retorna void
+        return;
     }
 
     const membersBefore = (beforeData?.members as string[]) || [];

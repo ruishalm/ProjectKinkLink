@@ -1,0 +1,536 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100; /* Acima de outros modais */
+  padding: 20px;
+}
+
+.modalContent {
+  width: 700px; /* Largura fixa, sem responsividade */
+  max-width: 95vw; /* Garante que não quebre em telas muito pequenas */
+  max-height: 90vh; /* Altura máxima para não ocupar a tela inteira */
+  overflow-y: auto; /* O próprio modal terá a barra de rolagem se necessário */
+  display: flex;
+  flex-direction: column;
+  padding: 15px; /* Padding reduzido para dar mais espaço ao conteúdo */
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+}
+
+.closeButton {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 2em;
+  color: var(--cor-texto-secundario);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+
+.stepIndicator {
+  text-align: center;
+  font-size: 0.9em;
+  color: var(--cor-texto-secundario);
+  margin-bottom: 15px;
+  flex-shrink: 0;
+}
+
+.stepContent {
+  /* flex-grow: 1; Removido para que a altura seja determinada pelo conteúdo */
+  display: flex;
+  justify-content: flex-start; /* Alinha o conteúdo ao topo */
+  overflow-y: visible; /* Permite que o conteúdo se expanda livremente */
+  padding: 15px;
+  background-color: rgba(0,0,0,0.1);
+  border-radius: 8px;
+  border: 1px solid var(--cor-borda);
+}
+
+.stepPlaceholder {
+  text-align: center;
+  color: var(--cor-texto-primario);
+}
+
+.stepPlaceholder h2 {
+  color: var(--cor-primaria);
+  margin-bottom: 15px;
+}
+
+.stepPlaceholder p {
+  line-height: 1.6;
+  max-width: 450px;
+  margin: 0 auto;
+}
+
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  flex-shrink: 0;
+}
+
+.navButton {
+  padding: 10px 25px;
+  font-size: 1em;
+  font-weight: bold;
+}
+
+.primaryNavButton {
+  background-color: var(--cor-acao-positiva);
+  color: var(--cor-texto-acao-positiva);
+  margin-left: auto; /* Empurra para a direita se for o único botão */
+}
+
+@media (max-width: 600px) {
+  .modalContent {
+    height: 85vh;
+    padding: 15px;
+  }
+  .navButton {
+    padding: 12px 20px;
+  }
+}
+
+/* --- Estilos da Nova Etapa 1 (Vínculo) --- */
+.linkMockupContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 25px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.linkMockupSection {
+  background-color: rgba(0,0,0,0.15);
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  min-width: 250px;
+}
+
+.linkMockupSection h4 {
+  margin: 0 0 10px 0;
+  color: var(--cor-texto-primario);
+}
+
+.linkArrow {
+  font-size: 2.5em;
+  color: var(--cor-primaria);
+}
+
+.generatedCodeMockup {
+  background-color: var(--cor-fundo);
+  padding: 10px 15px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 1.2em;
+  letter-spacing: 2px;
+  border: 1px solid var(--cor-borda-escura);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* --- Estilos da Etapa 1 movidos para cá --- */
+.stepContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.stepTitle {
+  color: var(--cor-primaria);
+  margin: 0 0 15px 0;
+  font-size: 1.6em;
+}
+
+.interactiveArea {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.cardWrapper {
+  animation: wiggle 4s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-3deg); }
+  50% { transform: rotate(0deg); }
+  75% { transform: rotate(3deg); }
+}
+
+.instruction {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 150px;
+  color: var(--cor-texto-secundario);
+}
+
+.instruction p {
+  margin: 0;
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+.arrow {
+  font-size: 2.5em;
+  color: var(--cor-primaria);
+  margin: 5px 0;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.leftInstruction .arrow {
+  animation-delay: 0.5s;
+}
+
+.bottomInstruction {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--cor-texto-secundario);
+  font-size: 0.9em;
+}
+
+.oopsButton {
+  background-color: var(--cor-secundaria);
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .interactiveArea {
+    flex-direction: column;
+    gap: 15px;
+  }
+}
+
+/* --- Estilos da Etapa 2 --- */
+.stepSubtitle {
+  font-size: 1em; /* Tamanho da fonte ligeiramente reduzido */
+  color: var(--cor-texto-secundario);
+  margin-top: -10px;
+  margin-bottom: 30px;
+  max-width: 500px;
+  text-align: center;
+}
+
+.matchesScreenMockup {
+  background-color: rgba(0,0,0,0.2);
+  padding: 20px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 600px; /* Aumenta a largura para caber as colunas */
+  display: grid; /* Usa grid para criar as colunas */
+  grid-template-columns: 1fr; /* Altera para uma coluna para empilhar as seções */
+  gap: 15px; /* Espaço entre as seções reduzido */
+}
+
+.matchesSection {
+  position: relative;
+  /* Adiciona o "quadrado" em volta de cada seção */
+  background-color: rgba(0,0,0,0.15);
+  border: 1px solid var(--cor-borda);
+  border-radius: 6px;
+  padding: 12px; /* Padding interno reduzido */
+}
+
+.matchesSectionTitle {
+  color: var(--cor-texto-primario);
+  margin: 0 0 10px 5px;
+  text-align: left;
+}
+
+.matchesCarousel {
+  display: flex;
+  gap: 15px;
+  overflow: visible; /* Permite que os callouts apareçam */
+  padding-bottom: 10px; /* Espaço para a barra de scroll */
+}
+
+.miniCard {
+  background-color: var(--cor-fundo-elemento);
+  border: 1px solid var(--cor-borda);
+  border-radius: 10px;
+  padding: 8px;
+  width: 80px; /* Largura reduzida */
+  height: 112px; /* Altura reduzida */
+  text-align: center;
+  display: flex; /* Para centralizar o texto */
+  align-items: center;
+  justify-content: center;
+  color: var(--cor-texto-primario);
+  font-weight: bold;
+  flex-shrink: 0;
+  position: relative;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.hasNotification::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 15px;
+  height: 15px;
+  background-color: var(--cor-aviso);
+  border-radius: 50%;
+  border: 2px solid var(--cor-fundo-elemento);
+  animation: pulse 1.5s infinite;
+}
+
+/* --- Estilos para os Balões de Dica (Reestruturado) --- */
+
+/* Classe base para os balões */
+.callout {
+  position: absolute;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.8em;
+  font-weight: bold;
+  z-index: 10;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+
+/* Dica para "Top Links" */
+.topLinkCallout {
+  composes: callout;
+  background-color: var(--cor-primaria);
+  color: var(--cor-texto-sobre-primaria);
+  width: 180px;
+  top: -45px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.topLinkCallout::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 8px;
+  border-style: solid;
+  border-color: var(--cor-primaria) transparent transparent transparent;
+}
+
+/* Dica para a notificação de novo link/mensagem */
+.notificationCallout {
+  composes: callout;
+  background-color: var(--cor-primaria);
+  color: var(--cor-texto-sobre-primaria);
+  width: 140px;
+  bottom: 110%;
+  left: 160%; /* Movido um pouco mais para a direita */
+  transform: translateX(-50%); /* Mantém o centro do balão alinhado com a nova posição */
+}
+
+/* Dica para a organização por categoria */
+.categoryCallout {
+  composes: callout;
+  background-color: var(--cor-acao-positiva);
+  color: var(--cor-texto-acao-positiva);
+  bottom: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 160px;
+}
+
+.categoryCallout::after {
+  content: '';
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 8px;
+  border-style: solid;
+  border-color: transparent transparent var(--cor-acao-positiva) transparent;
+}
+.bottomText {
+  margin-top: 25px;
+  font-size: 1em;
+  color: var(--cor-texto-secundario);
+  font-style: italic;
+}
+
+/* --- Estilos da Etapa 3 (nao ) --- */
+.chatModalMockup {
+  background-color: var(--cor-fundo-elemento);
+  border: 1px solid var(--cor-borda);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 300px;
+  height: 450px; /* jamais deve ser alterado */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.chatCardHeader {
+  background-color: rgba(0,0,0,0.2);
+  padding: 10px 15px;
+  text-align: center;
+  font-style: italic;
+  color: var(--cor-texto-secundario);
+  border-bottom: 1px solid var(--cor-borda);
+  flex-shrink: 0;
+}
+
+.chatMessagesArea {
+  flex-grow: 1;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* Alinha as mensagens na parte de baixo */
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.chatMessage {
+  display: flex;
+  max-width: 80%;
+}
+
+.sent {
+  align-self: flex-end;
+}
+
+.received {
+  align-self: flex-start;
+}
+
+.chatBubble {
+  padding: 10px 15px;
+  border-radius: 18px;
+  line-height: 1.4;
+}
+
+.sent .chatBubble {
+  background-color: var(--cor-primaria);
+  color: var(--cor-texto-sobre-primaria);
+  border-bottom-right-radius: 4px;
+}
+
+.received .chatBubble {
+  background-color: var(--cor-secundaria);
+  color: var(--cor-texto-sobre-secundaria);
+  border-bottom-left-radius: 4px;
+}
+
+.chatInputMockup {
+  padding: 15px;
+  background-color: rgba(0,0,0,0.2);
+  color: var(--cor-texto-secundario);
+  border-top: 1px solid var(--cor-borda);
+  flex-shrink: 0;
+}
+
+/* --- Estilos da Etapa 4 (Perfil) --- */
+.profileMockup {
+  background-color: var(--cor-fundo-elemento);
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  padding: 20px;
+  width: 100%;
+  max-width: 450px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.profileHeader {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.profileSymbol {
+  font-size: 1.8em;
+  color: var(--cor-primaria);
+}
+
+.profileName {
+  font-size: 1.4em;
+  font-weight: bold;
+}
+
+.profileSectionMockup {
+  text-align: left;
+}
+
+.profileSectionMockup h4 {
+  margin: 0 0 8px 0;
+  color: var(--cor-texto-primario);
+  font-size: 1.1em;
+}
+
+.profileSectionMockup p {
+  margin: 0;
+  color: var(--cor-texto-secundario);
+  font-size: 0.95em;
+}
+
+.unlinkButtonMockup {
+  margin-top: 15px;
+  background-color: var(--cor-acao-negativa);
+  color: var(--cor-texto-acao-negativa);
+  opacity: 0.7;
+}
+
+.intensitySelectorMockup {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: 10px;
+  background-color: rgba(0,0,0,0.2);
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.intensityLevelMockup {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: #555;
+  border: 1px solid #777;
+}
+.intensityLevelMockup.active {
+  background-color: var(--cor-primaria);
+  border-color: var(--cor-primaria-hover);
+}

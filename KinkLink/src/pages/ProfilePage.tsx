@@ -1,12 +1,13 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\ProfilePage.tsx
 import React, { useState, useEffect, type FormEvent } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useNotification } from '../contexts/NotificationContext'; // <<< ADICIONADO
+import { useNotification } from '../contexts/NotificationContext';
 import { db } from '../firebase';
 import { doc, getDoc, updateDoc, collection, getDocs } from 'firebase/firestore';
 import styles from './ProfilePage.module.css';
 import IntensitySelector from '../components/IntensitySelector/IntensitySelector';
+import TutorialModal from '../components/TutorialModal'; // Importa o novo modal
 
 // Interface para a carta serializada, onde Timestamps são convertidos para string.
 // Isso evita o uso de 'any' e fornece um tipo claro para o array.
@@ -23,8 +24,9 @@ interface ExtractedUserCard {
 
 function ProfilePage() {
   const { user, userSymbol, logout, updateUser, isLoading: authIsLoading, resetNonMatchedSeenCards } = useAuth(); // Adicionado userSymbol do contexto
-  const { appNotificationStatus, isNotificationProcessing, enableNotifications, disableNotifications } = useNotification(); // <<< ALTERADO
+  const { appNotificationStatus, isNotificationProcessing, enableNotifications } = useNotification();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isEditing, setIsEditing] = useState(false);
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
@@ -33,9 +35,8 @@ function ProfilePage() {
   const [initialGender, setInitialGender] = useState(''); // Novo estado para gênero inicial
   const [initialBio, setInitialBio] = useState('');
   const [partnerInfo, setPartnerInfo] = useState<{ username?: string; email?: string | null } | null>(null);
-  const [isLoadingPartner, setIsLoadingPartner] = useState(false); // Novo estado
-  const [isPersonalInfoOpen, setIsPersonalInfoOpen] = useState(true); 
-  const [isNotificationControlVisible, setIsNotificationControlVisible] = useState(false);
+  const [isPersonalInfoOpen, setIsPersonalInfoOpen] = useState(true);
+  const [isTutorialModalOpen, setIsTutorialModalOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -53,11 +54,18 @@ function ProfilePage() {
     }
   }, [user, authIsLoading, navigate]);
 
+  // Abre o tutorial se o estado de navegação indicar
+  useEffect(() => {
+    if (location.state?.showTutorial) {
+      setIsTutorialModalOpen(true);
+      // Limpa o estado da localização para não reabrir o modal em um refresh da página
+      window.history.replaceState({}, document.title)
+    }
+  }, [location.state]);
+
   useEffect(() => {
     // Só busca se tiver user.partnerId e (partnerInfo for null OU o partnerId mudou)
     if (user && user.partnerId) {
-      if (!partnerInfo || (partnerInfo.email !== user.partnerId && partnerInfo.username !== user.partnerId)) {
-        setIsLoadingPartner(true); // Inicia o carregamento
       const fetchPartnerInfo = async () => {
         try {
           const partnerDocRef = doc(db, 'users', user.partnerId!); // MODIFICADO AQUI
@@ -73,14 +81,12 @@ function ProfilePage() {
           console.error('ProfilePage: Erro ao buscar informações do parceiro:', error);
           setPartnerInfo({ username: 'Erro ao buscar parceiro(a)' });
         } finally {
-          setIsLoadingPartner(false); // Finaliza o carregamento
+          // Não precisa mais de isLoadingPartner
         }
       };
       fetchPartnerInfo();
-      }
     } else if (user && !user.partnerId) { // MODIFICADO AQUI
       setPartnerInfo(null); // Limpa info do parceiro se desvinculado
-      setIsLoadingPartner(false); // Garante que o loading seja falso se não houver parceiro
     }
   }, [user, user?.partnerId]); // Removido partnerInfo da dependência para evitar loops desnecessários
 
@@ -150,14 +156,6 @@ function ProfilePage() {
         console.error("Erro ao atualizar a intensidade:", error);
         // Opcional: Adicionar um toast/feedback de erro
       }
-    }
-  };
-
-  const handleNotificationToggle = async () => {
-    if (appNotificationStatus === 'enabled') { // <<< ALTERADO
-      await disableNotifications();
-    } else {
-      await enableNotifications();
     }
   };
 
@@ -414,68 +412,57 @@ function ProfilePage() {
                 </button>
               </div>
             )}
-            {/* Seção do Toggle de Notificação */}
+            {/* Seção de Notificação (Lógica Simplificada) */}
             {!isEditing && (
-              !isNotificationControlVisible ? (
-                <div className={styles.notificationToggleContainer}>
-                  <div className={styles.notificationManageHeader}>
-                    <label className={styles.formLabel}>Notificações Push</label>
-                    <button onClick={() => setIsNotificationControlVisible(true)} className={`${styles.button} genericButton`}>
-                      Gerenciar
-                    </button>
+              <>
+                <hr className={styles.separator} />
+                <div className={styles.profileActionsContainer}>
+                  <div className={styles.actionItem}>
+                    <div className={styles.actionItemHeader}>
+                      <label className={styles.formLabel}>Notificações Push</label>
+                      <button
+                        onClick={enableNotifications}
+                        disabled={appNotificationStatus === 'enabled' || appNotificationStatus === 'denied' || isNotificationProcessing}
+                        className={`${styles.button} ${styles.smallButton} genericButton`}
+                      >
+                        {isNotificationProcessing ? 'Aguardando...' : appNotificationStatus === 'enabled' ? 'Ativadas' : appNotificationStatus === 'denied' ? 'Bloqueadas' : 'Ativar'}
+                      </button>
+                    </div>
+                    <p className={styles.actionItemDescription}>Ative para ser avisado sobre novos Links e mensagens!</p>
                   </div>
-                  {appNotificationStatus === 'disabled' && (
-                    <p className={styles.notificationPromptText} onClick={() => setIsNotificationControlVisible(true)}>
-                      Ative as notificações para uma experiência completa do nosso app
-                      <span className={styles.notificationPromiseText}>(a gente promete que não vai ser chato)</span>
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <div className={styles.notificationToggleContainer}>
-                  <label className={styles.formLabel}>Notificações Push</label>
-                  <div className={styles.toggleWrapper}>
-                    <label className={styles.toggleSwitch}>
-                      <input
-                        type="checkbox"
-                        onChange={handleNotificationToggle}
-                        checked={appNotificationStatus === 'enabled'}
-                        disabled={isNotificationProcessing || appNotificationStatus === 'denied'}
-                      />
-                      <span className={styles.slider}></span>
-                    </label>
-                    {isNotificationProcessing && <span className={styles.processingText}>Processando...</span>}
+                  <div className={styles.actionItem}>
+                    <div className={styles.actionItemHeader}>
+                      <label className={styles.formLabel}>Guia Rápido</label>
+                      <button onClick={() => setIsTutorialModalOpen(true)} className={`${styles.button} ${styles.smallButton} genericButton`}>Mostrar Tutorial</button>
+                    </div>
+                    <p className={styles.actionItemDescription}>Relembre como usar as principais funções do app.</p>
                   </div>
-                  {appNotificationStatus === 'denied' && <p className={styles.permissionDeniedText}>As notificações estão bloqueadas nas configurações do seu navegador.</p>}
-                  <p className={styles.notificationHelpText}>
-                    A permissão de notificação é gerenciada pelo seu navegador. Para revogá-la completamente, você precisa acessar as configurações do site no seu navegador.
-                  </p>
                 </div>
-              )
+              </>
             )}
           </div>
         </div>
+
+        <TutorialModal
+          isOpen={isTutorialModalOpen}
+          onClose={() => setIsTutorialModalOpen(false)}
+        />
 
         {/* SEÇÃO DE VÍNCULO */}
         <div className={`${styles.section} klnkl-themed-panel`}>
           <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>Vínculo de Casal</h2>
           {user.partnerId ? (
-            <>
-              {isLoadingPartner ? (
-                <p className={styles.infoText}>Carregando parceiro...</p>
-              ) : (
-                <>
-                  <p className={styles.infoText}>
-                    Você está vinculado com:{' '}
-                    <strong>
-                      {partnerInfo?.username || partnerInfo?.email || '...'} ({userSymbol === '★' ? '▲' : '★'})
-                    </strong>
-                  </p>
-                  <p className={styles.infoText}>
-                    Você está jogando como <strong>{userSymbol}</strong>
-                  </p>
-                </>
-              )}
+            <>              
+              <p className={styles.infoText}>
+                Você está vinculado com:{' '}
+                <strong>
+                  {partnerInfo?.username || partnerInfo?.email || '...'} ({userSymbol === '★' ? '▲' : '★'})
+                </strong>
+              </p>
+              <p className={styles.infoText}>
+                Você está jogando como <strong>{userSymbol}</strong>
+              </p>
+              
               <p className={styles.infoText} style={{fontSize: '0.9em', opacity: 0.8, marginTop: '-5px', marginBottom: '15px'}}>
                 Explore os Links e converse com seu par!
               </p>
@@ -503,7 +490,7 @@ function ProfilePage() {
 
         {/* SEÇÃO DE FILTRO DE INTENSIDADE */}
         <div className={`${styles.section} klnkl-themed-panel`}>
-          <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>Filtro de Intensidade</h2>
+          <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>‼️ Filtro de Intensidade ‼️</h2>
           <IntensitySelector
             currentLevel={user?.maxIntensity ?? 8} // Usa 8 (mostrar tudo) como padrão se não definido
             onLevelChange={handleIntensityChange}

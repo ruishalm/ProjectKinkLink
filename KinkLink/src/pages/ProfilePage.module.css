@@ -159,11 +159,23 @@
   filter: brightness(110%); /* Leve clareada para secundário */
 }
 
+.smallButton {
+  padding: 6px 14px;
+  font-size: 0.85em;
+  margin-right: 0; /* Remove a margem direita para este botão específico */
+}
+
 .buttonDisabled {
   background-color: var(--cor-secundaria); /* Usa cor secundária para desabilitado */
   color: var(--cor-texto-secundario); /* Texto secundário para menos destaque */
   /* cursor: not-allowed e opacity são cobertos por genericButton:disabled ou .genericButton.disabled */
   /* Se este estilo .buttonDisabled for para elementos <a> que não podem ter :disabled, o genericButton.disabled já cobre */
+}
+
+.separator {
+  border: none;
+  border-top: 1px solid var(--cor-borda);
+  margin: 25px 0;
 }
 
 .link {
@@ -199,11 +211,16 @@
 .notificationToggleContainer {
   margin-top: 25px;
   padding-top: 20px;
-  border-top: 1px solid var(--cor-borda);
-  /* Alterado para permitir que o texto fique abaixo */
   display: flex;
   flex-direction: column;
   gap: 15px; /* Espaço entre o header e o texto de prompt */
+}
+
+/* Novo container para os textos descritivos */
+.notificationDescriptionContainer {
+  padding-top: 10px;
+  border-top: 1px solid var(--cor-borda);
+  margin-top: 15px;
 }
 
 .notificationManageHeader {
@@ -248,15 +265,14 @@
   width: 100%;
   font-size: 0.8em;
   color: var(--cor-aviso);
-  margin-top: 5px;
-  text-align: right;
+  margin-top: 10px;
+  text-align: center;
 }
 
 .notificationHelpText {
   width: 100%;
-  font-size: 0.75em;
+  font-size: 0.85em;
   color: var(--cor-texto-secundario);
-  margin-top: 10px;
   text-align: center;
 }
 

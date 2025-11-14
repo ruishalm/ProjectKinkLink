@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom'; // Para ler query params
 import { acceptLink } from '../services/linkService'; // Ajuste o caminho se necessário
+import { requestNotificationPermission } from '../services/notificationService'; // Importa o novo serviço
 import styles from './AcceptLink.module.css'; // Importa os CSS Modules
 
 interface AcceptLinkProps {
@@ -26,6 +27,11 @@ const AcceptLink: React.FC<AcceptLinkProps> = ({ onLinkAccepted, onCancel }) => 
       setLinkCode(codeFromUrl.toUpperCase()); // Preenche o estado com o código da URL, em maiúsculas
       // Opcional: você poderia até tentar submeter o formulário automaticamente aqui se desejado,
       // mas preencher o campo já é uma grande melhoria de UX.
+
+      // Solicita permissão de notificação assim que a página carrega com um código
+      // Isso é opcional, mas pode ser uma boa UX
+      requestNotificationPermission().catch(console.error);
+
     }
   }, [location.search]); // Dependência: location.search
 
@@ -42,6 +48,10 @@ const AcceptLink: React.FC<AcceptLinkProps> = ({ onLinkAccepted, onCancel }) => 
     try {
       // Os códigos são gerados em maiúsculas, então convertemos para garantir a correspondência
       const result = await acceptLink(linkCode.trim().toUpperCase());
+
+      // Após o vínculo bem-sucedido, solicita permissão e salva o token
+      await requestNotificationPermission();
+
       setSuccessMessage(`Vínculo realizado com sucesso!`);
       onLinkAccepted(result.coupleId, result.partnerId);
       // Opcional: Limpar o campo de código ou desabilitar o formulário após o sucesso

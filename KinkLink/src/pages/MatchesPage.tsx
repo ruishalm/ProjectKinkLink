@@ -1,5 +1,5 @@
 // MatchesPage.tsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth, type MatchedCard } from '../contexts/AuthContext';
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
@@ -100,7 +100,7 @@ function MatchesPage() {
     };
   }, [user?.id, user?.lastVisitedMatchesPage, userMatchedCards, cardChatsData]);
   
-  const handleCardClick = (card: MatchedCard) => { 
+  const handleCardClick = useCallback((card: MatchedCard) => { 
     const cardForModal: PlayingCardDataType = {
         id: card.id,
         text: card.text,
@@ -111,7 +111,7 @@ function MatchesPage() {
     };
     setSelectedCardForChat(cardForModal);
     setIsChatModalOpen(true);
-  };
+  }, []); // A dependência vazia garante que a função seja criada apenas uma vez
 
   const handleCloseChat = () => {
     setIsChatModalOpen(false);
@@ -130,25 +130,18 @@ function MatchesPage() {
     }
   };
 
-  if (isLoadingSkins || (!user || (isLoadingCardChats && !Object.keys(cardChatsData).length))) { 
-    return <div className={styles.page}><p>Carregando seus links...</p></div>;
-  }
-  if (cardChatsError) {
-    return <div className={styles.page}><p>Erro ao carregar dados dos chats: {cardChatsError}</p></div>;
-  }
+  // Otimização: Memoiza a filtragem e agrupamento das cartas.
+  // Isso evita que as listas sejam recalculadas em cada renderização.
+  const { completedMatches, hotMatches, otherMatches, categorizedMatches, noActiveMatchesCondition } = useMemo(() => {
+    const fixedCarouselOrder: string[] = ['Poder', 'Fantasia', 'Exposição', 'Sensorial'];
 
-  // Filtragem das cartas
-  const completedMatches = userMatchedCards.filter(card => card.isCompleted);
-  const activeMatches = userMatchedCards.filter(card => !card.isCompleted);
-  
-  const hotMatches = activeMatches.filter(card => card.isHot);
-  const otherMatches = activeMatches.filter(card => !card.isHot);
-  
-  const noActiveMatchesCondition = hotMatches.length === 0 && otherMatches.length === 0;
+    const completed = userMatchedCards.filter(card => card.isCompleted);
+    const active = userMatchedCards.filter(card => !card.isCompleted);
+    const hot = active.filter(card => card.isHot);
+    const others = active.filter(card => !card.isHot);
 
-
-  const groupCardsByCategory = (cards: MatchedCard[]) => {
-    return cards.reduce((acc, card) => {
+    // Agrupa as cartas "outras" por categoria
+    const groupedByCategory = others.reduce((acc, card) => {
       const category = card.category || 'Outros';
       if (!acc[category]) {
         acc[category] = [];
@@ -156,11 +149,21 @@ function MatchesPage() {
       acc[category].push(card);
       return acc;
     }, {} as Record<string, MatchedCard[]>);
-  };
-  const otherCardsByCategory = groupCardsByCategory(otherMatches);
 
-  // Define a ordem fixa e as únicas categorias a serem exibidas nos carrosséis
-  const fixedCarouselOrder: string[] = ['Poder', 'Fantasia', 'Exposição', 'Sensorial'];
+    // Ordena as categorias: primeiro as da ordem fixa, depois as restantes.
+    const sortedCategories = [...fixedCarouselOrder.filter(cat => groupedByCategory[cat]), ...Object.keys(groupedByCategory).filter(cat => !fixedCarouselOrder.includes(cat))];
+    const categorized = sortedCategories.map(categoryName => ({ categoryName, cards: groupedByCategory[categoryName] }));
+
+    const noActive = hot.length === 0 && others.length === 0;
+    return { completedMatches: completed, hotMatches: hot, otherMatches: others, categorizedMatches: categorized, noActiveMatchesCondition: noActive };
+  }, [userMatchedCards]);
+
+  if (isLoadingSkins || (!user || (isLoadingCardChats && !Object.keys(cardChatsData).length))) { 
+    return <div className={styles.page}><p>Carregando seus links...</p></div>;
+  }
+  if (cardChatsError) {
+    return <div className={styles.page}><p>Erro ao carregar dados dos chats: {cardChatsError}</p></div>;
+  }
 
 
   // Função auxiliar para obter a classe CSS da categoria
@@ -243,44 +246,23 @@ function MatchesPage() {
                 {hotMatches.length > 0 ? 'Outros Links' : 'Seus Links por Categoria'}
               </h2>
               <div className={styles.categoryCarouselsGrid}>
-                {fixedCarouselOrder.map(categoryName => {
-                  const cardsForCategory = otherCardsByCategory[categoryName];
-                  if (cardsForCategory && cardsForCategory.length > 0) {
+                {categorizedMatches.map(({ categoryName, cards }) => {
+                  if (cards && cards.length > 0) {
                     return (
-                      <div key={categoryName} className={`${styles.carouselCell} ${getCarouselCellClasses(categoryName, cardsForCategory.length)}`}>
-                        <CategoryCarousel // <<< AQUI
-                          title={categoryName}
-                          cards={cardsForCategory}
-                          onCardClick={handleCardClick}
-                          onToggleHot={handleToggleHot}
-                          cardChatsData={cardChatsData} // Passa para o carrossel
-                          userLastVisitedMatchesPage={user?.lastVisitedMatchesPage} // Passa para o carrossel
-                        />
-
-                      </div>
-                    );
-                  }
-                  return null;
-                })}
-                {Object.entries(otherCardsByCategory)
-                  .filter(([categoryName]) => !fixedCarouselOrder.includes(categoryName))
-                  .map(([categoryName, cardsForCategory]) => {
-                    if (cardsForCategory && cardsForCategory.length > 0) {
-                      return (
-                        <div key={`other-${categoryName}`} className={`${styles.carouselCell} ${getCarouselCellClasses(categoryName, cardsForCategory.length)}`}> 
-                          <CategoryCarousel // <<< AQUI
+                      <div key={categoryName} className={`${styles.carouselCell} ${getCarouselCellClasses(categoryName, cards.length)}`}>
+                        <CategoryCarousel
                             title={categoryName}
-                            cards={cardsForCategory}
+                            cards={cards}
                             onCardClick={handleCardClick}
                             onToggleHot={handleToggleHot}
                             cardChatsData={cardChatsData} // Passa para o carrossel
                             userLastVisitedMatchesPage={user?.lastVisitedMatchesPage} // Passa para o carrossel
                           />
-                        </div>
-                      );
-                    }
-                    return null;
-                  })}
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
               </div>
             </section>
           )}

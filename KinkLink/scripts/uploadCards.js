@@ -16,7 +16,7 @@ const allKinkLinkCards = require('./cardsData.cjs'); // Atualiza para a extensã
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const serviceAccountPath = path.join(__dirname, 'kinklink-a4607-firebase-adminsdk-fbsvc-4f31fcfd76.json');
+const serviceAccountPath = path.join(__dirname, '../../functions/kinklink-a4607-firebase-adminsdk-fbsvc-13400b61c8.json'); // Corrigido o caminho e o nome do arquivo
 const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)

@@ -1,226 +1,138 @@
-/* CreateUserCardModal.module.css */
 .modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 1070;
+  justify-content: center;
+  z-index: 1000;
 }
 
 .modalContent {
-  background-color: #1e1e1e;
-  color: #e0e0e0;
-  padding: 30px 40px;
-  border-radius: 20px;
-  text-align: left;
-  max-width: 600px;
+  padding: 30px;
+  border-radius: 12px;
   width: 90%;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-  border: 1px solid #444;
-  font-family: "Trebuchet MS", sans-serif;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
-.headerTitle {
+.modalTitle {
   margin-top: 0;
-  color: #61dafb;
-  text-align: center;
   margin-bottom: 25px;
+  color: var(--cor-primaria);
+  text-align: center;
 }
 
-.label {
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formLabel {
   display: block;
   margin-bottom: 8px;
   font-weight: bold;
-  color: #61dafb;
-}
-
-.controlsContainer {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 25px;
-  gap: 20px;
-}
-
-.controlGroup {
-  flex-grow: 1;
-}
-
-/* Estilos para o novo contador de intensidade */
-.intensityCounter {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--cor-fundo-elemento-sutil); /* Fundo sutil para o contador */
-  border-radius: 8px;
-  overflow: hidden; /* Garante que os cantos arredondados funcionem */
-  border: 1px solid var(--cor-borda);
-  height: 40px; /* Altura fixa para o contador */
-}
-
-.counterButton {
-  background-color: var(--cor-acao-secundaria); /* Cor de destaque para os botões */
-  color: var(--cor-texto-sobre-acao-secundaria);
-  border: none;
-  padding: 0 15px;
-  font-size: 1.5em;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.2s ease, filter 0.2s ease;
-  height: 100%; /* Ocupa a altura total do container */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.counterButton:hover:not(:disabled) {
-  filter: brightness(1.1);
-}
-
-.counterButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.counterValueDisplay {
-  font-size: 1.2em;
-  font-weight: bold;
   color: var(--cor-texto-primario);
-  padding: 0 15px;
-  min-width: 30px; /* Garante espaço para números de 1 a 9 */
-  text-align: center;
 }
 
-/* Checkbox para notificar o parceiro */
-.notifyPartnerContainer {
-  display: flex;
-  align-items: center;
-  margin-bottom: 25px;
-  font-size: 0.95em;
-  color: #b0b0b0;
-}
-
-.checkboxInput {
-  margin-right: 10px;
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-}
-
-.checkboxLabel {
-  cursor: pointer;
-}
-
-.cardPreviewContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 25px;
-  position: relative;
-  min-height: 350px;
-}
-
-.cardBackPreview {
-  position: absolute;
-  z-index: 1;
-  opacity: 0.8;
-}
-
-.cardVisual {
-  width: 250px;
-  height: 350px;
-  border-radius: 12px;
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-  position: relative;
+.textarea,
+.select {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--cor-fundo-pagina);
+  border: 1px solid var(--cor-borda);
+  border-radius: 6px;
+  color: var(--cor-texto-primario);
   box-sizing: border-box;
-  overflow: hidden;
-  z-index: 2;
+  font-size: 1em;
+  font-family: inherit;
 }
 
-.cardCorner {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  text-align: center;
-  line-height: 1;
-}
-
-.intensityNumber {
-  font-size: 2.5em;
-  font-weight: bold;
-  display: block;
-}
-
-.suit {
-  font-size: 0.7em;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  display: block;
-  margin-top: 2px;
-}
-
-.cardCenterText {
-  flex-grow: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.textarea:focus,
+.select:focus {
+  outline: none;
+  border-color: var(--cor-primaria);
+  box-shadow: 0 0 0 2px var(--cor-primaria-transparente, rgba(100, 181, 246, 0.3));
 }
 
 .textarea {
-  flex-grow: 1;
-  padding: 15px;
-  border: 1px solid #555;
-  background-color: #3a3f47;
-  color: #e0e0e0;
-  font-size: 1em;
-  box-sizing: border-box;
   resize: vertical;
-  border-radius: 6px;
-  min-height: 150px;
-  /* Estilos para textarea dentro da carta */
-  background-color: transparent;
-  border: none;
-  text-align: center;
-  font-size: 1.1em;
 }
 
-.buttonContainer {
-  display: flex; /* Adicionado para melhor controle de alinhamento */
-  justify-content: flex-end; /* Alinha botões à direita, ou use 'center' */
-  gap: 10px; /* Espaço entre os botões */
-  margin-top: 20px;
-  /* text-align: center; /* Removido em favor do flex */
+.checkboxContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.9em;
+  color: var(--cor-texto-secundario);
+}
+
+.checkboxContainer input {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+.formActions {
+  margin-top: 30px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+}
+
+.button,
+.buttonCancel {
+  padding: 10px 20px;
+  border: none;
+  transition: all 0.2s ease;
 }
 
 .button {
-  border: none;
-  background-color: #61dafb;
-  color: #20232a;
-  padding: 12px 25px; /* Padronizando o tamanho do botão */
-  font-size: 1.1em;   /* Padronizando o tamanho da fonte */
-  /* Outras propriedades como border-radius, cursor, font-weight, transition
-     são agora primariamente herdados de 'genericButton'.
-     'border: none;' é importante se genericButton adicionar uma borda e você não a quiser aqui. */
+  background-color: var(--cor-acao-positiva);
+  color: var(--cor-texto-acao-positiva);
 }
 
-.buttonSecondary {
-  /* Estilos base (border-radius, cursor, font-weight, transition)
-     são herdados de 'genericButton'. */
-  background-color: var(--cor-fundo-botao-secundario, #6c757d); /* Cor de fundo para botão secundário */
-  color: var(--cor-texto-sobre-secundaria, white); /* Cor do texto */
-  padding: 12px 25px; /* Mesmo padding do botão primário para consistência */
-  font-size: 1.1em;   /* Mesmo tamanho de fonte */
-  border: none; /* Garante ausência de borda, sobrescrevendo genericButton se necessário. */
+.buttonCancel {
+  background-color: var(--cor-secundaria);
+  color: var(--cor-texto-sobre-secundaria);
 }
 
-.buttonSecondary:hover:not(:disabled) {
-  background-color: var(--cor-fundo-botao-secundario-hover, #5a6268);
+/* Estilos para os novos botões de símbolo */
+.symbolButtonsContainer {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.symbolButton {
+  background-color: var(--cor-fundo-elemento);
+  border: 1px solid var(--cor-borda);
+  color: var(--cor-texto-secundario);
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.2s ease;
+}
+
+.symbolButton:hover {
+  background-color: var(--cor-secundaria);
+  color: var(--cor-texto-primario);
+  border-color: var(--cor-primaria);
+}
+
+@media (max-width: 600px) {
+  .modalContent {
+    padding: 20px;
+  }
+  .formActions {
+    flex-direction: column-reverse;
+  }
+  .formActions > button {
+    width: 100%;
+  }
 }

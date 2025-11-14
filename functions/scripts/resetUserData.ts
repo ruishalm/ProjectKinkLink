@@ -2,7 +2,7 @@ import * as admin from 'firebase-admin';
 import * as path from 'path';
 
 // --- CONFIGURAÇÃO ---
-const serviceAccountPath = path.resolve(__dirname, '../kinklink-a4607-firebase-adminsdk-fbsvc-13400b61c8.json');
+const serviceAccountPath = path.resolve(__dirname, '../../kinklink-a4607-firebase-adminsdk-fbsvc-13400b61c8.json');
 
 // Inicializa o Firebase Admin SDK
 try {
@@ -102,4 +102,3 @@ async function resetAllUserData() {
 
 // Executa a função principal
 resetAllUserData().catch(console.error);
-

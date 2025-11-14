@@ -33,7 +33,7 @@ async function uploadCards() {
 
   console.log(`Iniciando upload de ${allKinkLinkCards.length} cartas para a coleção "cards"...`);
 
-  const batch = db.batch();
+  let batch = db.batch();
   let operationsCount = 0;
 
   for (const card of allKinkLinkCards) {

@@ -90,7 +90,7 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCar
             // Prepara os dados para MatchCardItem
             const cardForDisplay: MatchCardItemProps['card'] = {
               id: card.id,
-              text: card.text,
+              text: card.text || '', // Garante que o texto seja sempre uma string
               category: card.category,
               intensity: card.intensity,
               isHot: card.isHot,

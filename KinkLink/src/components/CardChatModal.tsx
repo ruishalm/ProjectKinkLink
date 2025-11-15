@@ -1,6 +1,6 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\CardChatModal.tsx
 import React, { useState, useEffect, useRef } from 'react';
-import { useCardChat, type ChatMessage } from '../hooks/useCardChat'; // Importa o hook e o tipo
+import { useCardChat, type ChatMessage } from '../hooks/useCardChat';
 import { useAuth } from '../contexts/AuthContext';
 import { Timestamp } from 'firebase/firestore'; // <<< ADICIONADO
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
@@ -13,10 +13,6 @@ interface CardChatModalProps {
   cardId: string | null; // Pode ser null se nenhum chat estiver selecionado
   cardTitle?: string; // Título da carta, opcional
   onClose: () => void;
-  onToggleHot?: () => void; // Função para alternar o status de favorito
-  isCompleted?: boolean; // Status de "realizada" da carta
-  onToggleCompleted?: () => void; // Função para marcar/desmarcar como realizada
-  onRepeatCard?: () => void; // Função para "Vamos Repetir?!"
 }
 
 function CardChatModal({
@@ -24,18 +20,14 @@ function CardChatModal({
   cardId,
   cardTitle,
   onClose,
-  onToggleHot,
-  isCompleted,
-  onToggleCompleted,
-  onRepeatCard,
 }: CardChatModalProps) {
   const { user } = useAuth();
   const { messages, sendMessage, isLoading, error: chatError } = useCardChat(cardId); // Usa o cardId para o hook
-  const { matchedCards } = useUserCardInteractions(); // Pega os matched cards para saber o status de isHot
+  // O modal agora busca seus próprios dados e funções de interação
+  const { matchedCards, toggleHotStatus, toggleCompletedStatus, repeatCard, deleteMatch } = useUserCardInteractions();
   const [newMessage, setNewMessage] = useState(''); 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const modalContentRef = useRef<HTMLDivElement>(null); // Ref para o conteúdo do modal
-  const { deleteMatch } = useUserCardInteractions();
 
   // Efeito para fechar com Escape e clique fora
   useEffect(() => {
@@ -96,21 +88,22 @@ function CardChatModal({
   };
 
   const handleToggleHot = () => {
-    if (onToggleHot) {
-      onToggleHot();
+    if (cardId) {
+      toggleHotStatus(cardId);
     }
   };
 
   const handleToggleCompleted = () => {
-    if (onToggleCompleted) {
-      onToggleCompleted();
+    if (cardId) {
+      // A lógica para determinar o novo status é movida para cá
+      const currentCard = matchedCards.find(card => card.id === cardId);
+      toggleCompletedStatus(cardId, !currentCard?.isCompleted);
     }
   };
 
   const handleRepeatCard = () => {
-    if (onRepeatCard) {
-      onRepeatCard();
-      // onClose(); // Opcional: fechar o modal após clicar em "Vamos Repetir?!"
+    if (cardId) {
+      repeatCard(cardId);
     }
   };
 
@@ -121,8 +114,9 @@ function CardChatModal({
     }
   };
 
-  // Determina o status de "isHot" buscando nos dados mais recentes do hook
+  // Determina os status da carta buscando nos dados mais recentes do hook
   const isHot = matchedCards.find(card => card.id === cardId)?.isHot || false;
+  const isCompleted = matchedCards.find(card => card.id === cardId)?.isCompleted || false;
 
   if (!isOpen || !cardId) { // Se não estiver aberto ou não tiver cardId, não renderiza nada
     return null;
@@ -135,7 +129,7 @@ function CardChatModal({
         <div className={styles.modalHeaderActions}>
           <div className={styles.actionButtonsGroup}> {/* Renomeado de leftHeaderActions e agora contém todos os 3 botões */}
             {/* Botão de Marcar como Realizada / Repetir (AGORA PRIMEIRO) */}
-            {cardId && (onToggleCompleted || onRepeatCard) && (
+            {cardId && (
               <button
                 onClick={isCompleted ? handleRepeatCard : handleToggleCompleted}
                 className={`${styles.headerActionButton} ${styles.completedButtonInChat} ${isCompleted ? styles.isCompletedAction : ''}`}
@@ -148,7 +142,7 @@ function CardChatModal({
             )}
 
             {/* Botão de Favoritar (AGORA SEGUNDO) */}
-            {cardId && onToggleHot && (
+            {cardId && (
               <button
                 onClick={handleToggleHot}
                 className={`${styles.headerActionButton} ${styles.favoriteButtonInChat} ${isHot ? styles.isHot : ''}`}
@@ -231,4 +225,4 @@ function CardChatModal({
   );
 }
 
-export default CardChatModal;
+export default React.memo(CardChatModal);

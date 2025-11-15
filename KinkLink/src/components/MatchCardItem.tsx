@@ -29,6 +29,12 @@ const MatchCardItem: React.FC<MatchCardItemProps> = ({
   const cardWidth = 250 * scaleFactor;
   const cardHeight = 350 * scaleFactor;
 
+  // Garante que a carta sempre tenha uma categoria para evitar crashes
+  const safeCardData = {
+    ...card,
+    category: card.category || 'geral', // Se a categoria for undefined, usa 'geral'
+  };
+
   return (
     <div
       className={`${styles.cardItemWrapper} ${isNewMatch || hasNewMessage ? styles.unreadMatch : ''}`}
@@ -38,12 +44,12 @@ const MatchCardItem: React.FC<MatchCardItemProps> = ({
       role="button"
       tabIndex={0}
       // O aria-label agora reflete se a carta é nova OU tem mensagens não lidas
-      aria-label={`Link: ${card.text.substring(0,30)}... ${isNewMatch ? ' (Novo Link!)' : ''} ${hasNewMessage ? ' (Nova Mensagem!)' : ''}`}
+      aria-label={`Link: ${(card?.text || 'Texto indisponível').substring(0,30)}... ${isNewMatch ? ' (Novo Link!)' : ''} ${hasNewMessage ? ' (Nova Mensagem!)' : ''}`}
     >
       {/* Indicador de "Novo" ou "Não Lido" */}
       {(isNewMatch || hasNewMessage) && <div className={styles.unreadIndicator}></div>}
       <PlayingCard
-        data={card}
+        data={safeCardData}
         targetWidth={cardWidth}
         targetHeight={cardHeight}
         isFlipped={false}

@@ -1,5 +1,5 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\hooks\useUserCardInteractions.ts
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth, type User, type MatchedCard as AuthMatchedCard } from '../contexts/AuthContext';
 import type { Card } from '../data/cards';
 import { db } from '../firebase';
@@ -25,7 +25,8 @@ import { exampleSkinsData } from '../config/skins'; // Importar dados das skins 
 export function useUserCardInteractions() {
   const { user, updateUser, checkAndUnlockSkins } = useAuth(); // Adicionar checkAndUnlockSkins
 
-  const matchedCards = user?.matchedCards || [];
+  // Estado local para os matches, quebrando o ciclo de renderização global. 
+  const [localMatchedCards, setLocalMatchedCards] = useState<AuthMatchedCard[]>(user?.matchedCards || []);
   const seenCards = user?.seenCards || [];
   const conexaoAcceptedCount = user?.conexaoAccepted || 0;
   const conexaoRejectedCount = user?.conexaoRejected || 0;
@@ -74,8 +75,8 @@ export function useUserCardInteractions() {
 
         if (newMatchedStringFromListener !== lastProcessedMatchedStringRef.current) {
           console.log(`[SubcollectionListener] User ${user.id.substring(0,5)} - Updating user with new matches (or hot status change). Count: ${newMatchesFromListener.length}`);
-          updateUser({ matchedCards: newMatchesFromListener });
           lastProcessedMatchedStringRef.current = newMatchedStringFromListener;
+          setLocalMatchedCards(newMatchesFromListener); // ATUALIZA O ESTADO LOCAL, NÃO O GLOBAL
         } else {
           console.log(`[SubcollectionListener Debug] User ${user.id.substring(0,5)} - Strings are identical. No update to AuthContext for matchedCards.`);
         }
@@ -95,7 +96,7 @@ export function useUserCardInteractions() {
   // from its closure, which are stable or updated correctly.
   // Note: `user` object itself is not in dependency array to avoid re-subscribing on every `matchedCards` update.
   // The logic inside `onSnapshot` now uses a ref to compare, mitigating issues with stale `user.matchedCards` in closure.
-  }, [user?.id, user?.coupleId, updateUser]);
+  }, [user?.id, user?.coupleId]); // Removida a dependência 'updateUser' para quebrar o loop
 
   const updateUserProfileInFirestore = async (userId: string, data: PartialWithFieldValue<User>) => {
     if (!userId) return;
@@ -389,7 +390,7 @@ export function useUserCardInteractions() {
   };
 
   return {
-    matchedCards,
+    matchedCards: localMatchedCards,
     seenCards,
     conexaoAcceptedCount,
     conexaoRejectedCount,

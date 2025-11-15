@@ -21,7 +21,7 @@ import MatchCardItem from '../components/MatchCardItem';
 
 function MatchesPage() {
   const { user } = useAuth();
-  const { matchedCards: userMatchedCards, toggleHotStatus, toggleCompletedStatus, repeatCard } = useUserCardInteractions();
+  const { matchedCards: userMatchedCards, toggleHotStatus } = useUserCardInteractions();
   const navigate = useNavigate();
   const { isLoadingSkins } = useSkin();
   const location = useLocation();
@@ -113,7 +113,7 @@ function MatchesPage() {
     setIsChatModalOpen(true);
   }, []); // A dependência vazia garante que a função seja criada apenas uma vez
 
-  const handleCloseChat = () => {
+  const handleCloseChat = useCallback(() => {
     setIsChatModalOpen(false);
     setSelectedCardForChat(null);
 
@@ -121,14 +121,14 @@ function MatchesPage() {
     if (location.hash.startsWith('#card-')) {
       navigate(location.pathname, { replace: true });
     }
-  };
+  }, [location.hash, location.pathname, navigate]);
 
-  const handleToggleHot = async (cardId: string, event: React.MouseEvent) => {
-    event.stopPropagation(); 
-    if (user && user.coupleId) {
-      await toggleHotStatus(cardId);
-    }
-  };
+  // Callback para os carrosséis, que precisam do ID e do evento
+  const handleToggleHotInCarousel = useCallback((cardId: string, event?: React.MouseEvent) => {
+    event?.stopPropagation();
+    toggleHotStatus(cardId);
+  }, [toggleHotStatus]);
+
 
   // Otimização: Memoiza a filtragem e agrupamento das cartas.
   // Isso evita que as listas sejam recalculadas em cada renderização.
@@ -231,7 +231,7 @@ function MatchesPage() {
                       isNewMatch={getCardNotificationStatus(card).isNewMatch}
                       hasNewMessage={getCardNotificationStatus(card).hasNewMessage}
                       lastMessageSnippet={getCardNotificationStatus(card).hasNewMessage ? cardChatsData[card.id]?.lastMessageTextSnippet : undefined}
-                      onToggleHot={(cardId, event) => handleToggleHot(cardId, event)}
+                      onToggleHot={handleToggleHotInCarousel} // Usa a função correta para o carrossel
                       isCompletedCard={false}
                     />
                   ))}
@@ -254,7 +254,7 @@ function MatchesPage() {
                             title={categoryName}
                             cards={cards}
                             onCardClick={handleCardClick}
-                            onToggleHot={handleToggleHot}
+                            onToggleHot={handleToggleHotInCarousel}
                             cardChatsData={cardChatsData} // Passa para o carrossel
                             userLastVisitedMatchesPage={user?.lastVisitedMatchesPage} // Passa para o carrossel
                           />
@@ -298,24 +298,7 @@ function MatchesPage() {
           isOpen={isChatModalOpen} 
           onClose={handleCloseChat}
           cardId={selectedCardForChat.id}
-          cardTitle={selectedCardForChat.text} 
-          onToggleHot={() => {
-            if (selectedCardForChat?.id) {
-              toggleHotStatus(selectedCardForChat.id);
-            }
-          }}
-          isCompleted={userMatchedCards.find(card => card.id === selectedCardForChat.id)?.isCompleted || false}
-          onToggleCompleted={() => {
-            if (selectedCardForChat?.id) {
-              const currentCard = userMatchedCards.find(card => card.id === selectedCardForChat.id);
-              toggleCompletedStatus(selectedCardForChat.id, !currentCard?.isCompleted);
-            }
-          }}
-          onRepeatCard={() => {
-            if (selectedCardForChat?.id) {
-              repeatCard(selectedCardForChat.id);
-            }
-          }}
+          cardTitle={selectedCardForChat.text}
         />
       )}
     </div>

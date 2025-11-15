@@ -44,7 +44,7 @@ interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
 }
 
-function App() {
+function AppContent() {
   const { user, isLoading, submitUserFeedback } = useAuth(); // submitUserFeedback do AuthContext
   const location = useLocation();
   const isUserLinked = !!user?.partnerId; // MODIFICADO AQUI
@@ -135,7 +135,6 @@ function App() {
   };
 
   return (
-    <SkinProvider>
       <div className="appContainer">
         <NotificationProvider> {/* <<< ENVOLVER COM O NOTIFICATION PROVIDER */}
           <Toaster
@@ -225,6 +224,14 @@ function App() {
           <Footer /> {/* <<< RODAPÉ ADICIONADO AQUI */}
         </NotificationProvider> {/* <<< FECHAR O NOTIFICATION PROVIDER */}
       </div>
+  );
+}
+
+function App() {
+  return (
+    <SkinProvider>
+      {/* O Router deve estar aqui, mas como já está no main.tsx, não o adicionamos de novo */}
+      <AppContent />
     </SkinProvider>
   );
 }

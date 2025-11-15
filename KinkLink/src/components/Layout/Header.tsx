@@ -28,7 +28,7 @@ const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOp
       <div className={styles.logoContainer}>
         <Link to="/cards" className={styles.logoLink}>
           <img src={logoSrc} alt="KinkLink Logo" className={styles.logoImage} />
-          <span className={styles.betaText}>BETA</span>
+          <span className={styles.betaText}>ALPHA</span>
         </Link>
       </div>
       {/* NOVO: Indicador de Símbolo */}

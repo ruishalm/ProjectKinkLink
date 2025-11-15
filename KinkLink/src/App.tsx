@@ -1,5 +1,5 @@
 // App.tsx
-import React, { Suspense, lazy, useState, useCallback } from 'react'; // Adicionado useState, useCallback, useEffect
+import React, { Suspense, lazy, useState, useCallback, useEffect, useRef } from 'react'; // Adicionado useState, useCallback, useEffect
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import type { Card } from './data/cards'; // Importa o tipo Card
 import './App.css';
@@ -33,6 +33,8 @@ import AdminRoute from './components/AdminRoute';
 import FeedbackModal from './components/FeedbackModal'; // <<< IMPORT PARA O MODAL
 import NewMatchModal from './hooks/NewMatchModal'; // Modal para exibir novos links
 // import { useTranslation } from 'react-i18next'; // Removido, pois não usaremos t() para os alertas aqui
+import { doc, updateDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { db } from './firebase';
 
 
 const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'));
@@ -59,6 +61,64 @@ function AppContent() {
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [isUserTicketsModalOpen, setIsUserTicketsModalOpen] = useState(false); // <<< NOVO ESTADO
   const [newMatchesForModal, setNewMatchesForModal] = useState<Card[]>([]); // Estado para o modal de "Novo Link!"
+
+  // evita múltiplos writes repetidos ao entrar na rota /matches
+  const matchesVisitedRef = useRef(false);
+  const IN_FLIGHT_LOCK_KEY = 'lk_lastVisited_lock';
+  const MATCHES_UPDATE_THRESHOLD_SECONDS = 30;
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    if (location.pathname !== '/matches') {
+      matchesVisitedRef.current = false;
+      return;
+    }
+
+    if (matchesVisitedRef.current) return;
+
+    // check localStorage lock (prevenir múltiplas instâncias/tabs)
+    const lock = localStorage.getItem(IN_FLIGHT_LOCK_KEY);
+    const lockTs = lock ? Number(lock) : 0;
+    if (Date.now() - lockTs < MATCHES_UPDATE_THRESHOLD_SECONDS * 1000) {
+      console.debug('[App] lastVisited update suppressed by local lock');
+      matchesVisitedRef.current = true;
+      return;
+    }
+
+    type LastVisitedType = Timestamp | number | string | undefined;
+    const lastVisited = user.lastVisitedMatchesPage as LastVisitedType;
+    let lastVisitedMs = 0;
+    if (lastVisited) {
+      if (lastVisited instanceof Timestamp) {
+        lastVisitedMs = (lastVisited as Timestamp).toMillis();
+      } else if (typeof lastVisited === 'number' || typeof lastVisited === 'string') {
+        lastVisitedMs = typeof lastVisited === 'string' ? Number(lastVisited) : lastVisited;
+      } else {
+        const parsed = Date.parse(String(lastVisited));
+        lastVisitedMs = Number.isFinite(parsed) ? parsed : 0;
+      }
+    }
+
+    if (Date.now() - lastVisitedMs <= MATCHES_UPDATE_THRESHOLD_SECONDS * 1000) {
+      matchesVisitedRef.current = true;
+      return;
+    }
+
+    // acquire lock and write
+    localStorage.setItem(IN_FLIGHT_LOCK_KEY, String(Date.now()));
+    matchesVisitedRef.current = true;
+    const userRef = doc(db, 'users', user.id);
+    updateDoc(userRef, { lastVisitedMatchesPage: serverTimestamp() })
+      .catch((err) => console.warn('[App] erro ao atualizar lastVisitedMatchesPage', err))
+      .finally(() => {
+        // release lock após threshold para prevenir re-writes rápidos
+        setTimeout(() => {
+          localStorage.removeItem(IN_FLIGHT_LOCK_KEY);
+          matchesVisitedRef.current = false;
+        }, MATCHES_UPDATE_THRESHOLD_SECONDS * 1000);
+      });
+  }, [location.pathname, user?.id]); // removido user.lastVisitedMatchesPage para não re-disparar quando o user for atualizado
 
   // useEffect para o prompt de instalação PWA - ESTÁ SENDO USADO
   React.useEffect(() => {
@@ -132,102 +192,102 @@ function AppContent() {
   };
 
   return (
-      <div className="appContainer">
-        <NotificationProvider> {/* <<< ENVOLVER COM O NOTIFICATION PROVIDER */}
-          <Toaster
-            position="bottom-center"
-            toastOptions={{
-              style: {
-                background: 'var(--cor-fundo-elemento)',
-                color: 'var(--cor-texto-primario)',
-                border: '1px solid var(--cor-borda)',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-              },
-            }}
-          />
-          <UnlockNotificationModal />
-          <Header
-            showInstallButton={showInstallButtonInHeader}
-            onInstallClick={handleInstallClick}
-            onOpenFeedbackModal={handleOpenFeedbackModal} // Passa a função para o Header
-            onOpenUserTicketsModal={handleOpenUserTicketsModal} // <<< NOVA PROP
-          />
-          <main className="appMainContent">
-            <Suspense fallback={<div className="page-container-centered">Carregando página...</div>}>
-              <Routes>
-                {/* Rotas Públicas */}
-                <Route path="/" element={<HomePage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/signup" element={<SignupPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/termos-de-servico" element={<TermsOfServicePage />} />
-                <Route path="/suporte" element={<SupportPage />} />
+    <div className="appContainer">
+      <NotificationProvider> {/* <<< ENVOLVER COM O NOTIFICATION PROVIDER */}
+        <Toaster
+          position="bottom-center"
+          toastOptions={{
+            style: {
+              background: 'var(--cor-fundo-elemento)',
+              color: 'var(--cor-texto-primario)',
+              border: '1px solid var(--cor-borda)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            },
+          }}
+        />
+        <UnlockNotificationModal />
+        <Header
+          showInstallButton={showInstallButtonInHeader}
+          onInstallClick={handleInstallClick}
+          onOpenFeedbackModal={handleOpenFeedbackModal} // Passa a função para o Header
+          onOpenUserTicketsModal={handleOpenUserTicketsModal} // <<< NOVA PROP
+        />
+        <main className="appMainContent">
+          <Suspense fallback={<div className="page-container-centered">Carregando página...</div>}>
+            <Routes>
+              {/* Rotas Públicas */}
+              <Route path="/" element={<HomePage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/termos-de-servico" element={<TermsOfServicePage />} />
+              <Route path="/suporte" element={<SupportPage />} />
 
-                {/* Rotas Protegidas por Autenticação */}
-                <Route element={<ProtectedRoute />}>
-                  <Route path="/profile" element={<ProfilePage />} />
-                  <Route path="/link-couple" element={<LinkCouplePage />} /> {/* Rota para Meus Tickets removida */}
+              {/* Rotas Protegidas por Autenticação */}
+              <Route element={<ProtectedRoute />}>
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/link-couple" element={<LinkCouplePage />} /> {/* Rota para Meus Tickets removida */}
 
-                  {/* Rotas que exigem que o usuário esteja vinculado */}
-                  <Route element={<LinkedRoute />}>
-                    <Route path="/cards" element={<CardPilePage />} />
-                    <Route path="/matches" element={<MatchesPage />} />
-                    <Route path="/skins" element={<SkinsPage />} />
-                  </Route>
-
-                  {/* Rotas que exigem que o usuário NÃO esteja vinculado */}
-                  <Route element={<UnlinkedRoute />}>
-                    {/* Outras rotas que só devem ser acessadas por usuários não vinculados podem ir aqui */}
-                  </Route>
+                {/* Rotas que exigem que o usuário esteja vinculado */}
+                <Route element={<LinkedRoute />}>
+                  <Route path="/cards" element={<CardPilePage />} />
+                  <Route path="/matches" element={<MatchesPage />} />
+                  <Route path="/skins" element={<SkinsPage />} />
                 </Route>
 
-                {/* ROTA DE ADMINISTRAÇÃO */}
-                <Route element={<AdminRoute />}>
-                  <Route path="/admin/users" element={<AdminUsersPage />} />
+                {/* Rotas que exigem que o usuário NÃO esteja vinculado */}
+                <Route element={<UnlinkedRoute />}>
+                  {/* Outras rotas que só devem ser acessadas por usuários não vinculados podem ir aqui */}
                 </Route>
+              </Route>
 
-                {/* Fallback para rotas não encontradas */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </Suspense>
-            {location.pathname === '/cards' && (
-              <div className="actionButtons">
-                {/* Botões de ação para a página de cartas, se aplicável globalmente aqui */}
-              </div>
-            )}
-          </main>
-          {/* Renderiza o modal de feedback */}
-          {isFeedbackModalOpen && user && (
-            <FeedbackModal
-              isOpen={isFeedbackModalOpen}
-              onClose={handleCloseFeedbackModal}
-              onSubmitFeedback={handleSubmitFeedbackToContext}
-              // Opcional: preencher com último feedback não visto ou um rascunho
-              // initialText={user.feedbackTickets?.find(ticket => ticket.status === 'new')?.text || ''}
-            />
+              {/* ROTA DE ADMINISTRAÇÃO */}
+              <Route element={<AdminRoute />}>
+                <Route path="/admin/users" element={<AdminUsersPage />} />
+              </Route>
+
+              {/* Fallback para rotas não encontradas */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
+          {location.pathname === '/cards' && (
+            <div className="actionButtons">
+              {/* Botões de ação para a página de cartas, se aplicável globalmente aqui */}
+            </div>
           )}
-          {/* Renderiza o modal de UserTickets */}
-          {isUserTicketsModalOpen && user && (
-            <UserTicketsModal
-              isOpen={isUserTicketsModalOpen}
-              onClose={handleCloseUserTicketsModal}
-            />
-          )}
-          {isSupportModalOpen && (
-            <SupportModal
-              isOpen={isSupportModalOpen}
-              onClose={() => setIsSupportModalOpen(false)} />
-          )}
-          {/* Renderiza o modal de Novo Link! */}
-          {newMatchesForModal.length > 0 && (
-            <NewMatchModal
-              matches={newMatchesForModal}
-              onClose={() => setNewMatchesForModal([])}
-            />
-          )}
-          <Footer /> {/* <<< RODAPÉ ADICIONADO AQUI */}
-        </NotificationProvider> {/* <<< FECHAR O NOTIFICATION PROVIDER */}
-      </div>
+        </main>
+        {/* Renderiza o modal de feedback */}
+        {isFeedbackModalOpen && user && (
+          <FeedbackModal
+            isOpen={isFeedbackModalOpen}
+            onClose={handleCloseFeedbackModal}
+            onSubmitFeedback={handleSubmitFeedbackToContext}
+            // Opcional: preencher com último feedback não visto ou um rascunho
+            // initialText={user.feedbackTickets?.find(ticket => ticket.status === 'new')?.text || ''}
+          />
+        )}
+        {/* Renderiza o modal de UserTickets */}
+        {isUserTicketsModalOpen && user && (
+          <UserTicketsModal
+            isOpen={isUserTicketsModalOpen}
+            onClose={handleCloseUserTicketsModal}
+          />
+        )}
+        {isSupportModalOpen && (
+          <SupportModal
+            isOpen={isSupportModalOpen}
+            onClose={() => setIsSupportModalOpen(false)} />
+        )}
+        {/* Renderiza o modal de Novo Link! */}
+        {newMatchesForModal.length > 0 && (
+          <NewMatchModal
+            matches={newMatchesForModal}
+            onClose={() => setNewMatchesForModal([])}
+          />
+        )}
+        <Footer /> {/* <<< RODAPÉ ADICIONADO AQUI */}
+      </NotificationProvider> {/* <<< FECHAR O NOTIFICATION PROVIDER */}
+    </div>
   );
 }
 

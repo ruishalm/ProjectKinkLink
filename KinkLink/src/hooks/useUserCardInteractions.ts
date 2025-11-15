@@ -32,70 +32,120 @@ export function useUserCardInteractions() {
   const conexaoRejectedCount = user?.conexaoRejected || 0;
   const lastProcessedMatchedStringRef = useRef<string | null>(null);
 
+  // ADICIONADO: refs para controlar listener ativo e debounce
+  const listenerActiveCoupleRef = useRef<string | null>(null);
+  const lastListenerUnsubscribeRef = useRef<(() => void) | null>(null);
+  const lastTriggerRef = useRef<number>(0);
+
   // Listener para a subcoleção likedInteractions do casal
   useEffect(() => {
-    let unsubscribeFromMatchListener: (() => void) | undefined;
+    // Cleanup anterior caso exista e seja para outro coupleId
+    const cleanupPrevious = () => {
+      if (lastListenerUnsubscribeRef.current) {
+        try {
+          lastListenerUnsubscribeRef.current();
+        } catch (e) {
+          console.warn('[SubcollectionListener] Erro ao limpar listener anterior', e);
+        }
+        lastListenerUnsubscribeRef.current = null;
+        listenerActiveCoupleRef.current = null;
+      }
+    };
 
-    if (user && user.id && user.coupleId) {
-      const likedInteractionsPath = `couples/${user.coupleId}/likedInteractions`;
-      const likesQuery = query(
-        collection(db, likedInteractionsPath),
-        where('isMatch', '==', true), // Apenas matches confirmados
-        orderBy('lastActivity', 'desc')
-      );
+    if (!user || !user.id || !user.coupleId) {
+      // Se não há user/couple, garante cleanup e sai
+      cleanupPrevious();
+      return;
+    }
 
-      console.log(`[SubcollectionListener] Setting up listener for user ${user.id.substring(0,5)} on ${likedInteractionsPath}`);
+    // Se já temos um listener ativo para esse coupleId, não recriar
+    if (listenerActiveCoupleRef.current === user.coupleId && lastListenerUnsubscribeRef.current) {
+      // já inscrito no mesmo coupleId
+      console.log("[SubcollectionListener] Listener já ativo para este coupleId, evitando re-subscribe.");
+      return;
+    }
 
-      unsubscribeFromMatchListener = onSnapshot(likesQuery, (querySnapshot) => {
+    // Se havia um listener ativo para outro coupleId, limpar antes de criar novo
+    cleanupPrevious();
+
+    const likedInteractionsPath = `couples/${user.coupleId}/likedInteractions`;
+    const likesQuery = query(
+      collection(db, likedInteractionsPath),
+      where('isMatch', '==', true),
+      orderBy('lastActivity', 'desc')
+    );
+
+    console.log(`[SubcollectionListener] Setting up listener for user ${user.id.substring(0,5)} on ${likedInteractionsPath}`);
+    listenerActiveCoupleRef.current = user.coupleId;
+
+    const unsubscribeFromMatchListener = onSnapshot(likesQuery, (querySnapshot) => {
+      try {
+        // Ignora snapshots que são apenas writes locais (evita loop por writes do próprio cliente)
+        const docChanges = querySnapshot.docChanges();
+        const allLocalWrites = docChanges.length > 0 && docChanges.every(ch => ch.doc.metadata.hasPendingWrites);
+        if (allLocalWrites) {
+          console.log("[SubcollectionListener] Ignorando snapshot composto apenas por writes locais.");
+          return;
+        }
+
+        // Debounce simples: ignora eventos muito próximos
+        const now = Date.now();
+        if (now - lastTriggerRef.current < 250) {
+          console.log("[SubcollectionListener] Debounced snapshot (too frequent).");
+          return;
+        }
+        lastTriggerRef.current = now;
+
         const newMatchesFromListener: AuthMatchedCard[] = [];
-        querySnapshot.forEach((docSnap) => { 
-          const interactionData = docSnap.data();          
+        querySnapshot.forEach((docSnap) => {
+          const interactionData = docSnap.data();
           if (interactionData && interactionData.cardData) {
             newMatchesFromListener.push({
-              id: docSnap.id, 
+              id: docSnap.id,
               text: interactionData.cardData.text,
               category: interactionData.cardData.category,
               intensity: interactionData.cardData.intensity,
               isHot: interactionData.isHot || false,
-              isCompleted: interactionData.isCompleted || false, // Adiciona o campo isCompleted
+              isCompleted: interactionData.isCompleted || false,
             });
           } else {
-            console.warn(`[SubcollectionListener] Documento ${docSnap.id} em ${likedInteractionsPath} não possui cardData ou é inválido.`, interactionData);
+            console.warn(`[SubcollectionListener] Documento ${docSnap.id} em ${likedInteractionsPath} inválido.`, interactionData);
           }
         });
-        
-        // Ordena as cartas por ID antes de criar a string para garantir consistência na comparação
+
         const sortedNewMatches = [...newMatchesFromListener].sort((a, b) => a.id.localeCompare(b.id));
         const newMatchedStringFromListener = sortedNewMatches
-          .map(m => `${m.id}-${m.isHot || false}-${m.isCompleted || false}`) // String de comparação correta
+          .map(m => `${m.id}-${m.isHot || false}-${m.isCompleted || false}`)
           .join(',');
 
-        console.log(`[SubcollectionListener Debug] User ${user.id.substring(0,5)} - Current Ref:`, lastProcessedMatchedStringRef.current);
-        console.log(`[SubcollectionListener Debug] User ${user.id.substring(0,5)} - New String:`, newMatchedStringFromListener);
-
         if (newMatchedStringFromListener !== lastProcessedMatchedStringRef.current) {
-          console.log(`[SubcollectionListener] User ${user.id.substring(0,5)} - Updating user with new matches (or hot status change). Count: ${newMatchesFromListener.length}`);
           lastProcessedMatchedStringRef.current = newMatchedStringFromListener;
-          setLocalMatchedCards(newMatchesFromListener); // ATUALIZA O ESTADO LOCAL, NÃO O GLOBAL
+          setLocalMatchedCards(newMatchesFromListener);
         } else {
-          console.log(`[SubcollectionListener Debug] User ${user.id.substring(0,5)} - Strings are identical. No update to AuthContext for matchedCards.`);
+          console.log(`[SubcollectionListener Debug] Strings são idênticas. Nenhuma atualização necessária.`);
         }
-      }, (error) => {
-        console.error(`[SubcollectionListener] Error listening to ${likedInteractionsPath}:`, error);
-      });
-    }
+      } catch (err) {
+        console.error('[SubcollectionListener] Erro no processamento do snapshot', err);
+      }
+    }, (error) => {
+      console.error(`[SubcollectionListener] Error listening to ${likedInteractionsPath}:`, error);
+    });
+
+    lastListenerUnsubscribeRef.current = unsubscribeFromMatchListener;
 
     return () => {
-      if (unsubscribeFromMatchListener) {
-        console.log(`[SubcollectionListener] Cleaning up listener for user ${user?.id?.substring(0,5)}`);
-        unsubscribeFromMatchListener();
+      // cleanup quando o effect desmonta ou dependencies mudam
+      if (lastListenerUnsubscribeRef.current) {
+        try {
+          lastListenerUnsubscribeRef.current();
+        } catch (e) {
+          console.warn('[SubcollectionListener] Erro ao chamar unsubscribe no cleanup', e);
+        }
+        lastListenerUnsubscribeRef.current = null;
       }
+      listenerActiveCoupleRef.current = null;
     };
-  // Only re-subscribe if user.id or user.coupleId changes, or if updateUser function reference changes.
-  // The onSnapshot callback will use the latest `updateUser` and `lastProcessedMatchedStringRef`
-  // from its closure, which are stable or updated correctly.
-  // Note: `user` object itself is not in dependency array to avoid re-subscribing on every `matchedCards` update.
-  // The logic inside `onSnapshot` now uses a ref to compare, mitigating issues with stale `user.matchedCards` in closure.
+  // Re-subscribe apenas se id ou coupleId mudarem
   }, [user?.id, user?.coupleId]);
 
   const updateUserProfileInFirestore = async (userId: string, data: PartialWithFieldValue<User>) => {
@@ -390,7 +440,7 @@ export function useUserCardInteractions() {
   };
 
   return {
-    matchedCards: localMatchedCards, // RETORNA OS DADOS DO ESTADO LOCAL
+    matchedCards: localMatchedCards,
     seenCards,
     conexaoAcceptedCount,
     conexaoRejectedCount,

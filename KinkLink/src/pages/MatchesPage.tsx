@@ -88,8 +88,8 @@ function MatchesPage() {
     });
     setHasUnseenGlobalMatches(anyNew);
 
-    // Atualiza o timestamp da última visita APENAS quando o usuário sai da página.
-    // Isso garante que os "novos matches" sejam marcados como vistos na próxima visita.
+    // A função de limpeza (cleanup) será executada APENAS quando o componente for desmontado (sair da página).
+    // Isso evita o loop de re-renderização.
     return () => {
       if (user?.id) {
         const userDocRef = doc(db, 'users', user.id);
@@ -98,7 +98,9 @@ function MatchesPage() {
         }).catch(console.error);
       }
     };
-  }, [user?.id, user?.lastVisitedMatchesPage, userMatchedCards, cardChatsData]);
+    // Removido `user.lastVisitedMatchesPage` das dependências para quebrar o loop.
+    // A atualização do timestamp agora só depende da saída do componente.
+  }, [user?.id, userMatchedCards, cardChatsData]);
   
   const handleCardClick = useCallback((card: MatchedCard) => { 
     const cardForModal: PlayingCardDataType = {

@@ -96,7 +96,7 @@ export function useUserCardInteractions() {
   // from its closure, which are stable or updated correctly.
   // Note: `user` object itself is not in dependency array to avoid re-subscribing on every `matchedCards` update.
   // The logic inside `onSnapshot` now uses a ref to compare, mitigating issues with stale `user.matchedCards` in closure.
-  }, [user?.id, user?.coupleId]); // Removida a dependência 'updateUser' para quebrar o loop
+  }, [user?.id, user?.coupleId]);
 
   const updateUserProfileInFirestore = async (userId: string, data: PartialWithFieldValue<User>) => {
     if (!userId) return;
@@ -390,7 +390,7 @@ export function useUserCardInteractions() {
   };
 
   return {
-    matchedCards: localMatchedCards,
+    matchedCards: localMatchedCards, // RETORNA OS DADOS DO ESTADO LOCAL
     seenCards,
     conexaoAcceptedCount,
     conexaoRejectedCount,

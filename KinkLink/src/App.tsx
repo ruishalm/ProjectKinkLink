@@ -1,6 +1,7 @@
 // App.tsx
 import React, { Suspense, lazy, useState, useCallback } from 'react'; // Adicionado useState, useCallback, useEffect
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import type { Card } from './data/cards'; // Importa o tipo Card
 import './App.css';
 import { Toaster } from 'react-hot-toast';
 import './config/skins/styles/panel-styles.css';
@@ -30,6 +31,7 @@ import UnlockNotificationModal from './components/UnlockNotificationModal';
 import UserTicketsModal from './components/UserTicketsModal'; // <<< IMPORT DO NOVO MODAL
 import AdminRoute from './components/AdminRoute';
 import FeedbackModal from './components/FeedbackModal'; // <<< IMPORT PARA O MODAL
+import NewMatchModal from './hooks/NewMatchModal'; // Modal para exibir novos links
 // import { useTranslation } from 'react-i18next'; // Removido, pois não usaremos t() para os alertas aqui
 
 
@@ -56,6 +58,7 @@ function AppContent() {
   // Estado para o modal de feedback - DEVE ESTAR NO TOPO DA FUNÇÃO
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [isUserTicketsModalOpen, setIsUserTicketsModalOpen] = useState(false); // <<< NOVO ESTADO
+  const [newMatchesForModal, setNewMatchesForModal] = useState<Card[]>([]); // Estado para o modal de "Novo Link!"
 
   // useEffect para o prompt de instalação PWA - ESTÁ SENDO USADO
   React.useEffect(() => {
@@ -78,13 +81,7 @@ function AppContent() {
     }
   }, [location]);
   // Hook customizado, chamado incondicionalmente
-  useLinkCompletionListener(
-    user,
-    isUserLinked,
-    (completedCoupleId, completedPartnerId) => {
-      console.log(`Vínculo concluído: CoupleID: ${completedCoupleId}, PartnerID: ${completedPartnerId}`);
-    }
-  );
+  useLinkCompletionListener(setNewMatchesForModal);
 
   // Funções para o modal de feedback - DEVEM ESTAR NO TOPO DA FUNÇÃO, ANTES DE QUALQUER RETURN CONDICIONAL
   const handleOpenFeedbackModal = useCallback(() => {
@@ -220,6 +217,13 @@ function AppContent() {
             <SupportModal
               isOpen={isSupportModalOpen}
               onClose={() => setIsSupportModalOpen(false)} />
+          )}
+          {/* Renderiza o modal de Novo Link! */}
+          {newMatchesForModal.length > 0 && (
+            <NewMatchModal
+              matches={newMatchesForModal}
+              onClose={() => setNewMatchesForModal([])}
+            />
           )}
           <Footer /> {/* <<< RODAPÉ ADICIONADO AQUI */}
         </NotificationProvider> {/* <<< FECHAR O NOTIFICATION PROVIDER */}

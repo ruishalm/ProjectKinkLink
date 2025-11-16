@@ -1,6 +1,12 @@
 // CreateLink.tsx
-import React, { useState } from 'react';
-import { createLink as apiCreateLink } from '../services/linkService'; // Renomeado para evitar conflito
+import React, { useState, useEffect } from 'react';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase'; // ajuste o caminho
+import {
+  createLink as apiCreateLink,
+  completeLinkForInitiator,
+} from '../services/linkService';
+import type { PendingLinkData } from '../services/linkService'; // Importação de tipo
 import { useAuth } from '../contexts/AuthContext';
 import styles from './CreateLink.module.css'; // Importa os CSS Modules
 
@@ -10,16 +16,49 @@ interface CreateLinkProps {
 }
 
 const CreateLink: React.FC<CreateLinkProps> = ({ onLinkCreated, onCancel }) => {
-  // Hooks e Estados
   const [linkCode, setLinkCode] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCodeCopied, setIsCodeCopied] = useState(false); // Novo estado para feedback de cópia do código
-  const { user } = useAuth();
+  const { user, refreshAuthContext } = useAuth(); // Adicionado refreshAuthContext
 
-  // Funções Manipuladoras
-  // A URL base do seu aplicativo. Para um app Firebase hospedado, window.location.origin é uma boa opção.
-  // Ou você pode hardcodar se preferir: const baseUrl = "https://kinklink-a4607.web.app";
+  // Listener para finalizar o vínculo quando o parceiro aceita
+  useEffect(() => {
+    if (!linkCode || !user) {
+      return;
+    }
+
+    const pendingLinkRef = doc(db, 'pendingLinks', linkCode);
+    const unsubscribe = onSnapshot(pendingLinkRef, async (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data() as PendingLinkData;
+        if (data.status === 'completed' && data.initiatorUserId === user.id) {
+          console.log("Parceiro aceitou o link! Finalizando o vínculo...");
+          try {
+            await completeLinkForInitiator(data);
+            console.log("Vínculo finalizado com sucesso para ambos!");
+            if (refreshAuthContext) {
+              refreshAuthContext();
+            }
+            unsubscribe();
+          } catch (err) {
+            console.error("Erro ao finalizar o vínculo para o iniciador:", err);
+            setError("Ocorreu um erro ao finalizar a conexão.");
+          }
+        }
+      } else {
+        console.log("Documento de link pendente removido, processo concluído.");
+        if (refreshAuthContext) refreshAuthContext(); // Garante a atualização se o doc for deletado
+        unsubscribe();
+      }
+    });
+
+    return () => {
+      console.log("Limpando o listener do link pendente.");
+      unsubscribe();
+    };
+  }, [linkCode, user, refreshAuthContext]);
+
   const getBaseUrl = () => window.location.origin;
 
   const handleCreateLink = async () => {
@@ -30,9 +69,6 @@ const CreateLink: React.FC<CreateLinkProps> = ({ onLinkCreated, onCancel }) => {
     setIsLoading(true);
     setError(null);
     try {
-      // Ajuste para o erro TS(2554): Se apiCreateLink não espera argumentos, chame sem.
-      // VERIFIQUE: Se apiCreateLink em linkService.ts DEVERIA receber user.id,
-      // então a definição da função em linkService.ts precisa ser alterada para aceitar um argumento.
       const code = await apiCreateLink();
       setLinkCode(code);
       onLinkCreated(code); // Notifica o pai que o código foi criado

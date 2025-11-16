@@ -94,6 +94,7 @@ interface AuthContextData {
   newlyUnlockedSkinsForModal: SkinDefinition[] | null;
   clearNewlyUnlockedSkinsForModal: () => void;
   submitUserFeedback: (feedbackText: string) => Promise<void>; // Nova função
+  refreshAuthContext: () => void; // <<< ADICIONADO
   unlinkCouple: () => Promise<void>; // Função para desvincular
   deleteUserFeedbackTicket: (ticketId: string) => Promise<void>; // <<< NOVA FUNÇÃO PARA DELETAR TICKET
   resetNonMatchedSeenCards: () => Promise<void>; // Nova função para resetar cartas "Não Topo!"  
@@ -200,6 +201,21 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       setUserSymbol(null);
     }
   }, [user?.id, user?.coupleId]);
+
+  const refreshAuthContext = useCallback(() => {
+    const fetchUserProfile = async (firebaseUser: FirebaseUser) => {
+      const userDocRef = doc(db, 'users', firebaseUser.uid);
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        setUser({ id: firebaseUser.uid, ...userDoc.data() } as User);
+      }
+    };
+    if (auth.currentUser) {
+      console.log("[AuthContext] Forçando atualização do perfil do usuário...");
+      setIsLoading(true);
+      fetchUserProfile(auth.currentUser).finally(() => setIsLoading(false));
+    }
+  }, []);
 
   const updateUser = useCallback(async (updatedData: Partial<User>) => {
     if (!user || !user.id) {
@@ -765,6 +781,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       newlyUnlockedSkinsForModal,
       clearNewlyUnlockedSkinsForModal,
       submitUserFeedback,
+      refreshAuthContext, // <<< ADICIONADO
       unlinkCouple,
       deleteUserFeedbackTicket, // <<< ADICIONA A FUNÇÃO AO CONTEXTO
       resetNonMatchedSeenCards // Adiciona a nova função ao contexto

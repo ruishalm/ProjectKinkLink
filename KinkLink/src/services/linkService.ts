@@ -121,7 +121,7 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
     const acceptLinkFunction = httpsCallable(functions, 'acceptLinkCallable');
     console.log(`[linkService] Chamando a Cloud Function 'acceptLinkCallable' com o código: ${linkCodeToAccept}`);
     
-    const response = await acceptLinkFunction({ linkCode: linkCodeToAccept });
+    const response = await acceptLinkFunction({ linkCode: linkCodeToAccept.toUpperCase().trim() });
     const data = response.data as { success: boolean; coupleId: string; partnerId: string };
 
     if (data.success) {

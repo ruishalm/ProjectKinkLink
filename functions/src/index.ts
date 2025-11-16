@@ -452,19 +452,24 @@ export const onLinkCompletedSendNotification = onDocumentWritten(
       { eventId: event.id }
     );
 
-    // --- LÓGICA DE NOTIFICAÇÃO ---
-    let user1Name = "Seu par";
-    let user2Name = "Seu par";
+    // Função auxiliar para buscar o nome do usuário de forma segura
+    const getUsername = async (userId: string): Promise<string> => {
+      try {
+        const userDoc = await db.collection("users").doc(userId).get();
+        if (userDoc.exists) {
+          return userDoc.data()?.username || "Seu par";
+        }
+      } catch (error) {
+        logger.error(`Error fetching username for ${userId}:`, error);
+      }
+      return "Seu par";
+    };
 
-    try {
-      const user1Doc = await db.collection("users").doc(user1Id).get();
-      if (user1Doc.exists) user1Name = user1Doc.data()?.username || user1Name;
-
-      const user2Doc = await db.collection("users").doc(user2Id).get();
-      if (user2Doc.exists) user2Name = user2Doc.data()?.username || user2Name;
-    } catch (error) {
-      logger.error(`Error fetching usernames for couple ${coupleId} notification:`, error, { eventId: event.id });
-    }
+    // Busca os nomes dos usuários em paralelo
+    const [user1Name, user2Name] = await Promise.all([
+      getUsername(user1Id),
+      getUsername(user2Id),
+    ]);
 
     // Envia notificação para ambos os usuários
     await Promise.all([
@@ -623,6 +628,11 @@ export const acceptLinkCallable = onCall({ region: "southamerica-east1" }, async
         throw new HttpsError("not-found", "Código de vínculo inválido ou não encontrado.");
       }
       const pendingLinkData = pendingLinkSnap.data();
+
+      // Verificação de segurança adicional
+      if (!pendingLinkData || !pendingLinkData.initiatorUserId) {
+        throw new HttpsError("data-loss", "Os dados do código de vínculo estão corrompidos ou incompletos.");
+      }
 
       if (pendingLinkData?.status !== 'pending') {
         throw new HttpsError("failed-precondition", "Este código de vínculo já foi usado, expirou ou foi cancelado.");

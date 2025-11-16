@@ -1,11 +1,11 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\services\linkService.ts
 import {
   doc,
-  getDoc, // Adicionado para verificação opcional
   Timestamp, // Adicionado para tipagem correta
   runTransaction, // Necessário para acceptLink
 } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { auth, db, functions } from '../firebase'; // Importar 'functions'
+import { httpsCallable } from 'firebase/functions'; // Importar 'httpsCallable'
 import { serverTimestamp } from 'firebase/firestore'; // Importação correta para serverTimestamp
 
 // --- Função Auxiliar para gerar o código ---
@@ -34,13 +34,6 @@ export interface PendingLinkData { // Adicionado 'export'
   coupleId?: string;
 }
 
-// --- Interface para os dados do casal ---
-interface CoupleData {
-  members: [string, string]; // Array com os dois UIDs, ordenados para consistência
-  createdAt: Timestamp;
-  memberSymbols: { [key: string]: string };
-}
-
 /**
  * Cria um novo link pendente para o usuário atual.
  * O usuário não deve estar vinculado a ninguém.
@@ -56,10 +49,6 @@ export const createLink = async (): Promise<string> => {
 
   // 1. Verificar se o usuário atual já está vinculado
   const userDocRef = doc(db, 'users', currentUser.uid);
-  const initialUserDocSnap = await getDoc(userDocRef);
-  if (initialUserDocSnap.exists() && (initialUserDocSnap.data().coupleId || initialUserDocSnap.data().partnerId)) {
-      throw new Error("Você já está vinculado a alguém. Desvincule primeiro para criar um novo código.");
-  }
 
   // 2. Gerar um linkCode
   // Para o MVP, vamos assumir que a chance de colisão com 6 caracteres é baixa.
@@ -86,7 +75,7 @@ export const createLink = async (): Promise<string> => {
       }
 
       const userData = userDocSnap.data() as UserLinkStatus;
-      if (userData.coupleId) {
+      if (userData.coupleId || userData.partnerId) {
         throw new Error("Você já está vinculado a alguém. Desvincule primeiro para criar um novo código.");
       }
 
@@ -118,86 +107,31 @@ export const createLink = async (): Promise<string> => {
  * @throws Erro se o usuário não estiver autenticado, o código for inválido, ou se algum dos usuários já estiver vinculado.
  */
 export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: string; partnerId: string }> => {
-  const currentUserB = auth.currentUser;
-  if (!currentUserB) {
-    throw new Error("Usuário não autenticado. Faça login para aceitar um link.");
-  }
-
-  const normalizedCode = linkCodeToAccept.toUpperCase().trim();
-  const pendingLinkRef = doc(db, 'pendingLinks', normalizedCode);
-
   try {
-    const result = await runTransaction(db, async (transaction) => {
-      // 1. Ler o link pendente
-      const pendingLinkSnap = await transaction.get(pendingLinkRef);
-      const pendingLinkData = pendingLinkSnap.data();
+    // Chama a Cloud Function 'acceptLinkCallable'
+    const acceptLinkFunction = httpsCallable(functions, 'acceptLinkCallable');
+    const normalizedCode = linkCodeToAccept.toUpperCase().trim();
+    console.log(`[linkService] Chamando a Cloud Function 'acceptLinkCallable' com o código: ${normalizedCode}`);
 
-      if (!pendingLinkSnap.exists() || !pendingLinkData || pendingLinkData.status !== 'pending') {
-        throw new Error("Código de vínculo inválido, expirado ou já utilizado.");
-      }
+    const response = await acceptLinkFunction({ linkCode: normalizedCode });
+    const data = response.data as { success: boolean; coupleId: string; partnerId: string };
 
-      const initiatorUserIdA = pendingLinkData.initiatorUserId;
-
-      if (initiatorUserIdA === currentUserB.uid) {
-        throw new Error("Você não pode se vincular consigo mesmo.");
-      }
-
-      // 2. Ler os documentos dos dois usuários
-      const userARef = doc(db, 'users', initiatorUserIdA);
-      const userBRef = doc(db, 'users', currentUserB.uid);
-      const [userASnap, userBSnap] = await Promise.all([
-        transaction.get(userARef),
-        transaction.get(userBRef)
-      ]);
-
-      if (!userASnap.exists()) {
-        transaction.update(pendingLinkRef, { status: 'expired' });
-        throw new Error("O usuário que criou o código não foi encontrado.");
-      }
-      if (!userBSnap.exists()) {
-        throw new Error("Seus dados de usuário não foram encontrados.");
-      }
-
-      const userDataA = userASnap.data() as UserLinkStatus;
-      const userDataB = userBSnap.data() as UserLinkStatus;
-
-      if (userDataA.coupleId || userDataA.partnerId) {
-        transaction.update(pendingLinkRef, { status: 'cancelled_initiator_linked' });
-        throw new Error("O usuário que criou o código já está vinculado a outra pessoa.");
-      }
-      if (userDataB.coupleId || userDataB.partnerId) {
-        throw new Error("Você já está vinculado a outra pessoa. Desvincule primeiro.");
-      }
-
-      // 3. Todos os cheques passaram, realizar a vinculação
-      const newCoupleRef = doc(db, 'couples', `${[initiatorUserIdA, currentUserB.uid].sort().join('_')}`);
-      const newCoupleId = newCoupleRef.id;
-
-      const coupleDocData: CoupleData = {
-        members: [initiatorUserIdA, currentUserB.uid].sort() as [string, string],
-        createdAt: serverTimestamp() as Timestamp,
-        memberSymbols: {
-          [initiatorUserIdA]: '★',
-          [currentUserB.uid]: '▲',
-        },
-      };
-      transaction.set(newCoupleRef, coupleDocData);
-
-      // Atualiza os dois usuários
-      transaction.update(userARef, { partnerId: currentUserB.uid, coupleId: newCoupleId, linkCode: null });
-      transaction.update(userBRef, { partnerId: initiatorUserIdA, coupleId: newCoupleId });
-
-      // Deleta o link pendente
-      transaction.delete(pendingLinkRef);
-
-      return { coupleId: newCoupleId, partnerId: initiatorUserIdA };
-    });
-
-    console.log(`Vínculo criado com sucesso. Couple ID: ${result.coupleId}`);
-    return result;
+    if (data.success) {
+      console.log(`[linkService] Vínculo criado com sucesso via Cloud Function. Couple ID: ${data.coupleId}`);
+      return { coupleId: data.coupleId, partnerId: data.partnerId };
+    } else {
+      throw new Error("A função de vínculo retornou uma resposta inesperada.");
+    }
   } catch (error) {
-    console.error(`Erro ao aceitar código de vínculo ${normalizedCode}:`, error);
-    throw error; // Re-lança o erro para ser tratado pela UI
+    console.error(`[linkService] Erro ao chamar a Cloud Function 'acceptLinkCallable':`, error);
+    // Extrai a mensagem de erro específica da Cloud Function para a UI
+    // Verifica se o erro é um objeto com uma propriedade 'message'
+    if (typeof error === 'object' && error !== null && 'message' in error) {
+      // Converte a mensagem para string para garantir que seja um erro válido
+      throw new Error(String((error as { message: unknown }).message));
+    }
+    // Se não for um erro estruturado, lança um erro genérico
+    throw error;
   }
 };
 

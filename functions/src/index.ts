@@ -692,8 +692,8 @@ export const acceptLinkCallable = onCall({ region: "southamerica-east1" }, async
       return { coupleId: newCoupleId, partnerId: initiatorUserIdA };
     });
 
-    logger.info(`Vínculo com código ${linkCodeToAccept} aceito com sucesso por ${currentUserB_uid}! Couple ID: ${result.coupleId}`);
-    return { success: true, coupleId: result.coupleId, partnerId: result.partnerId };
+    logger.info(`Vínculo com código ${linkCodeToAccept} aceito com sucesso por ${currentUserB_uid}! Couple ID: ${result.coupleId}, Partner ID: ${result.partnerId}`);
+    return { success: true, ...result };
 
   } catch (error) {
     logger.error(`Erro ao aceitar código de vínculo ${linkCodeToAccept} via callable function:`, error);

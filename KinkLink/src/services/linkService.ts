@@ -71,14 +71,23 @@ export const createLink = async (): Promise<string> => {
     // A lógica de transação foi simplificada. Agora apenas criamos o link pendente.
     // A verificação de usuário já vinculado é feita no início da função e na Cloud Function.
     await runTransaction(db, async (transaction) => {
-      // Verifica se o código já existe (chance baixa, mas é uma boa prática)
+      // 1. Ler o documento do usuário DENTRO da transação para a verificação mais atualizada
+      const userDocSnap = await transaction.get(userDocRef);
+      if (!userDocSnap.exists()) {
+        throw new Error("Seus dados de usuário não foram encontrados. Tente novamente.");
+      }
+      const userData = userDocSnap.data();
+      if (userData.coupleId || userData.partnerId) {
+        throw new Error("Você já está vinculado a alguém. Desvincule primeiro para criar um novo código.");
+      }
+
+      // 2. Verificar se o código gerado já existe (chance baixa, mas é uma boa prática)
       const existingLink = await transaction.get(pendingLinkRef);
       if (existingLink.exists()) {
-        // Se o código colidir, lança um erro para que a UI possa pedir para tentar novamente.
         throw new Error("Falha ao gerar código único. Por favor, tente novamente.");
       }
 
-      // Cria o novo documento em pendingLinks e atualiza o documento do usuário
+      // 3. Criar o novo documento em pendingLinks e atualizar o documento do usuário
       transaction.set(pendingLinkRef, newPendingLink);
       transaction.update(userDocRef, { linkCode: linkCode });
     });

@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "kinklink-a4607"
-  }
+  },
+  "targets": {
+    "kinklink-a4607": {
+      "hosting": {
+        "kinklink-app": [
+          "kinklink-a4607"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

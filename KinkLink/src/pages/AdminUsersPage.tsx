@@ -271,8 +271,8 @@ function AdminUsersPage() {
         <table className={styles.usersTable}>
           <thead>
             <tr>
-              <th onClick={() => requestSort('username')}>Username{getSortIndicator('username')}</th>
-              <th onClick={() => requestSort('email')}>Email{getSortIndicator('email')}</th>
+              <th className={styles.truncateCell} onClick={() => requestSort('username')}>Username{getSortIndicator('username')}</th>
+              <th className={styles.truncateCell} onClick={() => requestSort('email')}>Email{getSortIndicator('email')}</th>
               <th onClick={() => requestSort('isSupporter')}>Apoiador?{getSortIndicator('isSupporter')}</th>
               <th onClick={() => requestSort('newTickets')}>Tickets Novos{getSortIndicator('newTickets')}</th>
               <th onClick={() => requestSort('resolvedTickets')}>Tickets Resolvidos{getSortIndicator('resolvedTickets')}</th>
@@ -284,8 +284,8 @@ function AdminUsersPage() {
             {sortedAndFilteredUsers.map(u => (
               <Fragment key={u.id}>
                 <tr>
-                  <td>{u.username || 'N/A'}</td>
-                  <td>{u.email}</td>
+                  <td className={styles.truncateCell} title={u.username || 'N/A'}>{u.username || 'N/A'}</td>
+                  <td className={styles.truncateCell} title={u.email ?? ''}>{u.email}</td>
                   <td>{u.isSupporter ? 'Sim ✅' : 'Não ❌'}</td>
                   <td>
                     {u.feedbackTickets?.filter(t => t.status === 'new').length || 0}

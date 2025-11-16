@@ -27,6 +27,13 @@
   color: var(--klnkl-text-color, #333);
 }
 
+.truncateCell {
+  max-width: 180px; /* Define uma largura máxima */
+  white-space: nowrap; /* Impede que o texto quebre a linha */
+  overflow: hidden; /* Esconde o que passar da largura máxima */
+  text-overflow: ellipsis; /* Adiciona "..." no final */
+}
+
 .tableWrapper {
   overflow-x: auto;
   width: 100%;

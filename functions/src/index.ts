@@ -451,21 +451,7 @@ export const onLinkCompletedSendNotification = onDocumentWritten(
       { eventId: event.id }
     );
 
-    // --- NOVA LÓGICA: Atribuir símbolos ao casal ---
-    try {
-      const coupleDocRef = db.collection("couples").doc(coupleId);
-      await coupleDocRef.update({
-        memberSymbols: {
-          [user1Id]: "★", // Estrela para o primeiro membro
-          [user2Id]: "▲", // Triângulo para o segundo membro
-        },
-      });
-      logger.info(`Símbolos atribuídos para o casal ${coupleId}.`, { eventId: event.id });
-    } catch (error) {
-      logger.error(`Falha ao atribuir símbolos para o casal ${coupleId}:`, error, { eventId: event.id });
-    }
-    // --- FIM DA NOVA LÓGICA ---
-
+    // --- LÓGICA DE NOTIFICAÇÃO ---
     let user1Name = "Seu par";
     let user2Name = "Seu par";
 
@@ -479,19 +465,17 @@ export const onLinkCompletedSendNotification = onDocumentWritten(
       logger.error(`Error fetching usernames for couple ${coupleId} notification:`, error, { eventId: event.id });
     }
 
-    await sendNotificationToUser(
-      user1Id,
-      "Conexão Estabelecida! 🎉",
-      `Você e ${user2Name} agora estão conectados no KinkLink!`,
-      { url: "/matches", type: "link_completed", partnerId: user2Id }
-    );
-
-    await sendNotificationToUser(
-      user2Id,
-      "Conexão Estabelecida! 🎉",
-      `Você e ${user1Name} agora estão conectados no KinkLink!`,
-      { url: "/matches", type: "link_completed", partnerId: user1Id }
-    );
+    // Envia notificação para ambos os usuários
+    await Promise.all([
+      sendNotificationToUser(
+        user1Id, "Conexão Estabelecida! 🎉", `Você e ${user2Name} agora estão conectados no KinkLink!`,
+        { url: "/matches", type: "link_completed", partnerId: user2Id }
+      ),
+      sendNotificationToUser(
+        user2Id, "Conexão Estabelecida! 🎉", `Você e ${user1Name} agora estão conectados no KinkLink!`,
+        { url: "/matches", type: "link_completed", partnerId: user1Id }
+      ),
+    ]);
   }
 );
 

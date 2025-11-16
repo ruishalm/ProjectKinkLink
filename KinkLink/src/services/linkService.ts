@@ -41,6 +41,7 @@ export interface PendingLinkData { // Adicionado 'export'
 interface CoupleData {
   members: [string, string]; // Array com os dois UIDs, ordenados para consistência
   createdAt: Timestamp;
+  memberSymbols: { [key: string]: string }; // <<< ADICIONADO
 }
 
 
@@ -187,8 +188,18 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
       const coupleDocData: CoupleData = {
         members: [initiatorUserIdA, currentUserB.uid].sort() as [string, string], // Ordenar IDs para consistência
         createdAt: serverTimestamp() as Timestamp,
+        memberSymbols: {
+          [initiatorUserIdA]: '★', // Iniciador é sempre a estrela
+          [currentUserB.uid]: '▲',   // Quem aceita é sempre o triângulo
+        },
       };
       transaction.set(newCoupleRef, coupleDocData);
+
+      // ATUALIZAR documento do Usuário A (iniciador)
+      transaction.update(userARef, {
+        partnerId: currentUserB.uid,
+        coupleId: newCoupleId,
+      });
 
       // Atualizar documento do Usuário B (aceitante)
       transaction.update(userBRef, {
@@ -196,12 +207,12 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
         coupleId: newCoupleId,
       });
 
-      // Atualizar o pendingLink
+      // Em vez de atualizar, vamos deletar o pendingLink, pois o processo está 100% concluído.
       transaction.update(pendingLinkRef, {
         status: 'completed',
         acceptedBy: currentUserB.uid,
         coupleId: newCoupleId,
-      });
+      }); // Manter a atualização para que o iniciador saiba que foi aceito e possa limpar a UI
       
       return { coupleId: newCoupleId, partnerId: initiatorUserIdA };
     });
@@ -221,42 +232,17 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
  * @param completedPendingLink Os dados do pendingLink que foi marcado como 'completed'.
  * @throws Erro se o usuário não estiver autenticado, não for o iniciador, ou se os dados do link estiverem incompletos.
  */
-export const completeLinkForInitiator = async (
-  completedPendingLink: PendingLinkData
-): Promise<void> => {
-  const currentUserA = auth.currentUser;
-
-  if (!currentUserA) {
-    throw new Error("Usuário não autenticado para completar o vínculo.");
-  }
-
-  if (currentUserA.uid !== completedPendingLink.initiatorUserId) {
-    throw new Error("Operação não autorizada: você não é o iniciador deste link.");
-  }
-
-  if (completedPendingLink.status !== 'completed' || !completedPendingLink.acceptedBy || !completedPendingLink.coupleId) {
-    // Isso pode indicar um problema ou que o listener foi acionado prematuramente.
-    throw new Error("O link não foi completamente aceito ou os dados estão faltando.");
-  }
-
-  const userARef = doc(db, 'users', currentUserA.uid);
+export const completeLinkForInitiator = async (completedPendingLink: PendingLinkData): Promise<void> => {
+  // Esta função agora serve apenas para limpar o pendingLink.
+  // A vinculação real já foi feita atomicamente em `acceptLink`.
   const batch: WriteBatch = writeBatch(db);
-
-  batch.update(userARef, {
-    partnerId: completedPendingLink.acceptedBy,
-    coupleId: completedPendingLink.coupleId,
-  });
-
-  // Deletar o pendingLink após a conclusão bem-sucedida
   const pendingLinkRefToDelete = doc(db, 'pendingLinks', completedPendingLink.linkCode);
   batch.delete(pendingLinkRefToDelete);
-
   try {
     await batch.commit();
-    console.log(`Usuário A (${currentUserA.uid}) completou a vinculação com ${completedPendingLink.acceptedBy}. Couple ID: ${completedPendingLink.coupleId}`);
+    console.log(`Limpeza do pendingLink ${completedPendingLink.linkCode} concluída.`);
   } catch (error) {
-    console.error("Erro ao completar vinculação para o iniciador (Usuário A):", error);
+    console.error("Erro ao limpar o pendingLink:", error);
     throw error;
-    // Considere não deletar o pendingLink se o commit do batch falhar, para permitir nova tentativa.
   }
 };

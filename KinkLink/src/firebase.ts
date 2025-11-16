@@ -1,7 +1,7 @@
 // Importe as funções que você precisa dos SDKs que você precisa
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app"; // Adicionado getApps, getApp, FirebaseApp
 import { getAuth, type Auth } from "firebase/auth"; // Adicionado Auth
-import { getFirestore, type Firestore, setLogLevel } from "firebase/firestore"; // Adicionado Firestore e setLogLevel
+import { getFirestore, type Firestore } from "firebase/firestore"; // Adicionado Firestore e setLogLevel
 import { getFunctions, type Functions } from "firebase/functions"; // Adicionado Functions
 // Se for usar Analytics (opcional, não está no plano MVP inicial)
 // import { getAnalytics } from "firebase/analytics";
@@ -31,8 +31,6 @@ const auth: Auth = getAuth(app);
 const db: Firestore = getFirestore(app);
 const functions: Functions = getFunctions(app, 'southamerica-east1'); // Especifica a região da sua função
 // const analytics = getAnalytics(app); // Descomente se for usar Analytics
-
-setLogLevel('debug'); // <-- adiciona para logs detalhados do Firestore
 
 // Exporte as instâncias para usar em outras partes do seu app
 export { app, auth, db, functions };

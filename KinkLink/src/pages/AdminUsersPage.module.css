@@ -27,6 +27,11 @@
   color: var(--klnkl-text-color, #333);
 }
 
+.tableWrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
 .usersTable {
   width: 100%;
   border-collapse: collapse;
@@ -45,6 +50,7 @@
   background-color: var(--klnkl-primary-color-light, #f8c5d8);
   color: var(--klnkl-primary-color-dark, #a61e4d);
   font-weight: bold;
+  cursor: pointer;
 }
 
 .actionButton {

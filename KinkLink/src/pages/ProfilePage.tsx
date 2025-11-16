@@ -528,7 +528,10 @@ function ProfilePage() {
         {/* SEÇÃO DE FERRAMENTAS DE DESENVOLVEDOR (APENAS PARA ADMINS) */}
         {user?.isAdmin && (
           <div className={`${styles.section} ${styles.textCenter} klnkl-themed-panel`}>
-            <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>Ferramentas de Desenvolvedor</h2>
+            <h2 className={styles.sectionTitleInHeader} style={{ borderBottom: 'none', marginBottom: '15px' }}>Ferramentas de Desenvolvedor</h2>
+            <Link to="/admin/users" className={`${styles.actionButton} genericButton`}>
+              Gerenciar Usuários
+            </Link>
             <button onClick={handleExtractUserCards} className={`${styles.actionButton} genericButton`}>
               Extrair UserCards (JSON)
             </button>

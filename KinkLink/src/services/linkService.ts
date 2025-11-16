@@ -19,12 +19,6 @@ const generateLinkCode = (length: number = 6): string => {
   return result;
 };
 
-// --- Interface para os dados do usuário (campos relevantes para esta etapa) ---
-interface UserLinkStatus {
-  partnerId?: string | null;
-  coupleId?: string | null;
-}
-
 // --- Interface para os dados do link pendente ---
 export interface PendingLinkData { // Adicionado 'export'
   initiatorUserId: string;
@@ -74,34 +68,29 @@ export const createLink = async (): Promise<string> => {
 
   // 4. Salvar o link pendente no Firestore
   try {
+    // A lógica de transação foi simplificada. Agora apenas criamos o link pendente.
+    // A verificação de usuário já vinculado é feita no início da função e na Cloud Function.
     await runTransaction(db, async (transaction) => {
-      // Ler o documento do usuário dentro da transação para a verificação mais atualizada
-      const userDocSnap = await transaction.get(userDocRef);
-
-      if (!userDocSnap.exists()) {
-        // Isso não deveria acontecer se o usuário está logado e o AuthContext garante a criação do doc.
-        console.error(`Documento do usuário ${currentUser.uid} não encontrado em 'users' dentro da transação.`);
-        throw new Error("Seus dados de usuário não foram encontrados. Tente novamente.");
+      // Verifica se o código já existe (chance baixa, mas é uma boa prática)
+      const existingLink = await transaction.get(pendingLinkRef);
+      if (existingLink.exists()) {
+        // Se o código colidir, lança um erro para que a UI possa pedir para tentar novamente.
+        throw new Error("Falha ao gerar código único. Por favor, tente novamente.");
       }
 
-      const userData = userDocSnap.data() as UserLinkStatus;
-      if (userData.coupleId || userData.partnerId) {
-        // Se o usuário se vinculou entre a verificação inicial e agora.
-        throw new Error("Você já está vinculado a alguém. Desvincule primeiro para criar um novo código.");
-      }
-
-      // Criar o novo documento em pendingLinks
+      // Cria o novo documento em pendingLinks e atualiza o documento do usuário
       transaction.set(pendingLinkRef, newPendingLink);
-
-      // ATUALIZAR o linkCode no documento do usuário iniciador
-      transaction.update(userDocRef, {
-        linkCode: linkCode // O mesmo código usado como ID do pendingLink
-      });
+      transaction.update(userDocRef, { linkCode: linkCode });
     });
+
     console.log(`Link pendente criado com sucesso. Código: ${linkCode} para usuário ${currentUser.uid}`);
     return linkCode; // Retornar o código para ser exibido na UI
   } catch (error) {
-    console.error("Erro ao criar o link pendente no Firestore:", error);
+    if (error instanceof Error) {
+      console.error("Erro ao criar o link pendente no Firestore:", error.message);
+    } else {
+      console.error("Erro desconhecido ao criar o link pendente no Firestore:", error);
+    }
     throw new Error("Falha ao criar o código de vínculo. Tente novamente.");
   }
 };
@@ -132,8 +121,16 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
       throw new Error("A função de vínculo retornou uma resposta inesperada.");
     }
   } catch (error) {
-    console.error(`Erro ao aceitar código de vínculo ${linkCodeToAccept}:`, error);
-    throw error; // Re-throw para ser tratado pela UI
+    console.error(`[linkService] Erro ao chamar a Cloud Function 'acceptLinkCallable':`, error);
+
+    // Extrai a mensagem de erro específica da Cloud Function para a UI
+    if (error && typeof error === 'object' && 'message' in error) {
+      // Se for um HttpsError do Firebase, ele terá 'code' e 'message'.
+      // A UI pode mostrar 'error.message' para o usuário.
+      throw new Error(String(error.message));
+    }
+
+    throw new Error("Ocorreu um erro de comunicação ao tentar validar o código. Verifique sua conexão.");
   }
 };
 

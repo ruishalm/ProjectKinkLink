@@ -4,9 +4,9 @@ import {
   getDoc, // Adicionado para verificação opcional
   Timestamp, // Adicionado para tipagem correta
   runTransaction, // Necessário para acceptLink
-  collection,     // Necessário para criar o doc do casal
 } from 'firebase/firestore';
 import { auth, db } from '../firebase'; // Ajustado para apontar para src/firebase.ts
+import { getFunctions, httpsCallable } from 'firebase/functions'; // <<< CORRIGIDO
 import { serverTimestamp } from 'firebase/firestore'; // Importação correta para serverTimestamp
 
 // --- Função Auxiliar para gerar o código ---
@@ -34,14 +34,6 @@ export interface PendingLinkData { // Adicionado 'export'
   acceptedBy?: string;
   coupleId?: string;
 }
-
-// --- Interface para os dados do casal ---
-interface CoupleData {
-  members: [string, string]; // Array com os dois UIDs, ordenados para consistência
-  createdAt: Timestamp;
-  memberSymbols: { [key: string]: string }; // <<< ADICIONADO
-}
-
 
 /**
  * Cria um novo link pendente para o usuário atual.
@@ -123,96 +115,22 @@ export const createLink = async (): Promise<string> => {
  * @throws Erro se o usuário não estiver autenticado, o código for inválido, ou se algum dos usuários já estiver vinculado.
  */
 export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: string; partnerId: string }> => {
-  const currentUserB = auth.currentUser;
-  if (!currentUserB) {
-    throw new Error("Usuário não autenticado. Faça login para aceitar um link.");
-  }
-
-  const pendingLinkRef = doc(db, 'pendingLinks', linkCodeToAccept);
-
+  const functions = getFunctions(); // Obtém a instância do Functions
   try {
-    const result = await runTransaction(db, async (transaction) => {
-      // 1. Ler o pendingLink
-      const pendingLinkSnap = await transaction.get(pendingLinkRef);
-      if (!pendingLinkSnap.exists()) {
-        throw new Error("Código de vínculo inválido ou não encontrado.");
-      }
-      const pendingLinkData = pendingLinkSnap.data() as PendingLinkData;
+    // Chama a Cloud Function 'acceptLinkCallable'
+    const acceptLinkFunction = httpsCallable(functions, 'acceptLinkCallable');
+    console.log(`[linkService] Chamando a Cloud Function 'acceptLinkCallable' com o código: ${linkCodeToAccept}`);
+    
+    const response = await acceptLinkFunction({ linkCode: linkCodeToAccept });
+    const data = response.data as { success: boolean; coupleId: string; partnerId: string };
 
-      if (pendingLinkData.status !== 'pending') {
-        // Poderia ser mais específico com a mensagem baseada no status
-        throw new Error("Este código de vínculo já foi usado, expirou ou foi cancelado.");
-      }
-
-      const initiatorUserIdA = pendingLinkData.initiatorUserId;
-
-      if (initiatorUserIdA === currentUserB.uid) {
-        throw new Error("Você não pode se vincular consigo mesmo.");
-      }
-
-      // 2. Ler os documentos dos usuários A (iniciador) e B (aceitante)
-      const userARef = doc(db, 'users', initiatorUserIdA);
-      const userBRef = doc(db, 'users', currentUserB.uid);
-
-      const userASnap = await transaction.get(userARef);
-      const userBSnap = await transaction.get(userBRef);
-
-      if (!userASnap.exists()) {
-        // O usuário A pode ter deletado a conta. Marcar o link como expirado.
-        transaction.update(pendingLinkRef, { status: 'expired' });
-        throw new Error("O usuário que criou o código não foi encontrado. O código pode ter expirado.");
-      }
-      if (!userBSnap.exists()) {
-        // Isso não deveria acontecer para o usuário B logado.
-        throw new Error("Seus dados de usuário não foram encontrados. Tente novamente.");
-      }
-
-      const userDataA = userASnap.data() as UserLinkStatus;
-      const userDataB = userBSnap.data() as UserLinkStatus;
-
-      if (userDataA.coupleId || userDataA.partnerId) {
-        // O iniciador já se vinculou com outra pessoa enquanto este link estava pendente.
-        transaction.update(pendingLinkRef, { status: 'cancelled_initiator_linked' });
-        throw new Error("O usuário que criou o código já está vinculado a outra pessoa.");
-      }
-      if (userDataB.coupleId || userDataB.partnerId) {
-        throw new Error("Você já está vinculado a outra pessoa. Desvincule primeiro.");
-      }
-
-      // 3. Todos os cheques passaram, proceder com a vinculação
-      const newCoupleRef = doc(collection(db, 'couples')); // Gera ID automático para o casal
-      const newCoupleId = newCoupleRef.id;
-
-      const coupleDocData: CoupleData = {
-        members: [initiatorUserIdA, currentUserB.uid].sort() as [string, string], // Ordenar IDs para consistência
-        createdAt: serverTimestamp() as Timestamp,
-        memberSymbols: {
-          [initiatorUserIdA]: '★', // Iniciador é sempre a estrela
-          [currentUserB.uid]: '▲',   // Quem aceita é sempre o triângulo
-        },
-      };
-      transaction.set(newCoupleRef, coupleDocData);
-
-      // ATUALIZAR documento do Usuário A (iniciador)
-      transaction.update(userARef, {
-        partnerId: currentUserB.uid,
-        coupleId: newCoupleId,
-      });
-
-      // Atualizar documento do Usuário B (aceitante)
-      transaction.update(userBRef, {
-        partnerId: initiatorUserIdA,
-        coupleId: newCoupleId,
-      });
-
-      // CORREÇÃO: Deletar o pendingLink diretamente na transação para garantir a limpeza.
-      transaction.delete(pendingLinkRef);
-
-      return { coupleId: newCoupleId, partnerId: initiatorUserIdA };
-    });
-
-    console.log(`Vínculo com código ${linkCodeToAccept} aceito com sucesso pelo Usuário B! Couple ID: ${result.coupleId}`);
-    return result;
+    if (data.success) {
+      console.log(`[linkService] Vínculo criado com sucesso via Cloud Function. Couple ID: ${data.coupleId}`);
+      return { coupleId: data.coupleId, partnerId: data.partnerId };
+    } else {
+      // Isso não deve acontecer se a função lançar um erro, mas é uma segurança extra.
+      throw new Error("A função de vínculo retornou uma resposta inesperada.");
+    }
   } catch (error) {
     console.error(`Erro ao aceitar código de vínculo ${linkCodeToAccept}:`, error);
     throw error; // Re-throw para ser tratado pela UI

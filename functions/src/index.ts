@@ -8,6 +8,7 @@
 
 import {onDocumentWritten} from "firebase-functions/v2/firestore";
 import {onSchedule} from "firebase-functions/v2/scheduler"; // Import para funções agendadas
+import {onCall, HttpsError} from "firebase-functions/v2/https"; // <<< ADICIONAR onCall e HttpsError
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 
@@ -595,3 +596,101 @@ export const notificacaoMensalDeApoio = onSchedule(
     });
   }
 );
+
+/**
+ * Função chamável para aceitar um código de vínculo.
+ * Executa a vinculação de forma atômica e segura no backend.
+ */
+export const acceptLinkCallable = onCall({ region: "southamerica-east1" }, async (request) => {
+  // 1. Verifica se o usuário está autenticado
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "A função deve ser chamada por um usuário autenticado.");
+  }
+
+  const linkCodeToAccept = request.data.linkCode;
+  if (!linkCodeToAccept || typeof linkCodeToAccept !== 'string') {
+    throw new HttpsError("invalid-argument", "O código do link ('linkCode') é inválido ou não foi fornecido.");
+  }
+
+  const currentUserB_uid = request.auth.uid;
+  const pendingLinkRef = db.collection('pendingLinks').doc(linkCodeToAccept);
+
+  try {
+    const result = await db.runTransaction(async (transaction) => {
+      // 2. Lê o link pendente
+      const pendingLinkSnap = await transaction.get(pendingLinkRef);
+      if (!pendingLinkSnap.exists) {
+        throw new HttpsError("not-found", "Código de vínculo inválido ou não encontrado.");
+      }
+      const pendingLinkData = pendingLinkSnap.data();
+
+      if (pendingLinkData?.status !== 'pending') {
+        throw new HttpsError("failed-precondition", "Este código de vínculo já foi usado, expirou ou foi cancelado.");
+      }
+
+      const initiatorUserIdA = pendingLinkData.initiatorUserId;
+
+      if (initiatorUserIdA === currentUserB_uid) {
+        throw new HttpsError("failed-precondition", "Você não pode se vincular consigo mesmo.");
+      }
+
+      // 3. Lê os documentos dos dois usuários
+      const userARef = db.collection('users').doc(initiatorUserIdA);
+      const userBRef = db.collection('users').doc(currentUserB_uid);
+      const [userASnap, userBSnap] = await transaction.getAll(userARef, userBRef);
+
+      if (!userASnap.exists) {
+        transaction.update(pendingLinkRef, { status: 'expired' });
+        throw new HttpsError("not-found", "O usuário que criou o código não foi encontrado.");
+      }
+      if (!userBSnap.exists) {
+        throw new HttpsError("not-found", "Seus dados de usuário não foram encontrados.");
+      }
+
+      const userDataA = userASnap.data();
+      const userDataB = userBSnap.data();
+
+      if (userDataA?.coupleId || userDataA?.partnerId) {
+        transaction.update(pendingLinkRef, { status: 'cancelled_initiator_linked' });
+        throw new HttpsError("failed-precondition", "O usuário que criou o código já está vinculado a outra pessoa.");
+      }
+      if (userDataB?.coupleId || userDataB?.partnerId) {
+        throw new HttpsError("failed-precondition", "Você já está vinculado a outra pessoa. Desvincule primeiro.");
+      }
+
+      // 4. Todos os cheques passaram, realizar a vinculação
+      const newCoupleRef = db.collection('couples').doc();
+      const newCoupleId = newCoupleRef.id;
+
+      const coupleDocData = {
+        members: [initiatorUserIdA, currentUserB_uid].sort(),
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        memberSymbols: {
+          [initiatorUserIdA]: '★',
+          [currentUserB_uid]: '▲',
+        },
+      };
+      transaction.set(newCoupleRef, coupleDocData);
+
+      // Atualiza os dois usuários
+      transaction.update(userARef, { partnerId: currentUserB_uid, coupleId: newCoupleId });
+      transaction.update(userBRef, { partnerId: initiatorUserIdA, coupleId: newCoupleId });
+
+      // Deleta o link pendente
+      transaction.delete(pendingLinkRef);
+
+      return { coupleId: newCoupleId, partnerId: initiatorUserIdA };
+    });
+
+    logger.info(`Vínculo com código ${linkCodeToAccept} aceito com sucesso por ${currentUserB_uid}! Couple ID: ${result.coupleId}`);
+    return { success: true, coupleId: result.coupleId, partnerId: result.partnerId };
+
+  } catch (error) {
+    logger.error(`Erro ao aceitar código de vínculo ${linkCodeToAccept} via callable function:`, error);
+    // Se o erro já for um HttpsError, relança. Senão, cria um erro genérico.
+    if (error instanceof HttpsError) {
+      throw error;
+    }
+    throw new HttpsError("internal", "Ocorreu um erro interno ao tentar criar o vínculo.", error);
+  }
+});

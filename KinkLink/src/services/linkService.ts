@@ -5,8 +5,6 @@ import {
   Timestamp, // Adicionado para tipagem correta
   runTransaction, // Necessário para acceptLink
   collection,     // Necessário para criar o doc do casal
-  WriteBatch,     // Necessário para completeLinkForInitiator
-  writeBatch      // Necessário para completeLinkForInitiator
 } from 'firebase/firestore';
 import { auth, db } from '../firebase'; // Ajustado para apontar para src/firebase.ts
 import { serverTimestamp } from 'firebase/firestore'; // Importação correta para serverTimestamp
@@ -207,13 +205,9 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
         coupleId: newCoupleId,
       });
 
-      // Em vez de atualizar, vamos deletar o pendingLink, pois o processo está 100% concluído.
-      transaction.update(pendingLinkRef, {
-        status: 'completed',
-        acceptedBy: currentUserB.uid,
-        coupleId: newCoupleId,
-      }); // Manter a atualização para que o iniciador saiba que foi aceito e possa limpar a UI
-      
+      // CORREÇÃO: Deletar o pendingLink diretamente na transação para garantir a limpeza.
+      transaction.delete(pendingLinkRef);
+
       return { coupleId: newCoupleId, partnerId: initiatorUserIdA };
     });
 
@@ -226,23 +220,6 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
 };
 
 /**
- * Permite que o Usuário A (iniciador) finalize o processo de vinculação
- * atualizando seu próprio documento de usuário após um link ser aceito.
- * Esta função é geralmente chamada após um listener detectar a mudança no pendingLink.
- * @param completedPendingLink Os dados do pendingLink que foi marcado como 'completed'.
- * @throws Erro se o usuário não estiver autenticado, não for o iniciador, ou se os dados do link estiverem incompletos.
+ * [REMOVIDO] Esta função não é mais necessária. A lógica foi consolidada em `acceptLink`.
  */
-export const completeLinkForInitiator = async (completedPendingLink: PendingLinkData): Promise<void> => {
-  // Esta função agora serve apenas para limpar o pendingLink.
-  // A vinculação real já foi feita atomicamente em `acceptLink`.
-  const batch: WriteBatch = writeBatch(db);
-  const pendingLinkRefToDelete = doc(db, 'pendingLinks', completedPendingLink.linkCode);
-  batch.delete(pendingLinkRefToDelete);
-  try {
-    await batch.commit();
-    console.log(`Limpeza do pendingLink ${completedPendingLink.linkCode} concluída.`);
-  } catch (error) {
-    console.error("Erro ao limpar o pendingLink:", error);
-    throw error;
-  }
-};
+export const completeLinkForInitiator = async (): Promise<void> => {};

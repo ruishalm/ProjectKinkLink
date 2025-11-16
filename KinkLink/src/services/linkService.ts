@@ -1,7 +1,7 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\services\linkService.ts
 import {
   doc,
-  getDoc, // Adicionado para verificação opcional
+   // Adicionado para verificação opcional
   Timestamp, // Adicionado para tipagem correta
   runTransaction, // Necessário para acceptLink
 } from 'firebase/firestore';
@@ -45,12 +45,6 @@ export const createLink = async (): Promise<string> => {
   // 1. Verificar se o usuário atual já está vinculado
   const userDocRef = doc(db, 'users', currentUser.uid);
   // A verificação de vínculo e a atualização do linkCode do usuário serão feitas dentro da transação
-
-  // Verificação inicial fora da transação para feedback rápido, se desejado.
-  const initialUserDocSnap = await getDoc(userDocRef);
-  if (initialUserDocSnap.exists() && (initialUserDocSnap.data().coupleId || initialUserDocSnap.data().partnerId)) {
-      throw new Error("Você já está vinculado a alguém. Desvincule primeiro para criar um novo código.");
-  }
 
   // 2. Gerar um linkCode
   // Para o MVP, vamos assumir que a chance de colisão com 6 caracteres é baixa.

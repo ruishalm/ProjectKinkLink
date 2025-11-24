@@ -241,18 +241,18 @@ describe('linkService', () => {
         return await callback(mockTransaction);
       });
 
-      await unlinkCouple('user123', 'partner456', 'couple789');
+      await unlinkCouple('couple789');
 
       // Verify transaction operations
       expect(mockTransaction.get).toHaveBeenCalledTimes(1);
       expect(mockTransaction.update).toHaveBeenCalledTimes(2); // Reset both users
       expect(mockTransaction.delete).toHaveBeenCalledTimes(1); // Delete couple
 
-      // Verify user updates reset partnerId and coupleId
+      // Verify user updates reset coupleId (partnerId não é mais usado)
       const user1Update = mockTransaction.update.mock.calls[0][1];
       const user2Update = mockTransaction.update.mock.calls[1][1];
-      expect(user1Update).toMatchObject({ partnerId: null, coupleId: null });
-      expect(user2Update).toMatchObject({ partnerId: null, coupleId: null });
+      expect(user1Update).toMatchObject({ coupleId: null });
+      expect(user2Update).toMatchObject({ coupleId: null });
     });
 
     it('should throw error if couple not found', async () => {
@@ -264,7 +264,7 @@ describe('linkService', () => {
         return await callback(mockTransaction);
       });
 
-      await expect(unlinkCouple('user123', 'partner456', 'invalid')).rejects.toThrow('Casal não encontrado');
+      await expect(unlinkCouple('invalid')).rejects.toThrow('Casal não encontrado');
     });
 
     it('should throw error if user is not a member of the couple', async () => {
@@ -281,7 +281,7 @@ describe('linkService', () => {
         return await callback(mockTransaction);
       });
 
-      await expect(unlinkCouple('user123', 'partner456', 'couple789')).rejects.toThrow('Você não é membro deste casal');
+      await expect(unlinkCouple('couple789')).rejects.toThrow('Você não é membro deste casal');
     });
   });
 });

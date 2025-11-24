@@ -40,27 +40,7 @@ service cloud.firestore {
           request.auth.uid == userId &&
           (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == resource.data.isAdmin) &&
           // Permite que o usuário atualize os campos listados, incluindo 'feedbackTickets'
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bio', 'username', 'unlockedSkinIds', 'gender', 'birthDate', 'linkCode', 'seenCards', 'conexaoAccepted', 'conexaoRejected', 'feedbackTickets', 'coupleId', 'partnerId', 'userCreatedCards'])
-        ) ||
-        // 2. Usuário B (aceitante, request.auth.uid) atualizando documento do Usuário A (iniciador, userId) para completar o vínculo.
-        //    Esta regra permite que o Usuário B (aceitante) defina o partnerId e coupleId do Usuário A (iniciador)
-        //    e limpe o linkCode do Usuário A. Não impede múltiplos vínculos se a estrutura de dados e a lógica do cliente suportarem.
-        (
-          request.auth.uid != userId &&                                         // O requisitante (B) não é o dono do documento (A)
-          // As verificações sobre o estado anterior de partnerId/coupleId do Usuário A foram removidas
-          // para permitir flexibilidade para múltiplos vínculos no futuro (a lógica do cliente controlaria isso).
-          // O que está sendo atualizado:
-          request.resource.data.partnerId == request.auth.uid &&                // Novo partnerId de A é o UID de B
-          request.resource.data.coupleId is string &&                           // Novo coupleId de A é uma string
-          request.resource.data.linkCode == null &&                             // linkCode de A está sendo limpo
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['partnerId', 'coupleId', 'linkCode'])
-        ) ||
-        // 3. Parceiro pode atualizar o array 'seenCards' do outro usuário.
-        ( 
-          request.method == 'update' &&
-          request.auth.uid != userId && // O requisitante não é o dono do documento
-          get(/databases/$(database)/documents/users/$(userId)).data.partnerId == request.auth.uid && // O documento sendo atualizado pertence ao parceiro atual do requisitante
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seenCards']) // Apenas o campo 'seenCards' pode ser alterado nesta condição
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bio', 'username', 'unlockedSkinIds', 'gender', 'birthDate', 'linkCode', 'seenCards', 'conexaoAccepted', 'conexaoRejected', 'feedbackTickets', 'coupleId', 'userCreatedCards'])
         ) ||
         // 4. Admin pode atualizar campos específicos de OUTRO usuário (e.g., 'isSupporter', 'bio').
         //    - Não pode mudar 'isAdmin' de outro usuário por esta regra (isso deve ser feito no console do Firebase).
@@ -93,33 +73,14 @@ service cloud.firestore {
       }
     }
 
-    // Regras para a coleção 'pendingLinks'
+    // Regras para a coleção 'pendingLinks' (simplificadas)
     match /pendingLinks/{linkCode} {
-      // Permite leitura para qualquer usuário autenticado (necessário para aceitar links)
+      // Qualquer autenticado pode ler (necessário para aceitar)
       allow read: if request.auth != null;
-      allow create: if request.auth != null && request.resource.data.initiatorUserId == request.auth.uid &&
-                       request.resource.data.status == 'pending' &&
-                       request.resource.data.linkCode == linkCode &&
-                       request.resource.data.keys().hasAll(['initiatorUserId', 'linkCode', 'status', 'createdAt']) &&
-                       request.resource.data.keys().hasOnly(['initiatorUserId', 'linkCode', 'status', 'createdAt']);
-      allow update: if request.auth != null &&
-                       resource.data.initiatorUserId != request.auth.uid && 
-                       resource.data.status == 'pending' &&
-                       (
-                         (request.resource.data.status == 'completed' &&
-                          request.resource.data.acceptedBy == request.auth.uid &&
-                          request.resource.data.coupleId is string &&
-                          request.resource.data.initiatorUserId == resource.data.initiatorUserId &&
-                          request.resource.data.linkCode == resource.data.linkCode &&
-                          request.resource.data.createdAt == resource.data.createdAt) ||
-                         ((request.resource.data.status == 'cancelled_initiator_linked' || request.resource.data.status == 'expired') &&
-                          !('acceptedBy' in request.resource.data) &&
-                          !('coupleId' in request.resource.data) &&
-                          request.resource.data.initiatorUserId == resource.data.initiatorUserId)
-                       );
-      // Permite que o iniciador delete seu próprio pendingLink se ele estiver 'completed'
-      allow delete: if request.auth != null &&
-                       request.auth.uid == resource.data.initiatorUserId && resource.data.status == 'completed';
+      // Criar: qualquer autenticado (durante createLink)
+      allow create: if request.auth != null;
+      // Deletar: qualquer autenticado em transação (durante acceptLink)
+      allow delete: if request.auth != null;
     }
     
     // Regras para a coleção 'linkRequests' (Se ainda estiver em uso, caso contrário, pode ser removida)
@@ -131,50 +92,45 @@ service cloud.firestore {
                        (resource.data.requesterId == request.auth.uid || resource.data.targetId == request.auth.uid); 
     }
 
-    // Regras para a coleção 'couples'
+    // Regras para a coleção 'couples' (SUPER SIMPLIFICADAS)
     match /couples/{coupleId} {
-      // Helper function para verificar se o documento do usuário autenticado
-      // tem seu campo 'coupleId' apontando para o 'targetCoupleId' (o ID do casal sendo acessado).
-      function isUserDocumentLinkedToThisCouple(targetCoupleId) {
+      // Helper: verifica se user tem coupleId no perfil
+      function userHasCoupleId() {
         return request.auth != null &&
-               get(/databases/$(database)/documents/users/$(request.auth.uid)).data.coupleId == targetCoupleId;
+               get(/databases/$(database)/documents/users/$(request.auth.uid)).data.coupleId == coupleId;
       }
 
-      // Permite criar OU sobrescrever (update via set) um couple quando:
-      // - Usuário autenticado tem coupleId apontando para este documento
-      // - Documento tem exatamente 2 membros
-      // - Usuário está na lista de membros
-      // NOTA: Como os users são atualizados ANTES do couple na transaction,
-      //       a função isUserDocumentLinkedToThisCouple() já retorna true durante criação
-      allow create, update: if isUserDocumentLinkedToThisCouple(coupleId) &&
-                               request.resource.data.members.size() == 2 &&
-                               request.auth.uid in request.resource.data.members;
+      // Criar: user autenticado (durante createLink)
+      allow create: if request.auth != null &&
+                       request.resource.data.status == 'pending' &&
+                       request.resource.data.initiatorId == request.auth.uid &&
+                       request.resource.data.members.size() == 1 &&
+                       request.auth.uid in request.resource.data.members;
 
-      // Helper function para verificar se o usuário está nos members do documento (para update/delete)
-      function isUserListedAsMember() {
-        return request.auth != null && request.auth.uid in resource.data.members;
-      }
+      // Atualizar: user é membro (durante acceptLink para completar)
+      allow update: if request.auth != null &&
+                       request.auth.uid in request.resource.data.members &&
+                       userHasCoupleId();
 
-      // Permite 'get' (leitura) apenas se o documento do usuário aponta para este couple
-      // Não verificamos os members do couple aqui para evitar loop infinito durante criação
-      allow get: if request.auth != null && isUserDocumentLinkedToThisCouple(coupleId);
-      // Listar todos os casais geralmente não é permitido para clientes.
+      // Ler: user tem coupleId
+      allow get: if userHasCoupleId();
       allow list: if false;
-      // Deletar um casal requer que o usuário seja um membro listado no documento existente
-      allow delete: if request.auth != null && isUserListedAsMember();
+
+      // Deletar: user é membro
+      allow delete: if request.auth != null &&
+                       request.auth.uid in resource.data.members;
 
       // Regras para a subcoleção 'likedInteractions'
       match /likedInteractions/{cardId} {
-        // Restaurando a verificação de membro para leitura
-        allow read: if request.auth != null && isUserDocumentLinkedToThisCouple(coupleId);
+        allow read: if request.auth != null && userHasCoupleId();
 
-        allow create: if request.auth != null && isUserDocumentLinkedToThisCouple(coupleId) &&
+        allow create: if request.auth != null && userHasCoupleId() &&
                         request.resource.data.likedByUIDs.size() == 1 &&
                         request.resource.data.likedByUIDs[0] == request.auth.uid &&
                         request.resource.data.isMatch == false &&
                         request.resource.data.keys().hasAll(['cardData', 'likedByUIDs', 'isMatch', 'isHot', 'lastActivity', 'createdAt']);
 
-        allow update: if request.auth != null && isUserDocumentLinkedToThisCouple(coupleId) &&
+        allow update: if request.auth != null && userHasCoupleId() &&
                          (
                            ( // Caso 1: Segundo usuário curte, formando um match
                              resource.data.likedByUIDs.size() == 1 &&
@@ -199,29 +155,29 @@ service cloud.firestore {
                            )
                          );
 
-        allow delete: if request.auth != null && isUserDocumentLinkedToThisCouple(coupleId);
+        allow delete: if request.auth != null && userHasCoupleId();
       }
 
       // Regras para a subcoleção 'cardChats' (chats de cada carta com match)
       match /cardChats/{cardId_do_match} {
         // Restaurando a verificação de membro para leitura e delete
-        allow read, delete: if request.auth != null && isUserDocumentLinkedToThisCouple(coupleId);
+        allow read, delete: if request.auth != null && userHasCoupleId();
 
         // Permite a criação do documento do chat se o usuário for membro.
         // Os campos como lastMessage... serão definidos através de uma operação de update (set com merge).
-        allow create: if request.auth != null && isUserDocumentLinkedToThisCouple(coupleId);
+        allow create: if request.auth != null && userHasCoupleId();
 
         // Permite a atualização dos detalhes da última mensagem.
-        allow update: if request.auth != null && isUserDocumentLinkedToThisCouple(coupleId) &&
+        allow update: if request.auth != null && userHasCoupleId() &&
                          request.resource.data.lastMessageSenderId == request.auth.uid && // Garante que quem está atualizando é o remetente da "última mensagem"
                          request.resource.data.lastMessageTimestamp is timestamp &&
                          // Verifica se os campos que estão sendo escritos são apenas os permitidos
                          request.writeFields.hasOnly(['lastMessageSenderId', 'lastMessageTimestamp', 'lastMessageTextSnippet']);
 
         match /messages/{messageId} {
-          allow read: if request.auth != null && isUserDocumentLinkedToThisCouple(coupleId);
+          allow read: if request.auth != null && userHasCoupleId();
           allow create: if request.auth != null &&
-                        isUserDocumentLinkedToThisCouple(coupleId) &&
+                        userHasCoupleId() &&
                         request.resource.data.userId == request.auth.uid && 
                         request.resource.data.keys().hasAll(['userId', 'username', 'text', 'timestamp']);
                         // request.resource.data.timestamp == request.time; // TEMPORARIAMENTE COMENTADO PARA TESTE

@@ -183,17 +183,29 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   useEffect(() => {
     if (user?.coupleId && user.id) {
       const coupleDocRef = doc(db, 'couples', user.coupleId);
-      const unsubscribe = onSnapshot(coupleDocRef, (docSnap: DocumentSnapshot) => {
-        if (docSnap.exists()) {
-          const coupleData = docSnap.data();
-          if (coupleData.memberSymbols) {
-            const symbol = coupleData.memberSymbols[user.id];
-            setUserSymbol(symbol || null);
+      const unsubscribe = onSnapshot(
+        coupleDocRef,
+        (docSnap: DocumentSnapshot) => {
+          if (docSnap.exists()) {
+            const coupleData = docSnap.data();
+            if (coupleData.memberSymbols) {
+              const symbol = coupleData.memberSymbols[user.id];
+              setUserSymbol(symbol || null);
+            }
+          } else {
+            setUserSymbol(null);
           }
-        } else {
+        },
+        (error) => {
+          // Silencia erros de permissão (esperados se couple não existe ou sem acesso)
+          if (error.code === 'permission-denied') {
+            console.log('[AuthContext] Permission denied para couple symbols (esperado antes de vincular)');
+          } else {
+            console.error('[AuthContext] Erro ao escutar couple para símbolos:', error);
+          }
           setUserSymbol(null);
         }
-      });
+      );
       // Limpa o listener quando o usuário desloga ou o coupleId muda
       return () => unsubscribe();
     } else {

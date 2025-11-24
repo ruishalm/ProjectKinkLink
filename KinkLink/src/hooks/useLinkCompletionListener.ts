@@ -50,8 +50,18 @@ export const useLinkCompletionListener = (
     null
   );
 
-  // 1. Busca todas as cartas uma vez
+  // 🔥 DESABILITA COMPLETAMENTE O HOOK SE NÃO ESTIVER VINCULADO
+  const isLinked = !!(user?.coupleId && user?.partnerId && user?.id);
+  
+  console.log('[useLinkCompletionListener] Hook ativado. isLinked:', isLinked, 'user.coupleId:', user?.coupleId);
+
+  // 1. Busca todas as cartas uma vez (SÓ SE VINCULADO)
   useEffect(() => {
+    if (!isLinked) {
+      console.log('[useLinkCompletionListener] Não vinculado - pulando fetch de cards');
+      return;
+    }
+    
     const fetchAllCards = async () => {
       const cardsSnapshot = await getDocs(collection(db, 'cards'));
       const userCardsSnapshot = await getDocs(collection(db, 'userCards'));
@@ -69,10 +79,17 @@ export const useLinkCompletionListener = (
       setAllCards([...fetchedCards, ...fetchedUserCards]);
     };
     fetchAllCards();
-  }, []);
+  }, [isLinked]);
 
-  // 2. Busca os dados do usuário e parceiro (getDoc é ok aqui)
+  // 2. Busca os dados do usuário e parceiro (SÓ SE VINCULADO)
   useEffect(() => {
+    if (!isLinked) {
+      console.log('[useLinkCompletionListener] Não vinculado - pulando fetch de user/partner data');
+      setLocalUserData(null);
+      setLocalPartnerData(null);
+      return;
+    }
+    
     const fetchDependentData = async () => {
       if (!user?.id || !user.partnerId) {
         setLocalUserData(null);
@@ -80,55 +97,81 @@ export const useLinkCompletionListener = (
         return;
       }
 
-      const userDocRef = doc(db, 'users', user.id);
-      const userDocSnap = await getDoc(userDocRef);
-      if (userDocSnap.exists()) {
-        setLocalUserData(userDocSnap.data() as UserWithVotes);
-      }
+      try {
+        const userDocRef = doc(db, 'users', user.id);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          setLocalUserData(userDocSnap.data() as UserWithVotes);
+        }
 
-      const partnerDocRef = doc(db, 'users', user.partnerId);
-      const partnerDocSnap = await getDoc(partnerDocRef);
-      if (partnerDocSnap.exists()) {
-        setLocalPartnerData(partnerDocSnap.data() as UserWithVotes);
+        const partnerDocRef = doc(db, 'users', user.partnerId);
+        const partnerDocSnap = await getDoc(partnerDocRef);
+        if (partnerDocSnap.exists()) {
+          setLocalPartnerData(partnerDocSnap.data() as UserWithVotes);
+        }
+      } catch (error) {
+        console.error('[useLinkCompletionListener] Erro ao buscar dados:', error);
+        setLocalUserData(null);
+        setLocalPartnerData(null);
       }
     };
 
     fetchDependentData();
-  }, [user?.id, user?.partnerId]);
+  }, [isLinked, user?.id, user?.partnerId]);
 
   // 3. OUVIR os dados do casal (onSnapshot é a chave para o bug do loop)
   useEffect(() => {
-    // Só ativa o listener se o usuário estiver vinculado (tem partnerId E coupleId)
-    if (!user?.coupleId || !user?.partnerId) {
+    // Desabilita COMPLETAMENTE se não estiver vinculado
+    if (!isLinked) {
+      console.log('[useLinkCompletionListener] Não vinculado - NÃO criando listener do couple');
       setLocalCoupleData(null);
       return;
     }
+    
+    // Só ativa o listener se o usuário estiver COMPLETAMENTE vinculado
+    if (!user?.coupleId || !user?.partnerId || !user?.id) {
+      console.warn('[useLinkCompletionListener] isLinked=true mas faltam dados:', { coupleId: user?.coupleId, partnerId: user?.partnerId, id: user?.id });
+      setLocalCoupleData(null);
+      return; // Return antecipado - não cria listener
+    }
 
+    console.log('[useLinkCompletionListener] Ativando listener para couple:', user.coupleId);
     const coupleDocRef = doc(db, 'couples', user.coupleId);
     
-    const unsubscribe = onSnapshot(
-      coupleDocRef,
-      (docSnap) => {
-        if (docSnap.exists()) {
-          setLocalCoupleData({
-            id: docSnap.id,
-            ...docSnap.data(),
-          } as CoupleData);
-        } else {
+    // Wrapping onSnapshot em try-catch adicional
+    try {
+      const unsubscribe = onSnapshot(
+        coupleDocRef,
+        (docSnap) => {
+          if (docSnap.exists()) {
+            setLocalCoupleData({
+              id: docSnap.id,
+              ...docSnap.data(),
+            } as CoupleData);
+          } else {
+            setLocalCoupleData(null);
+          }
+        },
+        (error) => {
+          // Silencia completamente erros de permissão (esperados antes de vincular)
+          if (error.code === 'permission-denied') {
+            console.log('[useLinkCompletionListener] Permission denied para couple (esperado se não vinculado)');
+          } else {
+            console.error('[useLinkCompletionListener] Erro ao escutar couple:', error);
+          }
           setLocalCoupleData(null);
         }
-      },
-      (error) => {
-        // Ignora erros de permissão se o couple ainda não existe
-        if (error.code !== 'permission-denied') {
-          console.error('[useLinkCompletionListener] Erro ao escutar couple:', error);
-        }
-        setLocalCoupleData(null);
-      }
-    );
+      );
 
-    return () => unsubscribe(); // Limpa o listener
-  }, [user?.coupleId, user?.partnerId]);
+      return () => {
+        console.log('[useLinkCompletionListener] Limpando listener do couple');
+        unsubscribe();
+      };
+    } catch (error) {
+      console.error('[useLinkCompletionListener] Erro ao criar listener:', error);
+      setLocalCoupleData(null);
+    }
+  }, [isLinked, user?.coupleId, user?.partnerId, user?.id]);
 
   // 4. Efeito de processamento (com a lógica de filtro anti-loop)
   useEffect(() => {

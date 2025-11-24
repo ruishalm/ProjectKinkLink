@@ -179,24 +179,12 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
         throw new Error("Você já está vinculado a outra pessoa. Desvincule primeiro.");
       }
 
-      // 3. Criar o documento do casal
+      // 3. Definir o coupleId (mas NÃO criar o documento ainda)
       const sortedIds = [initiatorUserIdA, currentUserB.uid].sort();
       const finalCoupleId = sortedIds.join('_');
-      const finalCoupleRef = doc(db, 'couples', finalCoupleId);
 
-      // Usar set() diretamente - se já existir de tentativa anterior, sobrescreve
-      // Não fazemos transaction.get() porque precisaríamos de permissão de leitura
-      const coupleDocData: CoupleData = {
-        members: sortedIds as [string, string],
-        createdAt: serverTimestamp() as Timestamp,
-        memberSymbols: {
-          [sortedIds[0]]: '★',
-          [sortedIds[1]]: '▲',
-        },
-      };
-      transaction.set(finalCoupleRef, coupleDocData);
-
-      // 4. Atualizar AMBOS os usuários atomicamente
+      // 4. PRIMEIRO: Atualizar AMBOS os usuários com partnerId e coupleId
+      // Isso permite que a regra isUserDocumentLinkedToThisCouple() funcione
       transaction.update(userARef, {
         partnerId: currentUserB.uid,
         coupleId: finalCoupleId,
@@ -208,7 +196,19 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
         coupleId: finalCoupleId,
       });
 
-      // 5. Remover o pendingLink (processo completo)
+      // 5. DEPOIS: Criar o documento do casal (agora os users já têm coupleId)
+      const finalCoupleRef = doc(db, 'couples', finalCoupleId);
+      const coupleDocData: CoupleData = {
+        members: sortedIds as [string, string],
+        createdAt: serverTimestamp() as Timestamp,
+        memberSymbols: {
+          [sortedIds[0]]: '★',
+          [sortedIds[1]]: '▲',
+        },
+      };
+      transaction.set(finalCoupleRef, coupleDocData);
+
+      // 6. Por último: Remover o pendingLink (processo completo)
       transaction.delete(pendingLinkRef);
       
       return { coupleId: finalCoupleId, partnerId: initiatorUserIdA };

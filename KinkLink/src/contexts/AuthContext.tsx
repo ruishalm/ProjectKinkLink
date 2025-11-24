@@ -665,20 +665,18 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   }, [user, updateUser]); // Depende de 'user' para ler os tickets e 'updateUser' para persistir
 
   const unlinkCouple = useCallback(async () => {
-    if (!user || !user.id || !user.coupleId || !user.partnerId) {
+    if (!user || !user.id || !user.coupleId) {
       console.warn("[AuthContext] unlinkCouple: Usuário não está em um casal ou dados do usuário estão incompletos para desvincular.");
       return;
     }
 
     setIsLoading(true);
-    const currentUserId = user.id;
     const coupleIdToDelete = user.coupleId;
-    const partnerIdToUnlink = user.partnerId;
 
     try {
       // Importamos e usamos a função do linkService que faz tudo atomicamente
       const { unlinkCouple: unlinkCoupleService } = await import('../services/linkService');
-      await unlinkCoupleService(currentUserId, partnerIdToUnlink, coupleIdToDelete);
+      await unlinkCoupleService(coupleIdToDelete);
       console.log(`[AuthContext] Desvinculação completa via linkService.`);
       // O onSnapshot atualizará automaticamente o estado do usuário
     } catch (error) {

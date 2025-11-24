@@ -55,14 +55,16 @@ describe('linkService - Integration Tests', () => {
       await deleteDoc(doc(db, 'users', user1Id));
       await deleteDoc(doc(db, 'users', user2Id));
       
-      // Limpar couple se existir
-      const coupleId = [user1Id, user2Id].sort().join('_');
-      await deleteDoc(doc(db, 'couples', coupleId));
-      
       // Limpar pendingLink se existir
       if (linkCode) {
-        await deleteDoc(doc(db, 'pendingLinks', linkCode));
+        try {
+          await deleteDoc(doc(db, 'pendingLinks', linkCode));
+        } catch (e) {
+          console.warn('PendingLink já foi deletado');
+        }
       }
+      
+      // Nota: couple será deletado automaticamente pelo unlinkCouple nos testes
       
       await signOut(auth);
       console.log('✅ Limpeza concluída');
@@ -71,7 +73,7 @@ describe('linkService - Integration Tests', () => {
     }
   });
 
-  it('1. Deve criar um link pendente (Usuário 1)', async () => {
+  it('1. Deve criar um link pendente com couple (Usuário 1)', async () => {
     // Login como usuário 1
     await signOut(auth);
     await signInAnonymously(auth);
@@ -89,11 +91,25 @@ describe('linkService - Integration Tests', () => {
     // Verificar que o pendingLink foi criado no Firestore
     const pendingLinkSnap = await getDoc(doc(db, 'pendingLinks', linkCode));
     expect(pendingLinkSnap.exists()).toBe(true);
-    expect(pendingLinkSnap.data()?.initiatorUserId).toBe(user1Id);
-    expect(pendingLinkSnap.data()?.status).toBe('pending');
+    const pendingData = pendingLinkSnap.data();
+    expect(pendingData?.coupleId).toBeDefined();
+    expect(pendingData?.linkCode).toBe(linkCode);
+    
+    // Verificar que o couple foi criado como 'pending' com 1 membro
+    const coupleSnap = await getDoc(doc(db, 'couples', pendingData!.coupleId));
+    expect(coupleSnap.exists()).toBe(true);
+    const coupleData = coupleSnap.data();
+    expect(coupleData?.status).toBe('pending');
+    expect(coupleData?.initiatorId).toBe(user1Id);
+    expect(coupleData?.members).toHaveLength(1);
+    expect(coupleData?.members[0]).toBe(user1Id);
+    
+    // Verificar que o usuário 1 tem coupleId
+    const user1Snap = await getDoc(doc(db, 'users', user1Id));
+    expect(user1Snap.data()?.coupleId).toBe(pendingData!.coupleId);
   });
 
-  it('2. Deve aceitar o link e criar o couple atomicamente (Usuário 2)', async () => {
+  it('2. Deve aceitar o link e completar o couple (Usuário 2)', async () => {
     // Login como usuário 2
     await signOut(auth);
     await signInAnonymously(auth);
@@ -107,22 +123,22 @@ describe('linkService - Integration Tests', () => {
     
     console.log('✅ Link aceito! CoupleId:', result.coupleId);
     
-    // Verificar que o couple foi criado
+    // Verificar que o couple foi completado
     const coupleSnap = await getDoc(doc(db, 'couples', result.coupleId));
     expect(coupleSnap.exists()).toBe(true);
-    expect(coupleSnap.data()?.members).toContain(user1Id);
-    expect(coupleSnap.data()?.members).toContain(user2Id);
-    expect(coupleSnap.data()?.members.length).toBe(2);
+    const coupleData = coupleSnap.data();
+    expect(coupleData?.status).toBe('completed');
+    expect(coupleData?.members).toContain(user1Id);
+    expect(coupleData?.members).toContain(user2Id);
+    expect(coupleData?.members.length).toBe(2);
+    expect(coupleData?.memberSymbols).toBeDefined();
     
-    // Verificar que o usuário 1 foi atualizado
+    // Verificar que o usuário 1 tem coupleId (partnerId não é mais usado)
     const user1Snap = await getDoc(doc(db, 'users', user1Id));
-    expect(user1Snap.data()?.partnerId).toBe(user2Id);
     expect(user1Snap.data()?.coupleId).toBe(result.coupleId);
-    expect(user1Snap.data()?.linkCode).toBeNull();
     
     // Verificar que o usuário 2 foi atualizado
     const user2Snap = await getDoc(doc(db, 'users', user2Id));
-    expect(user2Snap.data()?.partnerId).toBe(user1Id);
     expect(user2Snap.data()?.coupleId).toBe(result.coupleId);
     
     // Verificar que o pendingLink foi deletado
@@ -136,9 +152,12 @@ describe('linkService - Integration Tests', () => {
     await signInAnonymously(auth);
     Object.defineProperty(auth.currentUser, 'uid', { value: user1Id, writable: false });
     
-    const coupleId = [user1Id, user2Id].sort().join('_');
+    // Buscar o coupleId do usuário 1
+    const user1Snap = await getDoc(doc(db, 'users', user1Id));
+    const coupleId = user1Snap.data()?.coupleId;
+    expect(coupleId).toBeDefined();
     
-    await unlinkCouple(user1Id, user2Id, coupleId);
+    await unlinkCouple(coupleId);
     
     console.log('✅ Desvinculação completa!');
     
@@ -147,13 +166,11 @@ describe('linkService - Integration Tests', () => {
     expect(coupleSnap.exists()).toBe(false);
     
     // Verificar que o usuário 1 foi resetado
-    const user1Snap = await getDoc(doc(db, 'users', user1Id));
-    expect(user1Snap.data()?.partnerId).toBeNull();
-    expect(user1Snap.data()?.coupleId).toBeNull();
+    const user1SnapAfter = await getDoc(doc(db, 'users', user1Id));
+    expect(user1SnapAfter.data()?.coupleId).toBeNull();
     
     // Verificar que o usuário 2 foi resetado
     const user2Snap = await getDoc(doc(db, 'users', user2Id));
-    expect(user2Snap.data()?.partnerId).toBeNull();
     expect(user2Snap.data()?.coupleId).toBeNull();
   });
 });

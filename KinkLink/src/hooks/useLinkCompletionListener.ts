@@ -51,7 +51,7 @@ export const useLinkCompletionListener = (
   );
 
   // 🔥 DESABILITA COMPLETAMENTE O HOOK SE NÃO ESTIVER VINCULADO
-  const isLinked = !!(user?.coupleId && user?.partnerId && user?.id);
+  const isLinked = !!(user?.coupleId && user?.id);
   
   console.log('[useLinkCompletionListener] Hook ativado. isLinked:', isLinked, 'user.coupleId:', user?.coupleId);
 
@@ -91,7 +91,7 @@ export const useLinkCompletionListener = (
     }
     
     const fetchDependentData = async () => {
-      if (!user?.id || !user.partnerId) {
+      if (!user?.id || !user.coupleId) {
         setLocalUserData(null);
         setLocalPartnerData(null);
         return;
@@ -104,10 +104,19 @@ export const useLinkCompletionListener = (
           setLocalUserData(userDocSnap.data() as UserWithVotes);
         }
 
-        const partnerDocRef = doc(db, 'users', user.partnerId);
-        const partnerDocSnap = await getDoc(partnerDocRef);
-        if (partnerDocSnap.exists()) {
-          setLocalPartnerData(partnerDocSnap.data() as UserWithVotes);
+        // Buscar partner ID do couple document
+        const coupleDocRef = doc(db, 'couples', user.coupleId);
+        const coupleDocSnap = await getDoc(coupleDocRef);
+        if (coupleDocSnap.exists()) {
+          const coupleData = coupleDocSnap.data();
+          const partnerId = coupleData.members.find((id: string) => id !== user.id);
+          if (partnerId) {
+            const partnerDocRef = doc(db, 'users', partnerId);
+            const partnerDocSnap = await getDoc(partnerDocRef);
+            if (partnerDocSnap.exists()) {
+              setLocalPartnerData(partnerDocSnap.data() as UserWithVotes);
+            }
+          }
         }
       } catch (error) {
         console.error('[useLinkCompletionListener] Erro ao buscar dados:', error);
@@ -117,7 +126,7 @@ export const useLinkCompletionListener = (
     };
 
     fetchDependentData();
-  }, [isLinked, user?.id, user?.partnerId]);
+  }, [isLinked, user?.id, user?.coupleId]);
 
   // 3. OUVIR os dados do casal (onSnapshot é a chave para o bug do loop)
   useEffect(() => {
@@ -129,8 +138,8 @@ export const useLinkCompletionListener = (
     }
     
     // Só ativa o listener se o usuário estiver COMPLETAMENTE vinculado
-    if (!user?.coupleId || !user?.partnerId || !user?.id) {
-      console.warn('[useLinkCompletionListener] isLinked=true mas faltam dados:', { coupleId: user?.coupleId, partnerId: user?.partnerId, id: user?.id });
+    if (!user?.coupleId || !user?.id) {
+      console.warn('[useLinkCompletionListener] isLinked=true mas faltam dados:', { coupleId: user?.coupleId, id: user?.id });
       setLocalCoupleData(null);
       return; // Return antecipado - não cria listener
     }
@@ -171,7 +180,7 @@ export const useLinkCompletionListener = (
       console.error('[useLinkCompletionListener] Erro ao criar listener:', error);
       setLocalCoupleData(null);
     }
-  }, [isLinked, user?.coupleId, user?.partnerId, user?.id]);
+  }, [isLinked, user?.coupleId, user?.id]);
 
   // 4. Efeito de processamento (com a lógica de filtro anti-loop)
   useEffect(() => {

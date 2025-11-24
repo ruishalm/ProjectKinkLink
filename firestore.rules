@@ -107,13 +107,15 @@ service cloud.firestore {
                        request.resource.data.members.size() == 1 &&
                        request.auth.uid in request.resource.data.members;
 
-      // Atualizar: user é membro (durante acceptLink para completar)
+      // Atualizar: user é membro no novo estado do couple (permite acceptLink completar)
       allow update: if request.auth != null &&
-                       request.auth.uid in request.resource.data.members &&
-                       userHasCoupleId();
+                       request.auth.uid in request.resource.data.members;
 
-      // Ler: user tem coupleId
-      allow get: if userHasCoupleId();
+      // Ler: 
+      // - Couple pending: qualquer user autenticado (para acceptLink)
+      // - Couple completed: user tem coupleId
+      allow get: if request.auth != null && 
+                    (resource.data.status == 'pending' || userHasCoupleId());
       allow list: if false;
 
       // Deletar: user é membro

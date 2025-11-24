@@ -51,7 +51,7 @@ interface BeforeInstallPromptEvent extends Event {
 function AppContent() {
   const { user, isLoading, submitUserFeedback } = useAuth(); // submitUserFeedback do AuthContext
   const location = useLocation();
-  const isUserLinked = !!user?.partnerId; // MODIFICADO AQUI
+  const isUserLinked = !!user?.coupleId; // Nova arquitetura: usa coupleId ao invés de partnerId
   const [deferredInstallPrompt, setDeferredInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallButtonInHeader, setShowInstallButtonInHeader] = React.useState(false);
   // const { t } = useTranslation(); // Removido

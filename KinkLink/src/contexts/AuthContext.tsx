@@ -239,46 +239,12 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     } catch (error) {
       console.error(`[AuthContext] Firestore: Erro ao persistir atualização do perfil do usuário ${user.id}:`, error);
     }
-  }, [user?.id]); // Depend on user.id for stability
+  }, [user]); // Depend on user for stability
 
-  // Efeito para auto-correção do vínculo (self-healing)
-  useEffect(() => {
-    const verifyAndHealLink = async () => {
-      // Verifica se o usuário está logado, possui um coupleId e um partnerId.
-      // A verificação de user.id garante que temos um usuário válido.
-      if (user && user.id && user.coupleId && user.partnerId) {
-        try {
-          const coupleDocRef = doc(db, 'couples', user.coupleId);
-          const coupleDocSnap = await getDoc(coupleDocRef);
-
-          let shouldClearLink = false;
-          if (!coupleDocSnap.exists()) {
-            console.log(`[AuthContext] Self-healing: Documento do casal ${user.coupleId} não encontrado. Limpando vínculo para usuário ${user.id}.`);
-            shouldClearLink = true;
-          } else {
-            const coupleData = coupleDocSnap.data();
-            // Verifica se o usuário atual ou o parceiro registrado ainda são membros do casal.
-            // Isso cobre o caso onde o documento do casal existe, mas os membros foram alterados.
-            if (!coupleData.members || !coupleData.members.includes(user.id) || (user.partnerId && !coupleData.members.includes(user.partnerId))) {
-              console.log(`[AuthContext] Self-healing: Usuário ${user.id} ou parceiro ${user.partnerId} não consta nos membros do casal ${user.coupleId}. Limpando vínculo.`);
-              shouldClearLink = true;
-            }
-          }
-
-          if (shouldClearLink) {
-            // Chama updateUser para limpar partnerId e coupleId no Firestore e no estado local.
-            // A condição no início deste if (user.coupleId && user.partnerId) previne loops desnecessários
-            // se o estado já estiver limpo mas o efeito rodar novamente por outra dependência.
-            await updateUser({ partnerId: null, coupleId: null });
-            // Ao desvincular, o token FCM não precisa ser reprocessado imediatamente, mas se o usuário logar novamente, será.
-          }
-        } catch (error) {
-          console.error("[AuthContext] Erro durante a auto-correção do vínculo:", error);
-        }
-      }
-    };
-    verifyAndHealLink();
-  }, [user, updateUser]); // updateUser é memoizado com user.id, e 'user' é a dependência principal aqui.
+  // REMOVIDO: Self-healing simplificado
+  // O novo sistema atômico garante consistência, eliminando a necessidade de correções frequentes
+  // Se houver inconsistências por operações manuais no Firestore, devem ser resolvidas via Cloud Functions
+  // ou ferramentas administrativas, não no cliente a cada render
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
@@ -625,7 +591,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       console.error(`[AuthContext] Erro ao commitar o batch de reset para ${currentUserId}:`, error);
       throw error;
     }
-  }, [user?.id, user?.coupleId, user?.isSupporter]); // Adicionado user?.isSupporter se defaultUnlockedSkins depender dele
+  }, [user?.id, user?.coupleId]); // Removido user?.isSupporter (desnecessário)
 
   const submitUserFeedback = useCallback(async (feedbackText: string) => {
     const currentUserId = user?.id;
@@ -687,51 +653,29 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   }, [user, updateUser]); // Depende de 'user' para ler os tickets e 'updateUser' para persistir
 
   const unlinkCouple = useCallback(async () => {
-    if (!user || !user.id || !user.coupleId) {
+    if (!user || !user.id || !user.coupleId || !user.partnerId) {
       console.warn("[AuthContext] unlinkCouple: Usuário não está em um casal ou dados do usuário estão incompletos para desvincular.");
-      // Pode ser útil lançar um erro para a UI tratar, se apropriado.
-      // Ex: throw new Error("Você não está atualmente vinculado ou não foi possível obter seus dados.");
       return;
     }
 
-    // Considerar um estado de loading específico para desvinculação se for uma operação demorada
-    // e o isLoading global for muito genérico. Por ora, usamos o global.
     setIsLoading(true);
     const currentUserId = user.id;
     const coupleIdToDelete = user.coupleId;
-    const partnerIdBeingUnlinked = user.partnerId; // Para log
-
-    const batch = writeBatch(db);
-
-    // 1. Atualiza o documento do usuário atual
-    const currentUserDocRef = doc(db, 'users', currentUserId);
-    batch.update(currentUserDocRef, {
-      partnerId: null,
-      coupleId: null,
-      // Adicionar outros campos a serem resetados no desvínculo, se necessário (ex: seenCards, etc.)
-      // como já está sendo feito na LinkCouplePage.tsx
-      seenCards: [],
-      conexaoAccepted: 0,
-      conexaoRejected: 0,
-      userCreatedCards: [],
-      linkCode: null
-    });
-
-    // 2. Exclui o documento do casal
-    const coupleDocRef = doc(db, 'couples', coupleIdToDelete);
-    batch.delete(coupleDocRef);
+    const partnerIdToUnlink = user.partnerId;
 
     try {
-      await batch.commit();
-      console.log(`[AuthContext] Usuário ${currentUserId} desvinculado via unlinkCouple. Casal ${coupleIdToDelete} removido. Ex-parceiro ${partnerIdBeingUnlinked || 'N/A'} será atualizado via self-healing.`);
-      // O estado local do usuário atual será atualizado pelo listener onSnapshot.
+      // Importamos e usamos a função do linkService que faz tudo atomicamente
+      const { unlinkCouple: unlinkCoupleService } = await import('../services/linkService');
+      await unlinkCoupleService(currentUserId, partnerIdToUnlink, coupleIdToDelete);
+      console.log(`[AuthContext] Desvinculação completa via linkService.`);
+      // O onSnapshot atualizará automaticamente o estado do usuário
     } catch (error) {
-      console.error(`[AuthContext] Erro ao desvincular (usuário: ${currentUserId}, casal: ${coupleIdToDelete}):`, error);
-      setIsLoading(false); // Garante que o loading pare em caso de erro.
-      throw error; // Relança o erro para a UI poder tratar, se necessário.
+      console.error(`[AuthContext] Erro ao desvincular:`, error);
+      setIsLoading(false);
+      throw error;
     }
-    // O setIsLoading(false) principal será tratado pelo onSnapshot ao receber os dados atualizados do usuário.
-  }, [user, setIsLoading]); // updateUser não é necessário como dependência aqui pois o onSnapshot cuidará da atualização do estado local.
+    // setIsLoading(false) será chamado quando o onSnapshot detectar as mudanças
+  }, [user, setIsLoading]);
 
   const resetNonMatchedSeenCards = useCallback(async () => {
     if (!user || !user.id) {

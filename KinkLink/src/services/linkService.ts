@@ -20,8 +20,6 @@ import {
   getDoc,
   Timestamp,
   runTransaction,
-  WriteBatch,
-  writeBatch,
   serverTimestamp,
   type Transaction
 } from 'firebase/firestore';
@@ -62,9 +60,8 @@ interface CoupleData {
 
 
 /**
- * Cria um novo link pendente para o usuário atual.
- * O usuário não deve estar vinculado a ninguém.
- * O linkCode gerado será o ID do documento na coleção 'pendingLinks'.
+ * Cria um novo link pendente E um couple pendente para o usuário atual.
+ * O couple já é criado com status "pending" e será completado quando alguém aceitar.
  * @returns O linkCode gerado.
  * @throws Erro se o usuário não estiver autenticado ou já estiver vinculado.
  */
@@ -84,12 +81,17 @@ export const createLink = async (): Promise<string> => {
 
   const linkCode = generateLinkCode();
   const pendingLinkRef = doc(db, 'pendingLinks', linkCode);
+  
+  // Cria o couple pendente com ID temporário
+  const pendingCoupleId = `PENDING_${currentUser.uid}_${Date.now()}`;
+  const pendingCoupleRef = doc(db, 'couples', pendingCoupleId);
 
-  const newPendingLink: Omit<PendingLinkData, 'acceptedBy' | 'coupleId'> = {
+  const newPendingLink: Omit<PendingLinkData, 'acceptedBy'> & { coupleId: string } = {
     initiatorUserId: currentUser.uid,
     linkCode: linkCode,
     status: 'pending',
     createdAt: serverTimestamp() as Timestamp,
+    coupleId: pendingCoupleId,
   };
 
   try {
@@ -105,23 +107,34 @@ export const createLink = async (): Promise<string> => {
         throw new Error("Você já está vinculado a alguém. Desvincule primeiro para criar um novo código.");
       }
 
+      // Cria o couple pendente
+      transaction.set(pendingCoupleRef, {
+        initiatorUserId: currentUser.uid,
+        status: 'pending',
+        createdAt: serverTimestamp() as Timestamp,
+        linkCode: linkCode,
+      });
+
+      // Cria o pendingLink
       transaction.set(pendingLinkRef, newPendingLink);
+      
+      // Atualiza o usuário com o linkCode
       transaction.update(userDocRef, { linkCode: linkCode });
     });
-    console.log(`Link pendente criado com sucesso. Código: ${linkCode} para usuário ${currentUser.uid}`);
+    console.log(`✅ Link e couple pendente criados! Código: ${linkCode} | Couple: ${pendingCoupleId}`);
     return linkCode;
   } catch (error) {
-    console.error("Erro ao criar o link pendente no Firestore:", error);
+    console.error("❌ Erro ao criar o link pendente no Firestore:", error);
     if (error instanceof Error) {
-        throw error; // Relança o erro original se for uma instância de Error
+        throw error;
     }
     throw new Error("Falha ao criar o código de vínculo. Tente novamente.");
   }
 };
 
 /**
- * Aceita um código de vínculo e conecta dois usuários em uma única transação atômica.
- * Esta função realiza TODAS as operações necessárias para vincular o casal.
+ * Aceita um código de vínculo entrando no couple pendente já criado.
+ * Atualiza o couple para "completed" e vincula ambos os usuários.
  * @param linkCodeToAccept O código de vínculo inserido pelo Usuário B.
  * @returns Um objeto com o `coupleId` e o `partnerId` (ID do iniciador).
  */
@@ -148,6 +161,11 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
       }
 
       const initiatorUserIdA = pendingLinkData.initiatorUserId;
+      const pendingCoupleId = pendingLinkData.coupleId;
+
+      if (!pendingCoupleId) {
+        throw new Error("Erro interno: Couple pendente não encontrado.");
+      }
 
       if (initiatorUserIdA === currentUserB.uid) {
         throw new Error("Você não pode se vincular consigo mesmo.");
@@ -163,7 +181,6 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
       ]);
 
       if (!userASnap.exists()) {
-        transaction.update(pendingLinkRef, { status: 'expired' });
         throw new Error("O usuário que criou o código não foi encontrado. O código pode ter expirado.");
       }
       if (!userBSnap.exists()) {
@@ -174,17 +191,16 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
       const userDataB = userBSnap.data() as UserLinkStatus;
 
       if (userDataA.coupleId || userDataA.partnerId) {
-        transaction.update(pendingLinkRef, { status: 'cancelled_initiator_linked' });
         throw new Error("O usuário que criou o código já está vinculado a outra pessoa.");
       }
       if (userDataB.coupleId || userDataB.partnerId) {
         throw new Error("Você já está vinculado a outra pessoa. Desvincule primeiro.");
       }
 
-      // 3. Criar o documento do casal
+      // 3. Criar o documento FINAL do casal (substitui o pendente)
       const sortedIds = [initiatorUserIdA, currentUserB.uid].sort();
-      const newCoupleId = sortedIds.join('_');
-      const newCoupleRef = doc(db, 'couples', newCoupleId);
+      const finalCoupleId = sortedIds.join('_');
+      const finalCoupleRef = doc(db, 'couples', finalCoupleId);
 
       const coupleDocData: CoupleData = {
         members: sortedIds as [string, string],
@@ -194,24 +210,28 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
           [sortedIds[1]]: '▲',
         },
       };
-      transaction.set(newCoupleRef, coupleDocData);
+      transaction.set(finalCoupleRef, coupleDocData);
 
-      // 4. Atualizar AMBOS os usuários atomicamente
+      // 4. Deletar o couple pendente
+      const pendingCoupleRef = doc(db, 'couples', pendingCoupleId);
+      transaction.delete(pendingCoupleRef);
+
+      // 5. Atualizar AMBOS os usuários atomicamente
       transaction.update(userARef, {
         partnerId: currentUserB.uid,
-        coupleId: newCoupleId,
+        coupleId: finalCoupleId,
         linkCode: null, // Limpa o código do iniciador
       });
 
       transaction.update(userBRef, {
         partnerId: initiatorUserIdA,
-        coupleId: newCoupleId,
+        coupleId: finalCoupleId,
       });
 
-      // 5. Remover o pendingLink (processo completo)
+      // 6. Remover o pendingLink (processo completo)
       transaction.delete(pendingLinkRef);
       
-      return { coupleId: newCoupleId, partnerId: initiatorUserIdA };
+      return { coupleId: finalCoupleId, partnerId: initiatorUserIdA };
     });
 
     console.log(`✅ Vínculo completo! Casal ${result.coupleId} criado entre ${currentUserB.uid} e ${result.partnerId}.`);
@@ -223,7 +243,8 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
 };
 
 /**
- * Desvincula dois usuários e remove o documento do casal em uma única operação atômica.
+ * Desvincula dois usuários e remove o documento do casal.
+ * Usa transação para garantir atomicidade.
  * @param userId O ID do usuário que está iniciando a desvinculação.
  * @param partnerId O ID do parceiro.
  * @param coupleId O ID do casal a ser removido.
@@ -238,34 +259,41 @@ export const unlinkCouple = async (
     throw new Error("Usuário não autenticado ou operação não autorizada.");
   }
 
-  const batch: WriteBatch = writeBatch(db);
-
   try {
-    // Campos a serem resetados em ambos os usuários
-    const resetData = {
-      partnerId: null,
-      coupleId: null,
-      seenCards: [],
-      conexaoAccepted: 0,
-      conexaoRejected: 0,
-      userCreatedCards: [],
-      linkCode: null,
-      matchedCards: [],
-    };
+    await runTransaction(db, async (transaction: Transaction) => {
+      const coupleRef = doc(db, 'couples', coupleId);
+      const userARef = doc(db, 'users', userId);
+      const userBRef = doc(db, 'users', partnerId);
 
-    // 1. Atualizar Usuário A (atual)
-    const userARef = doc(db, 'users', userId);
-    batch.update(userARef, resetData);
+      // Verifica se o couple existe e se o usuário é membro
+      const coupleSnap = await transaction.get(coupleRef);
+      if (!coupleSnap.exists()) {
+        throw new Error("Casal não encontrado.");
+      }
 
-    // 2. Atualizar Usuário B (parceiro)
-    const userBRef = doc(db, 'users', partnerId);
-    batch.update(userBRef, resetData);
+      const coupleData = coupleSnap.data();
+      if (!coupleData.members || !coupleData.members.includes(userId)) {
+        throw new Error("Você não é membro deste casal.");
+      }
 
-    // 3. Deletar documento do casal
-    const coupleRef = doc(db, 'couples', coupleId);
-    batch.delete(coupleRef);
+      // Campos a serem resetados em ambos os usuários
+      const resetData = {
+        partnerId: null,
+        coupleId: null,
+        seenCards: [],
+        conexaoAccepted: 0,
+        conexaoRejected: 0,
+        userCreatedCards: [],
+        linkCode: null,
+        matchedCards: [],
+      };
 
-    await batch.commit();
+      // Atualiza ambos usuários e deleta o couple em uma transação
+      transaction.update(userARef, resetData);
+      transaction.update(userBRef, resetData);
+      transaction.delete(coupleRef);
+    });
+
     console.log(`✅ Desvinculação completa! Casal ${coupleId} removido. Usuários ${userId} e ${partnerId} resetados.`);
   } catch (error) {
     console.error(`❌ Erro ao desvincular casal ${coupleId}:`, error);

@@ -175,15 +175,13 @@ export const acceptLink = async (
 
     // 5. Completar Couple (adicionar 2º membro)
     tx.update(coupleRef, {
-      status: 'completed',
-      members: [couple.initiatorId, user.uid],
-      memberSymbols: {
+        status: 'completed',
+        members: [couple.initiatorId, user.uid],
+        memberSymbols: {
         [couple.initiatorId]: '★',
         [user.uid]: '▲'
-      }
-    });
-
-    // 6. Deletar pendingLink
+        }
+      });    // 6. Deletar pendingLink
     tx.delete(pendingLinkRef);
 
     console.log(`✅ Vínculo completo! Couple: ${coupleId}`);

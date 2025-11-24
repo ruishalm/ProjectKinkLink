@@ -184,13 +184,8 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
       const finalCoupleId = sortedIds.join('_');
       const finalCoupleRef = doc(db, 'couples', finalCoupleId);
 
-      // Verificar se já existe (de tentativa anterior) e deletar
-      const existingCoupleSnap = await transaction.get(finalCoupleRef);
-      if (existingCoupleSnap.exists()) {
-        console.warn('⚠️  Couple já existe! Deletando para recriar...');
-        transaction.delete(finalCoupleRef);
-      }
-
+      // Usar set() diretamente - se já existir de tentativa anterior, sobrescreve
+      // Não fazemos transaction.get() porque precisaríamos de permissão de leitura
       const coupleDocData: CoupleData = {
         members: sortedIds as [string, string],
         createdAt: serverTimestamp() as Timestamp,

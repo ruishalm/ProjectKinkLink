@@ -17,16 +17,30 @@ const LinkCouplePage: React.FC = () => {
   const [isUnlinking, setIsUnlinking] = useState(false);
 
   useEffect(() => {
-    if (user && user.partnerId && !partnerInfo) { // MODIFICADO: user.linkedPartnerId para user.partnerId
+    if (user && user.coupleId && !partnerInfo) {
       const fetchPartnerInfo = async () => {
         try {
-          const partnerDocRef = doc(db, 'users', user.partnerId!); // MODIFICADO: user.linkedPartnerId para user.partnerId
-          const partnerDocSnap = await getDoc(partnerDocRef);
-          if (partnerDocSnap.exists()) {
-            const partnerData = partnerDocSnap.data() as User;
-            setPartnerInfo({ username: partnerData.username, email: partnerData.email });
+          // Buscar couple para pegar o partnerId
+          const coupleDocRef = doc(db, 'couples', user.coupleId!);
+          const coupleDocSnap = await getDoc(coupleDocRef);
+          
+          if (coupleDocSnap.exists()) {
+            const coupleData = coupleDocSnap.data();
+            const partnerId = coupleData.members.find((id: string) => id !== user.id);
+            
+            if (partnerId) {
+              const partnerDocRef = doc(db, 'users', partnerId);
+              const partnerDocSnap = await getDoc(partnerDocRef);
+              if (partnerDocSnap.exists()) {
+                const partnerData = partnerDocSnap.data() as User;
+                setPartnerInfo({ username: partnerData.username, email: partnerData.email });
+              } else {
+                console.warn("Documento do parceiro não encontrado.");
+                setPartnerInfo({ username: "Parceiro(a) não encontrado(a)" });
+              }
+            }
           } else {
-            console.warn("Documento do parceiro não encontrado.");
+            console.warn("Documento do couple não encontrado.");
             setPartnerInfo({ username: "Parceiro(a) não encontrado(a)" });
           }
         } catch (error) {
@@ -35,10 +49,10 @@ const LinkCouplePage: React.FC = () => {
         }
       };
       fetchPartnerInfo();
-    } else if (user && !user.partnerId) { // MODIFICADO: user.linkedPartnerId para user.partnerId
+    } else if (user && !user.coupleId) {
       setPartnerInfo(null); // Limpa info do parceiro se desvinculado
     }
-  }, [user, user?.partnerId, partnerInfo]); // MODIFICADO: user.linkedPartnerId para user.partnerId
+  }, [user, user?.coupleId, partnerInfo]);
 
   if (authIsLoading) {
     return <div className={styles.page}><p className={styles.loadingText}>Carregando informações do usuário...</p></div>;
@@ -73,12 +87,12 @@ const LinkCouplePage: React.FC = () => {
     }
   };
 
-  if (user.partnerId) { // MODIFICADO: user.linkedPartnerId para user.partnerId
+  if (user.coupleId) {
     return (
       <div className={styles.page}>
         <main className={`${styles.mainContent} klnkl-themed-panel`}> {/* Envolve o conteúdo principal */}
           <h1 className={styles.title}>Você já está Vinculado!</h1>
-          <p className={styles.partnerInfoText}>Seu parceiro(a) é: {partnerInfo?.username || partnerInfo?.email || user.partnerId.substring(0, 8) + "..."}</p> {/* MODIFICADO: user.linkedPartnerId para user.partnerId */}
+          <p className={styles.partnerInfoText}>Seu parceiro(a) é: {partnerInfo?.username || partnerInfo?.email || '...'}</p>
           <p className={styles.subText}>Agora vocês podem começar a usar o KinkLink juntos!</p>
           <button 
             onClick={() => {

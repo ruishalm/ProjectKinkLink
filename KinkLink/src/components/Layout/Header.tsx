@@ -34,8 +34,12 @@ const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOp
       {/* NOVO: Indicador de Símbolo */}
       <div className={styles.userSymbolContainer}>
         {userSymbol && (
-          <div className={styles.userSymbolIndicator}>
-            Você é {userSymbol}
+          <div 
+            className={styles.userSymbolIndicator}
+            title={`Seu símbolo é ${userSymbol}. Este símbolo aparece nas cartas do casal para identificar você.`}
+          >
+            <span className={styles.symbolLabel}>Você</span>
+            <span className={styles.symbolIcon}>{userSymbol}</span>
           </div>
         )}
       </div>
@@ -44,40 +48,33 @@ const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOp
           <button
             onClick={onInstallClick}
             className={`${styles.installButton} ck-theme-button genericButton`}
-            title="Adicionar KinkLink à sua tela inicial"
+            title="Instale o KinkLink como app na sua área de trabalho"
           >
-            Instalar App
-            {/* Você pode adicionar um ícone aqui depois, quando tiver os ícones prontos */}
-            {/* <img src="/icons/install-icon.svg" alt="" className={styles.buttonIcon} /> */}
+            <span className={styles.installIcon}>📱</span>
+            <span className={styles.installText}>Instalar</span>
           </button>
         )}
         {isAuthenticated && ( // Mostrar apenas se o usuário estiver autenticado
-          <div
+          <button
             onClick={(e) => {
               e.stopPropagation();
               onOpenUserTicketsModal(); // <<< CHAMA A FUNÇÃO PARA ABRIR O MODAL
             }}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.stopPropagation();
-                onOpenUserTicketsModal(); // <<< CHAMA A FUNÇÃO PARA ABRIR O MODAL
-              }
-            }}
-            role="button" // Define o papel semântico
-            tabIndex={0}  // Torna o div focável
-            className={`${styles.myTicketsButton} ${styles.iconButton} ck-theme-button genericButton ${hasUnreadTicketResponses ? styles.shakeAnimation : ''}`}
+            className={`${styles.myTicketsButton} ck-theme-button genericButton ${hasUnreadTicketResponses ? styles.shakeAnimation : ''}`}
             title="Meus Chamados"
           >
-            ✉️
+            <span className={styles.ticketIcon}>✉️</span>
             {hasUnreadTicketResponses && <span className={styles.notificationBadge}>!</span>}
-          </div>
+          </button>
         )}
         {/* Adicionada a classe global ck-theme-button para aplicar o estilo do tema */}
         <button
           onClick={onOpenFeedbackModal} // Chama a função para abrir o modal
           className={`${styles.feedbackButton} ck-theme-button genericButton`} // Pode renomear a classe se quiser
+          title="Reportar um problema ou bug"
         >
-          Reportar erro
+          <span className={styles.feedbackIcon}>🐛</span>
+          <span className={styles.feedbackText}>Reportar</span>
         </button>
       </div>
     </header>

@@ -72,18 +72,35 @@ Inicia um servidor local para pré-visualizar a build de produção contida na p
 ## Funcionalidades Principais (MVP)
 
 * Autenticação de usuários via Firebase (Email/Senha, Google, Facebook).
-* Vinculação de contas entre parceiros usando um código único temporário.
+* **Vinculação de contas v4.0:** Sistema revolucionário de conexão entre parceiros
+  - Código de 6 caracteres (A-Z, 0-9)
+  - Couple criado instantaneamente pelo iniciador (status pending)
+  - Cada usuário edita apenas seu próprio documento (zero problemas de permissão)
+  - IDs aleatórios (não concatenação de UIDs)
+  - Coleção `pendingLinks` para códigos temporários
 * Visualização e interação (swipe/botões) com cartas pré-definidas e personalizadas.
 * Cartas especiais de "Conexão" que não geram matches, mas registram interações para o casal.
 * Criação de cartas personalizadas pelo casal, visíveis apenas para eles.
 * Detecção de "match" quando ambos os parceiros curtem a mesma carta (exceto "Conexão").
 * Lista de matches compartilhada.
 * Chat interno para cada match, com persistência de mensagens no Firestore.
-* Desvinculação de contas.
+* Desvinculação de contas (simplificada - apenas coupleId necessário).
 * Tela de perfil básica com opção de troca de tema.
 * Aviso de conteúdo NSFW.
 * Notificações Push para novos matches, mensagens e outras atividades.
 * Sistema de Temas/Skins para personalização da interface.
+
+## Arquitetura v4.0 (Novembro 2024)
+
+**Mudança Fundamental:** Removido campo `partnerId` dos documentos de usuário. Informação de parceiro obtida dinamicamente da coleção `couples` através do campo `coupleId`.
+
+**Benefícios:**
+- ✅ Sem loops de permissão (cada user edita só seu documento)
+- ✅ Regras Firestore simplificadas
+- ✅ Menos redundância (partnerId era duplicação)
+- ✅ Atomicidade garantida com transações
+
+Veja `docs/architecture/04-couple-connection-flow.md` para detalhes completos.
 
 ## Próximos Passos (Desenvolvimento)
 

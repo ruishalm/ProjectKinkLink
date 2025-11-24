@@ -33,7 +33,24 @@ O KinkLink utiliza o **Firebase Authentication** para gerenciar todas as operaç
     *   **Falha:** Se o e-mail já existir, a senha for fraca (conforme políticas do Firebase), ou ocorrer outro erro, o Firebase retorna um erro.
 5.  **Atualização do Perfil Firebase e Criação de Documento no Firestore:**
     *   Após o sucesso da criação do usuário no Firebase Authentication, a função `updateProfile` do Firebase Auth é chamada para definir o `displayName` do usuário com o `username` fornecido.
-    *   Um documento correspondente é criado na coleção `users` do Firestore, usando o UID como ID do documento. Este documento armazena informações adicionais do perfil, incluindo `email`, `username`, `birthDate`, `sex`, `gender`, `linkCode` (gerado aleatoriamente), `linkedPartnerId` (inicialmente `null`), `coupleId` (inicialmente `null`), `seenCards` (array vazio), `conexaoAccepted` (0), `conexaoRejected` (0), `unlockedSkinIds` (array com IDs de skins padrão) e `createdAt` (timestamp).
+    *   Um documento correspondente é criado na coleção `users` do Firestore, usando o UID como ID do documento. 
+    
+    **Campos inicializados (v4.0):**
+    - `email`: E-mail do usuário
+    - `username`: Nome de usuário escolhido
+    - `birthDate`: Data de nascimento
+    - `sex`: Sexo atribuído ao nascer
+    - `gender`: Identidade de gênero
+    - `coupleId`: **`null`** (será preenchido quando vincular)
+    - `seenCards`: `[]` (array vazio)
+    - `conexaoAccepted`: `0`
+    - `conexaoRejected`: `0`
+    - `unlockedSkinIds`: Array com IDs de skins padrão
+    - `createdAt`: Timestamp
+    
+    **Campos REMOVIDOS na v4.0:**
+    - ❌ `linkCode` - Movido para coleção `pendingLinks` (criado sob demanda)
+    - ❌ `linkedPartnerId` - Redundante, info vem de `couples.members`
 6.  **Atualização do Estado no Frontend:** O `AuthContext` é atualizado com os dados do novo usuário autenticado, incluindo o `username`.
 7.  **Redirecionamento:** O usuário é geralmente redirecionado para a `ProfilePage` ou para a tela principal do aplicativo.
 

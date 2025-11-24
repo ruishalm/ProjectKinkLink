@@ -60,8 +60,8 @@ interface CoupleData {
 
 
 /**
- * Cria um novo link pendente E um couple pendente para o usuário atual.
- * O couple já é criado com status "pending" e será completado quando alguém aceitar.
+ * Cria um novo link pendente para o usuário atual.
+ * O couple será criado apenas quando alguém aceitar o código.
  * @returns O linkCode gerado.
  * @throws Erro se o usuário não estiver autenticado ou já estiver vinculado.
  */
@@ -81,17 +81,12 @@ export const createLink = async (): Promise<string> => {
 
   const linkCode = generateLinkCode();
   const pendingLinkRef = doc(db, 'pendingLinks', linkCode);
-  
-  // Cria o couple pendente com ID temporário
-  const pendingCoupleId = `PENDING_${currentUser.uid}_${Date.now()}`;
-  const pendingCoupleRef = doc(db, 'couples', pendingCoupleId);
 
-  const newPendingLink: Omit<PendingLinkData, 'acceptedBy'> & { coupleId: string } = {
+  const newPendingLink: Omit<PendingLinkData, 'acceptedBy' | 'coupleId'> = {
     initiatorUserId: currentUser.uid,
     linkCode: linkCode,
     status: 'pending',
     createdAt: serverTimestamp() as Timestamp,
-    coupleId: pendingCoupleId,
   };
 
   try {
@@ -107,21 +102,13 @@ export const createLink = async (): Promise<string> => {
         throw new Error("Você já está vinculado a alguém. Desvincule primeiro para criar um novo código.");
       }
 
-      // Cria o couple pendente
-      transaction.set(pendingCoupleRef, {
-        initiatorUserId: currentUser.uid,
-        status: 'pending',
-        createdAt: serverTimestamp() as Timestamp,
-        linkCode: linkCode,
-      });
-
-      // Cria o pendingLink
+      // Cria apenas o pendingLink
       transaction.set(pendingLinkRef, newPendingLink);
       
       // Atualiza o usuário com o linkCode
       transaction.update(userDocRef, { linkCode: linkCode });
     });
-    console.log(`✅ Link e couple pendente criados! Código: ${linkCode} | Couple: ${pendingCoupleId}`);
+    console.log(`✅ Link pendente criado! Código: ${linkCode}`);
     return linkCode;
   } catch (error) {
     console.error("❌ Erro ao criar o link pendente no Firestore:", error);
@@ -133,8 +120,8 @@ export const createLink = async (): Promise<string> => {
 };
 
 /**
- * Aceita um código de vínculo entrando no couple pendente já criado.
- * Atualiza o couple para "completed" e vincula ambos os usuários.
+ * Aceita um código de vínculo e conecta dois usuários em uma única transação atômica.
+ * Cria o couple e atualiza ambos os usuários de uma vez.
  * @param linkCodeToAccept O código de vínculo inserido pelo Usuário B.
  * @returns Um objeto com o `coupleId` e o `partnerId` (ID do iniciador).
  */
@@ -161,11 +148,6 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
       }
 
       const initiatorUserIdA = pendingLinkData.initiatorUserId;
-      const pendingCoupleId = pendingLinkData.coupleId;
-
-      if (!pendingCoupleId) {
-        throw new Error("Erro interno: Couple pendente não encontrado.");
-      }
 
       if (initiatorUserIdA === currentUserB.uid) {
         throw new Error("Você não pode se vincular consigo mesmo.");
@@ -197,7 +179,7 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
         throw new Error("Você já está vinculado a outra pessoa. Desvincule primeiro.");
       }
 
-      // 3. Criar o documento FINAL do casal (substitui o pendente)
+      // 3. Criar o documento do casal
       const sortedIds = [initiatorUserIdA, currentUserB.uid].sort();
       const finalCoupleId = sortedIds.join('_');
       const finalCoupleRef = doc(db, 'couples', finalCoupleId);
@@ -212,11 +194,7 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
       };
       transaction.set(finalCoupleRef, coupleDocData);
 
-      // 4. Deletar o couple pendente
-      const pendingCoupleRef = doc(db, 'couples', pendingCoupleId);
-      transaction.delete(pendingCoupleRef);
-
-      // 5. Atualizar AMBOS os usuários atomicamente
+      // 4. Atualizar AMBOS os usuários atomicamente
       transaction.update(userARef, {
         partnerId: currentUserB.uid,
         coupleId: finalCoupleId,
@@ -228,7 +206,7 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
         coupleId: finalCoupleId,
       });
 
-      // 6. Remover o pendingLink (processo completo)
+      // 5. Remover o pendingLink (processo completo)
       transaction.delete(pendingLinkRef);
       
       return { coupleId: finalCoupleId, partnerId: initiatorUserIdA };

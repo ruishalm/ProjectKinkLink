@@ -1,23 +1,22 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\services\linkService.ts
 /**
- * ⚡ REFATORADO: Sistema de Vínculos Simplificado (v2.0)
+ * 🔥 SISTEMA DE VÍNCULOS - RECRIADO
  * 
- * MUDANÇAS PRINCIPAIS:
- * - acceptLink() agora é TOTALMENTE atômico (1 transação faz tudo)
- * - completeLinkForInitiator() REMOVIDO (não é mais necessário)
- * - unlinkCouple() ADICIONADO para desvinculação atômica
+ * LÓGICA SIMPLIFICADA:
+ * 1. createLink() - Cria apenas pendingLink
+ * 2. acceptLink() - 1 transação atômica cria TUDO
  * 
- * BENEFÍCIOS:
- * - Sem estados intermediários inconsistentes
- * - Sem listeners adicionais necessários
- * - -66% operações Firestore
- * - Mais rápido e confiável
+ * ORDEM DA TRANSAÇÃO:
+ * 1. Valida pendingLink + users
+ * 2. Atualiza User A (adiciona coupleId)
+ * 3. Atualiza User B (adiciona coupleId)
+ * 4. Cria Couple (agora users já têm coupleId)
+ * 5. Deleta pendingLink
  * 
- * Data: 24/11/2025
+ * Data: 24/11/2025 - v3.0
  */
 import {
   doc,
-  getDoc,
   Timestamp,
   runTransaction,
   serverTimestamp,
@@ -72,13 +71,6 @@ export const createLink = async (): Promise<string> => {
   }
 
   const userDocRef = doc(db, 'users', currentUser.uid);
-
-  // Verificação inicial fora da transação para feedback rápido.
-  const initialUserDocSnap = await getDoc(userDocRef);
-  if (initialUserDocSnap.exists() && (initialUserDocSnap.data().coupleId || initialUserDocSnap.data().partnerId)) {
-      throw new Error("Você já está vinculado a alguém. Desvincule primeiro para criar um novo código.");
-  }
-
   const linkCode = generateLinkCode();
   const pendingLinkRef = doc(db, 'pendingLinks', linkCode);
 
@@ -135,13 +127,16 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
   const pendingLinkRef = doc(db, 'pendingLinks', normalizedCode);
 
   try {
+    console.log(`🔄 Iniciando acceptLink para código: ${normalizedCode}`);
+    
     const result = await runTransaction(db, async (transaction: Transaction) => {
-      // 1. Buscar e validar o pendingLink
+      console.log('📋 PASSO 1: Buscando pendingLink...');
       const pendingLinkSnap = await transaction.get(pendingLinkRef);
       if (!pendingLinkSnap.exists()) {
         throw new Error("Código de vínculo inválido ou não encontrado.");
       }
       const pendingLinkData = pendingLinkSnap.data() as PendingLinkData;
+      console.log('✅ PendingLink encontrado:', pendingLinkData);
 
       if (pendingLinkData.status !== 'pending') {
         throw new Error("Este código de vínculo já foi usado, expirou ou foi cancelado.");
@@ -154,6 +149,7 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
       }
 
       // 2. Buscar e validar ambos os usuários
+      console.log('📋 PASSO 2: Buscando users...');
       const userARef = doc(db, 'users', initiatorUserIdA);
       const userBRef = doc(db, 'users', currentUserB.uid);
 
@@ -161,6 +157,7 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
         transaction.get(userARef),
         transaction.get(userBRef)
       ]);
+      console.log('✅ Users encontrados');
 
       if (!userASnap.exists()) {
         throw new Error("O usuário que criou o código não foi encontrado. O código pode ter expirado.");
@@ -179,24 +176,30 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
         throw new Error("Você já está vinculado a outra pessoa. Desvincule primeiro.");
       }
 
-      // 3. Definir o coupleId (mas NÃO criar o documento ainda)
+      // 3. Definir o coupleId
       const sortedIds = [initiatorUserIdA, currentUserB.uid].sort();
       const finalCoupleId = sortedIds.join('_');
+      console.log(`📋 PASSO 3: CoupleId definido: ${finalCoupleId}`);
 
-      // 4. PRIMEIRO: Atualizar AMBOS os usuários com partnerId e coupleId
-      // Isso permite que a regra isUserDocumentLinkedToThisCouple() funcione
+      // 4. PRIMEIRO: Atualizar User A
+      console.log('📋 PASSO 4: Atualizando User A...');
       transaction.update(userARef, {
         partnerId: currentUserB.uid,
         coupleId: finalCoupleId,
-        linkCode: null, // Limpa o código do iniciador
+        linkCode: null,
       });
+      console.log('✅ User A atualizado');
 
+      // 5. SEGUNDO: Atualizar User B
+      console.log('📋 PASSO 5: Atualizando User B...');
       transaction.update(userBRef, {
         partnerId: initiatorUserIdA,
         coupleId: finalCoupleId,
       });
+      console.log('✅ User B atualizado');
 
-      // 5. DEPOIS: Criar o documento do casal (agora os users já têm coupleId)
+      // 6. TERCEIRO: Criar Couple (users já têm coupleId agora)
+      console.log('📋 PASSO 6: Criando couple...');
       const finalCoupleRef = doc(db, 'couples', finalCoupleId);
       const coupleDocData: CoupleData = {
         members: sortedIds as [string, string],
@@ -207,9 +210,12 @@ export const acceptLink = async (linkCodeToAccept: string): Promise<{ coupleId: 
         },
       };
       transaction.set(finalCoupleRef, coupleDocData);
+      console.log('✅ Couple criado');
 
-      // 6. Por último: Remover o pendingLink (processo completo)
+      // 7. POR ÚLTIMO: Deletar pendingLink
+      console.log('📋 PASSO 7: Deletando pendingLink...');
       transaction.delete(pendingLinkRef);
+      console.log('✅ PendingLink deletado');
       
       return { coupleId: finalCoupleId, partnerId: initiatorUserIdA };
     });

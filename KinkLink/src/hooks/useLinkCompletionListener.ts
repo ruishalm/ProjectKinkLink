@@ -98,26 +98,37 @@ export const useLinkCompletionListener = (
 
   // 3. OUVIR os dados do casal (onSnapshot é a chave para o bug do loop)
   useEffect(() => {
-    if (!user?.coupleId) {
+    // Só ativa o listener se o usuário estiver vinculado (tem partnerId E coupleId)
+    if (!user?.coupleId || !user?.partnerId) {
       setLocalCoupleData(null);
       return;
     }
 
     const coupleDocRef = doc(db, 'couples', user.coupleId);
     
-    const unsubscribe = onSnapshot(coupleDocRef, (docSnap) => {
-      if (docSnap.exists()) {
-        setLocalCoupleData({
-          id: docSnap.id,
-          ...docSnap.data(),
-        } as CoupleData);
-      } else {
+    const unsubscribe = onSnapshot(
+      coupleDocRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          setLocalCoupleData({
+            id: docSnap.id,
+            ...docSnap.data(),
+          } as CoupleData);
+        } else {
+          setLocalCoupleData(null);
+        }
+      },
+      (error) => {
+        // Ignora erros de permissão se o couple ainda não existe
+        if (error.code !== 'permission-denied') {
+          console.error('[useLinkCompletionListener] Erro ao escutar couple:', error);
+        }
         setLocalCoupleData(null);
       }
-    });
+    );
 
     return () => unsubscribe(); // Limpa o listener
-  }, [user?.coupleId]);
+  }, [user?.coupleId, user?.partnerId]);
 
   // 4. Efeito de processamento (com a lógica de filtro anti-loop)
   useEffect(() => {

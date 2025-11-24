@@ -18,7 +18,7 @@ const LinkedRoute: React.FC = () => {
   }
 
   // Se estiver logado, mas não vinculado, redireciona para a página de vinculação
-  if (!user.partnerId) { // MODIFICADO: user.linkedPartnerId para user.partnerId
+  if (!user.coupleId) {
     return <Navigate to="/link-couple" state={{ from: location }} replace />;
   }
 

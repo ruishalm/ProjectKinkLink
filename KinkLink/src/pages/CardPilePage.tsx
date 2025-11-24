@@ -127,8 +127,8 @@ function CardPilePage() {
 
   // <<< NOVO: Listener para "Like do Parceiro"
   useEffect(() => {
-    if (!user?.coupleId || !user.partnerId) {
-      return; // Sai se não houver casal ou parceiro
+    if (!user?.coupleId) {
+      return; // Sai se não houver casal
     }
 
     const interactionsRef = collection(db, `couples/${user.coupleId}/likedInteractions`);

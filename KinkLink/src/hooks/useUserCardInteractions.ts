@@ -343,8 +343,8 @@ export function useUserCardInteractions() {
     intensity?: number,
     isCreatorSuggestion?: boolean
   ) => {
-    if (!user || !user.id || !text.trim() || !user.coupleId || !user.partnerId) { // MODIFICADO AQUI
-      console.warn("Tentativa de criar carta sem usuário, texto, coupleId ou parceiro vinculado.");
+    if (!user || !user.id || !text.trim() || !user.coupleId) {
+      console.warn("Tentativa de criar carta sem usuário, texto ou coupleId.");
       return;
     }
 

@@ -7,11 +7,6 @@
   overflow: hidden; /* Garante que a bolinha não vaze se for posicionada ligeiramente fora */
 }
 
-.unreadMatch .cardItemWrapper { 
-  /* Estilos para o wrapper quando a carta tem mensagens não lidas.
-     Você pode adicionar um brilho ou borda aqui se quiser um destaque extra. */
-}
-
 .unreadIndicator {
   position: absolute; /* Posiciona a bolinha em relação ao .cardItemWrapper */
   top: 0px; /* Alinha com a borda superior */
@@ -43,4 +38,26 @@
   z-index: 1; /* Garante que o snippet fique acima da carta */
   text-align: left; 
   box-sizing: border-box; 
+}
+
+/* Indicador de "Hot" para cartas completadas */
+.completedHotIndicator {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  font-size: 1.2em;
+  z-index: 10;
+  filter: drop-shadow(0 0 3px rgba(255, 107, 107, 0.8));
+  animation: pulseHot 2s ease-in-out infinite;
+}
+
+@keyframes pulseHot {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 3px rgba(255, 107, 107, 0.8));
+  }
+  50% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 6px rgba(255, 107, 107, 1));
+  }
 }

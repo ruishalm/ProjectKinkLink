@@ -240,19 +240,24 @@ export const onNewMatch = onDocumentWritten(
       const notificationTitle = "Novo Link! 🔗";
       const notificationBody = `Você e ${completadorUsername} têm um novo Link!🔗 numa carta de ${cardCategoryForNotification}.`;
 
-      // Usar a função sendNotificationToUser
-      await sendNotificationToUser(
-        pioneerUID,
-        notificationTitle,
-        notificationBody,
-        { // data payload
-          type: "match_notification",
-          coupleId: event.params.coupleId,
-          cardId: event.params.cardId,
-          url: `/matches#card-${event.params.cardId}`
-        }
-        // iconUrl e targetUrlBase usarão os padrões definidos em sendNotificationToUser
-      );
+      // Usar a função sendNotificationToUser com tratamento de erro
+      try {
+        await sendNotificationToUser(
+          pioneerUID,
+          notificationTitle,
+          notificationBody,
+          { // data payload
+            type: "match_notification",
+            coupleId: event.params.coupleId,
+            cardId: event.params.cardId,
+            url: `/matches#card-${event.params.cardId}`
+          }
+          // iconUrl e targetUrlBase usarão os padrões definidos em sendNotificationToUser
+        );
+        logger.info(`Match notification sent successfully to user ${pioneerUID} for card ${event.params.cardId}`);
+      } catch (error) {
+        logger.error(`Failed to send match notification to user ${pioneerUID} for card ${event.params.cardId}:`, error);
+      }
 
       // ✅ PROTEÇÃO: Marca que a notificação foi enviada para evitar duplicatas
       try {
@@ -568,20 +573,40 @@ export const onNewChatMessage = onDocumentWritten(
       logger.error("Error fetching sender's username:", error);
     }
 
+    // Verifica se o destinatário está com o chat aberto antes de enviar notificação
+    try {
+      const recipientDoc = await db.doc(`users/${recipientId}`).get();
+      const recipientData = recipientDoc.data();
+      
+      // Se o destinatário está com este chat aberto, não envia notificação
+      if (recipientData?.activeChatCardId === cardId) {
+        logger.info(`Recipient ${recipientId} has chat ${cardId} open. Skipping notification.`);
+        return;
+      }
+    } catch (error) {
+      logger.error(`Error checking recipient's active chat for user ${recipientId}:`, error);
+      // Continua para enviar a notificação mesmo se a verificação falhar
+    }
+
     const notificationTitle = `Nova mensagem de ${senderUsername}`;
     const notificationBody = `"${messageText.substring(0, 80)}${messageText.length > 80 ? "..." : ""}"`;
 
-    await sendNotificationToUser(
-      recipientId,
-      notificationTitle,
-      notificationBody,
-      {
-        type: "chat_message",
-        coupleId: coupleId,
-        cardId: cardId,
-        url: `/matches#card-${cardId}`,
-      }
-    );
+    try {
+      await sendNotificationToUser(
+        recipientId,
+        notificationTitle,
+        notificationBody,
+        {
+          type: "chat_message",
+          coupleId: coupleId,
+          cardId: cardId,
+          url: `/matches#card-${cardId}`,
+        }
+      );
+      logger.info(`Chat message notification sent successfully to user ${recipientId} for card ${cardId}`);
+    } catch (error) {
+      logger.error(`Failed to send chat message notification to user ${recipientId} for card ${cardId}:`, error);
+    }
   }
 );
 

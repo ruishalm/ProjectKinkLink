@@ -25,9 +25,10 @@ interface CategoryCarouselProps {
   onToggleHot: (cardId: string, event: React.MouseEvent) => void; // <<< ADICIONADO
   cardChatsData: CoupleCardChats; // Dados dos chats para verificar novas mensagens
   userLastVisitedMatchesPage?: Timestamp; // Timestamp da última visita do usuário
+  isCompletedCarousel?: boolean; // Indica se é o carrossel da seção "Realizadas"
 }
 
-const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCardClick, onToggleHot, cardChatsData, userLastVisitedMatchesPage }) => {
+const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCardClick, onToggleHot, cardChatsData, userLastVisitedMatchesPage, isCompletedCarousel = false }) => {
   const { user } = useAuth(); // <<< ADICIONADO
 
   // Função auxiliar para determinar o status de notificação de cada carta
@@ -108,6 +109,7 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCar
                   hasNewMessage={getCardNotificationStatus(card).hasNewMessage} // Passa se tem nova mensagem
                   lastMessageSnippet={getCardNotificationStatus(card).hasNewMessage ? cardChatsData[card.id]?.lastMessageTextSnippet : undefined} // Passa o snippet
                   onToggleHot={onToggleHot} // <<< ADICIONADO
+                  isCompletedCard={isCompletedCarousel} // Passa se é seção de completadas
                 />
               </SwiperSlide>
             );

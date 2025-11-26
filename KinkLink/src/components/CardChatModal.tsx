@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useCardChat, type ChatMessage } from '../hooks/useCardChat';
 import { useAuth } from '../contexts/AuthContext';
-import { Timestamp } from 'firebase/firestore'; // <<< ADICIONADO
+import { Timestamp, doc, updateDoc, serverTimestamp } from 'firebase/firestore'; // <<< ADICIONADO
+import { db } from '../firebase'; // <<< ADICIONADO
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
 import styles from './CardChatModal.module.css';
 import chatStyles from './CardChat.module.css';
@@ -62,16 +63,37 @@ function CardChatModal({
     };
   }, [isOpen, onClose]);
 
-  // Efeito para marcar o chat como visto ao abrir
+  // Efeito para marcar o chat como visto ao abrir E registrar que o chat está aberto
   useEffect(() => {
-    if (isOpen && cardId) {
+    if (isOpen && cardId && user?.id && user?.coupleId) {
       // Ao abrir o modal, marca o chat como visto usando a data e hora atuais.
-      // Isso é mais simples e garante que qualquer mensagem vista ao abrir
-      // não será mais notificada.
       const nowAsTimestamp = Timestamp.now();
       markChatAsSeen(cardId, nowAsTimestamp);
+      
+      // Registra no Firestore que este usuário está com o chat aberto
+      // Isso será usado pela Cloud Function para evitar notificações redundantes
+      const userDocRef = doc(db, 'users', user.id);
+      updateDoc(userDocRef, {
+        activeChatCardId: cardId,
+        activeChatTimestamp: serverTimestamp()
+      }).catch(err => {
+        console.error('[CardChatModal] Erro ao atualizar activeChatCardId:', err);
+      });
     }
-  }, [isOpen, cardId]);
+    
+    // Cleanup: Remove o registro quando o modal é fechado
+    return () => {
+      if (cardId && user?.id) {
+        const userDocRef = doc(db, 'users', user.id);
+        updateDoc(userDocRef, {
+          activeChatCardId: null,
+          activeChatTimestamp: null
+        }).catch(err => {
+          console.error('[CardChatModal] Erro ao limpar activeChatCardId:', err);
+        });
+      }
+    };
+  }, [isOpen, cardId, user?.id, user?.coupleId]);
 
 
   const scrollToBottom = () => {

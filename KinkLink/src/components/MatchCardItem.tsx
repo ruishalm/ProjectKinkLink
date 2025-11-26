@@ -48,6 +48,10 @@ const MatchCardItem: React.FC<MatchCardItemProps> = ({
     >
       {/* Indicador de "Novo" ou "Não Lido" */}
       {(isNewMatch || hasNewMessage) && <div className={styles.unreadIndicator}></div>}
+      
+      {/* Indicador de "Hot" para cartas completadas */}
+      {isCompletedCard && isHot && <div className={styles.completedHotIndicator}>🔥</div>}
+      
       <PlayingCard
         data={safeCardData}
         targetWidth={cardWidth}

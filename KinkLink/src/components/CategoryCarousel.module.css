@@ -49,6 +49,8 @@
   position: relative;
   width: 100%;
   min-height: 200px;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* Define um z-index base para todos os slides do Swiper */

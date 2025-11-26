@@ -80,13 +80,9 @@ export function useUserCardInteractions() {
 
     const unsubscribeFromMatchListener = onSnapshot(likesQuery, (querySnapshot) => {
       try {
-        // Ignora snapshots que são apenas writes locais (evita loop por writes do próprio cliente)
-        const docChanges = querySnapshot.docChanges();
-        const allLocalWrites = docChanges.length > 0 && docChanges.every(ch => ch.doc.metadata.hasPendingWrites);
-        if (allLocalWrites) {
-          console.log("[SubcollectionListener] Ignorando snapshot composto apenas por writes locais.");
-          return;
-        }
+        // NÃO ignora writes locais - eles são importantes para atualizar a UI imediatamente
+        // O Firestore vai sincronizar com o servidor depois
+        // (Removido o filtro de allLocalWrites que causava bug no toggleHot)
 
         // Debounce simples: ignora eventos muito próximos
         const now = Date.now();

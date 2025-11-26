@@ -87,20 +87,20 @@ function MatchesPage() {
       return isNewMatch || hasNewMessage;
     });
     setHasUnseenGlobalMatches(anyNew);
+  }, [user?.id, userMatchedCards, cardChatsData, getCardNotificationStatus]);
 
-    // A função de limpeza (cleanup) será executada APENAS quando o componente for desmontado (sair da página).
-    // Isso evita o loop de re-renderização.
-    return () => {
-      if (user?.id) {
-        const userDocRef = doc(db, 'users', user.id);
-        updateDoc(userDocRef, {
-          lastVisitedMatchesPage: serverTimestamp()
-        }).catch(console.error);
-      }
-    };
-    // Removido `user.lastVisitedMatchesPage` das dependências para quebrar o loop.
-    // A atualização do timestamp agora só depende da saída do componente.
-  }, [user?.id, userMatchedCards, cardChatsData]);
+  // Atualiza lastVisitedMatchesPage quando o componente é montado (entra na página)
+  // Não no cleanup para evitar erro de permissão no Strict Mode
+  useEffect(() => {
+    if (user?.id) {
+      const userDocRef = doc(db, 'users', user.id);
+      updateDoc(userDocRef, {
+        lastVisitedMatchesPage: serverTimestamp()
+      }).catch(err => {
+        console.error('[MatchesPage] Erro ao atualizar lastVisitedMatchesPage:', err);
+      });
+    }
+  }, [user?.id]); // Roda apenas quando user.id muda (mount/login)
   
   const handleCardClick = useCallback((card: MatchedCard) => { 
     const cardForModal: PlayingCardDataType = {

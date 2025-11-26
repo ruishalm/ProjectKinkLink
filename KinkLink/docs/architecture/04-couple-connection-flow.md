@@ -1,8 +1,8 @@
-# Fluxo de Conexão de Casal (v4.0)
+# 🔗 Fluxo de Conexão de Casal (v4.0)
 
 Este documento descreve o processo pelo qual dois usuários do KinkLink podem conectar suas contas para formar um casal dentro do aplicativo.
 
-**Versão:** 4.0 (Nova Arquitetura - Novembro 2024)
+**Versão:** 4.0 (Nova Arquitetura - Novembro 2025)
 
 ## 1. Visão Geral
 
@@ -43,10 +43,13 @@ A conexão de casal permite que os usuários compartilhem interações com carta
           status: 'pending',
           initiatorId: userA.uid,
           members: [userA.uid],
-          memberSymbols: { [userA.uid]: '★' },
+          memberSymbols: { 
+            [userA.uid]: Math.random() < 0.5 ? '▲' : '⭐' // Aleatório
+          },
           createdAt: serverTimestamp()
         }
         ```
+        **Nota:** Símbolo do iniciador já é atribuído aleatoriamente na criação
 
 3.  **Atualização do Usuário A:**
     *   Atualiza `users/{userA.uid}`:

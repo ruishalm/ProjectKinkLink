@@ -86,14 +86,26 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
         // Define a intensidade máxima, com um padrão de 8 (mostrar tudo) se não estiver definida no usuário.
         const maxIntensity = user?.maxIntensity ?? 8;
 
-        const standardCardsQuery = query(
-          collection(db, 'cards'),
-          where('intensity', '<=', maxIntensity)
-        );
-        const cardsSnapshot = await getDocs(standardCardsQuery);
-        const fetchedStandardCards = cardsSnapshot.docs.map(d => ({ id: d.id, ...d.data() } as Card));
-        setAllCardsFromDb(fetchedStandardCards);
-        console.log(`[useCardPileLogic] Cartas padrão (até intensidade ${maxIntensity}) carregadas:`, fetchedStandardCards.length);
+        // Carrega TODAS as cartas (sem filtro composto que precisa de índice)
+        const allCardsQuery = query(collection(db, 'cards'));
+        const snapshot = await getDocs(allCardsQuery);
+        
+        // Filtra no JavaScript para evitar índice composto
+        const allCards = snapshot.docs
+          .map(d => ({ id: d.id, ...d.data() } as Card))
+          .filter(card => {
+            // Cartas de conexão: sempre incluir (independente de intensidade)
+            if (card.category === 'conexao') return true;
+            
+            // Outras cartas: respeitar maxIntensity
+            return (card.intensity ?? 0) <= maxIntensity;
+          });
+        
+        const normalCards = allCards.filter(c => c.category !== 'conexao');
+        const conexaoCards = allCards.filter(c => c.category === 'conexao');
+        
+        setAllCardsFromDb(allCards);
+        console.log(`[useCardPileLogic] Cartas carregadas: ${normalCards.length} normais (intensidade ≤${maxIntensity}) + ${conexaoCards.length} conexão (sempre) = ${allCards.length} total`);
       } catch (error) {
         console.error("[useCardPileLogic] Erro ao buscar cartas padrão do Firestore:", error);
         setAllCardsFromDb([]);
@@ -218,11 +230,15 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
   // Combina cartas e separa em "swipable" e "conexao"
   const { swipableCards, allConexaoCards } = useMemo((): { swipableCards: Card[]; allConexaoCards: Card[] } => {
     const combinedSourceCards = [...allCardsFromDb, ...userCreatedCards];
+    console.log(`[useCardPileLogic] 🔄 Separando cartas: ${allCardsFromDb.length} do DB + ${userCreatedCards.length} criadas = ${combinedSourceCards.length} total`);
+    
     const sourceCards = combinedSourceCards.length > 0 ? combinedSourceCards :
       (isLoadingCards ? [{ id: 'loading', text: 'Carregando cartas...', category: 'sensorial' as Card['category'] }]
                       : [{ id: 'fallback', text: 'Nenhuma carta encontrada.', category: 'sensorial' as Card['category'] }]);
     const conexaoResult = sourceCards.filter((card: Card) => card.category === 'conexao');
     const swipableResult = sourceCards.filter((card: Card) => card.category !== 'conexao');
+    
+    console.log(`[useCardPileLogic] 📊 Separadas: ${swipableResult.length} swipable + ${conexaoResult.length} conexão`);
     return { swipableCards: swipableResult, allConexaoCards: conexaoResult };
   }, [allCardsFromDb, userCreatedCards, isLoadingCards]);
 
@@ -238,11 +254,13 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
       setInitialConexaoTriggered(false);
       setLastConexaoMatchTriggerCount(0);
     }
-    setLastConexaoMatchTriggerCount(matchedCards.length);
-  }, [user, conexaoCardsPool, seenCards, matchedCards.length]);
+    // ❌ REMOVIDO: setLastConexaoMatchTriggerCount estava sendo atualizado SEMPRE
+    // Isso fazia com que a condição de trigger nunca fosse verdadeira
+  }, [user, conexaoCardsPool, seenCards, matchedCards.length, initialConexaoTriggered]);
 
   // Inicializa pool de cartas de conexão
   useEffect(() => {
+    console.log(`[useCardPileLogic] 🎴 Pool de conexão atualizado: ${allConexaoCards.length} cartas`);
     setConexaoCardsPool(allConexaoCards);
   }, [allConexaoCards]);
 
@@ -307,7 +325,7 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
     const nextCycleValue = (cardSelectionCycle + 1) % 3;
     console.log(`[useCardPileLogic] 🔄 Ciclo atual: ${cardSelectionCycle} | Próximo ciclo: ${nextCycleValue} ${nextCycleValue === 2 ? '(LIKE PARCEIRO)' : '(ALEATÓRIA)'}`);
     setCardSelectionCycle(nextCycleValue);
-  }, [generalUnseen, isLoadingCards, partnerNewCard, seenCards, user?.coupleId, cardSelectionCycle, partnerLikesQueue, user?.maxIntensity]); // Adicionado user?.maxIntensity
+  }, [generalUnseen, isLoadingCards, partnerNewCard, seenCards, cardSelectionCycle, partnerLikesQueue, user?.maxIntensity]);
 
   // Efeito para selecionar a primeira carta
   useEffect(() => {
@@ -353,6 +371,8 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
 
     // Lógica de Gatilho para cartas "Conexão"
     if (user) {
+      console.log(`[CONEXÃO] 🔍 Debug: initialTriggered=${initialConexaoTriggered}, liked=${liked}, category=${interactedCard.category}, unseenConexao=${unseenConexaoCards.length}`);
+      
       if (!initialConexaoTriggered) {
         if (liked && interactedCard.category !== 'conexao') {
           const newLikesCount = userLikesForInitialConexao + 1;
@@ -371,18 +391,27 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
       } else {
         if (matchOccurredThisInteraction) {
           const currentTotalMatches = matchedCards.length;
-          console.log(`[CONEXÃO] 🔗 Match ocorreu! Total de matches agora: ${currentTotalMatches}. Último trigger em: ${lastConexaoMatchTriggerCount}`);
+          console.log(`[CONEXÃO] 🔗 Match ocorreu! Total: ${currentTotalMatches}, Último trigger: ${lastConexaoMatchTriggerCount}`);
+          console.log(`[CONEXÃO] 🔍 Checando: ${currentTotalMatches} > ${lastConexaoMatchTriggerCount} = ${currentTotalMatches > lastConexaoMatchTriggerCount}`);
+          console.log(`[CONEXÃO] 🔍 Mod 5: ${currentTotalMatches} % 5 = ${currentTotalMatches % 5}`);
+          console.log(`[CONEXÃO] 🔍 Diferença: ${currentTotalMatches - lastConexaoMatchTriggerCount} >= 5 = ${(currentTotalMatches - lastConexaoMatchTriggerCount) >= 5}`);
+          
           if (currentTotalMatches > lastConexaoMatchTriggerCount &&
               (currentTotalMatches % 5 === 0 || (currentTotalMatches - lastConexaoMatchTriggerCount) >= 5)) {
             if (unseenConexaoCards.length > 0) {
               console.log(`[CONEXÃO] 🎉 GATILHO DE MATCHES ATIVADO! Matches: ${currentTotalMatches}. Mostrando carta de conexão.`);
               setCurrentConexaoCardForModal(unseenConexaoCards[0]);
               setShowConexaoModal(true);
+              setLastConexaoMatchTriggerCount(currentTotalMatches);
             } else {
               console.warn(`[CONEXÃO] ⚠️ Gatilho ativado (${currentTotalMatches} matches), mas nenhuma carta de conexão disponível!`);
+              setLastConexaoMatchTriggerCount(currentTotalMatches);
             }
-            setLastConexaoMatchTriggerCount(currentTotalMatches);
+          } else {
+            console.log(`[CONEXÃO] ⏭️ Condições não atendidas, não mostrando modal`);
           }
+        } else {
+          console.log(`[CONEXÃO] ℹ️ Nenhum match ocorreu nesta interação`);
         }
       }
     }

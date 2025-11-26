@@ -27,7 +27,7 @@ export const useCardTips = (currentCard: Card | null) => {
       setActiveLeftTip(newLeftTip);
       setActiveRightTip(newRightTip);
 
-      const fadeInDelay = 5000;
+      const fadeInDelay = 3000; // Reduzido de 5s para 3s
       const timerId = setTimeout(() => {
         setAnimateTipsInState(true);
       }, fadeInDelay);

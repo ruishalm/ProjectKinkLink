@@ -298,12 +298,6 @@ function CardPilePage() {
         {cardForDisplay ? (
           <>
             <div className={styles.cardStackContainer}> {/* REMOVIDO klnkl-themed-panel daqui */}
-               <SideTipMessages
-                leftMessage={activeLeftTip}
-                rightMessage={activeRightTip}
-                animateIn={animateTipsIn}
-                cardWidth={cardDimensions.width}
-              />
               {cardForDisplay && (
                 <div className={styles.staticCardBack}>
                   {/* CardBack estaria dentro do painel */}
@@ -355,6 +349,11 @@ function CardPilePage() {
             {/* Painel para botões de ação da carta e "Criar Kink" */}
             {/* Este painel só aparece se houver cardForDisplay. Adicionada a classe global klnkl-all-buttons-panel */}
             <div className={`${styles.cardActionsPanel} klnkl-all-buttons-panel klnkl-themed-panel`}>
+              <SideTipMessages
+                leftMessage={activeLeftTip}
+                rightMessage={activeRightTip}
+                animateIn={animateTipsIn}
+              />
               <div className={styles.buttonContainer}>
                 <button
                   className={`${styles.dislikeButton} ${styles.botaoDecisao} genericButton dislikeButton actionButton`}
@@ -432,18 +431,6 @@ function CardPilePage() {
         >
           Criar Kink
         </button>
-      </div>
-
-      {/* Contadores de cartas - Sempre visíveis */}
-      {/* Estes contadores também devem estar dentro do painel temático da página */}
-      <div className={`${styles.cardCounters} klnkl-card-counters`}>
-        <span className={`${styles.counterItem} klnkl-counter-item`}>
-          Cartas Vistas: <span className={styles.counterValue}>{seenCards.length}</span>
-        </span>
-        <span className={`${styles.counterSeparator} klnkl-counter-separator`}>|</span>
-        <span className={`${styles.counterItem} klnkl-counter-item`}>
-          Restantes: <span className={styles.counterValue}>{unseenCardsCount}</span>
-        </span>
       </div>
     </div>
   );

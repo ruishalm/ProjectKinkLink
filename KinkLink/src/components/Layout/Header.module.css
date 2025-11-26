@@ -186,9 +186,11 @@
   backdrop-filter: blur(10px);
   box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2),
               inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  cursor: help; /* Mostra que tem tooltip */
+  cursor: pointer; /* Mostra que é clicável */
   transition: all 0.3s ease;
   white-space: nowrap;
+  font-family: inherit;
+  font-size: inherit;
 }
 
 .userSymbolIndicator:hover {
@@ -196,6 +198,11 @@
   box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4),
               inset 0 1px 0 rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 215, 0, 0.5);
+}
+
+.userSymbolIndicator:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(255, 215, 0, 0.3);
 }
 
 .symbolLabel {

@@ -1,7 +1,8 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\Layout\Header.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom'; // useNavigate não é mais necessário aqui para os tickets
 import { useAuth, type UserFeedback } from '../../contexts/AuthContext'; // Adicionado para verificar autenticação e UserFeedback
+import SymbolExplainerModal from '../SymbolExplainerModal';
 import styles from './Header.module.css';
 
 // Supondo que o logo esteja em public/kinklogo.png ou um caminho acessível
@@ -16,6 +17,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOpenFeedbackModal, onOpenUserTicketsModal }) => {
   const { isAuthenticated, user, userSymbol } = useAuth(); // Obter o estado de autenticação, o usuário e o SÍMBOLO
+  const [isSymbolModalOpen, setIsSymbolModalOpen] = useState(false);
 
   // Verifica se há tickets com respostas do admin não lidas (status 'admin_replied')
   const hasUnreadTicketResponses = isAuthenticated && user?.feedbackTickets?.some(
@@ -34,15 +36,22 @@ const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOp
       {/* NOVO: Indicador de Símbolo */}
       <div className={styles.userSymbolContainer}>
         {userSymbol && (
-          <div 
+          <button 
             className={styles.userSymbolIndicator}
-            title={`Seu símbolo é ${userSymbol}. Este símbolo aparece nas cartas do casal para identificar você.`}
+            onClick={() => setIsSymbolModalOpen(true)}
+            title="O que é isso? Clique para entender os símbolos"
           >
             <span className={styles.symbolLabel}>Você</span>
             <span className={styles.symbolIcon}>{userSymbol}</span>
-          </div>
+          </button>
         )}
       </div>
+      
+      {/* Modal Explicador de Símbolos */}
+      <SymbolExplainerModal 
+        isOpen={isSymbolModalOpen} 
+        onClose={() => setIsSymbolModalOpen(false)} 
+      />
       <div className={styles.actionsContainer}> {/* Renomeado para acomodar mais botões */}
         {showInstallButton && (
           <button

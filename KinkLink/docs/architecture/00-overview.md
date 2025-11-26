@@ -1,10 +1,18 @@
-# Visão Geral da Arquitetura do KinkLink
+# 📱 Visão Geral da Arquitetura do KinkLink
+
+> **Versão:** 4.0 | **Última Atualização:** Novembro 2025
 
 Este documento fornece uma visão geral da arquitetura técnica do aplicativo KinkLink, descrevendo seus principais componentes, tecnologias utilizadas e fluxos de dados.
 
 ## 1. Introdução
 
-O KinkLink é um aplicativo interativo projetado para casais, com o objetivo de facilitar a descoberta de novos interesses e fortalecer a conexão através de sugestões de atividades e um sistema de chat integrado. A arquitetura foi pensada para ser escalável, utilizando tecnologias modernas e serviços gerenciados para garantir uma boa experiência ao usuário e facilitar a manutenção.
+O KinkLink é um Progressive Web App (PWA) gamificado projetado para casais explorarem fetiches, fantasias e conexão emocional através de cartas interativas no estilo Tinder. A arquitetura foi pensada para ser escalável, real-time e privada, utilizando tecnologias modernas e serviços gerenciados do Firebase para garantir uma experiência fluida e segura.
+
+### Conceitos-Chave
+- **Links:** Matches entre o casal (ambos curtiram a mesma carta)
+- **Símbolos:** ▲ Triângulo ou ⭐ Estrela atribuídos aleatoriamente
+- **Conexão:** Cartas especiais de intimidade emocional (não geram matches)
+- **Real-Time Sync:** Todos os dados sincronizam automaticamente via listeners
 
 ## 2. Pilha Tecnológica (Tech Stack)
 
@@ -12,40 +20,77 @@ O KinkLink é composto por um frontend (aplicativo cliente) e utiliza os serviç
 
 ### 2.1. Frontend
 
-*   **Framework/Biblioteca Principal:** React (com TypeScript) para a construção da interface de usuário.
-*   **Bundler/Servidor de Desenvolvimento:** Vite, proporcionando um desenvolvimento rápido e eficiente.
-*   **Roteamento:** React Router DOM para a navegação entre as diferentes telas (páginas) do aplicativo.
-*   **Estilização:** CSS Modules para escopo local de estilos, garantindo que os estilos de um componente não afetem outros inesperadamente. Variáveis CSS globais são usadas para temas (Skins).
-*   **Gerenciamento de Estado:**
-    *   Context API do React para estados globais como autenticação (`AuthContext`) e skins (`SkinContext`).
-    *   Hooks customizados para encapsular lógicas de estado e efeitos colaterais complexos (ex: `useUserCardInteractions`, `useCoupleCardChats`).
-*   **Interações com Gestos:** `use-gesture` para interações de arrastar (swipe) nas cartas.
-*   **Carrosséis:** Swiper.js para os carrosséis de categorias na página de "Links".
+| Tecnologia | Uso |
+|------------|-----|
+| **React 18** | Framework UI com TypeScript |
+| **Vite** | Build tool e dev server |
+| **React Router v6** | Navegação entre páginas |
+| **CSS Modules** | Estilos com escopo local |
+| **Context API** | State global (Auth, Skins, Notifications) |
+| **@use-gesture/react** | Gestos de swipe nas cartas |
+| **Swiper.js** | Carrosséis de categorias |
+| **React-Spring** | Animações fluidas |
+| **React-Hot-Toast** | Notificações in-app |
+
+**Hooks Customizados Principais:**
+- `useAuth` - Autenticação e dados do usuário
+- `useUserCardInteractions` - Likes, dislikes e matches
+- `useCardPileLogic` - Lógica da fila de cartas (CORE)
+- `useCoupleCardChats` - Agregação de dados de chat
+- `useCardChat` - Chat individual por carta
+- `useLinkCompletionListener` - Detecta aceite de vínculo
 
 ### 2.2. Backend e Serviços (Firebase)
 
-O KinkLink utiliza extensivamente a plataforma Firebase para suas necessidades de backend:
+| Serviço | Uso |
+|---------|-----|
+| **Firebase Authentication** | Login (Email/Senha, Google), sessões |
+| **Cloud Firestore** | Banco NoSQL principal, real-time sync |
+| **Cloud Functions** | Notificações push, lógica server-side |
+| **Firebase Cloud Messaging (FCM)** | Push notifications |
+| **Firebase Hosting** | Deploy do PWA |
+| **Firebase Storage** | (Futuro) Upload de fotos |
 
-*   **Firebase Authentication:**
-    *   Responsável pelo gerenciamento de usuários: cadastro (e-mail/senha), login e gerenciamento de sessão.
-*   **Firestore (Cloud Firestore):**
-    *   Banco de dados NoSQL principal.
-    *   Armazena:
-        *   Dados dos usuários (perfis, ID do parceiro conectado).
-        *   Cartas (padrão e criadas por usuários).
-        *   "Links" (matches entre usuários e cartas).
-        *   Mensagens de chat associadas a cada Link.
-        *   Configurações de skins disponíveis.
-*   **Firebase Storage:**
-    *   Utilizado para armazenar assets estáticos, como:
-        *   Imagens de textura para as skins de fundo.
-        *   (Potencialmente) Imagens para cartas personalizadas, se essa funcionalidade for expandida.
-*   **Cloud Functions for Firebase (Opcional/Futuro):**
-    *   Atualmente, a lógica de match e outras operações são majoritariamente tratadas no cliente.
-    *   Cloud Functions poderiam ser usadas no futuro para:
-        *   Lógica de backend mais complexa (ex: notificações push).
-        *   Operações que exigem privilégios administrativos ou segurança aprimorada.
-        *   Processamento de dados em segundo plano.
+**Estrutura do Firestore:**
+
+```
+users/{userId}
+  ├─ Perfil (email, username, bio, birthDate, gender)
+  ├─ coupleId (referência ao casal)
+  ├─ seenCards[] (cartas já vistas)
+  ├─ maxIntensity (filtro 1-5)
+  ├─ conexaoAccepted, conexaoRejected
+  ├─ unlockedSkinIds[]
+  └─ fcmTokens/{token} (subcoleção)
+
+couples/{coupleId}
+  ├─ members[] (2 userIds)
+  ├─ memberSymbols {userId: '▲' ou '⭐'}
+  ├─ status ('pending' | 'completed')
+  ├─ likedInteractions/{cardId}
+  │   ├─ likedByUIDs[] (1 ou 2)
+  │   ├─ isMatch (true = Link formado)
+  │   ├─ isHot (favoritado)
+  │   ├─ isCompleted (realizado)
+  │   └─ cardData (snapshot)
+  └─ cardChats/{cardId}
+      ├─ lastMessageTimestamp, lastMessageSenderId
+      └─ messages/{msgId}
+
+cards/{cardId}
+  └─ text, category, intensity
+
+userCards/{cardId}
+  └─ coupleId, text, category, createdByUserId
+
+pendingLinks/{linkCode}
+  └─ initiatorUserId, status, createdAt
+```
+
+**Cloud Functions Ativas:**
+- `notifyNewMatch` - Envia push quando forma Link
+- `notifyNewMessage` - Envia push para novas mensagens
+- `notifyPartnerCreatedCard` - Notifica carta customizada do parceiro
 
 ## 3. Estrutura de Pastas Principais do Frontend (`src/`)
 
@@ -62,32 +107,142 @@ A organização do código no frontend segue uma estrutura modular para facilita
 *   `App.tsx`: Componente raiz da aplicação, onde o roteamento principal é configurado.
 *   `main.tsx`: Ponto de entrada da aplicação, onde o React é renderizado no DOM.
 
-## 4. Principais Fluxos de Dados (Exemplos)
+## 4. Principais Fluxos de Dados
 
-*   **Autenticação de Usuário:**
-    1.  Usuário insere e-mail/senha na `SignupPage` ou `LoginPage`.
-    2.  Funções do `firebaseAuth.ts` interagem com o Firebase Authentication.
-    3.  Em caso de sucesso, o `AuthContext` é atualizado com os dados do usuário, e a sessão é persistida.
-*   **Carregamento e Interação com Cartas:**
-    1.  `CardPilePage` utiliza o hook `useUserCardInteractions`.
-    2.  O hook busca cartas do Firestore (filtrando as já vistas/interagidas pelo casal).
-    3.  O usuário interage (swipe/botão) com uma `PlayingCard`.
-    4.  A interação é registrada no Firestore (ex: `user_interactions` ou similar).
-    5.  Se ambos os parceiros conectados curtem a mesma carta, um "Link" é formado.
-*   **Sistema de Chat:**
-    1.  Na `MatchesPage`, ao clicar em um Link, o `CardChatModal` é aberto.
-    2.  O hook `useCoupleCardChats` (ou lógica similar dentro do modal) busca/escuta mensagens do Firestore para o `coupleId` e `cardId` específicos.
-    3.  Novas mensagens são salvas no Firestore na coleção apropriada.
-*   **Aplicação de Skins:**
-    1.  `SkinsPage` exibe as skins disponíveis (buscadas do Firestore ou definidas localmente).
-    2.  Usuário seleciona e ativa uma skin.
-    3.  O `SkinContext` é atualizado.
-    4.  Variáveis CSS globais são alteradas dinamicamente, refletindo a nova skin em toda a aplicação.
+### 4.1. Autenticação e Vinculação
 
-## 5. Diagrama de Arquitetura de Alto Nível
+```
+User A                          Firebase                       User B
+  │                               │                              │
+  ├─ Signup/Login ──────────────> Authentication                │
+  │                               │                              │
+  ├─ "Criar Vínculo" ─────────> pendingLinks/{code}            │
+  │                              couples/{id} (pending)          │
+  │                               │                              │
+  │                               │ <───────────── "Aceitar"  ───┤
+  │                               │                              │
+  │  <─── couple (completed) ────┤────── memberSymbols ───────> │
+  │       ▲ Triângulo             │           ⭐ Estrela          │
+```
 
-*(Um diagrama visual será adicionado aqui posteriormente ).*
+### 4.2. Swipe e Detecção de Match
+
+```
+1. useCardPileLogic carrega cartas:
+   ├─ 2/3 da fila: Likes do parceiro
+   └─ 1/3 da fila: Cartas gerais (filtradas por intensity)
+
+2. User swipa carta:
+   ├─ 👎 Não Topo! → Adiciona a seenCards
+   └─ 👍 Topo! → Grava em likedInteractions
+
+3. Verificação de match:
+   IF partnerId JÁ curtiu essa carta:
+     ├─ Atualiza isMatch: true
+     ├─ likedByUIDs: [userA, userB]
+     ├─ Modal "Novo Link!" aparece
+     └─ Cloud Function envia push para ambos
+
+4. Carta vai para MatchesPage:
+   └─ Listener onSnapshot detecta isMatch=true
+```
+
+### 4.3. Sistema de Chat Real-Time
+
+```
+User A                          Firestore                      User B
+  │                               │                              │
+  ├─ Digita mensagem ──────────> messages/{msgId}              │
+  │                              ├─ userId, text, timestamp      │
+  │                              └─ lastMessageTimestamp ────> listener
+  │                               │                              │
+  │                               │ <──────── onSnapshot ────────┤
+  │                               │                              │
+  │                               │ ──── Cloud Function ───────> Push!
+```
+
+### 4.4. Sistema de Skins por Conquistas
+
+```
+1. User forma matches → checkAndUnlockSkins()
+2. Verifica conquistas:
+   ├─ 5 matches Sensorial → Skin "Veludo Rosa"
+   ├─ 15 matches total → Skin "Oceano"
+   └─ 50 matches total → Skin "Rose Gold"
+3. Atualiza user.unlockedSkinIds[]
+4. Modal mostra skins desbloqueadas
+5. User ativa skin → SkinContext.applySkin()
+6. CSS variables atualizam → UI reflete nova skin
+```
+
+### 4.5. Modal de Conexão (Periódico)
+
+```
+1. useCardPileLogic rastreia:
+   └─ conexaoAccepted + conexaoRejected
+
+2. Triggers:
+   ├─ Inicial: 10 likes totais
+   └─ Seguintes: A cada 5 matches
+
+3. Modal mostra carta de Conexão:
+   ├─ User aceita → conexaoAccepted++
+   │                 └─ Vai para "Carinhos & Mimos"
+   └─ User rejeita → conexaoRejected++
+
+4. NÃO gera match (categoria especial)
+```
+
+## 5. Arquitetura v4.0 - Mudanças Principais
+
+### Remoção de `partnerId`
+**Problema (v3.x):** Campo redundante causava loops de permissão
+
+**Solução (v4.0):** 
+```typescript
+// ANTES (v3.x)
+const partnerId = user.partnerId; // ❌ Redundante
+
+// DEPOIS (v4.0)
+const coupleDoc = await getDoc(doc(db, 'couples', user.coupleId));
+const partnerId = coupleDoc.data().members.find(id => id !== user.id); // ✅
+```
+
+**Benefícios:**
+- ✅ Zero loops de permissão (cada user edita só seu doc)
+- ✅ Regras Firestore simplificadas
+- ✅ Menos redundância de dados
+- ✅ Atomicidade garantida via transações
+
+### Real-Time Sync com onSnapshot
+Todos os dados críticos usam listeners em tempo real:
+- Matches (`likedInteractions`)
+- Mensagens (`cardChats/{cardId}/messages`)
+- User updates (`users/{userId}`)
+- Cartas customizadas (`userCards`)
+
+### Otimizações de Performance
+- Queries sem índices compostos (filtro em JS quando necessário)
+- Debounce em listeners frequentes
+- Lazy loading de imagens
+- Service Worker para cache agressivo (PWA)
+
+## 6. Documentação Adicional
+
+Para entender fluxos específicos, consulte:
+
+| Documento | Conteúdo |
+|-----------|----------|
+| `01-data-model.md` | Modelo de dados detalhado |
+| `02-authentication-flow.md` | Fluxo de auth e sessões |
+| `03-firestore-security-rules.md` | Regras de segurança |
+| `04-couple-connection-flow.md` | Vinculação de casais |
+| `05-card-interaction-flow.md` | Swipe e matches |
+| `06-chat-flow.md` | Sistema de chat |
+| `07-pendinglinks-collection.md` | Lógica de convites |
+
+**Documentação Completa:** Ver [PROJECT_CONTEXT.md](../../../PROJECT_CONTEXT.md)
 
 ---
 
-Este documento fornece uma base para o entendimento da arquitetura do KinkLink. Detalhes adicionais sobre componentes específicos ou fluxos podem ser encontrados em documentações mais granulares ou diretamente no código-fonte comentado.
+**Última Atualização:** Novembro 2025 | **Versão:** 4.0

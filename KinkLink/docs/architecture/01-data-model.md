@@ -1,10 +1,17 @@
-# Modelo de Dados (Firestore)
+# 📊 Modelo de Dados (Firestore)
+
+> **Versão:** 4.0 | **Última Atualização:** Novembro 2025
 
 Este documento descreve a estrutura das principais coleções e documentos utilizados no Cloud Firestore para o aplicativo KinkLink.
 
 ## Visão Geral
 
-O Firestore é usado como o principal banco de dados NoSQL para armazenar dados de usuários, cartas, interações, links (matches), chats e configurações. A estrutura é projetada para permitir consultas eficientes e escalabilidade.
+O Firestore é usado como o principal banco de dados NoSQL para armazenar dados de usuários, cartas, interações, links (matches), chats e configurações. A estrutura v4.0 foi redesenhada para:
+
+- ✅ Eliminar redundância de dados
+- ✅ Simplificar regras de segurança
+- ✅ Melhorar performance com real-time sync
+- ✅ Garantir atomicidade via transações
 
 ## Coleções Principais
 
@@ -45,10 +52,11 @@ O Firestore é usado como o principal banco de dados NoSQL para armazenar dados 
         *   `memberSymbols`: (Map) Símbolos associados a cada membro para identificação:
             ```typescript
             {
-              [userId1]: '★',  // User A (iniciador)
-              [userId2]: '▲'   // User B (aceitante)
+              [userId1]: '▲',  // Triângulo (aleatório)
+              [userId2]: '⭐'   // Estrela (aleatório)
             }
             ```
+            **Nota:** Símbolos são atribuídos aleatoriamente, não baseados em ordem
         *   `createdAt`: (Timestamp) Data e hora de criação do couple (pelo User A)
 
    **Mudanças v4.0:**

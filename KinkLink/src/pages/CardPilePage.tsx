@@ -1,7 +1,7 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\CardPilePage.tsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { useDrag } from '@use-gesture/react';
-import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore'; // <<< ADICIONADO
+import { collection, query, where, onSnapshot, Timestamp, doc, getDoc } from 'firebase/firestore'; // <<< ADICIONADO
 import { useAuth } from '../contexts/AuthContext'; // Importar useAuth
 import { Link, useNavigate } from 'react-router-dom';
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
@@ -127,40 +127,73 @@ function CardPilePage() {
 
   // <<< NOVO: Listener para "Like do Parceiro"
   useEffect(() => {
-    if (!user?.coupleId) {
+    if (!user?.coupleId || !user?.id) {
       return; // Sai se não houver casal
     }
 
-    const interactionsRef = collection(db, `couples/${user.coupleId}/likedInteractions`);
-    // Ouve apenas por documentos criados a partir de agora
-    const q = query(interactionsRef, where('createdAt', '>', Timestamp.now()));
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        if (change.type === 'added') {
-          const data = change.doc.data();
-          // Verifica se o primeiro like foi do parceiro
-          if (data.likedByUIDs && data.likedByUIDs[0] === user.partnerId) {
-            const cardText = data.cardData?.text || 'uma carta';
-            const truncatedText = cardText.length > 40 ? `${cardText.substring(0, 37)}...` : cardText;
-
-            toast.success(
-              (t) => (
-                <div onClick={() => toast.dismiss(t.id)} style={{ cursor: 'pointer' }}>
-                  <b>Seu par topou uma carta! 👀</b>
-                  <p style={{ margin: '4px 0 0' }}>A carta '{truncatedText}' foi curtida.</p>
-                </div>
-              ), { duration: 6000 }
-            );
-          }
+    const fetchPartnerIdAndListen = async () => {
+      try {
+        // Buscar partner ID do couple document
+        const coupleDocRef = doc(db, 'couples', user.coupleId!);
+        const coupleDocSnap = await getDoc(coupleDocRef);
+        
+        if (!coupleDocSnap.exists()) {
+          console.log('[CardPilePage] Couple document não encontrado');
+          return;
         }
-      });
+
+        const coupleData = coupleDocSnap.data();
+        const partnerId = coupleData.members?.find((id: string) => id !== user.id);
+        
+        if (!partnerId) {
+          console.log('[CardPilePage] Partner ID não encontrado no couple');
+          return;
+        }
+
+        const interactionsRef = collection(db, `couples/${user.coupleId}/likedInteractions`);
+        // Ouve apenas por documentos criados a partir de agora
+        const q = query(interactionsRef, where('createdAt', '>', Timestamp.now()));
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+            if (change.type === 'added') {
+              const data = change.doc.data();
+              // Verifica se o primeiro like foi do parceiro
+              if (data.likedByUIDs && data.likedByUIDs[0] === partnerId) {
+                const cardText = data.cardData?.text || 'uma carta';
+                const truncatedText = cardText.length > 40 ? `${cardText.substring(0, 37)}...` : cardText;
+
+                toast.success(
+                  (t) => (
+                    <div onClick={() => toast.dismiss(t.id)} style={{ cursor: 'pointer' }}>
+                      <b>Seu par topou uma carta! 👀</b>
+                      <p style={{ margin: '4px 0 0' }}>A carta '{truncatedText}' foi curtida.</p>
+                    </div>
+                  ), { duration: 6000 }
+                );
+              }
+            }
+          });
+        });
+
+        // Retorna a função de limpeza
+        return unsubscribe;
+      } catch (error) {
+        console.error('[CardPilePage] Erro ao configurar listener de likes do parceiro:', error);
+      }
+    };
+
+    let unsubscribe: (() => void) | undefined;
+    fetchPartnerIdAndListen().then(unsub => {
+      unsubscribe = unsub;
     });
 
     // Limpa o listener quando o componente desmonta ou o usuário muda
-    return () => unsubscribe();
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
 
-  }, [user?.coupleId, user?.partnerId]);
+  }, [user?.coupleId, user?.id]);
 
   const triggerHapticFeedback = (pattern: number | number[] = 30) => {
     if (navigator.vibrate) {

@@ -8,7 +8,7 @@
 
 import {onDocumentWritten} from "firebase-functions/v2/firestore";
 import {onSchedule} from "firebase-functions/v2/scheduler"; // Import para funções agendadas
-import {onCall, HttpsError} from "firebase-functions/v2/https"; // <<< ADICIONAR onCall e HttpsError
+// import {onCall, HttpsError} from "firebase-functions/v2/https"; // Não usado por enquanto
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 
@@ -159,6 +159,14 @@ export const onNewMatch = onDocumentWritten(
         return;
       }
 
+      // ✅ PROTEÇÃO EXTRA: Verificar se já enviamos notificação para este match
+      // Evita duplicação caso a function execute 2x por instabilidade
+      const notificationSent = afterSnapshotData.notificationSent;
+      if (notificationSent === true) {
+        logger.info("Notification already sent for this match. Skipping to avoid duplicate.", { coupleId: event.params.coupleId, cardId: event.params.cardId });
+        return;
+      }
+
       let pioneerUID: string | undefined;
       let completadorUID: string | undefined;
 
@@ -245,6 +253,16 @@ export const onNewMatch = onDocumentWritten(
         }
         // iconUrl e targetUrlBase usarão os padrões definidos em sendNotificationToUser
       );
+
+      // ✅ PROTEÇÃO: Marca que a notificação foi enviada para evitar duplicatas
+      try {
+        await db.doc(`couples/${event.params.coupleId}/likedInteractions/${event.params.cardId}`).update({
+          notificationSent: true
+        });
+        logger.info("Marked notification as sent to prevent duplicates.");
+      } catch (error) {
+        logger.error("Error marking notification as sent:", error);
+      }
     } else {
       logger.info("Event did not meet criteria for a new match notification.", {
         afterDataExists: !!afterSnapshotData,
@@ -339,6 +357,9 @@ export const sendWeeklyLinkSuggestion = onSchedule(
  * Cloud Function para notificar um usuário quando um de seus tickets de feedback
  * recebe uma resposta do administrador.
  * Acionada quando um documento em 'users/{userId}' é atualizado.
+ * 
+ * OTIMIZAÇÃO: Verificação adicional no início para evitar execuções desnecessárias.
+ * A function só deve processar se o campo feedbackTickets realmente mudou.
  */
 export const onAdminTicketResponse = onDocumentWritten(
   {
@@ -349,13 +370,12 @@ export const onAdminTicketResponse = onDocumentWritten(
   },
   async (event) => {
     const userId = event.params.userId;
-    logger.info(`User document update event for user ${userId}. Checking for ticket responses.`, { eventId: event.id });
 
     const beforeSnapshot = event.data?.before;
     const afterSnapshot = event.data?.after;
 
     if (!beforeSnapshot?.exists || !afterSnapshot?.exists) {
-      logger.info("Document before or after snapshot does not exist (e.g., creation or deletion). Exiting ticket response check.", { userId, eventId: event.id });
+      // Ignora criação ou deleção de documentos
       return;
     }
 
@@ -363,26 +383,33 @@ export const onAdminTicketResponse = onDocumentWritten(
     const afterData = afterSnapshot.data();
 
     if (!beforeData || !afterData) {
-      logger.info("beforeData or afterData is undefined. Exiting ticket response check.", { userId, eventId: event.id });
       return;
     }
 
-    if (!afterData.feedbackTickets) {
-      logger.info("No feedbackTickets in afterData. Exiting.", { userId });
-      return; // Retorna void
+    // ✅ OTIMIZAÇÃO: Verifica se feedbackTickets mudou ANTES de processar
+    const beforeTickets = beforeData.feedbackTickets || [];
+    const afterTickets = afterData.feedbackTickets || [];
+    
+    // Se não há tickets no afterData, retorna imediatamente
+    if (!afterTickets || afterTickets.length === 0) {
+      return;
     }
 
-    const beforeTickets = (beforeData.feedbackTickets || []) as Array<{ id: string; adminResponse?: string; status: string; text: string }>;
-    const afterTickets = (afterData.feedbackTickets || []) as Array<{ id: string; adminResponse?: string; status: string; text: string }>;
+    // Se os arrays são idênticos (mesmo JSON), não houve mudança
+    if (JSON.stringify(beforeTickets) === JSON.stringify(afterTickets)) {
+      return; // Nenhuma mudança nos tickets, evita processamento
+    }
+
+    logger.info(`Feedbacktickets changed for user ${userId}. Checking for admin responses.`, { eventId: event.id });
 
     let respondedTicket: { id: string; adminResponse?: string; status: string; text: string } | undefined;
 
     for (const afterTicket of afterTickets) {
-      const beforeTicket = beforeTickets.find(bt => bt.id === afterTicket.id);
+      const beforeTicket = beforeTickets.find((bt: { id: string }) => bt.id === afterTicket.id);
       if (afterTicket.adminResponse && afterTicket.status === 'admin_replied' &&
           (!beforeTicket || !beforeTicket.adminResponse || beforeTicket.status !== 'admin_replied')) {
         respondedTicket = afterTicket;
-        logger.info(`New admin response detected for ticket ${respondedTicket.id} for user ${userId}.`);
+        logger.info(`New admin response detected for ticket ${afterTicket.id} for user ${userId}.`);
         break;
       }
     }
@@ -559,15 +586,21 @@ export const onNewChatMessage = onDocumentWritten(
 );
 
 /**
- * Lógica para enviar a notificação mensal de apoio.
- * Busca todos os usuários e envia a notificação para cada um.
+ * Lógica INTELIGENTE para enviar a notificação mensal de apoio.
+ * Busca usuários que atendem aos critérios e envia a notificação.
+ * 
+ * CRITÉRIOS PARA ENVIAR:
+ * 1. Usuário tem mais de 7 dias de cadastro (não é muito novo)
+ * 2. Usuário tem pelo menos 5 matches (está engajado)
+ * 3. Usuário NÃO é apoiador (isSupporter !== true)
+ * 4. Última notificação de apoio foi há mais de 30 dias (ou nunca recebeu)
  */
 async function enviarNotificacaoDeApoio() {
-  logger.info("Iniciando envio da notificação mensal de apoio.");
+  logger.info("Iniciando envio INTELIGENTE da notificação mensal de apoio.");
 
   const usersSnapshot = await db.collection("users").get();
   if (usersSnapshot.empty) {
-    logger.info("Nenhum usuário encontrado para notificar.");
+    logger.info("Nenhum usuário encontrado.");
     return;
   }
 
@@ -575,13 +608,63 @@ async function enviarNotificacaoDeApoio() {
   const notificationBody = "Se você curte o app, que tal nos apoiar? Toque para saber mais!";
   const notificationData = {
     type: "support_notification",
-    url: "/#openSupportModal", // URL para o frontend identificar e abrir o modal
+    url: "/#openSupportModal",
   };
 
+  const now = Date.now();
+  const sevenDaysAgo = now - (7 * 24 * 60 * 60 * 1000);
+  const thirtyDaysAgo = now - (30 * 24 * 60 * 60 * 1000);
+
+  let notificationsSent = 0;
+  let usersSkipped = 0;
+
   for (const userDoc of usersSnapshot.docs) {
-    await sendNotificationToUser(userDoc.id, notificationTitle, notificationBody, notificationData);
+    const userData = userDoc.data();
+    const userId = userDoc.id;
+
+    // Filtro 1: Já é apoiador? Pula
+    if (userData.isSupporter === true) {
+      usersSkipped++;
+      continue;
+    }
+
+    // Filtro 2: Conta muito nova? Pula (menos de 7 dias)
+    const createdAt = userData.createdAt?.toMillis() || 0;
+    if (createdAt > sevenDaysAgo) {
+      usersSkipped++;
+      continue;
+    }
+
+    // Filtro 3: Pouco engajamento? Pula (menos de 5 matches)
+    const matchedCards = userData.matchedCards || [];
+    if (matchedCards.length < 5) {
+      usersSkipped++;
+      continue;
+    }
+
+    // Filtro 4: Recebeu notificação recentemente? Pula (últimos 30 dias)
+    const lastSupportNotification = userData.lastSupportNotification?.toMillis() || 0;
+    if (lastSupportNotification > thirtyDaysAgo) {
+      usersSkipped++;
+      continue;
+    }
+
+    // ✅ Usuário passou em todos os filtros! Envia notificação
+    await sendNotificationToUser(userId, notificationTitle, notificationBody, notificationData);
+
+    // Atualiza a data da última notificação de apoio
+    try {
+      await db.doc(`users/${userId}`).update({
+        lastSupportNotification: admin.firestore.FieldValue.serverTimestamp()
+      });
+    } catch (error) {
+      logger.error(`Erro ao atualizar lastSupportNotification para usuário ${userId}:`, error);
+    }
+
+    notificationsSent++;
   }
-  logger.info(`Notificação de apoio enviada para ${usersSnapshot.size} usuários.`);
+
+  logger.info(`Notificação de apoio INTELIGENTE concluída. Enviadas: ${notificationsSent}, Ignoradas: ${usersSkipped}, Total: ${usersSnapshot.size}`);
 }
 
 /**

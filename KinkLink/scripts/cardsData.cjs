@@ -369,13 +369,13 @@ const allKinkLinkCards = [
   {
     "id": "c71",
     "intensity": 3,
-    "text": "★ gostaria de sentir cera morna de vela BDSM escorrendo pelo meu corpo (aplicado por ▲).",
+    "text": "Cera morna de vela BDSM escorrendo pelo corpo de ★ (aplicado por ▲).",
     "category": "sensorial"
   },
   {
     "id": "c72",
     "intensity": 3,
-    "text": "▲ gostaria de sentir cera morna de vela BDSM escorrendo pelo meu corpo (aplicado por ★).",
+    "text": "Cera morna de vela BDSM escorrendo pelo corpo de ▲ (aplicado por ★).",
     "category": "sensorial"
   },
   {
@@ -405,25 +405,25 @@ const allKinkLinkCards = [
   {
     "id": "c77",
     "intensity": 4,
-    "text": "★ gostaria de sentir a estimulação de um riding crop em coxas/nádegas (aplicado por ▲).",
+    "text": "Estimulação de riding crop em coxas/nádegas de ★ (aplicado por ▲).",
     "category": "sensorial"
   },
   {
     "id": "c78",
     "intensity": 4,
-    "text": "▲ gostaria de sentir a estimulação de um riding crop em coxas/nádegas (aplicado por ★).",
+    "text": "Estimulação de riding crop em coxas/nádegas de ▲ (aplicado por ★).",
     "category": "sensorial"
   },
   {
     "id": "c79",
     "intensity": 5,
-    "text": "★ gostaria de sentir a ardência controlada de um chicote fino (tawse/single tail) (aplicado por ▲).",
+    "text": "Ardência controlada de chicote fino (tawse/single tail) em ★ (aplicado por ▲).",
     "category": "sensorial"
   },
   {
     "id": "c80",
     "intensity": 5,
-    "text": "▲ gostaria de sentir a ardência controlada de um chicote fino (tawse/single tail) (aplicado por ★).",
+    "text": "Ardência controlada de chicote fino (tawse/single tail) em ▲ (aplicado por ★).",
     "category": "sensorial"
   },
   {
@@ -435,7 +435,7 @@ const allKinkLinkCards = [
   {
     "id": "c82",
     "intensity": 3,
-    "text": "Gostaria de experimentar prendedores de mamilo durante preliminares/sexo.",
+    "text": "Prendedores de mamilo em ★ durante preliminares/sexo.",
     "category": "sensorial"
   },
   {
@@ -465,13 +465,13 @@ const allKinkLinkCards = [
   {
     "id": "c87",
     "intensity": 3,
-    "text": "★ (parceira com vulva) gostaria que ▲ (parceiro com pênis) usasse anel peniano vibratório para estimular meu clitóris/períneo.",
+    "text": "▲ usa anel peniano vibratório para estimular clitóris/períneo de ★ durante penetração.",
     "category": "sensorial"
   },
   {
     "id": "c88",
     "intensity": 3,
-    "text": "▲ (parceira com vulva) gostaria que ★ (parceiro com pênis) usasse anel peniano vibratório para estimular meu clitóris/períneo.",
+    "text": "★ usa anel peniano vibratório para estimular clitóris/períneo de ▲ durante penetração.",
     "category": "sensorial"
   },
   {
@@ -483,7 +483,7 @@ const allKinkLinkCards = [
   {
     "id": "c90",
     "intensity": 4,
-    "text": "Gostaria de usar plug anal (tamanho a combinar) durante sexo vaginal/oral.",
+    "text": "★ usa plug anal (tamanho a combinar) durante sexo vaginal/oral.",
     "category": "sensorial"
   },
   {
@@ -615,13 +615,13 @@ const allKinkLinkCards = [
   {
     "id": "c112",
     "intensity": 2,
-    "text": "★ gostaria que ▲ sussurrasse fantasias em meu ouvido enquanto me toca.",
+    "text": "▲ sussurra fantasias no ouvido de ★ enquanto toca seu corpo.",
     "category": "sensorial"
   },
   {
     "id": "c113",
     "intensity": 2,
-    "text": "▲ gostaria que ★ sussurrasse fantasias em meu ouvido enquanto me toca.",
+    "text": "★ sussurra fantasias no ouvido de ▲ enquanto toca seu corpo.",
     "category": "sensorial"
   },
   {
@@ -645,7 +645,7 @@ const allKinkLinkCards = [
   {
     "id": "c117",
     "intensity": 3,
-    "text": "Gostaria de ter meu corpo coberto por algo comestível para ser \"devorado(a)\".",
+    "text": "Corpo de ★ coberto por algo comestível para ser \"devorado(a)\" por ▲.",
     "category": "sensorial"
   },
   {
@@ -687,7 +687,7 @@ const allKinkLinkCards = [
   {
     "id": "c124",
     "intensity": 3,
-    "text": "Gostaria de ser amarrado(a) levemente com cordas macias e sentir meu corpo ser explorado.",
+    "text": "★ amarrado(a) levemente com cordas macias enquanto ▲ explora seu corpo.",
     "category": "sensorial"
   },
   {
@@ -879,7 +879,7 @@ const allKinkLinkCards = [
   {
     "id": "c156",
     "intensity": 3,
-    "text": "Gostaria de ter meus mamilos sugados/lambidos com intensidade.",
+    "text": "Mamilos sugados/lambidos com intensidade.",
     "category": "sensorial"
   },
   {
@@ -897,43 +897,43 @@ const allKinkLinkCards = [
   {
     "id": "c159",
     "intensity": 7,
-    "text": "Gostaria de ser \"lambuzado(a)\" com os fluidos de um(a) ou mais parceiros(as).",
+    "text": "Ser \"lambuzado(a)\" com os fluidos de um(a) ou mais parceiros(as).",
     "category": "sensorial"
   },
   {
     "id": "c160",
     "intensity": 8,
-    "text": "★ gostaria de receber \"chuva dourada\" (golden shower) de ▲.",
+    "text": "★ recebe \"chuva dourada\" (golden shower) de ▲.",
     "category": "sensorial"
   },
   {
     "id": "c161",
     "intensity": 8,
-    "text": "▲ gostaria de receber \"chuva dourada\" (golden shower) de ★.",
+    "text": "▲ recebe \"chuva dourada\" (golden shower) de ★.",
     "category": "sensorial"
   },
   {
     "id": "c162",
     "intensity": 7,
-    "text": "★ gostaria de experimentar o gosto do ânus de ▲ (anilingus).",
+    "text": "★ experimenta anilingus em ▲.",
     "category": "sensorial"
   },
   {
     "id": "c163",
     "intensity": 7,
-    "text": "▲ gostaria de experimentar o gosto do ânus de ★ (anilingus).",
+    "text": "▲ experimenta anilingus em ★.",
     "category": "sensorial"
   },
   {
     "id": "c164",
     "intensity": 7,
-    "text": "★ gostaria que ▲ fizesse anilingus em mim.",
+    "text": "▲ faz anilingus em ★.",
     "category": "sensorial"
   },
   {
     "id": "c165",
     "intensity": 7,
-    "text": "▲ gostaria que ★ fizesse anilingus em mim.",
+    "text": "★ faz anilingus em ▲.",
     "category": "sensorial"
   },
   {
@@ -945,13 +945,13 @@ const allKinkLinkCards = [
   {
     "id": "c167",
     "intensity": 4,
-    "text": "Gostaria de receber mordidas fortes (deixando marcas) durante o sexo.",
+    "text": "Receber mordidas fortes (deixando marcas) durante o sexo.",
     "category": "sensorial"
   },
   {
     "id": "c168",
     "intensity": 4,
-    "text": "Gostaria de dar mordidas fortes (deixando marcas) no meu/minha parceiro(a).",
+    "text": "Dar mordidas fortes (deixando marcas) no(a) parceiro(a).",
     "category": "sensorial"
   },
   {
@@ -1066,25 +1066,25 @@ const allKinkLinkCards = [
   {
     "id": "c187",
     "intensity": 2,
-    "text": "★ gostaria de dar um comando sensual para ▲ obedecer.",
+    "text": "★ dá um comando sensual para ▲ obedecer.",
     "category": "poder"
   },
   {
     "id": "c188",
     "intensity": 2,
-    "text": "▲ gostaria de dar um comando sensual para ★ obedecer.",
+    "text": "▲ dá um comando sensual para ★ obedecer.",
     "category": "poder"
   },
   {
     "id": "c189",
     "intensity": 2,
-    "text": "★ gostaria de receber um comando sensual de ▲ para obedecer.",
+    "text": "★ recebe um comando sensual de ▲ para obedecer.",
     "category": "poder"
   },
   {
     "id": "c190",
     "intensity": 2,
-    "text": "▲ gostaria de receber um comando sensual de ★ para obedecer.",
+    "text": "▲ recebe um comando sensual de ★ para obedecer.",
     "category": "poder"
   },
   {
@@ -1138,25 +1138,25 @@ const allKinkLinkCards = [
   {
     "id": "c199",
     "intensity": 4,
-    "text": "★ gostaria de ser imobilizado(a) por ▲ e se submeter.",
+    "text": "★ imobilizado(a) por ▲ em submissão.",
     "category": "poder"
   },
   {
     "id": "c200",
     "intensity": 4,
-    "text": "▲ gostaria de ser imobilizado(a) por ★ e se submeter.",
+    "text": "▲ imobilizado(a) por ★ em submissão.",
     "category": "poder"
   },
   {
     "id": "c201",
     "intensity": 4,
-    "text": "★ gostaria de imobilizar ▲ e tê-lo(a) à sua mercê.",
+    "text": "★ imobiliza ▲ e tem-no(a) à sua mercê.",
     "category": "poder"
   },
   {
     "id": "c202",
     "intensity": 4,
-    "text": "▲ gostaria de imobilizar ★ e tê-lo(a) à sua mercê.",
+    "text": "▲ imobiliza ★ e tem-no(a) à sua mercê.",
     "category": "poder"
   },
   {
@@ -1198,25 +1198,25 @@ const allKinkLinkCards = [
   {
     "id": "c209",
     "intensity": 3,
-    "text": "★ gostaria de receber tapas firmes na bunda de ▲.",
+    "text": "★ recebe tapas firmes na bunda de ▲.",
     "category": "poder"
   },
   {
     "id": "c210",
     "intensity": 3,
-    "text": "▲ gostaria de receber tapas firmes na bunda de ★.",
+    "text": "▲ recebe tapas firmes na bunda de ★.",
     "category": "poder"
   },
   {
     "id": "c211",
     "intensity": 4,
-    "text": "★ gostaria de receber tapas (spanking) de um(a) terceiro(a) sob comando de ▲.",
+    "text": "★ recebe tapas (spanking) de um(a) terceiro(a) sob comando de ▲.",
     "category": "poder"
   },
   {
     "id": "c212",
     "intensity": 4,
-    "text": "▲ gostaria de receber tapas (spanking) de um(a) terceiro(a) sob comando de ★.",
+    "text": "▲ recebe tapas (spanking) de um(a) terceiro(a) sob comando de ★.",
     "category": "poder"
   },
   {
@@ -1551,38 +1551,38 @@ const allKinkLinkCards = [
   },
   {
     "id": "c268",
-    "intensity": 4,
-    "text": "★ gostaria de ser objetificado(a) por ▲ durante o sexo.",
+    "intensity": 3,
+    "text": "★ objetificado(a) por ▲ durante o sexo.",
     "category": "poder"
   },
   {
     "id": "c269",
-    "intensity": 4,
-    "text": "▲ gostaria de ser objetificado(a) por ★ durante o sexo.",
+    "intensity": 3,
+    "text": "▲ objetificado(a) por ★ durante o sexo.",
     "category": "poder"
   },
   {
     "id": "c270",
     "intensity": 4,
-    "text": "★ gostaria de objetificar ▲ durante o sexo, tratando-o(a) como brinquedo.",
+    "text": "★ objetifica ▲ durante o sexo, tratando-o(a) como brinquedo.",
     "category": "poder"
   },
   {
     "id": "c271",
     "intensity": 4,
-    "text": "▲ gostaria de objetificar ★ durante o sexo, tratando-o(a) como brinquedo.",
+    "text": "▲ objetifica ★ durante o sexo, tratando-o(a) como brinquedo.",
     "category": "poder"
   },
   {
     "id": "c272",
     "intensity": 5,
-    "text": "★ gostaria de ser tratado(a) como objeto sexual por convidado(a), sob supervisão de ▲.",
+    "text": "★ tratado(a) como objeto sexual por convidado(a), sob supervisão de ▲.",
     "category": "poder"
   },
   {
     "id": "c273",
     "intensity": 5,
-    "text": "▲ gostaria de ser tratado(a) como objeto sexual por convidado(a), sob supervisão de ★.",
+    "text": "▲ tratado(a) como objeto sexual por convidado(a), sob supervisão de ★.",
     "category": "poder"
   },
   {
@@ -1690,25 +1690,25 @@ const allKinkLinkCards = [
   {
     "id": "c291",
     "intensity": 5,
-    "text": "★ (parceira) gostaria de ser 'apostada' por ▲ (parceiro) em jogo com amigo(a); se ▲ perder, ★ cumpre o desejo do(a) amigo(a).",
+    "text": "★ 'apostada' por ▲ em jogo com amigo(a); se ▲ perder, ★ cumpre o desejo do(a) amigo(a).",
     "category": "poder"
   },
   {
     "id": "c292",
     "intensity": 5,
-    "text": "▲ (parceira) gostaria de ser 'apostada' por ★ (parceiro) em jogo com amigo(a); se ★ perder, ▲ cumpre o desejo do(a) amigo(a).",
+    "text": "▲ 'apostada' por ★ em jogo com amigo(a); se ★ perder, ▲ cumpre o desejo do(a) amigo(a).",
     "category": "poder"
   },
   {
     "id": "c293",
     "intensity": 5,
-    "text": "★ (parceiro) gostaria de ser 'apostado' por ▲ (parceira) em jogo com amigo(a); se ▲ perder, ★ cumpre o desejo do(a) amigo(a).",
+    "text": "★ 'apostado' por ▲ em jogo com amigo(a); se ▲ perder, ★ cumpre o desejo do(a) amigo(a).",
     "category": "poder"
   },
   {
     "id": "c294",
     "intensity": 5,
-    "text": "▲ (parceiro) gostaria de ser 'apostado' por ★ (parceira) em jogo com amigo(a); se ★ perder, ▲ cumpre o desejo do(a) amigo(a).",
+    "text": "▲ 'apostado' por ★ em jogo com amigo(a); se ★ perder, ▲ cumpre o desejo do(a) amigo(a).",
     "category": "poder"
   },
   {
@@ -1774,13 +1774,13 @@ const allKinkLinkCards = [
   {
     "id":"c305",
     "intensity": 4,
-    "text": "★ gostaria de ser \"revistado(a)\" minuciosamente por um(a) policial (▲).",
+    "text": "★ \"revistado(a)\" minuciosamente por policial (▲).",
     "category": "poder"
   },
   {
     "id": "c306",
     "intensity": 4,
-    "text": "▲ gostaria de ser \"revistado(a)\" minuciosamente por um(a) policial (★).",
+    "text": "▲ \"revistado(a)\" minuciosamente por policial (★).",
     "category": "poder"
   },
   {
@@ -1834,13 +1834,13 @@ const allKinkLinkCards = [
   {
     "id": "c315",
     "intensity": 3,
-    "text": "★ gostaria de ser \"punido(a)\" por ▲ por uma \"infração\" com spanking/disciplina.",
+    "text": "★ \"punido(a)\" por ▲ por uma \"infração\" com spanking/disciplina.",
     "category": "poder"
   },
   {
     "id": "c316",
     "intensity": 3,
-    "text": "▲ gostaria de ser \"punido(a)\" por ★ por uma \"infração\" com spanking/disciplina.",
+    "text": "▲ \"punido(a)\" por ★ por uma \"infração\" com spanking/disciplina.",
     "category": "poder"
   },
   {
@@ -1936,13 +1936,13 @@ const allKinkLinkCards = [
   {
     "id": "c332",
     "intensity": 3,
-    "text": "★ (Submisso/a) gostaria de ter suas roupas escolhidas por ▲ (Dominante) por uma semana.",
+    "text": "Roupas de ★ (Submisso/a) escolhidas por ▲ (Dominante) por uma semana.",
     "category": "poder"
   },
   {
     "id": "c333",
     "intensity": 3,
-    "text": "▲ (Submisso/a) gostaria de ter suas roupas escolhidas por ★ (Dominante) por uma semana.",
+    "text": "Roupas de ▲ (Submisso/a) escolhidas por ★ (Dominante) por uma semana.",
     "category": "poder"
   },
   {
@@ -2080,13 +2080,13 @@ const allKinkLinkCards = [
   {
     "id": "c356",
     "intensity": 5,
-    "text": "★ (Submisso/a) gostaria de ser \"treinado(a)\" como um(a) animal de estimação por ▲ (Dono/a) e um(a) amigo(a) \"adestrador(a)\".",
+    "text": "★ (Submisso/a) \"treinado(a)\" como animal de estimação por ▲ (Dono/a) e amigo(a) \"adestrador(a)\".",
     "category": "poder"
   },
   {
     "id": "c357",
     "intensity": 5,
-    "text": "▲ (Submisso/a) gostaria de ser \"treinado(a)\" como um(a) animal de estimação por ★ (Dono/a) e um(a) amigo(a) \"adestrador(a)\".",
+    "text": "▲ (Submisso/a) \"treinado(a)\" como animal de estimação por ★ (Dono/a) e amigo(a) \"adestrador(a)\".",
     "category": "poder"
   },
   {
@@ -2225,13 +2225,13 @@ const allKinkLinkCards = [
   {
     "id": "c380",
     "intensity": 8,
-    "text": "★ gostaria de dar uma \"chuva dourada\" (golden shower) em ▲.",
+    "text": "★ dá \"chuva dourada\" (golden shower) em ▲.",
     "category": "poder"
   },
   {
     "id": "c381",
     "intensity": 8,
-    "text": "▲ gostaria de dar uma \"chuva dourada\" (golden shower) em ★.",
+    "text": "▲ dá \"chuva dourada\" (golden shower) em ★.",
     "category": "poder"
   },
   {
@@ -2261,13 +2261,13 @@ const allKinkLinkCards = [
   {
     "id": "c386",
     "intensity": 4,
-    "text": "★ gostaria que ▲ o(a) guiasse em seu estilo de vida por uma semana, como aprendiz.",
+    "text": "▲ guia ★ em seu estilo de vida por uma semana, como aprendiz.",
     "category": "poder"
   },
   {
     "id": "c387",
     "intensity": 4,
-    "text": "▲ gostaria que ★ o(a) guiasse em seu estilo de vida por uma semana, como aprendiz.",
+    "text": "★ guia ▲ em seu estilo de vida por uma semana, como aprendiz.",
     "category": "poder"
   },
   {
@@ -2297,13 +2297,13 @@ const allKinkLinkCards = [
   {
     "id": "c392",
     "intensity": 6,
-    "text": "★ (Submisso/a) gostaria de ser \"reprogramado(a)\" por ▲ (Dominante) através de repetição e treinamento.",
+    "text": "★ (Submisso/a) \"reprogramado(a)\" por ▲ (Dominante) através de repetição e treinamento.",
     "category": "poder"
   },
   {
     "id": "c393",
     "intensity": 6,
-    "text": "▲ (Submisso/a) gostaria de ser \"reprogramado(a)\" por ★ (Dominante) através de repetição e treinamento.",
+    "text": "▲ (Submisso/a) \"reprogramado(a)\" por ★ (Dominante) através de repetição e treinamento.",
     "category": "poder"
   },
   {
@@ -2423,13 +2423,13 @@ const allKinkLinkCards = [
   {
     "id": "c413",
     "intensity": 5,
-    "text": "★ (Dominante) gostaria de moldar completamente o comportamento de ▲ (Submisso/a).",
+    "text": "★ (Dominante) molda completamente o comportamento de ▲ (Submisso/a).",
     "category": "poder"
   },
   {
     "id": "c414",
     "intensity": 5,
-    "text": "▲ (Dominante) gostaria de moldar completamente o comportamento de ★ (Submisso/a).",
+    "text": "▲ (Dominante) molda completamente o comportamento de ★ (Submisso/a).",
     "category": "poder"
   },
   {
@@ -2519,13 +2519,13 @@ const allKinkLinkCards = [
   {
     "id": "c429",
     "intensity": 5,
-    "text": "Freeuse Invertido: ★ (Dominante) gostaria de ter ▲ (Submisso/a) como \"uso livre\" por 24h.",
+    "text": "Freeuse Invertido: ★ (Dominante) tem ▲ (Submisso/a) como \"uso livre\" por 24h.",
     "category": "poder"
   },
   {
     "id": "c430",
     "intensity": 5,
-    "text": "Freeuse Invertido: ▲ (Dominante) gostaria de ter ★ (Submisso/a) como \"uso livre\" por 24h.",
+    "text": "Freeuse Invertido: ▲ (Dominante) tem ★ (Submisso/a) como \"uso livre\" por 24h.",
     "category": "poder"
   },
   {
@@ -3444,13 +3444,13 @@ const allKinkLinkCards = [
   {
     "id": "c583",
     "intensity": 2,
-    "text": "★ gostaria de receber uma ligação/áudio de ▲ narrando uma fantasia erótica.",
+    "text": "★ recebe ligação/áudio de ▲ narrando uma fantasia erótica.",
     "category": "fantasia"
   },
   {
     "id": "c584",
     "intensity": 2,
-    "text": "▲ gostaria de receber uma ligação/áudio de ★ narrando uma fantasia erótica.",
+    "text": "▲ recebe ligação/áudio de ★ narrando uma fantasia erótica.",
     "category": "fantasia"
   },
   {
@@ -3625,97 +3625,97 @@ const allKinkLinkCards = [
   {
     "id": "c613",
     "intensity": 1,
-    "text": "★ gostaria que ▲ o(a) gravasse em uma performance sensual privada.",
+    "text": "▲ grava ★ em performance sensual privada.",
     "category": "exposicao"
   },
   {
     "id": "c614",
     "intensity": 1,
-    "text": "▲ gostaria que ★ o(a) gravasse em uma performance sensual privada.",
+    "text": "★ grava ▲ em performance sensual privada.",
     "category": "exposicao"
   },
   {
     "id": "c615",
     "intensity": 2,
-    "text": "★ gostaria de sair sem roupa íntima e deixar ▲ saber, provocando-o(a) em público.",
+    "text": "★ sai sem roupa íntima e deixa ▲ saber, provocando-o(a) em público.",
     "category": "exposicao"
   },
   {
     "id": "c616",
     "intensity": 2,
-    "text": "▲ gostaria de sair sem roupa íntima e deixar ★ saber, provocando-o(a) em público.",
+    "text": "▲ sai sem roupa íntima e deixa ★ saber, provocando-o(a) em público.",
     "category": "exposicao"
   },
   {
     "id": "c617",
     "intensity": 1,
-    "text": "★ gostaria de fazer um striptease particular e produzido para ▲.",
+    "text": "★ faz striptease particular e produzido para ▲.",
     "category": "exposicao"
   },
   {
     "id": "c618",
     "intensity": 1,
-    "text": "▲ gostaria de fazer um striptease particular e produzido para ★.",
+    "text": "▲ faz striptease particular e produzido para ★.",
     "category": "exposicao"
   },
   {
     "id": "c619",
     "intensity": 4,
-    "text": "★ gostaria de fazer striptease para ▲ e um(a) amigo(a) convidado(a).",
+    "text": "★ faz striptease para ▲ e um(a) amigo(a) convidado(a).",
     "category": "exposicao"
   },
   {
     "id": "c620",
     "intensity": 4,
-    "text": "▲ gostaria de fazer striptease para ★ e um(a) amigo(a) convidado(a).",
+    "text": "▲ faz striptease para ★ e um(a) amigo(a) convidado(a).",
     "category": "exposicao"
   },
   {
     "id": "c621",
     "intensity": 5,
-    "text": "★ gostaria de fazer striptease para ▲ e uma pequena plateia de amigos.",
+    "text": "★ faz striptease para ▲ e uma pequena plateia de amigos.",
     "category": "exposicao"
   },
   {
     "id": "c622",
     "intensity": 5,
-    "text": "▲ gostaria de fazer striptease para ★ e uma pequena plateia de amigos.",
+    "text": "▲ faz striptease para ★ e uma pequena plateia de amigos.",
     "category": "exposicao"
   },
   {
     "id": "c623",
     "intensity": 3,
-    "text": "★ gostaria de deixar a porta do banheiro entreaberta \"sem querer\" no banho com visita em casa (com ▲ ciente).",
+    "text": "★ deixa porta do banheiro entreaberta \"sem querer\" no banho com visita em casa (▲ ciente).",
     "category": "exposicao"
   },
   {
     "id": "c624",
     "intensity": 3,
-    "text": "▲ gostaria de deixar a porta do banheiro entreaberta \"sem querer\" no banho com visita em casa (com ★ ciente).",
+    "text": "▲ deixa porta do banheiro entreaberta \"sem querer\" no banho com visita em casa (★ ciente).",
     "category": "exposicao"
   },
   {
     "id": "c625",
     "intensity": 2,
-    "text": "★ gostaria de enviar uma foto sensual (não explícita) para amigo(a) comum, com consentimento de ▲.",
+    "text": "★ envia foto sensual (não explícita) para amigo(a) comum, com consentimento de ▲.",
     "category": "exposicao"
   },
   {
     "id": "c626",
     "intensity": 2,
-    "text": "▲ gostaria de enviar uma foto sensual (não explícita) para amigo(a) comum, com consentimento de ★.",
+    "text": "▲ envia foto sensual (não explícita) para amigo(a) comum, com consentimento de ★.",
     "category": "exposicao"
   },
   {
     "id": "c627",
     "intensity": 3,
-    "text": "★ gostaria de andar de lingerie/toalha em casa na presença de amigo(a) íntimo(a) convidado por ▲.",
+    "text": "★ anda de lingerie/toalha em casa na presença de amigo(a) íntimo(a) convidado por ▲.",
     "category": "exposicao"
   },
   {
     "id": "c628",
     "intensity": 3,
-    "text": "▲ gostaria de andar de lingerie/toalha em casa na presença de amigo(a) íntimo(a) convidado por ★.",
+    "text": "▲ anda de lingerie/toalha em casa na presença de amigo(a) íntimo(a) convidado por ★.",
     "category": "exposicao"
   },
   {
@@ -3733,37 +3733,37 @@ const allKinkLinkCards = [
   {
     "id": "c631",
     "intensity": 2,
-    "text": "★ gostaria que ▲ observasse enquanto ★ se masturba.",
+    "text": "▲ observa enquanto ★ se masturba.",
     "category": "exposicao"
   },
   {
     "id": "c632",
     "intensity": 2,
-    "text": "▲ gostaria que ★ observasse enquanto ▲ se masturba.",
+    "text": "★ observa enquanto ▲ se masturba.",
     "category": "exposicao"
   },
   {
     "id": "c633",
     "intensity": 4,
-    "text": "★ gostaria de se masturbar para ▲ e um(a) amigo(a) convidado(a).",
+    "text": "★ se masturba para ▲ e um(a) amigo(a) convidado(a).",
     "category": "exposicao"
   },
   {
     "id": "c634",
     "intensity": 4,
-    "text": "▲ gostaria de se masturbar para ★ e um(a) amigo(a) convidado(a).",
+    "text": "▲ se masturba para ★ e um(a) amigo(a) convidado(a).",
     "category": "exposicao"
   },
   {
     "id": "c635",
     "intensity": 5,
-    "text": "★ gostaria de se masturbar para ▲ e uma pequena plateia de amigos.",
+    "text": "★ se masturba para ▲ e uma pequena plateia de amigos.",
     "category": "exposicao"
   },
   {
     "id": "c636",
     "intensity": 5,
-    "text": "▲ gostaria de se masturbar para ★ e uma pequena plateia de amigos.",
+    "text": "▲ se masturba para ★ e uma pequena plateia de amigos.",
     "category": "exposicao"
   },
   {
@@ -3871,13 +3871,13 @@ const allKinkLinkCards = [
   {
     "id": "c654",
     "intensity": 6,
-    "text": "★ gostaria de visitar gloryhole (real) para interagir anonimamente.",
+    "text": "★ visita gloryhole (real) para interagir anonimamente.",
     "category": "exposicao"
   },
   {
     "id": "c655",
     "intensity": 6,
-    "text": "▲ gostaria de visitar gloryhole (real) para interagir anonimamente.",
+    "text": "▲ visita gloryhole (real) para interagir anonimamente.",
     "category": "exposicao"
   },
   {
@@ -4249,13 +4249,13 @@ const allKinkLinkCards = [
   {
     "id": "c717",
     "intensity": 4,
-    "text": "★ gostaria que ▲ (ou um grupo) escrevesse palavras/desenhos eróticos em seu corpo.",
+    "text": "▲ (ou um grupo) escreve palavras/desenhos eróticos no corpo de ★.",
     "category": "exposicao"
   },
   {
     "id": "c718",
     "intensity": 4,
-    "text": "▲ gostaria que ★ (ou um grupo) escrevesse palavras/desenhos eróticos em seu corpo.",
+    "text": "★ (ou um grupo) escreve palavras/desenhos eróticos no corpo de ▲.",
     "category": "exposicao"
   },
   {
@@ -4929,61 +4929,61 @@ const allKinkLinkCards = [
   {
     "id": "c830",
     "intensity": 4,
-    "text": "★ gostaria de ser imobilizado(a) por ▲ e ser tratado(a) como escravo(a) / objeto de uso.",
+    "text": "★ imobilizado(a) por ▲ e tratado(a) como escravo(a) / objeto de uso.",
     "category": "poder"
   },
   {
     "id": "c831",
     "intensity": 4,
-    "text": "▲ gostaria de ser imobilizado(a) por ★ e ser tratado(a) como escravo(a) / objeto de uso.",
+    "text": "▲ imobilizado(a) por ★ e tratado(a) como escravo(a) / objeto de uso.",
     "category": "poder"
   },
   {
     "id": "c832",
     "intensity": 4,
-    "text": "Roleplay CNC: ★ gostaria de ser imobilizado(a) por ▲, mas lutar contra o \"ataque\" (resistência simulada).",
+    "text": "Roleplay CNC: ★ imobilizado(a) por ▲, mas luta contra o \"ataque\" (resistência simulada).",
     "category": "fantasia"
   },
   {
     "id": "c833",
     "intensity": 4,
-    "text": "Roleplay CNC: ▲ gostaria de ser imobilizado(a) por ★, mas lutar contra o \"ataque\" (resistência simulada).",
+    "text": "Roleplay CNC: ▲ imobilizado(a) por ★, mas luta contra o \"ataque\" (resistência simulada).",
     "category": "fantasia"
   },
   {
     "id": "c834",
     "intensity": 3,
-    "text": "★ gostaria de confessar para ▲ um fetiche ou vontade que o(a) deixa envergonhado(a).",
+    "text": "★ confessa para ▲ um fetiche ou vontade que o(a) deixa envergonhado(a).",
     "category": "exposicao"
   },
   {
     "id": "c835",
     "intensity": 3,
-    "text": "▲ gostaria de confessar para ★ um fetiche ou vontade que o(a) deixa envergonhado(a).",
+    "text": "▲ confessa para ★ um fetiche ou vontade que o(a) deixa envergonhado(a).",
     "category": "exposicao"
   },
   {
     "id": "c836",
     "intensity": 4,
-    "text": "★ gostaria de confessar um fetiche secreto para ▲ e um(a) amigo(a) de confiança.",
+    "text": "★ confessa fetiche secreto para ▲ e um(a) amigo(a) de confiança.",
     "category": "exposicao"
   },
   {
     "id": "c837",
     "intensity": 4,
-    "text": "▲ gostaria de confessar um fetiche secreto para ★ e um(a) amigo(a) de confiança.",
+    "text": "▲ confessa fetiche secreto para ★ e um(a) amigo(a) de confiança.",
     "category": "exposicao"
   },
   {
     "id": "c838",
     "intensity": 5,
-    "text": "★ gostaria de confessar um fetiche secreto para ▲ e um pequeno grupo de amigos.",
+    "text": "★ confessa fetiche secreto para ▲ e um pequeno grupo de amigos.",
     "category": "exposicao"
   },
   {
     "id": "c839",
     "intensity": 5,
-    "text": "▲ gostaria de confessar um fetiche secreto para ★ e um pequeno grupo de amigos.",
+    "text": "▲ confessa fetiche secreto para ★ e um pequeno grupo de amigos.",
     "category": "exposicao"
   },
   {
@@ -5001,13 +5001,13 @@ const allKinkLinkCards = [
   {
     "id": "c842",
     "intensity": 4,
-    "text": "★ (Submisso/a) gostaria de ser forçado(a) por ▲ (Dominante) a confessar um segredo vergonhoso na frente de um(a) amigo(a).",
+    "text": "★ (Submisso/a) forçado(a) por ▲ (Dominante) a confessar segredo vergonhoso na frente de amigo(a).",
     "category": "poder"
   },
   {
     "id": "c843",
     "intensity": 4,
-    "text": "▲ (Submisso/a) gostaria de ser forçado(a) por ★ (Dominante) a confessar um segredo vergonhoso na frente de um(a) amigo(a).",
+    "text": "▲ (Submisso/a) forçado(a) por ★ (Dominante) a confessar segredo vergonhoso na frente de amigo(a).",
     "category": "poder"
   },
   {
@@ -5109,73 +5109,73 @@ const allKinkLinkCards = [
   {
     "id": "c860",
     "intensity": 3,
-    "text": "★ gostaria de ser amarrado(a) na cama (com algemas leves/lenços) e provocado(a) por ▲.",
+    "text": "★ amarrado(a) na cama (com algemas leves/lenços) e provocado(a) por ▲.",
     "category": "poder"
   },
   {
     "id": "c861",
     "intensity": 3,
-    "text": "▲ gostaria de ser amarrado(a) na cama (com algemas leves/lenços) e provocado(a) por ★.",
+    "text": "▲ amarrado(a) na cama (com algemas leves/lenços) e provocado(a) por ★.",
     "category": "poder"
   },
   {
     "id": "c862",
     "intensity": 5,
-    "text": "★ (Submisso/a) gostaria de ser amarrado(a) (ex: shibari) e deixado(a) sozinho(a) no quarto por 10-15 min por ▲ (Dominante) antes da cena começar.",
+    "text": "★ (Submisso/a) amarrado(a) (ex: shibari) e deixado(a) sozinho(a) no quarto por 10-15 min por ▲ (Dominante) antes da cena começar.",
     "category": "poder"
   },
   {
     "id": "c863",
     "intensity": 5,
-    "text": "▲ (Submisso/a) gostaria de ser amarrado(a) (ex: shibari) e deixado(a) sozinho(a) no quarto por 10-15 min por ★ (Dominante) antes da cena começar.",
+    "text": "▲ (Submisso/a) amarrado(a) (ex: shibari) e deixado(a) sozinho(a) no quarto por 10-15 min por ★ (Dominante) antes da cena começar.",
     "category": "poder"
   },
   {
     "id": "c864",
     "intensity": 6,
-    "text": "★ (Submisso/a) gostaria de ser amarrado(a) por ▲ (Dominante) e ser 'apresentado(a)' aos convidados para toques e provocações.",
+    "text": "★ (Submisso/a) amarrado(a) por ▲ (Dominante) e 'apresentado(a)' aos convidados para toques e provocações.",
     "category": "poder"
   },
   {
     "id": "c865",
     "intensity": 6,
-    "text": "▲ (Submisso/a) gostaria de ser amarrado(a) por ★ (Dominante) e ser 'apresentado(a)' aos convidados para toques e provocações.",
+    "text": "▲ (Submisso/a) amarrado(a) por ★ (Dominante) e 'apresentado(a)' aos convidados para toques e provocações.",
     "category": "poder"
   },
   {
     "id": "c866",
     "intensity": 4,
-    "text": "★ (Submisso/a) gostaria de ser chamado(a) por nomes 'degradantes' (consensuais, ex: 'puta', 'cadela', 'escravo') por ▲ durante o sexo.",
+    "text": "★ (Submisso/a) chamado(a) por nomes 'degradantes' (consensuais, ex: 'puta', 'cadela', 'escravo') por ▲ durante o sexo.",
     "category": "poder"
   },
   {
     "id": "c867",
     "intensity": 4,
-    "text": "▲ (Submisso/a) gostaria de ser chamado(a) por nomes 'degradantes' (consensuais, ex: 'puta', 'cadela', 'escravo') por ★ durante o sexo.",
+    "text": "▲ (Submisso/a) chamado(a) por nomes 'degradantes' (consensuais, ex: 'puta', 'cadela', 'escravo') por ★ durante o sexo.",
     "category": "poder"
   },
   {
     "id": "c868",
     "intensity": 6,
-    "text": "★ (Submisso/a) gostaria de receber 'impact play' (spanking) de ▲ (Dominante) e de um(a) convidado(a) (Nível Hardcore).",
+    "text": "★ (Submisso/a) recebe 'impact play' (spanking) de ▲ (Dominante) e de um(a) convidado(a) (Nível Hardcore).",
     "category": "poder"
   },
   {
     "id": "c869",
     "intensity": 6,
-    "text": "▲ (Submisso/a) gostaria de receber 'impact play' (spanking) de ★ (Dominante) e de um(a) convidado(a) (Nível Hardcore).",
+    "text": "▲ (Submisso/a) recebe 'impact play' (spanking) de ★ (Dominante) e de um(a) convidado(a) (Nível Hardcore).",
     "category": "poder"
   },
   {
     "id": "c870",
     "intensity": 6,
-    "text": "★ (Dominante) gostaria de ser o(a) centro de uma 'sessão de adoração' por ▲ (Submisso/a) e um grupo de amigos (Nível Hardcore).",
+    "text": "★ (Dominante) centro de uma 'sessão de adoração' por ▲ (Submisso/a) e um grupo de amigos (Nível Hardcore).",
     "category": "poder"
   },
   {
     "id": "c871",
     "intensity": 6,
-    "text": "▲ (Dominante) gostaria de ser o(a) centro de uma 'sessão de adoração' por ★ (Submisso/a) e um grupo de amigos (Nível Hardcore).",
+    "text": "▲ (Dominante) centro de uma 'sessão de adoração' por ★ (Submisso/a) e um grupo de amigos (Nível Hardcore).",
     "category": "poder"
   },
   {
@@ -5218,13 +5218,13 @@ const allKinkLinkCards = [
   {
     "id": "c878",
     "intensity": 5,
-    "text": "Head Stomp: Submisso(a) ★ gostaria de ter sua cabeça pisada (seguramente) por ▲ (Dominante).",
+    "text": "Head Stomp: Cabeça de ★ (Submisso/a) pisada (seguramente) por ▲ (Dominante).",
     "category": "poder"
   },
   {
     "id": "c879",
     "intensity": 5,
-    "text": "Head Stomp: Submisso(a) ▲ gostaria de ter sua cabeça pisada (seguramente) por ★ (Dominante).",
+    "text": "Head Stomp: Cabeça de ▲ (Submisso/a) pisada (seguramente) por ★ (Dominante).",
     "category": "poder"
   },
   {
@@ -5381,13 +5381,13 @@ const allKinkLinkCards = [
   {
     "id": "c905",
     "intensity": 4,
-    "text": "Exposição Virtual: ★ gostaria de enviar uma foto de visualização única (sensual, não nua) para ▲.",
+    "text": "Exposição Virtual: ★ envia foto de visualização única (sensual, não nua) para ▲.",
     "category": "exposicao"
   },
   {
     "id": "c906",
     "intensity": 4,
-    "text": "Exposição Virtual: ▲ gostaria de enviar uma foto de visualização única (sensual, não nua) para ★.",
+    "text": "Exposição Virtual: ▲ envia foto de visualização única (sensual, não nua) para ★.",
     "category": "exposicao"
   },
   {
@@ -5549,14 +5549,38 @@ const allKinkLinkCards = [
   {
     "id": "c933",
     "intensity": 6,
-    "text": "Podofilia (Hardcore): ★ (Dominante) gostaria de ter seus pés adorados simultaneamente por ▲ (Submisso/a) e um(a) convidado(a).",
+    "text": "Podofilia (Hardcore): Pés de ★ (Dominante) adorados simultaneamente por ▲ (Submisso/a) e um(a) convidado(a).",
     "category": "poder"
   },
   {
     "id": "c934",
     "intensity": 6,
-    "text": "Podofilia (Hardcore): ▲ (Dominante) gostaria de ter seus pés adorados simultaneamente por ★ (Submisso/a) e um(a) convidado(a).",
+    "text": "Podofilia (Hardcore): Pés de ▲ (Dominante) adorados simultaneamente por ★ (Submisso/a) e um(a) convidado(a).",
     "category": "poder"
+  },
+  {
+    "id": "c935",
+    "intensity": 3,
+    "text": "Prendedores de mamilo em ▲ durante preliminares/sexo.",
+    "category": "sensorial"
+  },
+  {
+    "id": "c936",
+    "intensity": 4,
+    "text": "▲ usa plug anal (tamanho a combinar) durante sexo vaginal/oral.",
+    "category": "sensorial"
+  },
+  {
+    "id": "c937",
+    "intensity": 3,
+    "text": "Corpo de ▲ coberto por algo comestível para ser \"devorado(a)\" por ★.",
+    "category": "sensorial"
+  },
+  {
+    "id": "c938",
+    "intensity": 3,
+    "text": "▲ amarrado(a) levemente com cordas macias enquanto ★ explora seu corpo.",
+    "category": "sensorial"
   }
 ];
 

@@ -7,6 +7,7 @@ import { db } from '../firebase';
 import {
   collection,
   getDocs,
+  getDoc,
   query,
   where,
   doc,
@@ -143,33 +144,60 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
   // Efeito para buscar likes do parceiro não vistos pelo usuário atual
   useEffect(() => {
     const fetchUnseenPartnerLikes = async () => {
-      if (!user?.coupleId || !user?.partnerId || !user?.id || !seenCards) {
+      if (!user?.coupleId || !user?.id) {
+        console.log(`[useCardPileLogic] ⚠️ NÃO buscando likes do parceiro. coupleId: ${!!user?.coupleId}, userId: ${!!user?.id}`);
         setPartnerLikesQueue([]);
         return;
       }
-      console.log(`[useCardPileLogic] Buscando likes do parceiro ${user.partnerId.substring(0,5)} não vistos por ${user.id.substring(0,5)}`);
+
       try {
+        // Buscar partner ID do couple document
+        const coupleDocRef = doc(db, 'couples', user.coupleId);
+        const coupleDocSnap = await getDoc(coupleDocRef);
+        
+        if (!coupleDocSnap.exists()) {
+          console.log(`[useCardPileLogic] ⚠️ Couple document não encontrado: ${user.coupleId}`);
+          setPartnerLikesQueue([]);
+          return;
+        }
+
+        const coupleData = coupleDocSnap.data();
+        const partnerId = coupleData.members?.find((id: string) => id !== user.id);
+        
+        if (!partnerId) {
+          console.log(`[useCardPileLogic] ⚠️ Partner ID não encontrado no couple. Members: ${coupleData.members}`);
+          setPartnerLikesQueue([]);
+          return;
+        }
+
+        console.log(`[useCardPileLogic] 🔍 Buscando likes do parceiro ${partnerId.substring(0,5)} não vistos por ${user.id.substring(0,5)}`);
+        
         const interactionsRef = collection(db, 'couples', user.coupleId, 'likedInteractions');
         const qPartnerLikes = query(
           interactionsRef,
-          where('likedByUIDs', 'array-contains', user.partnerId)
+          where('likedByUIDs', 'array-contains', partnerId)
         );
         const snapshot = await getDocs(qPartnerLikes);
+        console.log(`[useCardPileLogic] 📦 Query retornou ${snapshot.size} documentos de interação do parceiro.`);
         const potentialPartnerLikedCards: Card[] = [];
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
-          if (data.cardData && !data.likedByUIDs.includes(user.id) && !seenCards.includes(docSnap.id)) {
+          const alreadyLikedByMe = data.likedByUIDs.includes(user.id);
+          const alreadySeen = seenCards.includes(docSnap.id);
+          console.log(`[useCardPileLogic]   - Card ${docSnap.id}: likedByMe=${alreadyLikedByMe}, seen=${alreadySeen}, hasCardData=${!!data.cardData}`);
+          if (data.cardData && !alreadyLikedByMe && !alreadySeen) {
             potentialPartnerLikedCards.push({ id: docSnap.id, ...data.cardData });
           }
         });
         setPartnerLikesQueue(potentialPartnerLikedCards.sort(() => 0.5 - Math.random()));
-        console.log('[useCardPileLogic] Likes do parceiro não vistos carregados:', potentialPartnerLikedCards.length);
+        console.log(`[useCardPileLogic] 📥 FILA DE LIKES DO PARCEIRO CARREGADA: ${potentialPartnerLikedCards.length} cartas`, potentialPartnerLikedCards.map(c => `${c.id.substring(0,4)}:${c.text?.substring(0,20)}`));
       } catch (error) {
-        console.error("[useCardPileLogic] Erro ao buscar likes do parceiro:", error);
+        console.error("[useCardPileLogic] ❌ Erro ao buscar likes do parceiro:", error);
+        setPartnerLikesQueue([]);
       }
     };
     fetchUnseenPartnerLikes();
-  }, [user?.coupleId, user?.partnerId, user?.id, seenCards]);
+  }, [user?.coupleId, user?.id, seenCards]);
 
   // Combina cartas e separa em "swipable" e "conexao"
   const { swipableCards, allConexaoCards } = useMemo((): { swipableCards: Card[]; allConexaoCards: Card[] } => {
@@ -186,6 +214,7 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
   useEffect(() => {
     if (user && conexaoCardsPool.length > 0) {
       const unseen = conexaoCardsPool.filter((card: Card) => !seenCards.includes(card.id));
+      console.log(`[CONEXÃO] 📊 Inicialização: ${unseen.length} cartas de conexão não vistas de ${conexaoCardsPool.length} totais. Matches: ${matchedCards.length}. Primeiro trigger: ${initialConexaoTriggered ? 'JÁ ATIVADO' : 'PENDENTE'}`);
       setUnseenConexaoCards(unseen);
     } else if (!user) {
       setUnseenConexaoCards([]);
@@ -225,16 +254,20 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
       if (partnerLikedCard) {
         const maxIntensity = user?.maxIntensity ?? 8; // Usa 8 (mostrar tudo) como padrão
         if ((partnerLikedCard.intensity ?? 0) > maxIntensity) {
-          console.log(`[useCardPileLogic] Like do parceiro com intensidade alta detectado. Acionando 'peek'. Card: ${partnerLikedCard.id}`);
+          console.log(`[useCardPileLogic] ⚠️ Like do parceiro com intensidade alta detectado. Acionando 'peek'. Card: ${partnerLikedCard.id}`);
           setCardToPeek(partnerLikedCard);
           setCurrentCard(null); // Garante que a pilha não mostre nada enquanto o modal de peek é exibido.
           return; // Para a seleção aqui.
         } else {
           nextCard = partnerLikedCard;
-          console.log(`[useCardPileLogic] Priorizando like do parceiro: ${nextCard.id}`);
+          console.log(`[useCardPileLogic] 💕 LIKE DO PARCEIRO (ciclo ${cardSelectionCycle}): ${nextCard.id} - "${nextCard.text?.substring(0, 40)}..." | Fila restante: ${partnerLikesQueue.length - 1}`);
           setPartnerLikesQueue(prev => prev.filter(card => card.id !== nextCard?.id));
         }
+      } else {
+        console.log(`[useCardPileLogic] ⚠️ Ciclo 2 (like parceiro), mas nenhuma carta disponível na fila.`);
       }
+    } else if (!nextCard && cardSelectionCycle === 2 && partnerLikesQueue.length === 0) {
+      console.log(`[useCardPileLogic] 📭 Ciclo 2, mas fila de likes do parceiro está VAZIA.`);
     }
 
     // Prioridade 3: Carta aleatória geral
@@ -246,14 +279,18 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
       if (availableGeneral.length > 0) {
         const shuffledGeneral = [...availableGeneral].sort(() => 0.5 - Math.random());
         nextCard = shuffledGeneral[0];
-        console.log(`[useCardPileLogic] Selecionando carta aleatória geral: ${nextCard?.id}`);
+        console.log(`[useCardPileLogic] 🎲 CARTA ALEATÓRIA (ciclo ${cardSelectionCycle}): ${nextCard?.id} - "${nextCard?.text?.substring(0, 40)}..." | Total não vistas: ${availableGeneral.length}`);
+      } else {
+        console.log(`[useCardPileLogic] ⚠️ Nenhuma carta geral disponível!`);
       }
     }
 
     if (!isLoadingCards) {
       setCurrentCard(nextCard);
     }
-    setCardSelectionCycle(prev => (prev + 1) % 3); // Ciclo 0, 1, 2
+    const nextCycleValue = (cardSelectionCycle + 1) % 3;
+    console.log(`[useCardPileLogic] 🔄 Ciclo atual: ${cardSelectionCycle} | Próximo ciclo: ${nextCycleValue} ${nextCycleValue === 2 ? '(LIKE PARCEIRO)' : '(ALEATÓRIA)'}`);
+    setCardSelectionCycle(nextCycleValue);
   }, [generalUnseen, isLoadingCards, partnerNewCard, seenCards, user?.coupleId, cardSelectionCycle, partnerLikesQueue, user?.maxIntensity]); // Adicionado user?.maxIntensity
 
   // Efeito para selecionar a primeira carta
@@ -303,22 +340,30 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
       if (!initialConexaoTriggered) {
         if (liked && interactedCard.category !== 'conexao') {
           const newLikesCount = userLikesForInitialConexao + 1;
+          console.log(`[CONEXÃO] ❤️ Like #${newLikesCount} em carta não-conexão. Faltam ${10 - newLikesCount} para o primeiro gatilho.`);
           setUserLikesForInitialConexao(newLikesCount);
           if (newLikesCount >= 10 && unseenConexaoCards.length > 0) {
+            console.log(`[CONEXÃO] 🎉 PRIMEIRO GATILHO ATIVADO! 10 likes alcançados. Cartas conexão disponíveis: ${unseenConexaoCards.length}`);
             setInitialConexaoTriggered(true);
             setCurrentConexaoCardForModal(unseenConexaoCards[0]);
             setShowConexaoModal(true);
             setUserLikesForInitialConexao(0);
+          } else if (newLikesCount >= 10 && unseenConexaoCards.length === 0) {
+            console.warn(`[CONEXÃO] ⚠️ 10 likes alcançados, mas nenhuma carta de conexão disponível!`);
           }
         }
       } else {
         if (matchOccurredThisInteraction) {
           const currentTotalMatches = matchedCards.length;
+          console.log(`[CONEXÃO] 🔗 Match ocorreu! Total de matches agora: ${currentTotalMatches}. Último trigger em: ${lastConexaoMatchTriggerCount}`);
           if (currentTotalMatches > lastConexaoMatchTriggerCount &&
               (currentTotalMatches % 5 === 0 || (currentTotalMatches - lastConexaoMatchTriggerCount) >= 5)) {
             if (unseenConexaoCards.length > 0) {
+              console.log(`[CONEXÃO] 🎉 GATILHO DE MATCHES ATIVADO! Matches: ${currentTotalMatches}. Mostrando carta de conexão.`);
               setCurrentConexaoCardForModal(unseenConexaoCards[0]);
               setShowConexaoModal(true);
+            } else {
+              console.warn(`[CONEXÃO] ⚠️ Gatilho ativado (${currentTotalMatches} matches), mas nenhuma carta de conexão disponível!`);
             }
             setLastConexaoMatchTriggerCount(currentTotalMatches);
           }

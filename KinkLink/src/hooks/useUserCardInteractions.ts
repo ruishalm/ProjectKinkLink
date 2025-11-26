@@ -349,6 +349,23 @@ export function useUserCardInteractions() {
     }
 
     try {
+      // Buscar partner ID do couple document
+      const coupleDocRef = doc(db, 'couples', user.coupleId);
+      const coupleDocSnap = await getDoc(coupleDocRef);
+      
+      if (!coupleDocSnap.exists()) {
+        console.error('[createUserCard] Couple document não encontrado');
+        return;
+      }
+
+      const coupleData = coupleDocSnap.data();
+      const partnerId = coupleData.members?.find((id: string) => id !== user.id);
+      
+      if (!partnerId) {
+        console.warn('[createUserCard] Partner ID não encontrado no couple');
+        // Continua mesmo sem partnerId, pois a carta pode ser criada
+      }
+
       // Inicia um batch para garantir que todas as operações sejam atômicas
       const batch = writeBatch(db);
 
@@ -375,16 +392,17 @@ export function useUserCardInteractions() {
       };
       batch.set(interactionDocRef, newInteractionData);
 
-      // 3. Sinaliza para o parceiro que há uma nova carta para ele ver
-      const coupleDocRef = doc(db, 'couples', user.coupleId);
-      batch.update(coupleDocRef, {
-        nextCardForPartner: {
-          cardId: newUserCardRef.id,
-          cardData: { text: newCardData.text, category: newCardData.category, intensity: newCardData.intensity, isCreatorSuggestion: newCardData.isCreatorSuggestion },
-          forUserId: user.partnerId,
-          timestamp: Timestamp.now()
-        }
-      });
+      // 3. Sinaliza para o parceiro que há uma nova carta para ele ver (se houver)
+      if (partnerId) {
+        batch.update(coupleDocRef, {
+          nextCardForPartner: {
+            cardId: newUserCardRef.id,
+            cardData: { text: newCardData.text, category: newCardData.category, intensity: newCardData.intensity, isCreatorSuggestion: newCardData.isCreatorSuggestion },
+            forUserId: partnerId,
+            timestamp: Timestamp.now()
+          }
+        });
+      }
 
       // 4. Executa todas as operações do batch
       await batch.commit();
@@ -413,6 +431,16 @@ export function useUserCardInteractions() {
     }
 
     try {
+      // Buscar partner ID do couple document
+      const coupleDocRef = doc(db, 'couples', user.coupleId);
+      const coupleDocSnap = await getDoc(coupleDocRef);
+      
+      let partnerId: string | undefined;
+      if (coupleDocSnap.exists()) {
+        const coupleData = coupleDocSnap.data();
+        partnerId = coupleData.members?.find((id: string) => id !== user.id);
+      }
+
       // Inicia um batch para garantir que todas as operações sejam atômicas
       const batch = writeBatch(db);
 
@@ -425,8 +453,8 @@ export function useUserCardInteractions() {
       batch.update(currentUserDocRef, { seenCards: arrayRemove(cardId) });
 
       // 3. Remove cardId de seenCards do parceiro (se houver)
-      if (user.partnerId) { // JÁ CORRIGIDO ANTERIORMENTE, MANTIDO
-        const partnerDocRef = doc(db, 'users', user.partnerId); // JÁ CORRIGIDO ANTERIORMENTE, MANTIDO
+      if (partnerId) {
+        const partnerDocRef = doc(db, 'users', partnerId);
         batch.update(partnerDocRef, { seenCards: arrayRemove(cardId) });
       }
 

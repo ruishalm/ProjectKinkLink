@@ -4,9 +4,9 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth, type MatchedCard } from '../contexts/AuthContext';
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
 import { useCoupleCardChats } from '../hooks/useCoupleCardChats';
+import { useCardNotificationStatus } from '../hooks/useCardNotificationStatus'; // <<< NOVO HOOK
 // Importa apenas o tipo CardData, pois o componente PlayingCard não é usado diretamente aqui.
 import { type CardData as PlayingCardDataType } from '../components/PlayingCard'; // Mantido para o modal
-import { getLastSeenTimestampForCard } from '../utils/chatNotificationStore'; // <<< REATIVADO
 import CardChatModal from '../components/CardChatModal'; // Mantido para o modal
 import CategoryCarousel from '../components/CategoryCarousel';
 import { useSkin } from '../contexts/SkinContext';
@@ -14,11 +14,24 @@ import { db } from '../firebase'; // <<< ADICIONADO
 import styles from './MatchesPage.module.css';
 import {doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
-// MatchCardItem é importado e usado, mas sua interface MatchCardItemProps não precisa ser importada separadamente aqui.
-// A interface MatchCardItemProps é exportada pelo MatchCardItem.tsx e usada lá.
 import MatchCardItem from '../components/MatchCardItem';
 
-
+/**
+ * MatchesPage - Página que exibe todos os Links (matches) do usuário
+ * 
+ * Organização:
+ * - 🔥 Top Links: Cartas favoritadas (isHot = true)
+ * - 📂 Outros Links: Cartas agrupadas por categoria
+ * - ✅ Cartas Realizadas: Cartas marcadas como completadas
+ * 
+ * Badges de notificação:
+ * - Badge vermelho: Novo match OU nova mensagem não lida
+ * - Badge no botão "Cartas": Há algum match ou mensagem não vista
+ * 
+ * Lógica de notificação usa dois mecanismos:
+ * 1. Firestore: user.lastVisitedMatchesPage (atualizado ao entrar na página)
+ * 2. LocalStorage: chatNotificationStore (atualizado ao abrir modal de chat)
+ */
 function MatchesPage() {
   const { user } = useAuth();
   const { matchedCards: userMatchedCards, toggleHotStatus } = useUserCardInteractions();
@@ -26,12 +39,38 @@ function MatchesPage() {
   const { isLoadingSkins } = useSkin();
   const location = useLocation();
   const { cardChatsData, isLoading: isLoadingCardChats, error: cardChatsError } = useCoupleCardChats(user?.coupleId);
+  
+  // Hook customizado para verificar status de notificação das cartas
+  const { getCardNotificationStatus } = useCardNotificationStatus(user, cardChatsData);
 
-  // O tipo PlayingCardDataType é usado apenas para selectedCardForChat, que é passado para CardChatModal.
+  // Estados locais
   const [selectedCardForChat, setSelectedCardForChat] = useState<PlayingCardDataType | null>(null);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const completedSectionRef = useRef<HTMLDivElement>(null);
-  const [hasUnseenGlobalMatches, setHasUnseenGlobalMatches] = useState(false); // Para o botão "Cartas"
+  const [hasUnseenGlobalMatches, setHasUnseenGlobalMatches] = useState(false); // Badge no botão "Cartas"
+
+  // Efeito para atualizar a flag global de "não visto" para o botão "Cartas"
+  useEffect(() => {
+    const anyNew = userMatchedCards.some(card => {
+      const { isNewMatch, hasNewMessage } = getCardNotificationStatus(card);
+      return isNewMatch || hasNewMessage;
+    });
+    setHasUnseenGlobalMatches(anyNew);
+  }, [userMatchedCards, getCardNotificationStatus]);
+  
+  // Callback para abrir uma carta (usado no useEffect e nos handlers)
+  const handleCardClick = useCallback((card: MatchedCard) => { 
+    const cardForModal: PlayingCardDataType = {
+        id: card.id,
+        text: card.text,
+        category: card.category,
+        intensity: card.intensity,
+        isHot: card.isHot,
+        isCompleted: card.isCompleted,
+    };
+    setSelectedCardForChat(cardForModal);
+    setIsChatModalOpen(true);
+  }, []); // A dependência vazia garante que a função seja criada apenas uma vez
 
   // Efeito para abrir o modal de chat se a URL tiver um hash #card-CARD_ID
   useEffect(() => {
@@ -48,46 +87,7 @@ function MatchesPage() {
         }
       }
     }
-  }, [location.hash, userMatchedCards]);
-
-  // Lógica para determinar se há novos matches ou novas mensagens
-  const getCardNotificationStatus = (card: MatchedCard) => {
-    const lastVisited = user?.lastVisitedMatchesPage?.toDate();
-    const matchCreatedAt = card.createdAt?.toDate();
-    const chatLastMessageTimestamp = cardChatsData[card.id]?.lastMessageTimestamp?.toDate();
-
-    let isNewMatch = false;
-    let hasNewMessage = false;
-    const lastSeenByClientISO = getLastSeenTimestampForCard(card.id);
-
-    if (lastVisited) {
-      // Um match é novo se foi criado DEPOIS da última visita
-      // E se não foi visto ainda no localStorage (para o caso de o usuário não ter aberto a carta)
-      if (matchCreatedAt && matchCreatedAt > lastVisited && (!lastSeenByClientISO || new Date(lastSeenByClientISO) < matchCreatedAt)) {
-        isNewMatch = true;
-      }
-    }
-
-    // Lógica para novas mensagens, agora usando o localStorage
-    if (chatLastMessageTimestamp) {
-      if (!lastSeenByClientISO || new Date(lastSeenByClientISO) < chatLastMessageTimestamp) {
-        if (cardChatsData[card.id]?.lastMessageSenderId !== user?.id) {
-          hasNewMessage = true;
-        }
-      }
-    }
-
-    return { isNewMatch, hasNewMessage };
-  };
-
-  // Efeito para atualizar a flag global de "não visto" para o botão "Cartas"
-  useEffect(() => {
-    const anyNew = userMatchedCards.some(card => {
-      const { isNewMatch, hasNewMessage } = getCardNotificationStatus(card);
-      return isNewMatch || hasNewMessage;
-    });
-    setHasUnseenGlobalMatches(anyNew);
-  }, [user?.id, userMatchedCards, cardChatsData, getCardNotificationStatus]);
+  }, [location.hash, userMatchedCards, handleCardClick]);
 
   // Atualiza lastVisitedMatchesPage quando o componente é montado (entra na página)
   // Não no cleanup para evitar erro de permissão no Strict Mode
@@ -101,19 +101,6 @@ function MatchesPage() {
       });
     }
   }, [user?.id]); // Roda apenas quando user.id muda (mount/login)
-  
-  const handleCardClick = useCallback((card: MatchedCard) => { 
-    const cardForModal: PlayingCardDataType = {
-        id: card.id,
-        text: card.text,
-        category: card.category,
-        intensity: card.intensity,
-        isHot: card.isHot,
-        isCompleted: card.isCompleted,
-    };
-    setSelectedCardForChat(cardForModal);
-    setIsChatModalOpen(true);
-  }, []); // A dependência vazia garante que a função seja criada apenas uma vez
 
   const handleCloseChat = useCallback(() => {
     setIsChatModalOpen(false);
@@ -257,8 +244,7 @@ function MatchesPage() {
                             cards={cards}
                             onCardClick={handleCardClick}
                             onToggleHot={handleToggleHotInCarousel}
-                            cardChatsData={cardChatsData} // Passa para o carrossel
-                            userLastVisitedMatchesPage={user?.lastVisitedMatchesPage} // Passa para o carrossel
+                            cardChatsData={cardChatsData}
                           />
                       </div>
                     );
@@ -276,12 +262,10 @@ function MatchesPage() {
                 {completedMatches.map((card: MatchedCard) => (
                   <MatchCardItem
                     key={card.id}
-                    card={card} // <<< AQUI
+                    card={card}
                     onClick={() => handleCardClick(card)}
-                    isHot={false}
-                    isNewMatch={false} // Cartas completadas não são "novas"
-                    hasNewMessage={false} // Chats de cartas completadas não mostram "nova mensagem"
                     isCompletedCard={true}
+                    // Não passa isHot, isNewMatch ou hasNewMessage - cartas completadas não exibem esses badges
                   />
                 ))}
               </div>

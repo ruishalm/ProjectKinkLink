@@ -1,11 +1,11 @@
 // CategoryCarousel.tsx
 import React from 'react';
-import { useAuth } from '../contexts/AuthContext'; // <<< ADICIONADO
-import { type Timestamp } from 'firebase/firestore';
-import { type MatchedCard } from '../contexts/AuthContext'; // Usaremos o tipo MatchedCard
-import { type CoupleCardChats } from '../hooks/useCoupleCardChats'; // Importa o tipo
-import MatchCardItem, { type MatchCardItemProps } from './MatchCardItem'; // Importa o componente refatorado
-import CardBack from './CardBack'; // Para a carta vazia
+import { useAuth } from '../contexts/AuthContext';
+import { type MatchedCard } from '../contexts/AuthContext';
+import { type CoupleCardChats } from '../hooks/useCoupleCardChats';
+import { useCardNotificationStatus } from '../hooks/useCardNotificationStatus'; // <<< NOVO HOOK
+import MatchCardItem, { type MatchCardItemProps } from './MatchCardItem';
+import CardBack from './CardBack';
 import styles from './CategoryCarousel.module.css';
 
 // Import Swiper React components
@@ -22,36 +22,23 @@ interface CategoryCarouselProps {
   title: string;
   cards: MatchedCard[];
   onCardClick: (card: MatchedCard) => void;
-  onToggleHot: (cardId: string, event: React.MouseEvent) => void; // <<< ADICIONADO
+  onToggleHot: (cardId: string, event: React.MouseEvent) => void;
   cardChatsData: CoupleCardChats; // Dados dos chats para verificar novas mensagens
-  userLastVisitedMatchesPage?: Timestamp; // Timestamp da última visita do usuário
   isCompletedCarousel?: boolean; // Indica se é o carrossel da seção "Realizadas"
 }
 
-const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCardClick, onToggleHot, cardChatsData, userLastVisitedMatchesPage, isCompletedCarousel = false }) => {
-  const { user } = useAuth(); // <<< ADICIONADO
-
-  // Função auxiliar para determinar o status de notificação de cada carta
-  const getCardNotificationStatus = (card: MatchedCard) => {
-    const lastVisited = userLastVisitedMatchesPage?.toDate();
-    const matchCreatedAt = card.createdAt?.toDate();
-    const chatLastMessageTimestamp = cardChatsData[card.id]?.lastMessageTimestamp?.toDate();
-    const lastMessageSenderId = cardChatsData[card.id]?.lastMessageSenderId;
-
-    let isNewMatch = false;
-    let hasNewMessage = false;
-
-    if (lastVisited) {
-      if (matchCreatedAt && matchCreatedAt > lastVisited) {
-        isNewMatch = true;
-      }
-      // Verifica se a última mensagem é mais recente que a visita E não foi enviada pelo próprio usuário
-      if (chatLastMessageTimestamp && chatLastMessageTimestamp > lastVisited && lastMessageSenderId !== user?.id) {
-        hasNewMessage = true;
-      }
-    }
-    return { isNewMatch, hasNewMessage };
-  };
+const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ 
+  title, 
+  cards, 
+  onCardClick, 
+  onToggleHot, 
+  cardChatsData, 
+  isCompletedCarousel = false 
+}) => {
+  const { user } = useAuth();
+  
+  // Hook customizado para verificar status de notificação das cartas
+  const { getCardNotificationStatus } = useCardNotificationStatus(user, cardChatsData);
 
   if (cards.length === 0) {
     return (
@@ -77,8 +64,8 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCar
           slidesPerView={'auto'} // Para o efeito de "espiar"
           centeredSlides={true} // Centraliza o slide ativo
           // Ativar o loop apenas se houver cartas suficientes para uma boa experiência de "peek"
-          // Ex: 3 ou mais cartas. Ajuste o número conforme necessário.
-          loop={cards.length > 2}
+          // Com 5+ cartas, o loop funciona suavemente sem duplicatas visíveis
+          loop={cards.length >= 5}
           // slidesPerGroup={1} // Com slidesPerView: 'auto' e loop, slidesPerGroup pode não ser necessário ou desejado
           navigation // Habilita as setas de navegação
           preventClicks={false} // Tenta garantir que cliques nas cartas funcionem

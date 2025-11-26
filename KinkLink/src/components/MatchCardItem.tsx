@@ -34,7 +34,7 @@ const MatchCardItem: React.FC<MatchCardItemProps> = ({
   isCompletedCard // Se é uma carta da seção "Realizadas"
 }) => {
   // A escala agora considera se é uma carta completada para não aplicar o "hot" visual
-  const scaleFactor = isHot && !isCompletedCard ? 0.55 : 0.5;
+  const scaleFactor = 0.7; // Aumentado de 0.5 para 0.7 - todas as cartas do mesmo tamanho
   const cardWidth = 250 * scaleFactor;
   const cardHeight = 350 * scaleFactor;
 

@@ -8,17 +8,14 @@
 }
 
 .unreadIndicator {
-  position: absolute; /* Posiciona a bolinha em relação ao .cardItemWrapper */
-  top: 0px; /* Alinha com a borda superior */
-  right: 0px; /* Alinha com a borda direita */
+  position: absolute;
+  top: 0px;
+  right: 0px;
   width: 10px;
   height: 10px;
-  background-color: #FF0000; /* Vermelho */
+  background-color: #FF0000;
   border-radius: 50%;
-  z-index: 10; /* Garante que fique acima da carta */
-  border: 1px solid white; /* Borda branca para destaque */
-  /* Ajusta a transformação para que a bolinha fique ligeiramente fora do canto,
-     como um "selo" ou "badge" */
+  z-index: 10;
   transform: translate(50%, -50%);
 }
 

@@ -10,7 +10,7 @@ import styles from './CategoryCarousel.module.css';
 
 // Import Swiper React components
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, A11y } from 'swiper/modules'; // A11y para acessibilidade
+import { Navigation, A11y } from 'swiper/modules';
 
 // Import Swiper styles
 // @ts-expect-error ts eh doido
@@ -60,19 +60,16 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({
       <div className={styles.swiperContainer}>
         <Swiper
           modules={[Navigation, A11y]}
-          spaceBetween={16} // Espaço entre os slides (1rem)
-          slidesPerView={'auto'} // Para o efeito de "espiar"
-          centeredSlides={true} // Centraliza o slide ativo
-          // Ativar o loop apenas se houver cartas suficientes para uma boa experiência de "peek"
-          // Com 5+ cartas, o loop funciona suavemente sem duplicatas visíveis
-          loop={cards.length >= 5}
-          // slidesPerGroup={1} // Com slidesPerView: 'auto' e loop, slidesPerGroup pode não ser necessário ou desejado
-          navigation // Habilita as setas de navegação
-          preventClicks={false} // Tenta garantir que cliques nas cartas funcionem
-          preventClicksPropagation={false} // Ajuda a propagar o clique para os elementos filhos
-          simulateTouch={true} // HABILITA a simulação de toque para mouse (opcional, mas bom para desktop)
-          allowTouchMove={true} // HABILITA o arrastar/swipe
-          className={styles.swiperInstance} // Classe para estilização customizada se necessário
+          spaceBetween={16}
+          slidesPerView={'auto'}
+          centeredSlides={true}
+          loop={cards.length >= 3}
+          navigation
+          preventClicks={false}
+          preventClicksPropagation={false}
+          simulateTouch={true}
+          allowTouchMove={true}
+          className={styles.swiperInstance}
         >
           {cards.map(card => {
             // Prepara os dados para MatchCardItem

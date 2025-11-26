@@ -14,24 +14,11 @@ import { db } from '../firebase'; // <<< ADICIONADO
 import styles from './MatchesPage.module.css';
 import {doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
+// MatchCardItem é importado e usado, mas sua interface MatchCardItemProps não precisa ser importada separadamente aqui.
+// A interface MatchCardItemProps é exportada pelo MatchCardItem.tsx e usada lá.
 import MatchCardItem from '../components/MatchCardItem';
 
-/**
- * MatchesPage - Página que exibe todos os Links (matches) do usuário
- * 
- * Organização:
- * - 🔥 Top Links: Cartas favoritadas (isHot = true)
- * - 📂 Outros Links: Cartas agrupadas por categoria
- * - ✅ Cartas Realizadas: Cartas marcadas como completadas
- * 
- * Badges de notificação:
- * - Badge vermelho: Novo match OU nova mensagem não lida
- * - Badge no botão "Cartas": Há algum match ou mensagem não vista
- * 
- * Lógica de notificação usa dois mecanismos:
- * 1. Firestore: user.lastVisitedMatchesPage (atualizado ao entrar na página)
- * 2. LocalStorage: chatNotificationStore (atualizado ao abrir modal de chat)
- */
+
 function MatchesPage() {
   const { user } = useAuth();
   const { matchedCards: userMatchedCards, toggleHotStatus } = useUserCardInteractions();
@@ -43,11 +30,11 @@ function MatchesPage() {
   // Hook customizado para verificar status de notificação das cartas
   const { getCardNotificationStatus } = useCardNotificationStatus(user, cardChatsData);
 
-  // Estados locais
+  // O tipo PlayingCardDataType é usado apenas para selectedCardForChat, que é passado para CardChatModal.
   const [selectedCardForChat, setSelectedCardForChat] = useState<PlayingCardDataType | null>(null);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const completedSectionRef = useRef<HTMLDivElement>(null);
-  const [hasUnseenGlobalMatches, setHasUnseenGlobalMatches] = useState(false); // Badge no botão "Cartas"
+  const [hasUnseenGlobalMatches, setHasUnseenGlobalMatches] = useState(false); // Para o botão "Cartas"
 
   // Efeito para atualizar a flag global de "não visto" para o botão "Cartas"
   useEffect(() => {
@@ -212,17 +199,18 @@ function MatchesPage() {
               <div className={getTopLinksContainerClasses(hotMatches.length)}>
                 <div className={styles.matchesGrid}>
                   {hotMatches.map((card: MatchedCard) => (
-                    <MatchCardItem // <<< AQUI
-                      key={card.id}
-                      card={card}
-                      onClick={() => handleCardClick(card)}
-                      isHot={true}
-                      isNewMatch={getCardNotificationStatus(card).isNewMatch}
-                      hasNewMessage={getCardNotificationStatus(card).hasNewMessage}
-                      lastMessageSnippet={getCardNotificationStatus(card).hasNewMessage ? cardChatsData[card.id]?.lastMessageTextSnippet : undefined}
-                      onToggleHot={handleToggleHotInCarousel} // Usa a função correta para o carrossel
-                      isCompletedCard={false}
-                    />
+                    <div key={card.id} className={styles.gridCellContent}>
+                      <MatchCardItem
+                        card={card}
+                        onClick={() => handleCardClick(card)}
+                        isHot={true}
+                        isNewMatch={getCardNotificationStatus(card).isNewMatch}
+                        hasNewMessage={getCardNotificationStatus(card).hasNewMessage}
+                        lastMessageSnippet={getCardNotificationStatus(card).hasNewMessage ? cardChatsData[card.id]?.lastMessageTextSnippet : undefined}
+                        onToggleHot={handleToggleHotInCarousel} // Usa a função correta para o carrossel
+                        isCompletedCard={false}
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
@@ -260,13 +248,14 @@ function MatchesPage() {
             {completedMatches.length > 0 ? (
               <div className={styles.matchesGrid}>
                 {completedMatches.map((card: MatchedCard) => (
-                  <MatchCardItem
-                    key={card.id}
-                    card={card}
-                    onClick={() => handleCardClick(card)}
-                    isCompletedCard={true}
-                    // Não passa isHot, isNewMatch ou hasNewMessage - cartas completadas não exibem esses badges
-                  />
+                  <div key={card.id} className={styles.gridCellContent}>
+                    <MatchCardItem
+                      card={card}
+                      onClick={() => handleCardClick(card)}
+                      isCompletedCard={true}
+                      // Não passa isHot, isNewMatch ou hasNewMessage - cartas completadas não exibem esses badges
+                    />
+                  </div>
                 ))}
               </div>
             ) : (

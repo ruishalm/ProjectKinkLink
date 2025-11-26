@@ -1,21 +1,28 @@
 /* MatchCardItem.module.css */
 .cardItemWrapper {
+  /* Volta ao estilo seguro e não-invasivo: inline-block para funcionar bem dentro da grid */
   display: inline-block;
+  vertical-align: top; /* Alinha ao topo da célula para evitar overlap */
+  max-width: 100%; /* Não excede a largura da célula da grid */
+  margin-bottom: 12px; /* Pequena folga entre linhas da grid */
   cursor: pointer;
   transition: transform 0.15s ease-out;
-  position: relative; /* ESSENCIAL: Para que .unreadIndicator possa ser posicionado absolutamente */
-  overflow: hidden; /* Garante que a bolinha não vaze se for posicionada ligeiramente fora */
+  position: relative; /* Essencial para posicionamento de badges */
+  overflow: visible; /* Permite que badges apareçam sem cortar */
 }
 
 .unreadIndicator {
-  position: absolute;
-  top: 0px;
-  right: 0px;
+  position: absolute; /* Posiciona a bolinha em relação ao .cardItemWrapper */
+  top: 0px; /* Alinha com a borda superior */
+  right: 0px; /* Alinha com a borda direita */
   width: 10px;
   height: 10px;
-  background-color: #FF0000;
+  background-color: #FF0000; /* Vermelho */
   border-radius: 50%;
-  z-index: 10;
+  z-index: 10; /* Garante que fique acima da carta */
+  border: 1px solid white; /* Borda branca para destaque */
+  /* Ajusta a transformação para que a bolinha fique ligeiramente fora do canto,
+     como um "selo" ou "badge" */
   transform: translate(50%, -50%);
 }
 

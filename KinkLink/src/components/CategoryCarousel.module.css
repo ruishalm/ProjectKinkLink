@@ -102,6 +102,8 @@
   box-sizing: border-box;
   overflow: visible !important;
   position: relative;
+  padding-left: 32px;
+  padding-right: 32px;
 }
 
 .singleActiveSlideOverride {

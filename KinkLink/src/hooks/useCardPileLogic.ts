@@ -78,9 +78,9 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
   const [lastDislikedCard, setLastDislikedCard] = useState<Card | null>(null); // Novo estado
   const { triggerAnimateTipsIn } = useCardTips(currentCard); // Mudado para usar a função trigger
 
-  // Efeito para buscar todas as cartas (padrão e do usuário)
+  // Efeito para buscar cartas padrão (apenas uma vez)
   useEffect(() => {
-    const fetchCards = async () => {
+    const fetchStandardCards = async () => {
       setIsLoadingCards(true);
       try {
         // Define a intensidade máxima, com um padrão de 8 (mostrar tudo) se não estiver definida no usuário.
@@ -94,29 +94,45 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
         const fetchedStandardCards = cardsSnapshot.docs.map(d => ({ id: d.id, ...d.data() } as Card));
         setAllCardsFromDb(fetchedStandardCards);
         console.log(`[useCardPileLogic] Cartas padrão (até intensidade ${maxIntensity}) carregadas:`, fetchedStandardCards.length);
-
-        if (user?.coupleId) {
-          const userCardsRef = query(
-            collection(db, 'userCards'),
-            where('coupleId', '==', user.coupleId),
-            where('intensity', '<=', maxIntensity)
-          );
-          const userCardsSnapshot = await getDocs(userCardsRef);
-          const fetchedUserCards = userCardsSnapshot.docs.map(d => ({ id: d.id, ...d.data() } as Card));
-          setUserCreatedCards(fetchedUserCards);
-          console.log('[useCardPileLogic] Cartas do usuário carregadas:', fetchedUserCards.length);
-        } else {
-          setUserCreatedCards([]);
-        }
       } catch (error) {
-        console.error("[useCardPileLogic] Erro ao buscar cartas do Firestore:", error);
+        console.error("[useCardPileLogic] Erro ao buscar cartas padrão do Firestore:", error);
         setAllCardsFromDb([]);
-        setUserCreatedCards([]);
       } finally {
         setIsLoadingCards(false);
       }
     };
-    fetchCards();
+    fetchStandardCards();
+  }, [user?.maxIntensity]);
+
+  // Efeito para ouvir cartas criadas pelo casal em TEMPO REAL
+  useEffect(() => {
+    if (!user?.coupleId) {
+      setUserCreatedCards([]);
+      return;
+    }
+
+    const maxIntensity = user?.maxIntensity ?? 8;
+    const userCardsQuery = query(
+      collection(db, 'userCards'),
+      where('coupleId', '==', user.coupleId),
+      where('intensity', '<=', maxIntensity)
+    );
+
+    console.log(`[useCardPileLogic] 🎧 Listener de userCards ativado para couple: ${user.coupleId}`);
+    
+    const unsubscribe = onSnapshot(userCardsQuery, (snapshot) => {
+      const fetchedUserCards = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Card));
+      setUserCreatedCards(fetchedUserCards);
+      console.log(`[useCardPileLogic] 🔄 Cartas do usuário atualizadas: ${fetchedUserCards.length}`);
+    }, (error) => {
+      console.error("[useCardPileLogic] ❌ Erro no listener de userCards:", error);
+      setUserCreatedCards([]);
+    });
+
+    return () => {
+      console.log('[useCardPileLogic] 🔇 Listener de userCards desativado');
+      unsubscribe();
+    };
   }, [user?.coupleId, user?.maxIntensity]);
 
   // Efeito para ouvir por carta nova criada pelo parceiro

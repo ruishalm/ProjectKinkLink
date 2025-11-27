@@ -79,7 +79,7 @@
   position: relative !important; 
 }
 
-/* Slide ativo */
+/* Slide ativo! */
 .swiperContainer :global(.swiper-slide-active) > .swiperSlide,
 .swiperContainer :global(.swiper-slide-active).swiperSlide {
   transform: scale(1) translateX(0) translateZ(0) !important;
@@ -89,12 +89,13 @@
   transition-delay: 0s;
 }
 
-/* Setas de navegação */
-.swiperContainer :global(.swiper-button-next),
-.swiperContainer :global(.swiper-button-prev) {
-  color: #64b5f6;
-}
 
+.swiperContainer{
+  /* Setas de navegação */
+  :global(.swiper-button-next),:global(.swiper-button-prev){
+    color: #64b5f6;
+  }
+}
 
 .swiperInstance {
   width: 100%;

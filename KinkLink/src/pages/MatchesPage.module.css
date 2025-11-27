@@ -91,7 +91,8 @@
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* Mais responsivo */
   justify-items: center;
   align-items: start; /* Alinha as células ao topo para evitar overlap vertical */
-  grid-auto-rows: auto; /* Garante que cada linha da grid seja dimensionada pelo conteúdo */
+  /* Reserva uma altura mínima por linha para comportar o PlayingCard e badges sem fixar o tamanho do card */
+  grid-auto-rows: minmax(180px, auto);
 }
 
 /* Força que os filhos diretos da grid não estiquem e alinhem ao início da célula */
@@ -106,6 +107,12 @@
   align-items: flex-start; /* Alinha ao topo do grid cell */
   width: 100%;
   box-sizing: border-box;
+}
+
+/* Reserva espaço interno e cria um contexto de empilhamento para badges absolutos */
+.gridCellContent {
+  min-height: 180px;
+  position: relative;
 }
 
 .cardItemWrapper {

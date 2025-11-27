@@ -39,7 +39,7 @@ const getCategoryStyles = (category: string): { backgroundColor: string; color: 
     case 'conexao': return { backgroundColor: '#FFFFFF', color: '#333333', borderColor: '#696969' };
     case 'usercard':
     case 'userCard': return { backgroundColor: '#0b5351', color: '#FFFFFF', borderColor: '#073e3c' };
-    default: return { backgroundColor: '#ECEFF1', color: '#263238', borderColor: '#B0BEC5' };
+    default: return { backgroundColor: '#ECEFF1', color: '#263238', borderColor: '#222' };
   }
 };
 

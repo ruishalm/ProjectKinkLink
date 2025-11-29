@@ -126,27 +126,25 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
 
           if (docSnap.exists()) {
             const firestoreData = docSnap.data() as Partial<User & { partnerId?: string | null; isSupporter?: boolean; isAdmin?: boolean }>;
-            setUser(currentUserState => ({
-              ...baseUserData, // Dados base do Firebase Auth (id, email, username inicial)
-              ...firestoreData, // Dados do documento do Firestore
-              // Preserva campos gerenciados no cliente que não estão no documento do usuário no Firestore
-              matchedCards: currentUserState?.matchedCards || [], // Mantém os matchedCards existentes
-              userCreatedCards: currentUserState?.userCreatedCards || [], // Mantém os userCreatedCards existentes (se aplicável)
-              // Garante que os dados principais do Firebase Auth não sejam sobrescritos por dados possivelmente obsoletos do Firestore
-              id: firebaseUser.uid,
-              email: firebaseUser.email,
-              username: firestoreData.username || baseUserData.username,
-              partnerId: firestoreData.partnerId || null,
-              coupleId: firestoreData.coupleId || null,
-              unlockedSkinIds: firestoreData.unlockedSkinIds || [],
-              birthDate: firestoreData.birthDate || undefined,
-              gender: firestoreData.gender || undefined,
-              isSupporter: firestoreData.isSupporter || false,
-              isAdmin: firestoreData.isAdmin || false,
-              feedbackTickets: firestoreData.feedbackTickets || [],
-              maxIntensity: firestoreData.maxIntensity ?? 8, // Adiciona o campo com fallback
-              // fcmToken: currentUserState?.fcmToken || null, // Removido
-            } as User));
+            setUser(currentUserState => {
+              // Start with a safe base: current state or empty object
+              const nextState = {
+                ...(currentUserState ?? {}),
+                // Layer on the latest data from auth and firestore
+                ...baseUserData,
+                ...firestoreData,
+                // Ensure critical IDs from auth are not overwritten by stale firestore data
+                id: firebaseUser.uid,
+                email: firebaseUser.email,
+              };
+
+              // Apply a safe fallback for maxIntensity only if it's truly missing
+              if (nextState.maxIntensity === null || nextState.maxIntensity === undefined) {
+                nextState.maxIntensity = 8;
+              }
+
+              return nextState as User;
+            });
           } else {
             // Documento não existe, provavelmente novo usuário ou erro. Definir estado base.
             // Também inicializa os campos gerenciados no cliente aqui

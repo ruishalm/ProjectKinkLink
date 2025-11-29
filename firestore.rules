@@ -40,7 +40,7 @@ service cloud.firestore {
           request.auth.uid == userId &&
           (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == resource.data.isAdmin) &&
           // Permite que o usuário atualize os campos listados, incluindo 'feedbackTickets'
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bio', 'username', 'unlockedSkinIds', 'gender', 'birthDate', 'linkCode', 'seenCards', 'conexaoAccepted', 'conexaoRejected', 'feedbackTickets', 'coupleId', 'userCreatedCards'])
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bio', 'username', 'unlockedSkinIds', 'gender', 'birthDate', 'linkCode', 'seenCards', 'conexaoAccepted', 'conexaoRejected', 'feedbackTickets', 'coupleId', 'userCreatedCards', 'maxIntensity'])
         ) ||
         // 4. Admin pode atualizar campos específicos de OUTRO usuário (e.g., 'isSupporter', 'bio').
         //    - Não pode mudar 'isAdmin' de outro usuário por esta regra (isso deve ser feito no console do Firebase).

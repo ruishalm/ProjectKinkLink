@@ -1,27 +1,31 @@
-.sideMessagesContainer {
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Alinha os itens no topo */
+  gap: 120px; /* Espaço entre os dois balões. Ajuste conforme necessário */
   position: absolute;
-  top: -75px; /* Acima dos botões */
+  top: -75px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.sideMessagesContainer {
   width: auto;
   max-width: 100px;
   display: flex;
   flex-direction: column;
-  z-index: 6;
-  pointer-events: none;
   opacity: 0;
   box-sizing: border-box;
 }
 
 .left {
-  left: 50%;
-  right: auto;
-  transform: translateX(-100%);
   align-items: flex-end;
 }
 
 .right {
-  left: 50%;
-  right: auto;
-  transform: translateX(0%);
   align-items: flex-start;
 }
 

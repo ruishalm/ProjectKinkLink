@@ -16,7 +16,7 @@ const SideTipMessages: React.FC<SideTipMessagesProps> = ({
   const animationClass = animateIn ? styles.animateIn : '';
 
   return (
-    <>
+    <div className={styles.wrapper}>
       {leftMessage && (
         <div className={`${styles.sideMessagesContainer} ${styles.left} ${animationClass}`}>
           <div className={styles.tipMessage}>
@@ -33,7 +33,7 @@ const SideTipMessages: React.FC<SideTipMessagesProps> = ({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 export default SideTipMessages;

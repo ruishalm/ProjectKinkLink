@@ -1,3 +1,4 @@
+import SideTipMessages from '../components/SideTipMessages';
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\CardPilePage.tsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { useDrag } from '@use-gesture/react';
@@ -20,7 +21,6 @@ import { useCardTips } from '../hooks/useCardTips'; // Importa o novo hook
 import { db } from '../firebase'; // <<< ADICIONADO
 import { useCardPileModals } from '../hooks/useCardPileModals'; // Importa o hook dos modais
 // import { categorySpecificTips } from '../components/categorySpecificTips'; // Não é mais necessário aqui
-import SideTipMessages from '../components/SideTipMessages';
 import styles from './CardPilePage.module.css';
 
 function CardPilePage() {
@@ -358,35 +358,32 @@ function CardPilePage() {
                 <button
                   className={`${styles.dislikeButton} ${styles.botaoDecisao} genericButton dislikeButton actionButton`}
                   onClick={() => {
-                    if (cardForDisplay && !areActionButtonsDisabled) { // Verifica se não está desabilitado
-                      // setAnimateTipsIn(false); // Removido: useCardTips gerencia isso
+                    if (cardForDisplay && !areActionButtonsDisabled) {
                       setExitingCard({ id: cardForDisplay.id, direction: 'left' });
                     }
                   }}
-                  onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
-                  onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  onMouseDown={e => e.currentTarget.style.transform = 'scale(0.95)'}
+                  onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
                   aria-label="Rejeitar carta"
-                  disabled={areActionButtonsDisabled} // Adiciona o estado de desabilitado
+                  disabled={areActionButtonsDisabled}
                 >
-              👎 Nao Topo!
+                  👎 Nao Topo!
                 </button>
-
                 <button
                   className={`${styles.likeButton} ${styles.botaoDecisao} genericButton likeButton actionButton`}
                   onClick={() => {
-                    if (cardForDisplay && !areActionButtonsDisabled) { // Verifica se não está desabilitado
-                      // setAnimateTipsIn(false); // Removido: useCardTips gerencia isso
+                    if (cardForDisplay && !areActionButtonsDisabled) {
                       setExitingCard({ id: cardForDisplay.id, direction: 'right' });
                     }
                   }}
-                  onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
-                  onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  onMouseDown={e => e.currentTarget.style.transform = 'scale(0.95)'}
+                  onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
                   aria-label="Aceitar carta"
-                  disabled={areActionButtonsDisabled} // Adiciona o estado de desabilitado
+                  disabled={areActionButtonsDisabled}
                 >
-              ❤️ Topo!
-              </button>
-            </div>
+                  ❤️ Topo!
+                </button>
+              </div>
             </div> {/* Fecha o cardActionsPanel */}
           </>
         ) : (

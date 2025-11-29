@@ -12,15 +12,17 @@
 }
 
 .left {
-  left: calc(25% - 2.5rem); /* Movido 2.5rem para esquerda */
-  transform: translateX(-50%);
-  align-items: center;
+  left: 50%;
+  right: auto;
+  transform: translateX(-100%);
+  align-items: flex-end;
 }
 
 .right {
-  right: calc(30% + 2.5rem); /* Movido 2.5rem para esquerda */
-  transform: translateX(50%);
-  align-items: center;
+  left: 50%;
+  right: auto;
+  transform: translateX(0%);
+  align-items: flex-start;
 }
 
 .tipMessage {
@@ -60,7 +62,7 @@
 .tipMessage::before,
 .tipMessage::after,
 .bubble1 {
-  content: '';
+  content: '';                                                                                              
   position: absolute;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(248, 249, 250, 0.6) 100%);
   backdrop-filter: blur(10px);
@@ -147,13 +149,11 @@
   }
 
   .left {
-    left: calc(25% - 2.5rem);
-    transform: translateX(-50%);
+    /* A posição agora é controlada pela regra base */
   }
 
   .right {
-    right: calc(30% + 2.5rem);
-    transform: translateX(50%);
+    /* A posição agora é controlada pela regra base */
   }
 
   .tipMessage {
@@ -183,30 +183,25 @@
     top: -65px;
     max-width: 75px;
   }
-
   .left {
-    left: calc(25% - 2.5rem);
-    transform: translateX(-50%);
+    /* A posição agora é controlada pela regra base */
+    align-items: flex-end;
   }
-
   .right {
-    right: calc(30% + 2.5rem);
-    transform: translateX(50%);
+    /* A posição agora é controlada pela regra base */
+    align-items: flex-start;
   }
-
   .tipMessage {
     width: 80px;
     height: 50px;
     font-size: 0.55rem;
     padding: 6px 10px;
   }
-
   .tipMessage::before {
     width: 5px;
     height: 5px;
     bottom: -6px;
   }
-
   .tipMessage::after {
     width: 3.5px;
     height: 3.5px;

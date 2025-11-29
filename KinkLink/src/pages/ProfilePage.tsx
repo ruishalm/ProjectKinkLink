@@ -159,9 +159,9 @@ function ProfilePage() {
 
   const handleIntensityChange = async (newLevel: number) => {
     if (user?.id) {
-      const userDocRef = doc(db, 'users', user.id);
       try {
-        await updateDoc(userDocRef, { maxIntensity: newLevel });
+        // Usa a função updateUser do AuthContext para garantir que o estado local e o firestore estejam em sincronia
+        await updateUser({ maxIntensity: newLevel });
         // Opcional: Adicionar um toast/feedback de sucesso
         console.log(`[ProfilePage] Intensidade atualizada para o nível ${newLevel}`);
       } catch (error) {

@@ -1,29 +1,34 @@
 /**
- * Import function triggers from their respective submodules:
- *
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
+ * Import function triggers from their respective submodules.
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
-
 import {onDocumentWritten} from "firebase-functions/v2/firestore";
-import {onSchedule} from "firebase-functions/v2/scheduler"; // Import para funções agendadas
-import {onCall, HttpsError} from "firebase-functions/v2/https"; // <<< ADICIONAR onCall e HttpsError
+import {onSchedule} from "firebase-functions/v2/scheduler";
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 
-// Inicializa o Firebase Admin SDK. Isso deve ser feito apenas uma vez.
+// Inicializa o Firebase Admin SDK para permitir que as funções acessem o Firestore e outros serviços.
 admin.initializeApp();
-// Log para verificar o ID do projeto que o Admin SDK está usando
-logger.info("Firebase Admin SDK initialized. Project ID from default app:", admin.app().options.projectId);
+logger.info("Firebase Admin SDK initialized. Project ID:", admin.app().options.projectId);
 
+// Constantes de configuração. Considere movê-las para variáveis de ambiente.
 const SITE_BASE_URL = "https://kinklink-a4607.web.app";
-const DEFAULT_ICON_URL = `${SITE_BASE_URL}/icons/kinklogo192.png`; //  <<< VERIFIQUE SE ESTE CAMINHO ESTÁ CORRETO
+const DEFAULT_ICON_URL = `${SITE_BASE_URL}/icons/kinklogo192.png`;
 
 const db = admin.firestore();
 const messaging = admin.messaging();
 
-// Função auxiliar para enviar notificação para um usuário específico
+/**
+ * Função auxiliar que envia uma notificação push para um usuário específico via FCM.
+ * Busca os tokens FCM do usuário, monta uma mensagem multi-plataforma e a envia.
+ * Também realiza a limpeza de tokens inválidos ou expirados se o envio falhar.
+ * @param {string} userId - O ID do usuário a ser notificado.
+ * @param {string} title - O título da notificação.
+ * @param {string} body - O corpo da notificação.
+ * @param {admin.messaging.DataMessagePayload} [data={}] - Dados extras para enviar com a notificação.
+ * @param {string} [iconUrl=DEFAULT_ICON_URL] - URL do ícone para notificações web.
+ * @param {string} [targetUrlBase=SITE_BASE_URL] - URL base para o link da notificação.
+ */
 async function sendNotificationToUser(
   userId: string,
   title: string,
@@ -51,16 +56,13 @@ async function sendNotificationToUser(
     return;
   }
 
-  // MENSAGEM MULTICAST ORIGINAL (MANTENHA PARA REFERÊNCIA OU COMENTE)
-  // Você pode querer reintroduzir esta estrutura completa ou partes dela
-  // agora que o envio simples funcionou.
-  const originalMessage: admin.messaging.MulticastMessage = {
-    notification: { title, body }, // Ícone é configurado por plataforma abaixo
+  const message: admin.messaging.MulticastMessage = {
+    notification: { title, body },
     tokens: tokens,
     data: data,
     webpush: {
       notification: {
-        icon: iconUrl, // Ícone para Web Push
+        icon: iconUrl,
       },
       fcmOptions: {
         link: data?.url ? `${targetUrlBase}${data.url}` : targetUrlBase,
@@ -68,57 +70,46 @@ async function sendNotificationToUser(
     },
     android: {
       notification: {
-        icon: "ic_stat_notification", // Nome do ícone no drawable do Android
+        icon: "ic_stat_notification",
         color: "#b71c1c",
       },
     },
-    apns: { // Configuração para iOS
+    apns: {
       payload: {
         aps: {
-          badge: 1, // Ou gerencie dinamicamente
+          alert: {
+            title: title,
+            body: body,
+          },
+          badge: 1,
           sound: "default",
         },
       },
     },
   };
 
-  // MENSAGEM MULTICAST SIMPLIFICADA PARA TESTE (USADA ANTERIORMENTE)
-  /*
-  const simplifiedMulticastMessage: admin.messaging.MulticastMessage = {
-    notification: { title, body },
-    tokens: tokens,
-    // Remova data, webpush, android, apns para este teste
-  };
-  */
-
-  // logger.info("[MULTICAST TEST] Using simplified message structure for user:", userId);
-  logger.info("Using original message structure for user:", userId);
-
-
   try {
-    // Alterado de sendMulticast para sendEachForMulticast
-    const response = await messaging.sendEachForMulticast(originalMessage); // Usando a mensagem original agora
+    const response = await messaging.sendEachForMulticast(message);
     logger.info(
       `Successfully sent ${response.successCount} messages to user ${userId}. Failure count: ${response.failureCount}`
     );
+    
+    // Limpeza de tokens inválidos.
     if (response.failureCount > 0) {
-      // Adicionando tipo explícito para resp e idx
-      response.responses.forEach((resp: admin.messaging.SendResponse, idx: number) => {
-        if (!resp.success) {
-          // CORREÇÃO: Verificar se resp.error existe
-          if (resp.error) {
-            logger.error(
-              `Failed to send to token ${tokens[idx]} for user ${userId}: Code: ${resp.error.code}, Message: ${resp.error.message}`
-            );
-            if (resp.error.code === 'messaging/registration-token-not-registered' ||
-                resp.error.code === 'messaging/invalid-registration-token') {
-              logger.info(`Deleting invalid token: ${tokens[idx]} for user ${userId}`);
-              db.collection("users").doc(userId).collection("fcmTokens").doc(tokens[idx]).delete()
-                .catch(deleteErr => logger.error(`Error deleting token ${tokens[idx]} for user ${userId}:`, deleteErr));
-            }
+      response.responses.forEach((resp, idx) => {
+        if (!resp.success && resp.error) {
+          const errorCode = resp.error.code;
+          // Códigos de erro que indicam que o token não é mais válido.
+          if (errorCode === 'messaging/registration-token-not-registered' ||
+              errorCode === 'messaging/invalid-registration-token') {
+            const invalidToken = tokens[idx];
+            logger.info(`Deleting invalid token: ${invalidToken} for user ${userId}`);
+            db.collection("users").doc(userId).collection("fcmTokens").doc(invalidToken).delete()
+              .catch(deleteErr => logger.error(`Error deleting token ${invalidToken} for user ${userId}:`, deleteErr));
           } else {
-            // Caso resp.error seja undefined, mas resp.success é false
-            logger.error(`Failed to send to token ${tokens[idx]} for user ${userId} with an unknown error. Response:`, resp);
+            logger.error(
+              `Failed to send to token ${tokens[idx]} for user ${userId}: Code: ${errorCode}, Message: ${resp.error.message}`
+            );
           }
         }
       });
@@ -129,12 +120,33 @@ async function sendNotificationToUser(
 }
 
 /**
- * Cloud Function para notificar um usuário quando um novo match é formado.
- * Acionada quando um documento em 'couples/{coupleId}/likedInteractions/{cardId}' é escrito (criado ou atualizado).
+ * Fetches a user's username from Firestore.
+ * @param {string} userId The ID of the user.
+ * @returns {Promise<string | null>} The username or null if not found or on error.
+ */
+async function getUsername(userId: string): Promise<string | null> {
+  try {
+    const userDoc = await db.collection("users").doc(userId).get();
+    if (userDoc.exists) {
+      // Retorna o username se existir, caso contrário null.
+      return userDoc.data()?.username || null;
+    }
+    logger.warn(`User document not found for ID: ${userId} in getUsername.`);
+    return null;
+  } catch (error) {
+    logger.error(`Error fetching username for ${userId}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Notifica o primeiro usuário que curtiu uma carta (o "pioneiro") quando o 
+ * segundo usuário (o "completador") também curte, formando um "match".
+ * A notificação não é enviada ao usuário que completou o match, apenas ao que aguardava.
  */
 export const onNewMatch = onDocumentWritten(
   {
-    region: "southamerica-east1", // Especifica a região da função
+    region: "southamerica-east1",
     document: "couples/{coupleId}/likedInteractions/{cardId}",
   },
   async (event) => {
@@ -146,8 +158,8 @@ export const onNewMatch = onDocumentWritten(
     const beforeSnapshotData = event.data?.before.data();
     const afterSnapshotData = event.data?.after.data();
 
-    const isNewDocument = !event.data?.before.exists;
-    const wasNotMatchBefore = isNewDocument || beforeSnapshotData?.isMatch === false;
+    // A condição para notificar é quando o estado de um card muda de "não-match" para "match".
+    const wasNotMatchBefore = !event.data?.before.exists || beforeSnapshotData?.isMatch === false;
     const isMatchNow = afterSnapshotData?.isMatch === true;
 
     if (afterSnapshotData && isMatchNow && wasNotMatchBefore) {
@@ -162,17 +174,15 @@ export const onNewMatch = onDocumentWritten(
       let pioneerUID: string | undefined;
       let completadorUID: string | undefined;
 
-      // Acessar likedByUIDs do beforeData, não do beforeSnapshotData diretamente
       const beforeLikedByUIDs = (beforeSnapshotData?.likedByUIDs as string[] | undefined) || [];
 
-      // Lógica para determinar quem deu o like primeiro e quem completou o match
-      // Isso funciona quando o documento é atualizado de 1 para 2 UIDs.
-      // O 'pioneiro' é quem já estava lá. O 'completador' é o novo UID.
-
-      if (beforeLikedByUIDs && beforeLikedByUIDs.length === 1 && likedByUIDs.length === 2) {
+      // Determina quem foi o pioneiro (primeiro a curtir) e quem completou o match.
+      // Isso é possível ao comparar a lista de UIDs antes e depois da atualização.
+      if (beforeLikedByUIDs.length === 1 && likedByUIDs.length === 2) {
         pioneerUID = beforeLikedByUIDs[0];
         completadorUID = likedByUIDs.find(uid => uid !== pioneerUID);
-      } else if (isNewDocument && likedByUIDs.length === 2) {
+      } else if (likedByUIDs.length === 2) {
+        // Se o documento já foi criado com 2 UIDs, não é possível determinar o pioneiro.
         logger.warn("Match document created directly with two UIDs. Cannot determine pioneer for notification.", { likedByUIDs });
         return;
       }
@@ -184,66 +194,28 @@ export const onNewMatch = onDocumentWritten(
 
       logger.info(`Pioneer (to notify): ${pioneerUID}, Completador (triggered match): ${completadorUID}`);
 
-      // BLOCO DE TESTE TEMPORÁRIO PARA ENVIO SIMPLES (REMOVIDO POIS O ENVIO SIMPLES FUNCIONOU)
-      // if (pioneerUID) {
-      //   try {
-      //     const testToken = "dS5kqNX20kzulHFTMDVU3Q:APA91bHuO93tTx9dYuf71M083L55UivnQC7tqCvcNcwPZ6-YQpDjDse15pb4NNjrwbf-L8eCyccyjVmyQjBPGlO8S7Br_XEMt3FXXpZBGVI2NHj4InlsIsM";
-      //     if (testToken.length > 50) {
-      //       logger.info(`[TESTE SIMPLES] Attempting to send a simple test notification to token: ${testToken.substring(0, 20)}...`);
-      //       const testResponse = await messaging.send({
-      //         notification: {
-      //           title: "KinkLink Teste Simples",
-      //           body: "Esta é uma mensagem de teste da Cloud Function (envio simples)."
-      //         },
-      //         token: testToken
-      //       });
-      //       logger.info(`[TESTE SIMPLES] Simple test notification sent successfully:`, testResponse);
-      //     } else {
-      //       logger.warn("[TESTE SIMPLES] Token de teste parece inválido (muito curto). Pulando envio simples.");
-      //     }
-      //   } catch (testError) {
-      //     logger.error(`[TESTE SIMPLES] Error sending simple test notification:`, testError);
-      //   }
-      // }
-      // FIM DO BLOCO DE TESTE TEMPORÁRIO
-
-      let completadorUsername = "Alguém";
-      try {
-        const completadorDoc = await db.doc(`users/${completadorUID}`).get();
-        if (completadorDoc.exists) {
-          completadorUsername = completadorDoc.data()?.username || "Alguém";
-        }
-      } catch (error) {
-        logger.error(`Error fetching completador's (${completadorUID}) username:`, error);
+      const completadorUsername = await getUsername(completadorUID);
+      if (!completadorUsername) {
+        logger.error(`Could not fetch username for completador ${completadorUID}. Aborting notification.`);
+        return;
       }
 
-      // Garantir que temos a categoria do card para a nova mensagem
       const cardData = afterSnapshotData.cardData as { text?: string; category?: string } | undefined;
-      let cardCategoryForNotification = "categoria desconhecida"; // Fallback
-      if (cardData?.category) {
-        cardCategoryForNotification = cardData.category;
-      } else if (cardData?.text) {
-        // Se não houver categoria, mas houver texto, podemos usar um placeholder ou omitir
-        // Por enquanto, manteremos o fallback "categoria desconhecida" se category não estiver presente.
-        // Ou você pode decidir usar o cardData.text aqui de alguma forma.
-        // Exemplo: cardCategoryForNotification = `descrita como "${cardData.text.substring(0,20)}..."`;
-      }
+      const cardCategoryForNotification = cardData?.category || "categoria desconhecida";
 
       const notificationTitle = "Novo Link! 🔗";
       const notificationBody = `Você e ${completadorUsername} têm um novo Link!🔗 numa carta de ${cardCategoryForNotification}.`;
 
-      // Usar a função sendNotificationToUser
       await sendNotificationToUser(
         pioneerUID,
         notificationTitle,
         notificationBody,
-        { // data payload
+        {
           type: "match_notification",
           coupleId: event.params.coupleId,
           cardId: event.params.cardId,
           url: `/matches#card-${event.params.cardId}`
         }
-        // iconUrl e targetUrlBase usarão os padrões definidos em sendNotificationToUser
       );
     } else {
       logger.info("Event did not meet criteria for a new match notification.", {
@@ -256,41 +228,33 @@ export const onNewMatch = onDocumentWritten(
 );
 
 /**
- * Cloud Function agendada para enviar uma sugestão de link para casais
- * toda sexta-feira às 16h.
+ * Envia uma sugestão de carta para re-engajamento dos casais.
+ * Roda toda sexta-feira e seleciona aleatoriamente um dos matches existentes do casal
+ * para sugerir uma conversa.
  */
 export const sendWeeklyLinkSuggestion = onSchedule(
   {
     schedule: "0 16 * * 5", // Toda sexta-feira às 16:00
-    timeZone: "America/Sao_Paulo", // Fuso horário de São Paulo
-    region: "southamerica-east1", // Manter a mesma região das outras funções
-    // memory: "512MiB", // Opcional: Aumentar memória se houver muitos casais
+    timeZone: "America/Sao_Paulo",
+    region: "southamerica-east1",
   },
   async (event) => {
-    // Tentativa de correção para event.id e event.time:
-    // O objeto 'event' para onSchedule pode não ter 'id' e 'time' diretamente.
-    // O 'jobName' pode ser um identificador útil, e o timestamp da execução pode ser obtido de outras formas se necessário,
-    // ou simplesmente logar o evento inteiro para inspeção.
-    // Por agora, vamos logar o que é garantido existir ou o evento completo.
-    logger.info("Executing sendWeeklyLinkSuggestion", { scheduleTime: event.scheduleTime, jobName: event.jobName, eventDetails: event });
+    logger.info("Executing sendWeeklyLinkSuggestion", { scheduleTime: event.scheduleTime, jobName: event.jobName });
     try {
       const couplesSnapshot = await db.collection("couples").get();
       if (couplesSnapshot.empty) {
-        logger.info("No couples found. Exiting sendWeeklyLinkSuggestion.");
+        logger.info("No couples found. Exiting.");
         return;
       }
-
-      let notificationsAttempted = 0;
 
       for (const coupleDoc of couplesSnapshot.docs) {
         const coupleData = coupleDoc.data();
         const coupleId = coupleDoc.id;
 
-        // Verifica se o casal tem dois membros (está ativo)
+        // Processa apenas casais ativos com dois membros.
         if (coupleData.members && coupleData.members.length === 2) {
           const memberUIDs = coupleData.members as string[];
 
-          // Busca os "links" (matches) para este casal
           const likedInteractionsSnapshot = await db
             .collection("couples")
             .doc(coupleId)
@@ -300,35 +264,37 @@ export const sendWeeklyLinkSuggestion = onSchedule(
 
           if (likedInteractionsSnapshot.empty) {
             logger.info(`Couple ${coupleId} has no matched links. Skipping.`);
-            continue; // Pula para o próximo casal
+            continue;
           }
 
-          // Seleciona uma carta aleatória da lista de matches
+          // Seleciona uma carta aleatória da lista de matches do casal.
           const matchedCardsDocs = likedInteractionsSnapshot.docs;
           const randomIndex = Math.floor(Math.random() * matchedCardsDocs.length);
           const randomMatchDoc = matchedCardsDocs[randomIndex];
-          // const randomMatchData = randomMatchDoc.data(); // Descomente se precisar de cardData.text, etc.
           const cardIdForNotification = randomMatchDoc.id;
 
           const notificationTitle = "KinkLink FDS 🎲";
           const notificationBody = "Sextou! Que tal esta sugestão para o fim de semana? 😉";
           const notificationData = {
-            url: `/matches#card-${cardIdForNotification}`, // URL para abrir o chat da carta específica
-            type: "weekend_suggestion_notification", // Tipo para identificação no cliente, se necessário
+            url: `/matches#card-${cardIdForNotification}`,
+            type: "weekend_suggestion_notification",
             cardId: cardIdForNotification,
           };
 
           logger.info(`Selected card ${cardIdForNotification} for couple ${coupleId}. Sending to members: ${memberUIDs.join(", ")}`);
 
           for (const userId of memberUIDs) {
-            await sendNotificationToUser(userId, notificationTitle, notificationBody, notificationData);
-            notificationsAttempted++;
+            try {
+              await sendNotificationToUser(userId, notificationTitle, notificationBody, notificationData);
+            } catch (error) {
+              logger.error(`Failed to send weekly suggestion to user ${userId} in couple ${coupleId}`, error);
+            }
           }
         } else {
-          logger.info(`Couple ${coupleId} does not have 2 members or 'members' field is missing. Skipping.`);
+          logger.info(`Couple ${coupleId} is not active (members count is not 2). Skipping.`);
         }
       }
-      logger.info(`sendWeeklyLinkSuggestion finished. Total notifications attempted: ${notificationsAttempted}`);
+      logger.info("sendWeeklyLinkSuggestion finished.");
     } catch (error) {
       logger.error("Error in sendWeeklyLinkSuggestion:", error);
     }
@@ -336,72 +302,59 @@ export const sendWeeklyLinkSuggestion = onSchedule(
 );
 
 /**
- * Cloud Function para notificar um usuário quando um de seus tickets de feedback
- * recebe uma resposta do administrador.
- * Acionada quando um documento em 'users/{userId}' é atualizado.
+ * Notifica um usuário quando um de seus tickets de feedback recebe uma resposta do admin.
+ * Acionada quando um documento na coleção 'tickets' é atualizado.
  */
-export const onAdminTicketResponse = onDocumentWritten(
+export const onTicketUpdate = onDocumentWritten(
   {
     region: "southamerica-east1",
-    document: "users/{userId}",
+    document: "tickets/{ticketId}",
     cpu: 1,
     memory: "256MiB",
   },
   async (event) => {
-    const userId = event.params.userId;
-    logger.info(`User document update event for user ${userId}. Checking for ticket responses.`, { eventId: event.id });
+    const ticketId = event.params.ticketId;
+    logger.info(`Ticket document update event for ticket ${ticketId}. Checking for response.`);
 
     const beforeSnapshot = event.data?.before;
     const afterSnapshot = event.data?.after;
 
+    // Só processa se o documento foi atualizado (não criado ou deletado)
     if (!beforeSnapshot?.exists || !afterSnapshot?.exists) {
-      logger.info("Document before or after snapshot does not exist (e.g., creation or deletion). Exiting ticket response check.", { userId, eventId: event.id });
+      logger.info("Ticket document created or deleted. Exiting response check.");
       return;
     }
 
-    const beforeData = beforeSnapshot.data();
-    const afterData = afterSnapshot.data();
+    const beforeData = beforeSnapshot.data() as { adminResponse?: string; status: string; };
+    const afterData = afterSnapshot.data() as { userId: string; id: string; adminResponse?: string; status: string; text: string; };
 
-    if (!beforeData || !afterData) {
-      logger.info("beforeData or afterData is undefined. Exiting ticket response check.", { userId, eventId: event.id });
-      return;
+    if (!afterData || !afterData.userId) {
+        logger.error("Update event, but after data is invalid or missing userId.", { ticketId });
+        return;
     }
 
-    if (!afterData.feedbackTickets) {
-      logger.info("No feedbackTickets in afterData. Exiting.", { userId });
-      return; // Retorna void
-    }
+    // A condição para notificar é se uma resposta do admin foi adicionada.
+    const hasNewResponse = afterData.adminResponse &&
+                           afterData.status === 'admin_replied' &&
+                           (!beforeData.adminResponse || beforeData.status !== 'admin_replied');
 
-    const beforeTickets = (beforeData.feedbackTickets || []) as Array<{ id: string; adminResponse?: string; status: string; text: string }>;
-    const afterTickets = (afterData.feedbackTickets || []) as Array<{ id: string; adminResponse?: string; status: string; text: string }>;
+    if (hasNewResponse) {
+      logger.info(`New admin response detected for ticket ${ticketId} for user ${afterData.userId}.`);
 
-    let respondedTicket: { id: string; adminResponse?: string; status: string; text: string } | undefined;
-
-    for (const afterTicket of afterTickets) {
-      const beforeTicket = beforeTickets.find(bt => bt.id === afterTicket.id);
-      if (afterTicket.adminResponse && afterTicket.status === 'admin_replied' &&
-          (!beforeTicket || !beforeTicket.adminResponse || beforeTicket.status !== 'admin_replied')) {
-        respondedTicket = afterTicket;
-        logger.info(`New admin response detected for ticket ${respondedTicket.id} for user ${userId}.`);
-        break;
-      }
-    }
-
-    if (respondedTicket) {
-      const ticketTitlePreview = respondedTicket.text.length > 50 ? respondedTicket.text.substring(0, 47) + "..." : respondedTicket.text;
+      const ticketTitlePreview = afterData.text.length > 50 ? afterData.text.substring(0, 47) + "..." : afterData.text;
 
       await sendNotificationToUser(
-        userId,
+        afterData.userId,
         "Resposta do Suporte KinkLink 💬",
         `Sua solicitação sobre "${ticketTitlePreview}" foi respondida.`,
-        { // data payload
+        {
           type: "ticket_response_notification",
-          ticketId: respondedTicket.id,
-          url: `/meus-tickets#ticket-${respondedTicket.id}`
+          ticketId: afterData.id,
+          url: `/meus-tickets#ticket-${afterData.id}`
         }
       );
     } else {
-      logger.info("No new admin ticket response detected for user based on conditions.", { userId });
+      logger.info("No new admin ticket response detected for ticket update.", { ticketId });
     }
   }
 );
@@ -413,65 +366,48 @@ export const onLinkCompletedSendNotification = onDocumentWritten(
   },
   async (event) => {
     const coupleId = event.params.coupleId;
-    logger.info(`Couple document event for couple ${coupleId}. Checking for link completion.`, { eventId: event.id });
+    logger.info(`Couple document event for couple ${coupleId}. Checking for link completion.`);
 
     const beforeSnapshot = event.data?.before;
     const afterSnapshot = event.data?.after;
 
     if (!afterSnapshot?.exists) {
-      logger.info(`Couple document ${coupleId} was deleted or does not exist after update. No notification.`, { eventId: event.id });
+      logger.info(`Couple document ${coupleId} was deleted. No notification.`);
       return;
     }
 
     const beforeData = beforeSnapshot?.data();
     const afterData = afterSnapshot.data();
 
-    if (!afterData) {
-        logger.warn(`afterData is undefined for couple ${coupleId}, though snapshot exists. Exiting.`, { eventId: event.id });
-        return;
-    }
-
+    // Notifica apenas quando um casal é formado (membros passa de <2 para 2).
     const membersBefore = (beforeData?.members as string[]) || [];
-    const membersAfter = (afterData.members as string[]) || [];
-    const linkJustCompleted =
-      membersAfter.length === 2 &&
-      (!beforeSnapshot?.exists || membersBefore.length < 2);
+    const membersAfter = (afterData?.members as string[]) || [];
+    const linkJustCompleted = membersAfter.length === 2 && membersBefore.length < 2;
 
     if (!linkJustCompleted) {
-      logger.info(
-        `Couple ${coupleId} update did not signify a new completed link. Members before: ${membersBefore.length}, after: ${membersAfter.length}. Document existed before: ${beforeSnapshot?.exists}`,
-        { eventId: event.id }
-      );
-      return; // Retorna void
+      logger.info(`Couple ${coupleId} update did not signify a new completed link.`);
+      return;
     }
 
     const [user1Id, user2Id] = membersAfter;
+    logger.info(`Link completed for couple ${coupleId}. Members: ${user1Id}, ${user2Id}. Sending notifications.`);
 
-    logger.info(
-      `Link completed for couple ${coupleId}. Members: ${user1Id}, ${user2Id}. Sending notifications.`,
-      { eventId: event.id }
-    );
-
-    // Função auxiliar para buscar o nome do usuário de forma segura
     const getUsername = async (userId: string): Promise<string> => {
       try {
         const userDoc = await db.collection("users").doc(userId).get();
-        if (userDoc.exists) {
-          return userDoc.data()?.username || "Seu par";
-        }
+        return userDoc.data()?.username || "Seu par";
       } catch (error) {
         logger.error(`Error fetching username for ${userId}:`, error);
+        return "Seu par";
       }
-      return "Seu par";
     };
 
-    // Busca os nomes dos usuários em paralelo
     const [user1Name, user2Name] = await Promise.all([
       getUsername(user1Id),
       getUsername(user2Id),
     ]);
 
-    // Envia notificação para ambos os usuários
+    // Envia notificação para ambos os usuários sobre a nova conexão.
     await Promise.all([
       sendNotificationToUser(
         user1Id, "Conexão Estabelecida! 🎉", `Você e ${user2Name} agora estão conectados no KinkLink!`,
@@ -486,8 +422,8 @@ export const onLinkCompletedSendNotification = onDocumentWritten(
 );
 
 /**
- * Cloud Function para notificar um usuário quando uma nova mensagem de chat é enviada.
- * Acionada quando um documento é criado em 'couples/{coupleId}/cardChats/{cardId}/messages/{messageId}'.
+ * Notifica o usuário parceiro quando uma nova mensagem é enviada no chat de uma carta.
+ * Acionada na criação de um novo documento de mensagem.
  */
 export const onNewChatMessage = onDocumentWritten(
   {
@@ -495,7 +431,7 @@ export const onNewChatMessage = onDocumentWritten(
     document: "couples/{coupleId}/cardChats/{cardId}/messages/{messageId}",
   },
   async (event) => {
-    // Só aciona na criação de uma nova mensagem
+    // Só aciona na criação de uma nova mensagem.
     if (!event.data?.after.exists || event.data.before.exists) {
       return;
     }
@@ -510,35 +446,28 @@ export const onNewChatMessage = onDocumentWritten(
     const senderId = messageData.userId;
     const messageText = messageData.text || "Nova mensagem";
 
-    // Busca o documento do casal para encontrar o destinatário
+    // Encontra o ID do destinatário no documento do casal.
     const coupleDoc = await db.doc(`couples/${coupleId}`).get();
     if (!coupleDoc.exists) {
       logger.error(`Couple document ${coupleId} not found.`);
       return;
     }
-
     const coupleData = coupleDoc.data();
-    if (!coupleData || !Array.isArray(coupleData.members)) {
+    if (!coupleData?.members) {
       logger.error(`Couple data or members array is undefined for couple ${coupleId}.`);
       return;
     }
-    const members = coupleData.members as string[];
-    const recipientId = members.find((id) => id !== senderId);
+    const recipientId = (coupleData.members as string[]).find((id) => id !== senderId);
 
     if (!recipientId) {
       logger.error(`Recipient not found for message in couple ${coupleId}.`);
       return;
     }
 
-    // Busca o nome de usuário do remetente para uma notificação mais amigável
-    let senderUsername = "Seu par";
-    try {
-      const senderDoc = await db.doc(`users/${senderId}`).get();
-      if (senderDoc.exists) {
-        senderUsername = senderDoc.data()?.username || "Seu par";
-      }
-    } catch (error) {
-      logger.error("Error fetching sender's username:", error);
+    const senderUsername = await getUsername(senderId);
+    if (!senderUsername) {
+      logger.error(`Could not fetch username for sender ${senderId}. Aborting notification.`);
+      return;
     }
 
     const notificationTitle = `Nova mensagem de ${senderUsername}`;
@@ -559,8 +488,8 @@ export const onNewChatMessage = onDocumentWritten(
 );
 
 /**
- * Lógica para enviar a notificação mensal de apoio.
- * Busca todos os usuários e envia a notificação para cada um.
+ * Lógica de negócio para a notificação mensal de apoio.
+ * Busca todos os usuários e dispara a notificação para cada um.
  */
 async function enviarNotificacaoDeApoio() {
   logger.info("Iniciando envio da notificação mensal de apoio.");
@@ -575,29 +504,30 @@ async function enviarNotificacaoDeApoio() {
   const notificationBody = "Se você curte o app, que tal nos apoiar? Toque para saber mais!";
   const notificationData = {
     type: "support_notification",
-    url: "/#openSupportModal", // URL para o frontend identificar e abrir o modal
+    url: "/#openSupportModal",
   };
 
   for (const userDoc of usersSnapshot.docs) {
-    await sendNotificationToUser(userDoc.id, notificationTitle, notificationBody, notificationData);
+    try {
+      await sendNotificationToUser(userDoc.id, notificationTitle, notificationBody, notificationData);
+    } catch (error) {
+      logger.error(`Falha ao enviar notificação de apoio para o usuário ${userDoc.id}`, error);
+    }
   }
-  logger.info(`Notificação de apoio enviada para ${usersSnapshot.size} usuários.`);
+  logger.info(`Disparo de notificação de apoio concluído para ${usersSnapshot.size} usuários.`);
 }
 
 /**
- * Cloud Function agendada para rodar todo dia 10 do mês às 16:00.
- * Envia uma notificação convidando os usuários a apoiarem o projeto.
+ * Função agendada que dispara a notificação mensal de apoio todo dia 10.
  */
 export const notificacaoMensalDeApoio = onSchedule(
   {
-    schedule: "0 16 10 * *",
+    schedule: "0 16 10 * *", // Todo dia 10 do mês, às 16:00.
     timeZone: "America/Sao_Paulo",
     region: "southamerica-east1",
   },
   async (event) => {
     logger.info("Executando a notificação mensal de apoio agendada.", { scheduleTime: event.scheduleTime });
-    await enviarNotificacaoDeApoio().catch((error) => {
-      logger.error("Erro ao executar a notificação mensal de apoio:", error);
-    });
+    await enviarNotificacaoDeApoio();
   }
 );

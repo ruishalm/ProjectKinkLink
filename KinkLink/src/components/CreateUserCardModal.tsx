@@ -9,14 +9,20 @@ interface CreateUserCardModalProps {
   onSubmit: (category: Card['category'], text: string, intensity: number, notifyAsCreator: boolean) => void;
 }
 
+/**
+ * Modal com um formulário para que os usuários criem suas próprias cartas personalizadas.
+ */
 const CreateUserCardModal: React.FC<CreateUserCardModalProps> = ({ isOpen, onClose, onSubmit }) => {
+  // Estados para controlar os campos do formulário.
   const [text, setText] = useState('');
   const [category, setCategory] = useState<Card['category']>('sensorial');
   const [intensity, setIntensity] = useState(1);
   const [notifyAsCreator, setNotifyAsCreator] = useState(true);
+  
   const modalContentRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Efeito para fechar o modal com a tecla 'Escape' ou ao clicar fora dele.
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -40,11 +46,12 @@ const CreateUserCardModal: React.FC<CreateUserCardModalProps> = ({ isOpen, onClo
     };
   }, [isOpen, onClose]);
 
+  // Lida com a submissão do formulário.
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     if (text.trim()) {
       onSubmit(category, text, intensity, notifyAsCreator);
-      // Limpa o formulário para a próxima vez
+      // Limpa o formulário para a próxima criação.
       setText('');
       setCategory('sensorial');
       setIntensity(1);
@@ -52,6 +59,7 @@ const CreateUserCardModal: React.FC<CreateUserCardModalProps> = ({ isOpen, onClo
     }
   };
 
+  // Permite que o usuário insira símbolos especiais (★, ▲) no textarea.
   const handleInsertSymbol = (symbol: '★' | '▲') => {
     const textarea = textareaRef.current;
     if (textarea) {
@@ -59,9 +67,9 @@ const CreateUserCardModal: React.FC<CreateUserCardModalProps> = ({ isOpen, onClo
       const end = textarea.selectionEnd;
       const newText = text.substring(0, start) + symbol + text.substring(end);
       setText(newText);
-      // Foca no textarea e move o cursor para depois do símbolo inserido
+      
+      // Foca e posiciona o cursor após o símbolo inserido.
       textarea.focus();
-      // Usamos um timeout para garantir que o estado foi atualizado antes de mover o cursor
       setTimeout(() => {
         textarea.selectionStart = textarea.selectionEnd = start + 1;
       }, 0);
@@ -77,6 +85,7 @@ const CreateUserCardModal: React.FC<CreateUserCardModalProps> = ({ isOpen, onClo
       <div className={`${styles.modalContent} klnkl-themed-panel`} ref={modalContentRef}>
         <h2 className={styles.modalTitle}>Criar Nova Carta</h2>
         <form onSubmit={handleSubmit}>
+          {/* Campo de Texto da Carta */}
           <div className={styles.formGroup}>
             <label htmlFor="card-text" className={styles.formLabel}>Texto da Carta:</label>
             <textarea
@@ -89,13 +98,13 @@ const CreateUserCardModal: React.FC<CreateUserCardModalProps> = ({ isOpen, onClo
               rows={5}
               required
             />
-            {/* Botões para inserir símbolos */}
             <div className={styles.symbolButtonsContainer}>
               <button type="button" onClick={() => handleInsertSymbol('★')} className={styles.symbolButton}>Inserir ★</button>
               <button type="button" onClick={() => handleInsertSymbol('▲')} className={styles.symbolButton}>Inserir ▲</button>
             </div>
           </div>
 
+          {/* Seletor de Categoria */}
           <div className={styles.formGroup}>
             <label htmlFor="card-category" className={styles.formLabel}>Categoria:</label>
             <select
@@ -112,6 +121,7 @@ const CreateUserCardModal: React.FC<CreateUserCardModalProps> = ({ isOpen, onClo
             </select>
           </div>
 
+          {/* Seletor de Intensidade */}
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>Intensidade:</label>
             <IntensitySelector
@@ -120,6 +130,7 @@ const CreateUserCardModal: React.FC<CreateUserCardModalProps> = ({ isOpen, onClo
             />
           </div>
 
+          {/* Opção de Notificação */}
           <div className={styles.formGroup}>
             <label className={styles.checkboxContainer}>
               <input
@@ -131,6 +142,7 @@ const CreateUserCardModal: React.FC<CreateUserCardModalProps> = ({ isOpen, onClo
             </label>
           </div>
 
+          {/* Botões de Ação */}
           <div className={styles.formActions}>
             <button type="submit" className={`${styles.button} genericButton`}>Criar Carta</button>
             <button type="button" onClick={onClose} className={`${styles.buttonCancel} genericButton`}>Cancelar</button>

@@ -1,29 +1,34 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\FeedbackModal.tsx
 import React, { useState, useEffect, type FormEvent } from 'react';
-import styles from './FeedbackModal.module.css'; // Criaremos este CSS Module
+import styles from './FeedbackModal.module.css';
 
 interface FeedbackModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmitFeedback: (feedbackText: string) => Promise<void>; // Função que lida com o envio
-  initialText?: string; // Para preencher com texto existente, se houver
+  onSubmitFeedback: (feedbackText: string) => Promise<void>;
+  initialText?: string;
 }
 
+/**
+ * Modal para que os usuários enviem feedback, sugestões ou reportem bugs.
+ */
 const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmitFeedback, initialText = '' }) => {
+  // Estados para controlar o texto do formulário, e os estados de envio, erro e sucesso.
   const [feedbackText, setFeedbackText] = useState(initialText);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  // const { t } = useTranslation(); // Removido
 
+  // Efeito para resetar o estado do modal sempre que ele é aberto.
   useEffect(() => {
     if (isOpen) {
-      setFeedbackText(initialText); // Reseta o texto ao abrir
+      setFeedbackText(initialText);
       setError(null);
       setSuccessMessage(null);
     }
   }, [isOpen, initialText]);
 
+  // Efeito para fechar o modal com a tecla 'Escape'.
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -38,10 +43,11 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
     };
   }, [isOpen, onClose]);
 
+  // Lida com a submissão do formulário de feedback.
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!feedbackText.trim()) {
-      setError('Por favor, escreva seu feedback antes de enviar.'); // String fixa
+      setError('Por favor, escreva seu feedback antes de enviar.');
       return;
     }
     setIsSubmitting(true);
@@ -49,13 +55,11 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
     setSuccessMessage(null);
     try {
       await onSubmitFeedback(feedbackText.trim());
-      setSuccessMessage('Feedback enviado com sucesso! Obrigado.'); // String fixa
-      setFeedbackText(''); // Limpa o campo após o envio bem-sucedido
-      // Poderia fechar o modal automaticamente após um tempo ou deixar o usuário fechar
-      // setTimeout(onClose, 2000); // Exemplo: fecha após 2 segundos
+      setSuccessMessage('Feedback enviado com sucesso! Obrigado.');
+      setFeedbackText(''); // Limpa o campo após o envio.
     } catch (err) {
       console.error("Erro ao enviar feedback:", err);
-      setError('Erro ao enviar o feedback. Por favor, tente novamente.'); // String fixa
+      setError('Erro ao enviar o feedback. Por favor, tente novamente.');
     } finally {
       setIsSubmitting(false);
     }
@@ -81,8 +85,12 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
             rows={6}
             disabled={isSubmitting || !!successMessage}
           />
+          
+          {/* Mensagens de erro ou sucesso */}
           {error && <p className={styles.errorMessage}>{error}</p>}
           {successMessage && <p className={styles.successMessage}>{successMessage}</p>}
+          
+          {/* Botões de Ação */}
           <div className={styles.buttonContainer}>
             <button type="button" onClick={onClose} className={`${styles.buttonSecondary} genericButton`} disabled={isSubmitting}>
               Cancelar
@@ -92,6 +100,8 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
             </button>
           </div>
         </form>
+        
+        {/* Contato Alternativo */}
         <div className={styles.alternativeContact}>
           <p>OU</p>
           <p>nos contacte em <a href="mailto:ruishalm.matzukan@gmail.com" className={styles.emailLink}>ruishalm.matzukan@gmail.com</a></p>

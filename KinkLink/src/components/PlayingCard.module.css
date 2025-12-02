@@ -31,8 +31,7 @@
 .cardFront {
   composes: cardFace;
   position: relative; /* Crucial para posicionamento absoluto dos filhos */
-  /* align-items: center; /* Removido - A textArea ocupará a largura e a altura é calculada */
-  justify-content: center; /* Para centralizar a .textArea se ela tiver altura fixa e não preencher */
+  justify-content: center;
 }
 
 .cardBack {
@@ -57,19 +56,16 @@
 
 .cornerSuit {
   display: block;
-  /* text-transform: uppercase; */
 }
 
 .textArea {
-  /* flex-grow: 1;  REMOVIDO - A altura será definida explicitamente no TSX */
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   overflow: hidden;
-  box-sizing: border-box; /* Mantido - importante para o padding não aumentar o tamanho total */
-  /* min-height: 0; Não é mais tão crítico se a altura é fixa */
+  box-sizing: border-box;
   position: relative;
 }
 
@@ -101,24 +97,22 @@
 }
 
 .cardBackLogo {
-  /* max-width: 70%; Removido para permitir que o logo seja maior */
-  /* max-height: 60%; Removido para permitir que o logo seja maior */
-  width: auto; /* Mantém a proporção da imagem */
-  height: auto; /* Mantém a proporção da imagem */
-  object-fit: contain; /* Garante que a imagem inteira caiba sem cortar, mantendo a proporção */
-  opacity: 0.85; /* Uma leve transparência para integrar melhor com o fundo */
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  opacity: 0.85;
 }
 
 .partnerSuggestionNotice {
   position: absolute;
-  top: 5px; /* Ajuste conforme necessário, considera o visualScaleFactor */
-  right: 5px; /* Ajuste conforme necessário, considera o visualScaleFactor */
-  background-color: rgba(0, 0, 0, 0.65); /* Fundo semi-transparente escuro */
-  color: #f0f0f0; /* Cor de texto clara */
-  padding: 3px 7px; /* Padding interno, pode ser ajustado com visualScaleFactor se necessário */
-  border-radius: 5px; /* Bordas arredondadas */
-  /* font-size é definido inline no TSX para usar visualScaleFactor */
-  z-index: 3; /* Para ficar acima de outros elementos do canto como .corner e .hotButton */
+  top: 5px;
+  right: 5px;
+  background-color: rgba(0, 0, 0, 0.65);
+  color: #f0f0f0;
+  padding: 3px 7px;
+  border-radius: 5px;
+  z-index: 3; /* Para ficar acima de outros elementos do canto */
   font-weight: bold;
-  line-height: 1.2; /* Para melhor espaçamento vertical se o texto quebrar */
+  line-height: 1.2;
 }
+

@@ -13,8 +13,7 @@ import { loadAndResolveInitialSkins } from './skinUtils/resolveActiveSkins';
 import { getThemeAppliedSettings, checkThemeIntegrity } from './skinUtils/themeManager';
 import { applyStylesAndClasses } from './skinUtils/styleApplier';
 
-// Re-exportar tipos e constantes que podem ser necessários em outros lugares
-export type { ActiveSkinSettings } from '../config/skins/skinTypes'; // This re-export is fine
+export type { ActiveSkinSettings } from '../config/skins/skinTypes';
 export { defaultPalette } from './skinUtils/skinConstants';
 
 interface SkinContextType {
@@ -34,6 +33,8 @@ export const SkinProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [activeSkins, setActiveSkinsState] = useState<ImportedActiveSkinSettings>(defaultActiveSkins);
   const [isLoadingSkins, setIsLoadingSkins] = useState(true);
 
+  // Efeito para carregar as skins iniciais na primeira renderização.
+  // Carrega do localStorage ou usa os padrões, e garante a integridade dos temas.
   useEffect(() => {
     let initialSkins = loadAndResolveInitialSkins(exampleSkinsData);
     initialSkins = checkThemeIntegrity(initialSkins, exampleSkinsData);
@@ -41,6 +42,8 @@ export const SkinProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsLoadingSkins(false);
   }, []);
 
+  // Efeito para aplicar as classes e variáveis de estilo ao DOM.
+  // Roda sempre que as skins ativas mudam.
   useEffect(() => {
     if (!isLoadingSkins) {
       applyStylesAndClasses(activeSkins);
@@ -52,51 +55,30 @@ export const SkinProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     skinId: string
   ) => {
     setActiveSkinsState(prevSkins => {
-      console.log(`[setActiveSkin START] Tipo: ${type}, ID: ${skinId}`);
-      console.log('[setActiveSkin] prevSkins:', JSON.parse(JSON.stringify(prevSkins)));
-
       let newSkinsDraft: ActiveSkinSettings = { ...prevSkins };
-      console.log('[setActiveSkin] newSkinsDraft após cópia de prevSkins:', JSON.parse(JSON.stringify(newSkinsDraft)));
 
-      if (type !== 'themePack') {
-        // Se um tema nomeado (que não seja já custom ou o default themePack se este for especial) estava ativo,
-        // e estamos mudando uma skin individual, o tema se torna customizado.
-        if (newSkinsDraft.themePack &&
-            newSkinsDraft.themePack !== CUSTOM_THEME_ID) {
-          console.log(`[setActiveSkin] Tema nomeado "${newSkinsDraft.themePack}" modificado por skin individual. Alterando para tema "${CUSTOM_THEME_ID}".`);
-          newSkinsDraft.themePack = CUSTOM_THEME_ID;
-          console.log('[setActiveSkin] newSkinsDraft APÓS marcar como CUSTOM_THEME_ID:', JSON.parse(JSON.stringify(newSkinsDraft)));
-        } else {
-          // Se já era CUSTOM_THEME_ID, ou não havia tema, ou era o tema default (que ao ser modificado também vira CUSTOM),
-          // apenas logamos. O themePack ou permanece CUSTOM_THEME_ID ou já é undefined/default.
-          // Se defaultActiveSkins.themePack for um tema específico e for modificado, ele também se tornará CUSTOM_THEME_ID.
-           if (newSkinsDraft.themePack && newSkinsDraft.themePack !== CUSTOM_THEME_ID){
-             console.log(`[setActiveSkin] Tema "${newSkinsDraft.themePack}" modificado. Alterando para tema "${CUSTOM_THEME_ID}".`);
-             newSkinsDraft.themePack = CUSTOM_THEME_ID;
-           } else {
-             console.log(`[setActiveSkin] Aplicando skin individual. Tema atual é "${newSkinsDraft.themePack || 'Nenhum/Customizado'}".`);
-           }
-        }
+      // Se um tema nomeado estava ativo e o usuário muda uma skin individual,
+      // o tema se torna "customizado". Isso preserva as outras skins do tema
+      // mas indica que não é mais o pacote original.
+      if (type !== 'themePack' && newSkinsDraft.themePack && newSkinsDraft.themePack !== CUSTOM_THEME_ID) {
+        newSkinsDraft.themePack = CUSTOM_THEME_ID;
       }
 
       const skinDef = exampleSkinsData.find(s => s.id === skinId && s.type === type);
 
+      // Se o usuário selecionou um pacote de tema completo.
       if (type === 'themePack') {
-        console.log(`[setActiveSkin] Aplicando pacote de tema: ${skinId}`);
         if (skinDef) {
+          // Substitui todas as configurações atuais pelas do tema selecionado.
           const themeSettings = getThemeAppliedSettings(skinId, exampleSkinsData);
-          // Ao aplicar um pacote de tema, ele define todas as suas skins associadas.
-          // O themePack ID correto já está em themeSettings.
-          newSkinsDraft = { ...themeSettings }; // Substitui completamente pelas configurações do tema
-          console.log('[setActiveSkin] themeSettings aplicados:', JSON.parse(JSON.stringify(themeSettings)));
+          newSkinsDraft = { ...themeSettings };
         } else {
-          console.warn(`[setActiveSkin] Pacote de tema "${skinId}" não encontrado. Aplicando tema padrão.`);
+          // Fallback para o tema padrão se o ID do tema for inválido.
+          console.warn(`[SkinContext] Pacote de tema "${skinId}" não encontrado. Aplicando tema padrão.`);
           const themeSettings = getThemeAppliedSettings(defaultActiveSkins.themePack, exampleSkinsData);
           newSkinsDraft = { ...themeSettings };
         }
-        console.log('[setActiveSkin] newSkinsDraft APÓS aplicação de pacote de tema:', JSON.parse(JSON.stringify(newSkinsDraft)));
-      } else { // Lógica para aplicar uma skin individual
-        console.log(`[setActiveSkin] Aplicando skin individual: Tipo=${type}, ID=${skinId}. Base newSkinsDraft (com themePack ajustado):`, JSON.parse(JSON.stringify(newSkinsDraft)));
+      } else { // Se o usuário selecionou uma skin individual.
         if (skinDef) {
           switch (type) {
             case 'backgroundPile':
@@ -113,6 +95,7 @@ export const SkinProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 const colors = skinDef.preview.slice(0, colorVariableNames.length);
                 newSkinsDraft.colorPaletteColors = colors.concat(defaultPalette.slice(colors.length));
               } else {
+                // Fallback para a paleta padrão se a skin for inválida.
                 newSkinsDraft.colorPalette = defaultActiveSkins.colorPalette;
                 newSkinsDraft.colorPaletteColors = [...defaultPalette];
               }
@@ -130,17 +113,16 @@ export const SkinProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               newSkinsDraft.panelStyleClass = typeof skinDef.preview === 'string' ? skinDef.preview : defaultActiveSkins.panelStyleClass;
               break;
           }
-          console.log(`[setActiveSkin] newSkinsDraft APÓS aplicação da skin individual ${type}:`, JSON.parse(JSON.stringify(newSkinsDraft)));
         } else {
-          console.warn(`[setActiveSkin] Definição da skin individual tipo "${type}" ID "${skinId}" não encontrada.`);
+          console.warn(`[SkinContext] Definição da skin individual tipo "${type}" ID "${skinId}" não encontrada.`);
         }
       }
       
+      // Salva as novas configurações de skin no localStorage para persistência.
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newSkinsDraft));
-      console.log('[setActiveSkin END] Estado final a ser retornado:', JSON.parse(JSON.stringify(newSkinsDraft)));
       return newSkinsDraft;
     });
-  }, [/* dependências */]); // Adicionar dependências se exampleSkinsData, etc., não forem estritamente estáveis globais
+  }, []);
 
   return (
     <SkinContext.Provider value={{

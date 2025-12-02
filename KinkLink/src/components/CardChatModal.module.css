@@ -9,51 +9,51 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000; /* Garante que fique sobre outros elementos */
+  z-index: 1000; /* Garante que o modal fique sobre outros elementos */
   padding: 20px;
   box-sizing: border-box;
 }
 
 .modalContent {
-  background-color: #2c2c2c; /* Cor de fundo interna, consistente com chatContainer */
-  border-radius: 12px; /* Raio similar ao CardBack */
-  border: 8px solid #b71c1c; /* Borda vermelha escura, como no CardBack */
+  background-color: #2c2c2c;
+  border-radius: 12px;
+  border: 8px solid #b71c1c;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  width: 420px; /* Largura ligeiramente aumentada */
-  height: 580px; /* Altura ligeiramente aumentada */
-  max-width: 95vw; /* Garante que não ultrapasse 95% da largura da viewport */
-  max-height: 90vh; /* Garante que não ultrapasse 90% da altura da viewport */
+  width: 420px;
+  height: 580px;
+  max-width: 95vw;
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
-  position: relative; /* Para posicionar o botão de fechar */
-  gap: 10px; /* Adicionado: Espaçamento entre o chatContainer e o destructiveButton */
-  overflow: hidden; /* Garante que os cantos arredondados da borda sejam respeitados pelos filhos */
-  box-sizing: border-box; /* Para que a borda não aumente o tamanho total */
+  position: relative;
+  gap: 10px; /* Espaçamento entre o chatContainer e o destructiveButton */
+  overflow: hidden; /* Garante que os cantos arredondados sejam respeitados pelos filhos */
+  box-sizing: border-box;
 }
 
 .modalHeaderActions {
   display: flex;
-  /* justify-content: flex-end; Removido para permitir que actionButtonsGroup ocupe a largura total */
   align-items: center;
-  padding: 10px 12px 5px; /* Ajuste no padding, especialmente inferior */
-  position: relative; /* Para o z-index do closeButton funcionar bem */
+  padding: 10px 12px 5px;
+  position: relative;
   flex-shrink: 0;
-  min-height: 40px; /* Garante uma altura mínima para o cabeçalho, considerando o padding do grupo */
+  min-height: 40px;
 }
 
-.actionButtonsGroup { /* Antigo .leftHeaderActions, agora com fundo e contendo todos os 3 botões */
+.actionButtonsGroup {
   display: flex;
   align-items: center;
-  gap: 10px; /* Espaço entre os botões de ação da esquerda */
-  background-color: rgba(0, 0, 0, 0.55); /* Fundo mais escuro para o grupo */
-  padding: 6px 10px; /* Padding interno do grupo ligeiramente aumentado */
-  border-radius: 8px; /* Bordas arredondadas para o grupo */
-  border: 1px solid rgba(255, 255, 255, 0.08); /* Borda ainda mais sutil para o grupo */
-  width: 100%; /* Faz o grupo de botões ocupar toda a largura do modalHeaderActions */
-  box-sizing: border-box; /* Garante que o padding não aumente a largura total */
+  gap: 10px;
+  background-color: rgba(0, 0, 0, 0.55);
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%; /* Ocupa toda a largura do cabeçalho */
+  box-sizing: border-box;
 }
 
-.headerActionButton { /* Classe base para botões no header do modal */
+/* Classe base para botões no cabeçalho do modal */
+.headerActionButton {
   background-color: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #ccc;
@@ -64,40 +64,39 @@
   align-items: center;
   gap: 6px;
   transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
-  font-size: 0.9em; /* Tamanho de fonte base para botões de ação */
+  font-size: 0.9em;
 }
 
-.closeButtonInGroup { /* Estilo para o botão X quando está dentro do grupo */
-  /* Herda de .headerActionButton mas com algumas modificações */
-  background: transparent; /* Sem fundo próprio, usa o do grupo */
-  border: 1px solid transparent; /* Sem borda própria */
+/* Estilo para o botão 'X' de fechar */
+.closeButtonInGroup {
+  background: transparent;
+  border: 1px solid transparent;
   color: #aaa;
-  padding: 3px 7px; /* Padding um pouco menor para o X */
-  font-size: 1.1em; /* 'X' um pouco maior */
+  padding: 3px 7px;
+  font-size: 1.1em;
   line-height: 1;
-  margin-left: auto; /* Empurra o botão X para a direita dentro do grupo */
+  margin-left: auto; /* Empurra o botão para a direita */
 }
 .closeButtonInGroup:hover {
   color: #fff;
-  background-color: rgba(255, 255, 255, 0.1); /* Leve destaque no hover */
+  background-color: rgba(255, 255, 255, 0.1);
   border-color: rgba(255,255,255,0.2);
 }
 
 /* Estilos para o botão de Favoritar (foguinho) */
 .favoriteButtonInChat {
   /* Herda de headerActionButton */
-  /* Estilos específicos para o estado 'isHot' e hover já estão abaixo */
 }
 
 .favoriteIcon {
-  font-size: 1.1em; /* Tamanho do emoji de fogo */
+  font-size: 1.1em;
   filter: grayscale(100%); /* Ícone cinza por padrão */
   opacity: 0.7;
   transition: filter 0.2s, opacity 0.2s;
 }
 
 .favoriteText {
-  font-size: 0.8em; /* Tamanho do texto "Favoritar" */
+  font-size: 0.8em;
   font-weight: bold;
 }
 
@@ -107,14 +106,14 @@
 }
 
 .favoriteButtonInChat.isHot {
-  background-color: rgba(255, 107, 107, 0.3); /* Fundo avermelhado quando "hot" */
-  color: #ffdddd; /* Texto mais claro quando "hot" */
-  border-color: rgba(255, 107, 107, 0.7); /* Borda avermelhada quando "hot" */
-  box-shadow: 0 0 8px rgba(255, 107, 107, 0.5); /* Brilho sutil quando "hot" */
+  background-color: rgba(255, 107, 107, 0.3);
+  color: #ffdddd;
+  border-color: rgba(255, 107, 107, 0.7);
+  box-shadow: 0 0 8px rgba(255, 107, 107, 0.5);
 }
 
 .favoriteButtonInChat:hover:not(.isHot) {
-  background-color: rgba(255, 255, 255, 0.15); /* Leve destaque no hover quando não está "hot" */
+  background-color: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.4);
 }
 
@@ -132,7 +131,6 @@
 /* Estilos para o botão de Realizada/Repetir */
 .completedButtonInChat {
   /* Herda de headerActionButton */
-  /* Cores e ícones são dinâmicos baseados no estado isCompleted */
 }
 
 .completedIcon {
@@ -144,43 +142,39 @@
   font-weight: bold;
 }
 
-.completedButtonInChat.isCompletedAction { /* Quando o botão é "Repetir?!" */
-  background-color: rgba(76, 175, 80, 0.3); /* Fundo esverdeado */
-  color: #d0f0d0; /* Texto claro esverdeado */
+/* Estilo para quando o botão está no modo "Repetir?!" */
+.completedButtonInChat.isCompletedAction {
+  background-color: rgba(76, 175, 80, 0.3);
+  color: #d0f0d0;
   border-color: rgba(76, 175, 80, 0.7);
 }
 .completedButtonInChat.isCompletedAction:hover {
   background-color: rgba(76, 175, 80, 0.5);
 }
 
-/* Ajuste para o chatContainer (do CardChat.module.css) quando dentro do modalContent */
-.modalContent > div[class*="chatContainer_"] { /* Seleciona o .chatContainer do CardChat.module.css */
-  box-shadow: none; /* Remove sombra duplicada se o modalContent já tiver */
-  flex-grow: 1; /* Faz o chatContainer ocupar o espaço disponível antes do botão de desfazer */
-  min-height: 0; /* Ajuda o flex-grow a funcionar corretamente em alguns cenários */
-  /* O chatContainer não precisa de border-radius próprio aqui, pois o modalContent já cuida disso */
+/* Ajuste para o chatContainer (do CardChat.module.css) quando dentro do modal */
+.modalContent > div[class*="chatContainer_"] {
+  box-shadow: none; /* Remove sombra duplicada */
+  flex-grow: 1; /* Faz o chat ocupar o espaço disponível */
+  min-height: 0; /* Ajuda o flex-grow a funcionar corretamente */
 }
 
 .destructiveButton {
-  /* Estilos base para garantir que tenha aparência destrutiva, mesmo que classes genéricas falhem */
-  background-color: transparent; /* Remove o fundo para parecer um link */
-  color: var(--cor-acao-negativa, #c0392b); /* Mantém a cor vermelha para o texto */
-  /* border, cursor, font-weight, transition
-     são herdados de genericButton. */
-  border: none; /* Remove a borda */
+  background-color: transparent;
+  color: var(--cor-acao-negativa, #c0392b);
+  border: none;
   text-align: center;
-  /* margin: 0; /* Removido em favor do gap no .modalContent */
-  width: auto; /* Permite que o tamanho se ajuste ao conteúdo */
+  width: auto;
   box-sizing: border-box;
-  flex-shrink: 0; /* Impede que o botão encolha */
-  padding: 8px 15px; /* Padding reduzido */
-  font-size: 0.95em;    /* Fonte ligeiramente menor */
-  text-decoration: underline; /* Adiciona sublinhado para parecer um link */
-  align-self: center; /* Centraliza o link/botão se o container pai for flex */
+  flex-shrink: 0;
+  padding: 8px 15px;
+  font-size: 0.95em;
+  text-decoration: underline;
+  align-self: center;
 }
 
 .destructiveButton:hover {
-  background-color: rgba(192, 57, 43, 0.1); /* Fundo vermelho bem sutil no hover */
-  color: var(--cor-acao-negativa-hover, #a93226); /* Texto vermelho mais escuro no hover */
-  text-decoration: underline; /* Mantém o sublinhado */
+  background-color: rgba(192, 57, 43, 0.1);
+  color: var(--cor-acao-negativa-hover, #a93226);
+  text-decoration: underline;
 }

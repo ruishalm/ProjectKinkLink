@@ -1,75 +1,185 @@
-# Fluxo de Conexão de Casal
+# 🔗 Fluxo de Conexão de Casal (v4.0)
 
 Este documento descreve o processo pelo qual dois usuários do KinkLink podem conectar suas contas para formar um casal dentro do aplicativo.
 
+**Versão:** 4.0 (Nova Arquitetura - Novembro 2025)
+
 ## 1. Visão Geral
 
-A conexão de casal permite que os usuários compartilhem interações com cartas, formem "Links" (matches) e utilizem o chat integrado. O processo geralmente envolve um usuário iniciando um convite (gerando um código) e o outro usuário aceitando esse convite (inserindo o código).
+A conexão de casal permite que os usuários compartilhem interações com cartas, formem "Links" (matches) e utilizem o chat integrado. O processo envolve:
+- **User A (Iniciador):** Gera código → cria `couple` (pending, 1 membro) + `pendingLink`
+- **User B (Aceitante):** Aceita código → atualiza próprio perfil + completa `couple` (2 membros)
+
+**Princípio fundamental:** Cada usuário edita APENAS seu próprio documento, evitando problemas de permissão.
 
 ## 2. Componentes Envolvidos
 
 *   **Frontend (React App):**
-    *   `ProfilePage.tsx` (ou uma seção/página dedicada à conexão): Interface para iniciar a conexão (gerar código) ou inserir um código de convite.
-    *   `AuthContext.tsx`: Pode ser usado para acessar o `userId` do usuário logado.
-    *   `firestoreService.ts` (ou similar): Funções para interagir com o Firestore (criar/atualizar `pendingLinks`, criar `couples`, atualizar `users`).
+    *   `CreateLink.tsx`: Interface para gerar código de vínculo
+    *   `AcceptLink.tsx`: Interface para aceitar código
+    *   `LinkCouplePage.tsx`: Página de gerenciamento de vínculo
+    *   `AuthContext.tsx`: Gerencia estado do usuário e operações de vínculo/desvínculo
+    *   `linkService.ts`: Serviço centralizado para operações de linking (createLink, acceptLink, unlinkCouple)
 *   **Backend (Firestore):**
-    *   `pendingLinks` (Coleção): Armazena convites pendentes com um código único, o ID do iniciador e o status.
-    *   `users` (Coleção): Documentos dos usuários são atualizados com o `coupleId` e `linkedPartnerId` após a conexão.
-    *   `couples` (Coleção): Um novo documento é criado para representar o casal conectado, armazenando os `userIds` dos membros.
+    *   `pendingLinks` (Coleção): Armazena convites pendentes com código, coupleId e timestamp
+    *   `users` (Coleção): Documentos atualizados apenas com `coupleId` (campo `partnerId` REMOVIDO)
+    *   `couples` (Coleção): Documento criado pelo iniciador com status ('pending'/'completed'), initiatorId, members[], memberSymbols{}
 
-## 3. Fluxo Detalhado
+## 3. Fluxo Detalhado (Nova Arquitetura v4.0)
 
-### Parte 1: Iniciando a Conexão (Usuário A - Iniciador)
+### Parte 1: Criando o Vínculo (Usuário A - Iniciador)
 
-1.  **Geração de Código:**
-    *   O Usuário A navega para a seção de conexão no aplicativo.
-    *   O aplicativo gera um código de convite único e com tempo de expiração (ex: 6 caracteres alfanuméricos, válido por X minutos/horas).
-    *   Um novo documento é criado na coleção `pendingLinks` no Firestore com:
-        *   `linkCode`: O código gerado.
-        *   `initiatorUserId`: `userId` do Usuário A.
-        *   `status`: "pending".
-        *   `createdAt`: Timestamp da criação.
-        *   `expiresAt`: Timestamp de expiração do código.
-    *   O código é exibido para o Usuário A, para que ele possa compartilhá-lo com o Usuário B.
+**Função:** `linkService.createLink()`
 
-### Parte 2: Aceitando a Conexão (Usuário B - Receptor)
+1.  **Validações Iniciais:**
+    *   Verifica se User A está autenticado
+    *   Verifica se User A já não está vinculado (`userData.coupleId === null`)
 
-1.  **Inserção do Código:**
-    *   O Usuário B recebe o código do Usuário A e o insere na seção de conexão do seu aplicativo.
-2.  **Validação do Código:**
-    *   O aplicativo consulta a coleção `pendingLinks` no Firestore pelo `linkCode` fornecido.
+2.  **Criação do Couple (Transação Atômica):**
+    *   Gera `coupleId` aleatório: `couple_${timestamp}_${random}` (NÃO concatenação de UIDs)
+    *   Cria documento `couples/{coupleId}`:
+        ```typescript
+        {
+          status: 'pending',
+          initiatorId: userA.uid,
+          members: [userA.uid],
+          memberSymbols: { 
+            [userA.uid]: Math.random() < 0.5 ? '▲' : '⭐' // Aleatório
+          },
+          createdAt: serverTimestamp()
+        }
+        ```
+        **Nota:** Símbolo do iniciador já é atribuído aleatoriamente na criação
+
+3.  **Atualização do Usuário A:**
+    *   Atualiza `users/{userA.uid}`:
+        ```typescript
+        { coupleId: coupleId }
+        ```
+
+4.  **Criação do PendingLink:**
+    *   Gera código de 6 caracteres (A-Z, 0-9, excluindo O, I, L)
+    *   Cria documento `pendingLinks/{code}`:
+        ```typescript
+        {
+          coupleId: coupleId,
+          linkCode: code,
+          createdAt: serverTimestamp()
+        }
+        ```
+
+5.  **Retorno:**
+    *   Retorna o código para ser exibido ao User A
+
+### Parte 2: Aceitando o Vínculo (Usuário B - Aceitante)
+
+**Função:** `linkService.acceptLink(code)`
+
+1.  **Busca do PendingLink (Transação Atômica):**
+    *   Busca documento `pendingLinks/{code}`
+    *   **Validações:**
+        *   Código existe?
+        *   Extrai `coupleId` do pendingLink
+
+2.  **Busca e Validação do Couple:**
+    *   Busca documento `couples/{coupleId}`
     *   **Verificações:**
-        *   O código existe?
-        *   O status é "pending"?
-        *   O código não expirou?
-        *   O `initiatorUserId` não é o mesmo que o `userId` do Usuário B (para evitar auto-conexão)?
-        *   O Usuário A e o Usuário B já não estão em outros casais ativos? (Esta verificação pode ser feita lendo os documentos dos usuários).
-3.  **Confirmação da Conexão (Transação Firestore):**
-    *   Se todas as validações passarem, uma transação do Firestore é ideal para garantir a atomicidade das seguintes operações:
-        1.  **Criar Documento `couples`:**
-            *   Um novo documento é criado na coleção `couples`.
-            *   `members`: Array contendo `[initiatorUserId, acceptedByUserId (userId do Usuário B)]`.
-            *   `createdAt`: Timestamp.
-            *   O ID deste novo documento (`coupleId`) é obtido.
-        2.  **Atualizar Documento `pendingLinks`:**
-            *   O status do documento em `pendingLinks` é atualizado para "completed".
-            *   `acceptedBy`: `userId` do Usuário B.
-            *   `coupleId`: O `coupleId` recém-criado.
-        3.  **Atualizar Documento do Usuário A (`users/{initiatorUserId}`):**
-            *   `coupleId`: O `coupleId` recém-criado.
-            *   `linkedPartnerId`: `userId` do Usuário B.
-        4.  **Atualizar Documento do Usuário B (`users/{acceptedByUserId}`):**
-            *   `coupleId`: O `coupleId` recém-criado.
-            *   `linkedPartnerId`: `userId` do Usuário A.
-4.  **Feedback ao Usuário:**
-    *   Ambos os usuários (ou pelo menos o Usuário B, e o Usuário A na próxima vez que carregar os dados) são notificados do sucesso da conexão.
-    *   A interface do aplicativo é atualizada para refletir o estado de conectado.
+        *   Couple existe?
+        *   Status é 'pending'?
+        *   User B não é o iniciador (evita auto-vinculação)
 
-## 4. Considerações Adicionais
+3.  **Validação do User B:**
+    *   Busca documento `users/{userB.uid}`
+    *   Verifica que `userData.coupleId === null` (não está vinculado)
 
-*   **Cancelamento/Expiração:** Lógica para lidar com códigos expirados ou se o iniciador cancelar o convite antes de ser aceito (atualizando o status em `pendingLinks`).
-*   **Desvinculação:** Um fluxo separado seria necessário para permitir que os usuários desfaçam a conexão do casal. Isso envolveria remover/atualizar os campos `coupleId` e `linkedPartnerId` nos documentos dos usuários e, possivelmente, arquivar ou excluir o documento `couples`.
-*   **Interface do Usuário:** A UI deve guiar claramente os usuários através do processo, informando sobre o status do código e o sucesso/falha da conexão.
+4.  **Completar o Vínculo (Mesma Transação):**
+    *   **Atualiza User B:**
+        ```typescript
+        users/{userB.uid}: { coupleId: coupleId }
+        ```
+    *   **Completa Couple:**
+        ```typescript
+        couples/{coupleId}: {
+          status: 'completed',
+          members: [userA.uid, userB.uid],
+          memberSymbols: {
+            [userA.uid]: '★',
+            [userB.uid]: '▲'
+          }
+        }
+        ```
+    *   **Deleta PendingLink:**
+        ```typescript
+        delete pendingLinks/{code}
+        ```
+
+5.  **Retorno:**
+    *   Retorna `{ coupleId, partnerId: initiatorId }` para compatibilidade
+
+**IMPORTANTE:** User B NUNCA edita documento do User A. Cada usuário edita apenas seu próprio perfil.
+
+### Parte 3: Desvinculação (Qualquer Usuário)
+
+**Função:** `linkService.unlinkCouple(coupleId)`
+
+1.  **Busca do Couple (Transação Atômica):**
+    *   Busca documento `couples/{coupleId}`
+    *   Verifica que user autenticado está em `couple.members`
+
+2.  **Reseta Ambos Usuários:**
+    *   Loop através de `couple.members`:
+        ```typescript
+        for (memberId in couple.members) {
+          users/{memberId}: { coupleId: null }
+        }
+        ```
+
+3.  **Deleta Couple:**
+    *   Delete `couples/{coupleId}`
+
+**Assinatura Simplificada:** Apenas precisa de `coupleId` (não precisa de `userId` ou `partnerId`)
+
+## 4. Mudanças da Arquitetura v4.0
+
+### Diferenças da Versão Anterior:
+
+| Aspecto | v3.x (Antiga) | v4.0 (Nova) |
+|---------|---------------|-------------|
+| **Couple ID** | Concatenação de UIDs | ID aleatório gerado |
+| **partnerId** | Campo no documento user | REMOVIDO (redundante) |
+| **Criação Couple** | Durante acceptLink | Durante createLink (pending) |
+| **Edição Cruzada** | User B edita User A | NUNCA acontece |
+| **Permissões** | Complexas, multi-usuário | Simples, auto-edição |
+| **Unlinking** | 3 parâmetros (userId, partnerId, coupleId) | 1 parâmetro (coupleId) |
+
+### Vantagens:
+
+✅ **Sem Loops de Permissão:** Cada user edita apenas seu próprio documento  
+✅ **Regras Simplificadas:** Checagens baseadas apenas em `couple.members`  
+✅ **Mais Flexível:** Couple ID aleatório permite futuras extensões  
+✅ **Menos Redundância:** `partnerId` removido, info vem de `couple.members`  
+✅ **Atomic Garantido:** Transações Firestore garantem consistência  
+
+## 5. Regras Firestore (Resumo)
+
+```javascript
+// Couples - Create (pending, 1 member)
+allow create: if status == 'pending' && 
+                 initiatorId == auth.uid && 
+                 members.size() == 1;
+
+// Couples - Update (complete with 2 members)
+allow update: if auth.uid in request.resource.data.members;
+
+// Couples - Read
+allow get: if status == 'pending' ||  // Qualquer user (para acceptLink)
+              userHasCoupleId();       // Ou user tem coupleId
+
+// PendingLinks - Simplified
+allow read, create, delete: if request.auth != null;
+```
 
 ---
-Este fluxo descreve uma abordagem comum para conectar casais. As implementações exatas podem variar com base nos requisitos específicos e na estrutura de dados do `firestore.rules` que você já possui.
+
+**Última Atualização:** Novembro 2024  
+**Versão:** 4.0 (Arquitetura Nova - Sem partnerId)

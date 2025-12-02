@@ -117,7 +117,7 @@ const CreateUserCardModal: React.FC<CreateUserCardModalProps> = ({ isOpen, onClo
               <option value="poder">Poder</option>
               <option value="fantasia">Fantasia</option>
               <option value="exposicao">Exposição</option>
-              <option value="conexao">Conexão</option>
+              {/* Conexão removida - categoria reservada para cartas do sistema */}
             </select>
           </div>
 

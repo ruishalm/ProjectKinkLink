@@ -64,31 +64,43 @@ function ProfilePage() {
   }, [location.state]);
 
   useEffect(() => {
-    // Só busca se tiver user.partnerId e (partnerInfo for null OU o partnerId mudou)
-    if (user && user.partnerId) {
+    // Nova arquitetura: busca partner do couple document
+    if (user && user.coupleId) {
       const fetchPartnerInfo = async () => {
         try {
-          const partnerDocRef = doc(db, 'users', user.partnerId!); // MODIFICADO AQUI
-          const partnerDocSnap = await getDoc(partnerDocRef);
-          if (partnerDocSnap.exists()) {
-            const partnerData = partnerDocSnap.data() as { username?: string; email?: string | null }; // Simplificando o tipo User aqui
-            setPartnerInfo({ username: partnerData.username, email: partnerData.email });
+          // Buscar couple para pegar o partnerId
+          const coupleDocRef = doc(db, 'couples', user.coupleId!);
+          const coupleDocSnap = await getDoc(coupleDocRef);
+          
+          if (coupleDocSnap.exists()) {
+            const coupleData = coupleDocSnap.data();
+            const partnerId = coupleData.members.find((id: string) => id !== user.id);
+            
+            if (partnerId) {
+              const partnerDocRef = doc(db, 'users', partnerId);
+              const partnerDocSnap = await getDoc(partnerDocRef);
+              if (partnerDocSnap.exists()) {
+                const partnerData = partnerDocSnap.data() as { username?: string; email?: string | null };
+                setPartnerInfo({ username: partnerData.username, email: partnerData.email });
+              } else {
+                console.warn('ProfilePage: Documento do parceiro não encontrado.');
+                setPartnerInfo({ username: 'Parceiro(a) não encontrado(a)' });
+              }
+            }
           } else {
-            console.warn('ProfilePage: Documento do parceiro não encontrado.');
+            console.warn('ProfilePage: Documento do couple não encontrado.');
             setPartnerInfo({ username: 'Parceiro(a) não encontrado(a)' });
           }
         } catch (error) {
           console.error('ProfilePage: Erro ao buscar informações do parceiro:', error);
           setPartnerInfo({ username: 'Erro ao buscar parceiro(a)' });
-        } finally {
-          // Não precisa mais de isLoadingPartner
         }
       };
       fetchPartnerInfo();
-    } else if (user && !user.partnerId) { // MODIFICADO AQUI
+    } else if (user && !user.coupleId) {
       setPartnerInfo(null); // Limpa info do parceiro se desvinculado
     }
-  }, [user, user?.partnerId]); // Removido partnerInfo da dependência para evitar loops desnecessários
+  }, [user, user?.coupleId]);
 
   const handleLogout = async () => {
     try {
@@ -147,9 +159,9 @@ function ProfilePage() {
 
   const handleIntensityChange = async (newLevel: number) => {
     if (user?.id) {
-      const userDocRef = doc(db, 'users', user.id);
       try {
-        await updateDoc(userDocRef, { maxIntensity: newLevel });
+        // Usa a função updateUser do AuthContext para garantir que o estado local e o firestore estejam em sincronia
+        await updateUser({ maxIntensity: newLevel });
         // Opcional: Adicionar um toast/feedback de sucesso
         console.log(`[ProfilePage] Intensidade atualizada para o nível ${newLevel}`);
       } catch (error) {
@@ -451,7 +463,7 @@ function ProfilePage() {
         {/* SEÇÃO DE VÍNCULO */}
         <div className={`${styles.section} klnkl-themed-panel`}>
           <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>Vínculo de Casal</h2>
-          {user.partnerId ? (
+          {user.coupleId ? (
             <>              
               <p className={styles.infoText}>
                 Você está vinculado com:{' '}

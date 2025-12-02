@@ -1,4 +1,13 @@
 // MatchCardItem.tsx
+/**
+ * Componente que representa uma carta no grid de matches
+ * 
+ * Exibe badges visuais para diferentes estados:
+ * - 🔴 Badge vermelho (unreadIndicator): Novo match OU nova mensagem não lida
+ * - ✉️ Snippet: Prévia da última mensagem (apenas se hasNewMessage = true)
+ * - 🔥 Indicador hot: Aparece em cartas completadas que são favoritas
+ * - 🔥 Botão toggle: Aparece em cartas ativas (não completadas) para favoritar/desfavoritar
+ */
 import React from 'react';
 import PlayingCard, { type CardData as PlayingCardDataType } from './PlayingCard';
 import styles from './MatchCardItem.module.css'; // Usará seu próprio CSS module
@@ -6,12 +15,12 @@ import styles from './MatchCardItem.module.css'; // Usará seu próprio CSS modu
 export interface MatchCardItemProps { // Exportar a interface
   card: PlayingCardDataType;
   onClick: () => void;
-  isHot?: boolean; // Se é um Top Link
-  isNewMatch?: boolean; // Se o match é recém-formado
-  hasNewMessage?: boolean; // Se há novas mensagens no chat
+  isHot?: boolean; // Se é um Top Link (favorito)
+  isNewMatch?: boolean; // Se o match é recém-formado (não visto ainda)
+  hasNewMessage?: boolean; // Se há mensagens não lidas no chat
   onToggleHot?: (cardId: string, event: React.MouseEvent) => void;
   lastMessageSnippet?: string; // Trecho da última mensagem se houver
-  isCompletedCard?: boolean; // Nova prop para indicar se é uma carta da seção "Realizadas"
+  isCompletedCard?: boolean; // Se é uma carta da seção "Realizadas" (desabilita toggle e badges de notificação)
 }
 
 const MatchCardItem: React.FC<MatchCardItemProps> = ({
@@ -48,6 +57,10 @@ const MatchCardItem: React.FC<MatchCardItemProps> = ({
     >
       {/* Indicador de "Novo" ou "Não Lido" */}
       {(isNewMatch || hasNewMessage) && <div className={styles.unreadIndicator}></div>}
+      
+      {/* Indicador de "Hot" para cartas completadas */}
+      {isCompletedCard && isHot && <div className={styles.completedHotIndicator}>🔥</div>}
+      
       <PlayingCard
         data={safeCardData}
         targetWidth={cardWidth}

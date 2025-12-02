@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { type Card } from '../data/cards';
+import { type Card } from '../data/cards'; // Mantém a interface Card
 import { db } from '../firebase';
 import {
   collection,
   getDocs,
+  getDoc,
   query,
   where,
   doc,
@@ -15,8 +16,8 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { useUserCardInteractions } from './useUserCardInteractions';
-import { useCardTips } from './useCardTips';
-import { exampleSkinsData } from '../config/skins';
+import { useCardTips } from './useCardTips'; // Importar useCardTips se for usar animateTipsIn
+import { exampleSkinsData } from '../config/skins'; // Importar dados das skins do index.ts
 
 // Interface para o tipo de retorno do hook
 interface UseCardPileLogicReturn {
@@ -29,12 +30,12 @@ interface UseCardPileLogicReturn {
   showConexaoModal: boolean;
   currentConexaoCardForModal: Card | null;
   handleConexaoInteractionInModal: (accepted: boolean) => void;
-  allConexaoCards: Card[];
-  undoLastDislike: () => Promise<void>;
-  canUndoDislike: boolean;
-  cardToPeek: Card | null;
-  acceptPeek: () => void;
-  rejectPeek: () => void;
+  allConexaoCards: Card[]; // Para o modal Carinhos & Mimos
+  undoLastDislike: () => Promise<void>; // Nova função para desfazer
+  canUndoDislike: boolean; // Novo estado para habilitar o botão de desfazer
+  cardToPeek: Card | null; // Carta de alta intensidade para "espiar"
+  acceptPeek: () => void; // Função para aceitar espiar
+  rejectPeek: () => void; // Função para rejeitar espiar
 }
 
 interface NextCardForPartnerData {
@@ -45,8 +46,7 @@ interface NextCardForPartnerData {
 }
 
 export function useCardPileLogic(): UseCardPileLogicReturn {
-  // Hooks de contexto para acesso a dados de usuário e interações.
-  const { user, checkAndUnlockSkins, updateUser: authContextUpdateUser } = useAuth();
+  const { user, checkAndUnlockSkins, updateUser: authContextUpdateUser } = useAuth(); // Adicionar updateUser do AuthContext
   const {
     matchedCards,
     seenCards,
@@ -55,19 +55,15 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
     handleConexaoCardInteraction: authHandleConexaoInteraction
   } = useUserCardInteractions();
 
-  // Estados para armazenar as cartas vindas do banco de dados.
   const [allCardsFromDb, setAllCardsFromDb] = useState<Card[]>([]);
   const [userCreatedCards, setUserCreatedCards] = useState<Card[]>([]);
   const [isLoadingCards, setIsLoadingCards] = useState(true);
 
-  // Estados para controlar a UI e o fluxo de jogo.
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [currentMatchCard, setCurrentMatchCard] = useState<Card | null>(null);
   const [currentCard, setCurrentCard] = useState<Card | null>(null);
-  const [cardToPeek, setCardToPeek] = useState<Card | null>(null); // Para o modal "espiar".
-  const [lastDislikedCard, setLastDislikedCard] = useState<Card | null>(null); // Para a função "Oops!".
+  const [cardToPeek, setCardToPeek] = useState<Card | null>(null);
 
-  // Estados específicos para a lógica das cartas "Conexão".
   const [conexaoCardsPool, setConexaoCardsPool] = useState<Card[]>([]);
   const [unseenConexaoCards, setUnseenConexaoCards] = useState<Card[]>([]);
   const [showConexaoModal, setShowConexaoModal] = useState(false);
@@ -76,54 +72,82 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
   const [initialConexaoTriggered, setInitialConexaoTriggered] = useState(false);
   const [lastConexaoMatchTriggerCount, setLastConexaoMatchTriggerCount] = useState(0);
 
-  // Estados para a lógica de priorização de cartas do parceiro.
   const [partnerNewCard, setPartnerNewCard] = useState<Card | null>(null);
   const [partnerLikesQueue, setPartnerLikesQueue] = useState<Card[]>([]);
-  const [cardSelectionCycle, setCardSelectionCycle] = useState(0);
-  
-  const { triggerAnimateTipsIn } = useCardTips(currentCard);
+  const [cardSelectionCycle, setCardSelectionCycle] = useState(0); // 0, 1 = random; 2 = partner like
+  const [lastDislikedCard, setLastDislikedCard] = useState<Card | null>(null); // Novo estado
+  const { triggerAnimateTipsIn } = useCardTips(currentCard); // Mudado para usar a função trigger
 
-  // Efeito para buscar todas as cartas (padrão e do usuário) do Firestore,
-  // respeitando o filtro de intensidade máxima definido pelo usuário.
+  // Efeito para buscar cartas padrão (apenas uma vez)
   useEffect(() => {
-    const fetchCards = async () => {
+    const fetchStandardCards = async () => {
       setIsLoadingCards(true);
       try {
+        // Define a intensidade máxima, com um padrão de 8 (mostrar tudo) se não estiver definida no usuário.
         const maxIntensity = user?.maxIntensity ?? 8;
 
-        const standardCardsQuery = query(
-          collection(db, 'cards'),
-          where('intensity', '<=', maxIntensity)
-        );
-        const cardsSnapshot = await getDocs(standardCardsQuery);
-        const fetchedStandardCards = cardsSnapshot.docs.map(d => ({ id: d.id, ...d.data() } as Card));
-        setAllCardsFromDb(fetchedStandardCards);
-
-        if (user?.coupleId) {
-          const userCardsRef = query(
-            collection(db, 'userCards'),
-            where('coupleId', '==', user.coupleId),
-            where('intensity', '<=', maxIntensity)
-          );
-          const userCardsSnapshot = await getDocs(userCardsRef);
-          const fetchedUserCards = userCardsSnapshot.docs.map(d => ({ id: d.id, ...d.data() } as Card));
-          setUserCreatedCards(fetchedUserCards);
-        } else {
-          setUserCreatedCards([]);
-        }
+        // Carrega TODAS as cartas (sem filtro composto que precisa de índice)
+        const allCardsQuery = query(collection(db, 'cards'));
+        const snapshot = await getDocs(allCardsQuery);
+        
+        // Filtra no JavaScript para evitar índice composto
+        const allCards = snapshot.docs
+          .map(d => ({ id: d.id, ...d.data() } as Card))
+          .filter(card => {
+            // Cartas de conexão: sempre incluir (independente de intensidade)
+            if (card.category === 'conexao') return true;
+            
+            // Outras cartas: respeitar maxIntensity
+            return (card.intensity ?? 0) <= maxIntensity;
+          });
+        
+        const normalCards = allCards.filter(c => c.category !== 'conexao');
+        const conexaoCards = allCards.filter(c => c.category === 'conexao');
+        
+        setAllCardsFromDb(allCards);
+        console.log(`[useCardPileLogic] Cartas carregadas: ${normalCards.length} normais (intensidade ≤${maxIntensity}) + ${conexaoCards.length} conexão (sempre) = ${allCards.length} total`);
       } catch (error) {
-        console.error("[useCardPileLogic] Erro ao buscar cartas do Firestore:", error);
+        console.error("[useCardPileLogic] Erro ao buscar cartas padrão do Firestore:", error);
         setAllCardsFromDb([]);
-        setUserCreatedCards([]);
       } finally {
         setIsLoadingCards(false);
       }
     };
-    fetchCards();
+    fetchStandardCards();
+  }, [user?.maxIntensity]);
+
+  // Efeito para ouvir cartas criadas pelo casal em TEMPO REAL
+  useEffect(() => {
+    if (!user?.coupleId) {
+      setUserCreatedCards([]);
+      return;
+    }
+
+    const maxIntensity = user?.maxIntensity ?? 8;
+    const userCardsQuery = query(
+      collection(db, 'userCards'),
+      where('coupleId', '==', user.coupleId),
+      where('intensity', '<=', maxIntensity)
+    );
+
+    console.log(`[useCardPileLogic] 🎧 Listener de userCards ativado para couple: ${user.coupleId}`);
+    
+    const unsubscribe = onSnapshot(userCardsQuery, (snapshot) => {
+      const fetchedUserCards = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Card));
+      setUserCreatedCards(fetchedUserCards);
+      console.log(`[useCardPileLogic] 🔄 Cartas do usuário atualizadas: ${fetchedUserCards.length}`);
+    }, (error) => {
+      console.error("[useCardPileLogic] ❌ Erro no listener de userCards:", error);
+      setUserCreatedCards([]);
+    });
+
+    return () => {
+      console.log('[useCardPileLogic] 🔇 Listener de userCards desativado');
+      unsubscribe();
+    };
   }, [user?.coupleId, user?.maxIntensity]);
 
-  // Efeito para ouvir em tempo real por uma nova carta criada pelo parceiro
-  // e destinada a este usuário.
+  // Efeito para ouvir por carta nova criada pelo parceiro
   useEffect(() => {
     if (!user?.id || !user?.coupleId) {
       setPartnerNewCard(null);
@@ -134,8 +158,8 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
       if (docSnap.exists()) {
         const coupleData = docSnap.data();
         const nextCardData = coupleData.nextCardForPartner as NextCardForPartnerData | undefined;
-        // Verifica se a carta é para o usuário atual.
         if (nextCardData && nextCardData.forUserId === user.id) {
+          console.log(`[useCardPileLogic] Nova carta do parceiro detectada: ${nextCardData.cardId}`);
           setPartnerNewCard({ id: nextCardData.cardId, ...nextCardData.cardData });
         } else {
           setPartnerNewCard(null);
@@ -145,107 +169,142 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
     return () => unsubscribe();
   }, [user?.id, user?.coupleId]);
 
-  // Efeito para buscar os "likes" do parceiro em cartas que o usuário atual ainda não viu.
-  // Monta uma fila de prioridade para exibir essas cartas com mais frequência.
+  // Efeito para buscar likes do parceiro não vistos pelo usuário atual
   useEffect(() => {
     const fetchUnseenPartnerLikes = async () => {
-      if (!user?.coupleId || !user?.partnerId || !user?.id || !seenCards) {
+      if (!user?.coupleId || !user?.id) {
+        console.log(`[useCardPileLogic] ⚠️ NÃO buscando likes do parceiro. coupleId: ${!!user?.coupleId}, userId: ${!!user?.id}`);
         setPartnerLikesQueue([]);
         return;
       }
+
       try {
+        // Buscar partner ID do couple document
+        const coupleDocRef = doc(db, 'couples', user.coupleId);
+        const coupleDocSnap = await getDoc(coupleDocRef);
+        
+        if (!coupleDocSnap.exists()) {
+          console.log(`[useCardPileLogic] ⚠️ Couple document não encontrado: ${user.coupleId}`);
+          setPartnerLikesQueue([]);
+          return;
+        }
+
+        const coupleData = coupleDocSnap.data();
+        const partnerId = coupleData.members?.find((id: string) => id !== user.id);
+        
+        if (!partnerId) {
+          console.log(`[useCardPileLogic] ⚠️ Partner ID não encontrado no couple. Members: ${coupleData.members}`);
+          setPartnerLikesQueue([]);
+          return;
+        }
+
+        console.log(`[useCardPileLogic] 🔍 Buscando likes do parceiro ${partnerId.substring(0,5)} não vistos por ${user.id.substring(0,5)}`);
+        
         const interactionsRef = collection(db, 'couples', user.coupleId, 'likedInteractions');
         const qPartnerLikes = query(
           interactionsRef,
-          where('likedByUIDs', 'array-contains', user.partnerId)
+          where('likedByUIDs', 'array-contains', partnerId)
         );
         const snapshot = await getDocs(qPartnerLikes);
+        console.log(`[useCardPileLogic] 📦 Query retornou ${snapshot.size} documentos de interação do parceiro.`);
         const potentialPartnerLikedCards: Card[] = [];
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
-          // Adiciona à fila se a carta foi curtida pelo parceiro, mas não pelo usuário atual,
-          // e se o usuário atual ainda não a viu.
-          if (data.cardData && !data.likedByUIDs.includes(user.id) && !seenCards.includes(docSnap.id)) {
+          const alreadyLikedByMe = data.likedByUIDs.includes(user.id);
+          const alreadySeen = seenCards.includes(docSnap.id);
+          console.log(`[useCardPileLogic]   - Card ${docSnap.id}: likedByMe=${alreadyLikedByMe}, seen=${alreadySeen}, hasCardData=${!!data.cardData}`);
+          if (data.cardData && !alreadyLikedByMe && !alreadySeen) {
             potentialPartnerLikedCards.push({ id: docSnap.id, ...data.cardData });
           }
         });
-        // Embaralha a fila para adicionar um pouco de aleatoriedade.
         setPartnerLikesQueue(potentialPartnerLikedCards.sort(() => 0.5 - Math.random()));
+        console.log(`[useCardPileLogic] 📥 FILA DE LIKES DO PARCEIRO CARREGADA: ${potentialPartnerLikedCards.length} cartas`, potentialPartnerLikedCards.map(c => `${c.id.substring(0,4)}:${c.text?.substring(0,20)}`));
       } catch (error) {
-        console.error("[useCardPileLogic] Erro ao buscar likes do parceiro:", error);
+        console.error("[useCardPileLogic] ❌ Erro ao buscar likes do parceiro:", error);
+        setPartnerLikesQueue([]);
       }
     };
     fetchUnseenPartnerLikes();
-  }, [user?.coupleId, user?.partnerId, user?.id, seenCards]);
+  }, [user?.coupleId, user?.id, seenCards]);
 
-  // Memoiza a separação das cartas em "swipable" (normais) e "conexao".
+  // Combina cartas e separa em "swipable" e "conexao"
   const { swipableCards, allConexaoCards } = useMemo((): { swipableCards: Card[]; allConexaoCards: Card[] } => {
     const combinedSourceCards = [...allCardsFromDb, ...userCreatedCards];
-    // Fallback para evitar que a pilha fique vazia durante o carregamento inicial.
+    console.log(`[useCardPileLogic] 🔄 Separando cartas: ${allCardsFromDb.length} do DB + ${userCreatedCards.length} criadas = ${combinedSourceCards.length} total`);
+    
     const sourceCards = combinedSourceCards.length > 0 ? combinedSourceCards :
       (isLoadingCards ? [{ id: 'loading', text: 'Carregando cartas...', category: 'sensorial' as Card['category'] }]
                       : [{ id: 'fallback', text: 'Nenhuma carta encontrada.', category: 'sensorial' as Card['category'] }]);
-    
     const conexaoResult = sourceCards.filter((card: Card) => card.category === 'conexao');
     const swipableResult = sourceCards.filter((card: Card) => card.category !== 'conexao');
+    
+    console.log(`[useCardPileLogic] 📊 Separadas: ${swipableResult.length} swipable + ${conexaoResult.length} conexão`);
     return { swipableCards: swipableResult, allConexaoCards: conexaoResult };
   }, [allCardsFromDb, userCreatedCards, isLoadingCards]);
 
-  // Efeito para gerenciar o pool de cartas "Conexão" não vistas.
+  // Atualiza cartas de conexão não vistas
   useEffect(() => {
     if (user && conexaoCardsPool.length > 0) {
       const unseen = conexaoCardsPool.filter((card: Card) => !seenCards.includes(card.id));
+      console.log(`[CONEXÃO] 📊 Inicialização: ${unseen.length} cartas de conexão não vistas de ${conexaoCardsPool.length} totais. Matches: ${matchedCards.length}. Primeiro trigger: ${initialConexaoTriggered ? 'JÁ ATIVADO' : 'PENDENTE'}`);
       setUnseenConexaoCards(unseen);
     } else if (!user) {
-      // Limpa os estados de "Conexão" se o usuário deslogar.
       setUnseenConexaoCards([]);
       setUserLikesForInitialConexao(0);
       setInitialConexaoTriggered(false);
       setLastConexaoMatchTriggerCount(0);
     }
-    setLastConexaoMatchTriggerCount(matchedCards.length);
-  }, [user, conexaoCardsPool, seenCards, matchedCards.length]);
+    // ❌ REMOVIDO: setLastConexaoMatchTriggerCount estava sendo atualizado SEMPRE
+    // Isso fazia com que a condição de trigger nunca fosse verdadeira
+  }, [user, conexaoCardsPool, seenCards, matchedCards.length, initialConexaoTriggered]);
 
-  // Inicializa o pool de cartas de conexão quando elas são carregadas.
+  // Inicializa pool de cartas de conexão
   useEffect(() => {
+    console.log(`[useCardPileLogic] 🎴 Pool de conexão atualizado: ${allConexaoCards.length} cartas`);
     setConexaoCardsPool(allConexaoCards);
   }, [allConexaoCards]);
 
-  // Memoiza a lista de cartas "gerais" que o usuário ainda não viu.
+  // Cartas "gerais" não vistas
   const generalUnseen = useMemo(() => {
     return swipableCards.filter((card: Card) => !seenCards.includes(card.id));
   }, [swipableCards, seenCards]);
 
-  // Função principal que decide qual carta será exibida a seguir.
+  // Seleciona a próxima carta
   const selectNextCard = useCallback((excludeCardId?: string) => {
     let nextCard: Card | null = null;
 
-    // A seleção segue uma ordem de prioridade para tornar a experiência mais dinâmica.
-    // Prioridade 1: Uma carta recém-criada pelo parceiro.
+    // Prioridade 1: Carta recém-criada pelo parceiro
     if (partnerNewCard && (!excludeCardId || partnerNewCard.id !== excludeCardId) && !seenCards.includes(partnerNewCard.id)) {
       nextCard = partnerNewCard;
+      console.log(`[useCardPileLogic] Priorizando carta do parceiro: ${nextCard.id}`);
+    } else if (partnerNewCard && seenCards.includes(partnerNewCard.id)) {
+        console.warn(`[useCardPileLogic] Carta do parceiro ${partnerNewCard.id} já estava em seenCards e ainda em partnerNewCard state. Limpando localmente.`);
+        setPartnerNewCard(null);
     }
 
-    // Prioridade 2: Uma carta que o parceiro curtiu e o usuário ainda não viu.
-    // Isso acontece a cada 3 seleções para não ser muito repetitivo.
+    // Prioridade 2: Likes do parceiro (se for a vez no ciclo)
     if (!nextCard && cardSelectionCycle === 2 && partnerLikesQueue.length > 0) {
-      const partnerLikedCard = partnerLikesQueue.find((card: Card) => card.id !== excludeCardId);
+      const partnerLikedCard = partnerLikesQueue.find((card: Card) => card.id !== excludeCardId); // Não precisa checar seenCards aqui, pois a fila já é de não vistos
       if (partnerLikedCard) {
-        const maxIntensity = user?.maxIntensity ?? 8;
-        // Se a carta tiver intensidade maior que o filtro do usuário, aciona o modal "espiar".
+        const maxIntensity = user?.maxIntensity ?? 8; // Usa 8 (mostrar tudo) como padrão
         if ((partnerLikedCard.intensity ?? 0) > maxIntensity) {
+          console.log(`[useCardPileLogic] ⚠️ Like do parceiro com intensidade alta detectado. Acionando 'peek'. Card: ${partnerLikedCard.id}`);
           setCardToPeek(partnerLikedCard);
-          setCurrentCard(null); // Limpa a carta atual para focar no modal.
-          return;
+          setCurrentCard(null); // Garante que a pilha não mostre nada enquanto o modal de peek é exibido.
+          return; // Para a seleção aqui.
         } else {
           nextCard = partnerLikedCard;
-          // Remove a carta da fila de prioridade para não mostrá-la novamente por este caminho.
+          console.log(`[useCardPileLogic] 💕 LIKE DO PARCEIRO (ciclo ${cardSelectionCycle}): ${nextCard.id} - "${nextCard.text?.substring(0, 40)}..." | Fila restante: ${partnerLikesQueue.length - 1}`);
           setPartnerLikesQueue(prev => prev.filter(card => card.id !== nextCard?.id));
         }
+      } else {
+        console.log(`[useCardPileLogic] ⚠️ Ciclo 2 (like parceiro), mas nenhuma carta disponível na fila.`);
       }
+    } else if (!nextCard && cardSelectionCycle === 2 && partnerLikesQueue.length === 0) {
+      console.log(`[useCardPileLogic] 📭 Ciclo 2, mas fila de likes do parceiro está VAZIA.`);
     }
 
-    // Prioridade 3: Uma carta aleatória do bolo de cartas gerais não vistas.
+    // Prioridade 3: Carta aleatória geral
     if (!nextCard) {
       const availableGeneral = generalUnseen.filter((card: Card) =>
         card.id !== excludeCardId &&
@@ -254,25 +313,30 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
       if (availableGeneral.length > 0) {
         const shuffledGeneral = [...availableGeneral].sort(() => 0.5 - Math.random());
         nextCard = shuffledGeneral[0];
+        console.log(`[useCardPileLogic] 🎲 CARTA ALEATÓRIA (ciclo ${cardSelectionCycle}): ${nextCard?.id} - "${nextCard?.text?.substring(0, 40)}..." | Total não vistas: ${availableGeneral.length}`);
+      } else {
+        console.log(`[useCardPileLogic] ⚠️ Nenhuma carta geral disponível!`);
       }
     }
 
     if (!isLoadingCards) {
       setCurrentCard(nextCard);
     }
-    // Avança o ciclo de seleção para a próxima rodada.
-    setCardSelectionCycle(prev => (prev + 1) % 3);
-  }, [generalUnseen, isLoadingCards, partnerNewCard, seenCards, user?.coupleId, cardSelectionCycle, partnerLikesQueue, user?.maxIntensity]);
+    const nextCycleValue = (cardSelectionCycle + 1) % 3;
+    console.log(`[useCardPileLogic] 🔄 Ciclo atual: ${cardSelectionCycle} | Próximo ciclo: ${nextCycleValue} ${nextCycleValue === 2 ? '(LIKE PARCEIRO)' : '(ALEATÓRIA)'}`);
+    setCardSelectionCycle(nextCycleValue);
+  }, [generalUnseen, isLoadingCards, partnerNewCard, seenCards, cardSelectionCycle, partnerLikesQueue, user?.maxIntensity]);
 
-  // Efeito para selecionar a primeira carta quando o hook é inicializado e as cartas estão prontas.
+  // Efeito para selecionar a primeira carta
   useEffect(() => {
     if (!isLoadingCards && !currentCard && (generalUnseen.length > 0 || partnerNewCard || partnerLikesQueue.length > 0) ) {
         selectNextCard();
     }
+  // Adicionadas partnerNewCard e partnerLikesQueue para garantir que selectNextCard seja chamado se houver cartas prioritárias
   }, [selectNextCard, isLoadingCards, currentCard, generalUnseen.length, partnerNewCard, partnerLikesQueue.length]);
 
 
-  // Lida com a interação do usuário (like/dislike) na carta principal.
+  // Lida com a interação do usuário
   const handleInteraction = async (liked: boolean) => {
     if (!currentCard || !user?.id) return;
 
@@ -280,15 +344,14 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
     const interactedCardId = interactedCard.id;
 
     await markCardAsSeen(interactedCardId);
-    
     if (!liked) {
-      setLastDislikedCard(interactedCard); // Armazena a carta para a função "Oops!".
+      setLastDislikedCard(interactedCard); // Guarda a carta se foi "Não Topo!"
     } else {
-      setLastDislikedCard(null);
+      setLastDislikedCard(null); // Limpa se foi "Topo!"
     }
 
-    // Se a carta interagida foi a que o parceiro criou, limpa o sinalizador no Firestore.
     if (partnerNewCard && interactedCardId === partnerNewCard.id && user.coupleId) {
+      console.log(`[useCardPileLogic] Carta do parceiro ${interactedCardId} foi vista. Limpando sinalizador.`);
       const coupleDocRef = doc(db, 'couples', user.coupleId);
       await updateDoc(coupleDocRef, { nextCardForPartner: null }).catch(err => console.error("Erro ao limpar nextCardForPartner:", err));
       setPartnerNewCard(null);
@@ -306,48 +369,68 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
       }
     }
 
-    // Lógica para decidir quando mostrar uma carta "Conexão".
+    // Lógica de Gatilho para cartas "Conexão"
     if (user) {
-      // Gatilho inicial: após 10 likes em cartas normais.
+      console.log(`[CONEXÃO] 🔍 Debug: initialTriggered=${initialConexaoTriggered}, liked=${liked}, category=${interactedCard.category}, unseenConexao=${unseenConexaoCards.length}`);
+      
       if (!initialConexaoTriggered) {
         if (liked && interactedCard.category !== 'conexao') {
           const newLikesCount = userLikesForInitialConexao + 1;
+          console.log(`[CONEXÃO] ❤️ Like #${newLikesCount} em carta não-conexão. Faltam ${10 - newLikesCount} para o primeiro gatilho.`);
           setUserLikesForInitialConexao(newLikesCount);
           if (newLikesCount >= 10 && unseenConexaoCards.length > 0) {
+            console.log(`[CONEXÃO] 🎉 PRIMEIRO GATILHO ATIVADO! 10 likes alcançados. Cartas conexão disponíveis: ${unseenConexaoCards.length}`);
             setInitialConexaoTriggered(true);
             setCurrentConexaoCardForModal(unseenConexaoCards[0]);
             setShowConexaoModal(true);
             setUserLikesForInitialConexao(0);
+          } else if (newLikesCount >= 10 && unseenConexaoCards.length === 0) {
+            console.warn(`[CONEXÃO] ⚠️ 10 likes alcançados, mas nenhuma carta de conexão disponível!`);
           }
         }
       } else {
-        // Gatilhos recorrentes: a cada 5 novos matches.
         if (matchOccurredThisInteraction) {
           const currentTotalMatches = matchedCards.length;
+          console.log(`[CONEXÃO] 🔗 Match ocorreu! Total: ${currentTotalMatches}, Último trigger: ${lastConexaoMatchTriggerCount}`);
+          console.log(`[CONEXÃO] 🔍 Checando: ${currentTotalMatches} > ${lastConexaoMatchTriggerCount} = ${currentTotalMatches > lastConexaoMatchTriggerCount}`);
+          console.log(`[CONEXÃO] 🔍 Mod 5: ${currentTotalMatches} % 5 = ${currentTotalMatches % 5}`);
+          console.log(`[CONEXÃO] 🔍 Diferença: ${currentTotalMatches - lastConexaoMatchTriggerCount} >= 5 = ${(currentTotalMatches - lastConexaoMatchTriggerCount) >= 5}`);
+          
           if (currentTotalMatches > lastConexaoMatchTriggerCount &&
               (currentTotalMatches % 5 === 0 || (currentTotalMatches - lastConexaoMatchTriggerCount) >= 5)) {
             if (unseenConexaoCards.length > 0) {
+              console.log(`[CONEXÃO] 🎉 GATILHO DE MATCHES ATIVADO! Matches: ${currentTotalMatches}. Mostrando carta de conexão.`);
               setCurrentConexaoCardForModal(unseenConexaoCards[0]);
               setShowConexaoModal(true);
+              setLastConexaoMatchTriggerCount(currentTotalMatches);
+            } else {
+              console.warn(`[CONEXÃO] ⚠️ Gatilho ativado (${currentTotalMatches} matches), mas nenhuma carta de conexão disponível!`);
+              setLastConexaoMatchTriggerCount(currentTotalMatches);
             }
-            setLastConexaoMatchTriggerCount(currentTotalMatches);
+          } else {
+            console.log(`[CONEXÃO] ⏭️ Condições não atendidas, não mostrando modal`);
           }
+        } else {
+          console.log(`[CONEXÃO] ℹ️ Nenhum match ocorreu nesta interação`);
         }
       }
     }
     selectNextCard(interactedCardId);
 
-    // Após a interação, verifica se o usuário desbloqueou novas skins.
+    // Verificar desbloqueio de skins após a interação (principalmente para 'seenCards')
     if (user && checkAndUnlockSkins) {
       try {
-        await checkAndUnlockSkins(exampleSkinsData);
+        const newlyUnlocked = await checkAndUnlockSkins(exampleSkinsData);
+        if (newlyUnlocked && newlyUnlocked.length > 0) {
+          console.log("[useCardPileLogic] Novas skins desbloqueadas (provavelmente por cartas vistas):", newlyUnlocked);
+        }
       } catch (error) {
-        console.error("[useCardPileLogic] Erro ao verificar skins após interação:", error);
+        console.error("[useCardPileLogic] Erro ao verificar skins após interação com carta:", error);
       }
     }
   };
 
-  // Lida com a interação (aceitar/rejeitar) dentro do modal de "Conexão".
+  // Lida com a interação no modal de "Conexão"
   const handleConexaoInteractionInModal = async (accepted: boolean) => {
     if (!currentConexaoCardForModal) return;
     await authHandleConexaoInteraction(currentConexaoCardForModal.id, accepted);
@@ -356,46 +439,53 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
     setCurrentConexaoCardForModal(null);
   };
 
-  // Funções para o modal "espiar".
+  // Funções para lidar com a "espiada"
   const acceptPeek = useCallback(() => {
     if (!cardToPeek) return;
-    setCurrentCard(cardToPeek); // Define a carta "espiada" como a atual.
+    setCurrentCard(cardToPeek);
     setCardToPeek(null);
-    setPartnerLikesQueue(prev => prev.filter(card => card.id !== cardToPeek.id));
+    setPartnerLikesQueue(prev => prev.filter(card => card.id !== cardToPeek.id)); // Remove da fila de prioridade
   }, [cardToPeek]);
 
   const rejectPeek = useCallback(() => {
     if (!cardToPeek) return;
     const rejectedCardId = cardToPeek.id;
     setCardToPeek(null);
-    selectNextCard(rejectedCardId); // Pula a carta "espiada" e seleciona a próxima.
+    selectNextCard(rejectedCardId); // Seleciona a próxima carta, excluindo a que foi rejeitada
   }, [cardToPeek, selectNextCard]);
 
-  // Desfaz a última ação de "Não Topo!".
   const undoLastDislike = useCallback(async () => {
-    if (!lastDislikedCard || !user?.id) return;
+    if (!lastDislikedCard || !user?.id) {
+      console.warn("[useCardPileLogic] Nenhuma carta 'Não Topo!' para desfazer ou usuário não disponível.");
+      return;
+    }
 
     const cardToRestore = lastDislikedCard;
     const currentSeenCards = user.seenCards || [];
+
+    // Cria novo array seenCards sem a carta restaurada
     const newSeenCards = currentSeenCards.filter(id => id !== cardToRestore.id);
 
     try {
-      // Remove a carta da lista de "vistas" no Firestore e no contexto.
-      await authContextUpdateUser({ seenCards: newSeenCards });
+      await authContextUpdateUser({ seenCards: newSeenCards }); // Atualiza Firestore & AuthContext
 
-      // Recoloca a carta na pilha para ser jogada novamente.
+      // Define a carta restaurada como a carta atual na pilha
       setCurrentCard(cardToRestore);
-      setLastDislikedCard(null);
-      
+      // setIsCardFlipped(true); // Começa com o verso da carta - opcional, pode querer que ela apareça direto
+      setLastDislikedCard(null); // Limpa o estado de desfazer
+      // Verifica se triggerAnimateTipsIn é uma função antes de chamá-la
       if (typeof triggerAnimateTipsIn === 'function') {
-        triggerAnimateTipsIn();
+        triggerAnimateTipsIn(); // Reativa a animação das dicas
+      } else {
+        console.warn("[useCardPileLogic] triggerAnimateTipsIn is not a function. Check the useCardTips.ts hook.");
       }
+
+      console.log(`[useCardPileLogic] Ação 'Não Topo!' desfeita para a carta: ${cardToRestore.id}.`);
     } catch (error) {
       console.error("[useCardPileLogic] Erro ao desfazer 'Não Topo!':", error);
     }
-  }, [lastDislikedCard, user, authContextUpdateUser, triggerAnimateTipsIn]);
+  }, [lastDislikedCard, user, authContextUpdateUser, triggerAnimateTipsIn, setCurrentCard /*, setIsCardFlipped (se usado) */]);
 
-  // Calcula o número total de cartas não vistas para exibição na UI.
   const unseenCardsCount = generalUnseen.length + partnerLikesQueue.filter(c => !seenCards.includes(c.id)).length + (partnerNewCard && !seenCards.includes(partnerNewCard.id) ? 1 : 0);
 
 
@@ -410,8 +500,8 @@ export function useCardPileLogic(): UseCardPileLogicReturn {
     currentConexaoCardForModal,
     handleConexaoInteractionInModal,
     allConexaoCards,
-    undoLastDislike,
-    canUndoDislike: !!lastDislikedCard,
+    undoLastDislike, // Expõe a nova função
+    canUndoDislike: !!lastDislikedCard, // Expõe um booleano para a UI
     cardToPeek,
     acceptPeek,
     rejectPeek,

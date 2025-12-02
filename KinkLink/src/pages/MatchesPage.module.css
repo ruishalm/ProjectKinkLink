@@ -76,16 +76,43 @@
 }
 
 .sectionTitleOthers {
-  composes: sectionTitle;
+  /* composes: sectionTitle; removido por ser inválido */
+  font-size: clamp(1.5em, 4vw, 1.8em); /* Fonte responsiva */
   color: var(--cor-destaque, #64b5f6); /* Usa variável de paleta */
-  border-bottom-color: var(--cor-destaque, #64b5f6); /* Usa variável de paleta */
+  border-bottom: 2px solid var(--cor-destaque, #64b5f6); /* Usa variável de paleta */
+  padding-bottom: 10px;
+  margin-bottom: 25px;
+  text-align: center;
 }
 
 .matchesGrid {
   display: grid;
-  gap: 16px; 
+  gap: 32px; /* Aumentado para mais espaçamento entre as cartas favoritas */
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* Mais responsivo */
   justify-items: center;
+  align-items: start; /* Alinha as células ao topo para evitar overlap vertical */
+  /* Reserva uma altura mínima por linha para comportar o PlayingCard e badges sem fixar o tamanho do card */
+  grid-auto-rows: minmax(180px, auto);
+}
+
+/* Força que os filhos diretos da grid não estiquem e alinhem ao início da célula */
+.matchesGrid > * {
+  align-self: start;
+}
+
+/* Utility wrapper for grid cells: centers content and prevents absolute children from overlapping neighbors */
+.gridCellContent {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Alinha ao topo do grid cell */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Reserva espaço interno e cria um contexto de empilhamento para badges absolutos */
+.gridCellContent {
+  min-height: 180px;
+  position: relative;
 }
 
 .cardItemWrapper {
@@ -119,9 +146,7 @@
   z-index: 10;
   border: 2px solid var(--cor-fundo-elemento); /* Borda para contraste */
 }
-.unreadMatch .cardItemWrapper { 
-  /* Estilos para cartas não lidas, se necessário */
-}
+
 /* .unreadIndicator foi movido para MatchCardItem.module.css */
 
 .matchCardSnippet {
@@ -150,9 +175,7 @@
   margin-right: 5px;
   vertical-align: middle;
 }
-.backToCardsButton.shakeAnimation {
-  /* A animação é definida no CardPilePage.module.css, mas a classe é aplicada aqui */
-}
+
 
 .categoryCarouselsGrid {
   display: grid;
@@ -366,9 +389,13 @@
 }
 
 .sectionTitleCompleted {
-  composes: sectionTitle; /* Herda estilos base de sectionTitle */
+  /* composes: sectionTitle; removido por ser inválido */
+  font-size: clamp(1.5em, 4vw, 1.8em); /* Fonte responsiva */
   color: var(--cor-sucesso, #4CAF50); /* Cor verde para o título "Realizadas" */
-  border-bottom-color: var(--cor-sucesso, #4CAF50);
+  border-bottom: 2px solid var(--cor-sucesso, #4CAF50);
+  padding-bottom: 10px;
+  margin-bottom: 25px;
+  text-align: center;
 }
 
 /* Media queries para responsividade dos carrosséis e grid de matches */

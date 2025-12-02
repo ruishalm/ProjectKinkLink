@@ -1,29 +1,29 @@
+import SideTipMessages from '../components/SideTipMessages';
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\CardPilePage.tsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { useDrag } from '@use-gesture/react';
-import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
-import { useAuth } from '../contexts/AuthContext';
+import { collection, query, where, onSnapshot, Timestamp, doc, getDoc } from 'firebase/firestore'; // <<< ADICIONADO
+import { useAuth } from '../contexts/AuthContext'; // Importar useAuth
 import { Link, useNavigate } from 'react-router-dom';
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
 import MatchModal from '../components/MatchModal';
 import PlayingCard, { type CardData as PlayingCardDataType } from '../components/PlayingCard';
 import CreateUserCardModal from '../components/CreateUserCardModal';
-import toast from 'react-hot-toast';
-import PeekInvitation from '../components/PeekInvitation/PeekInvitation';
+import toast from 'react-hot-toast'; // Importa o toast
+import PeekInvitation from '../components/PeekInvitation/PeekInvitation'; // Importa o novo componente
 import ConexaoCardModal from '../components/ConexaoCardModal';
 import { useCardPileLogic } from '../hooks/useCardPileLogic';
 import CarinhosMimosModal from '../components/CarinhosMimosModal';
 import CardBack from '../components/CardBack';
 import type { Card } from '../data/cards';
 import { useSkin } from '../contexts/SkinContext';
-import { useCardTips } from '../hooks/useCardTips';
-import { db } from '../firebase';
-import { useCardPileModals } from '../hooks/useCardPileModals';
-import SideTipMessages from '../components/SideTipMessages';
+import { useCardTips } from '../hooks/useCardTips'; // Importa o novo hook
+import { db } from '../firebase'; // <<< ADICIONADO
+import { useCardPileModals } from '../hooks/useCardPileModals'; // Importa o hook dos modais
+// import { categorySpecificTips } from '../components/categorySpecificTips'; // Não é mais necessário aqui
 import styles from './CardPilePage.module.css';
 
 function CardPilePage() {
-  // Hook principal para a lógica da pilha de cartas (qual carta mostrar, interações, etc.).
   const {
     currentCard,
     handleInteraction,
@@ -35,29 +35,25 @@ function CardPilePage() {
     currentConexaoCardForModal,
     handleConexaoInteractionInModal,
     allConexaoCards,
-    undoLastDislike,
-    canUndoDislike,
-    cardToPeek,
-    acceptPeek,
-    rejectPeek,
+    undoLastDislike, // Nova função do hook
+    canUndoDislike,  // Novo estado do hook
+    cardToPeek,      // Carta para espiar
+    acceptPeek,      // Função para aceitar espiar
+    rejectPeek,      // Função para rejeitar espiar
   } = useCardPileLogic();
-  
-  // Hooks para obter dados de autenticação, interações do usuário e skins.
   const { isLoadingSkins } = useSkin(); 
-  const { user } = useAuth();
+  const { user } = useAuth(); // Obter o usuário atual
+
   const { matchedCards, seenCards, handleCreateUserCard, toggleHotStatus } = useUserCardInteractions();
   const navigate = useNavigate();
 
-  // Estados para controlar a UI da carta (animação de saída, flip, arrasto).
   const [exitingCard, setExitingCard] = useState<{ id: string; direction: 'left' | 'right' } | null>(null);
   const [isCardFlipped, setIsCardFlipped] = useState(true);
   const [dragVisuals, setDragVisuals] = useState({ x: 0, active: false, dir: 0 });
   const [cardDimensions, setCardDimensions] = useState({ width: 250, height: 350 }); 
 
-  // Hook para gerenciar as dicas laterais que aparecem ao arrastar a carta.
-  const { activeLeftTip, activeRightTip, animateTipsIn } = useCardTips(currentCard);
+  const { activeLeftTip, activeRightTip, animateTipsIn } = useCardTips(currentCard); // Usa o hook
 
-  // Hook para gerenciar a abertura e fechamento dos modais da página.
   const {
     showCreateUserCardModal,
     openCreateUserCardModal,
@@ -71,7 +67,6 @@ function CardPilePage() {
     return (allConexaoCards || []).filter(card => seenCards.includes(card.id));
   }, [allConexaoCards, seenCards]);
 
-  // Memoiza a transformação da carta atual para o formato esperado pelo componente PlayingCard.
   const cardForDisplay: PlayingCardDataType | null = useMemo(() => {
     if (!currentCard) return null;
     return {
@@ -79,13 +74,12 @@ function CardPilePage() {
         text: currentCard.text,
         category: currentCard.category,
         intensity: currentCard.intensity,
-        creatorId: (currentCard as Card & { createdBy?: string }).createdBy,
-        isCreatorSuggestion: currentCard.isCreatorSuggestion,
+        creatorId: (currentCard as Card & { createdBy?: string }).createdBy, // Mapeia createdBy para creatorId de forma mais segura
+        isCreatorSuggestion: currentCard.isCreatorSuggestion, // Passa a nova flag
       isHot: matchedCards.find(mc => mc.id === currentCard.id)?.isHot || false,
     };
   }, [currentCard, matchedCards]);
 
-  // Efeito para calcular e atualizar as dimensões da carta responsivamente.
   useEffect(() => {
     const calculateCardDimensions = () => {
       const screenWidth = window.innerWidth;
@@ -114,7 +108,6 @@ function CardPilePage() {
     return () => window.removeEventListener('resize', calculateCardDimensions);
   }, []);
 
-  // Efeito para controlar a animação de "flip" da carta ao ser exibida.
   useEffect(() => {
     if (cardForDisplay && !exitingCard && isCardFlipped) {
       const timer = setTimeout(() => {
@@ -124,49 +117,83 @@ function CardPilePage() {
     }
   }, [cardForDisplay, exitingCard, isCardFlipped]);
 
-  // Garante que a animação de "flip" seja reativada quando uma nova carta
-  // é exibida (ex: após usar a função "Oops!").
+  // Efeito para garantir que a carta "flipe" quando currentCard muda (ex: após "Oops!")
   useEffect(() => {
     if (currentCard && !exitingCard) {
+      // Força a carta a estar "virada" para que a animação de flip ocorra
       setIsCardFlipped(true);
     }
-  }, [currentCard?.id, exitingCard]);
+  }, [currentCard?.id, exitingCard]); // Depende do ID da carta atual e do estado de exitingCard
 
-  // Efeito para ouvir em tempo real os "likes" do parceiro e notificar o usuário com um toast.
+  // <<< NOVO: Listener para "Like do Parceiro"
   useEffect(() => {
-    if (!user?.coupleId || !user.partnerId) {
-      return;
+    if (!user?.coupleId || !user?.id) {
+      return; // Sai se não houver casal
     }
 
-    const interactionsRef = collection(db, `couples/${user.coupleId}/likedInteractions`);
-    // Ouve apenas por interações que acontecem a partir de agora.
-    const q = query(interactionsRef, where('createdAt', '>', Timestamp.now()));
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        if (change.type === 'added') {
-          const data = change.doc.data();
-          // Notifica apenas se o primeiro "like" na interação foi do parceiro.
-          if (data.likedByUIDs && data.likedByUIDs[0] === user.partnerId) {
-            const cardText = data.cardData?.text || 'uma carta';
-            const truncatedText = cardText.length > 40 ? `${cardText.substring(0, 37)}...` : cardText;
-
-            toast.success(
-              (t) => (
-                <div onClick={() => toast.dismiss(t.id)} style={{ cursor: 'pointer' }}>
-                  <b>Seu par topou uma carta! 👀</b>
-                  <p style={{ margin: '4px 0 0' }}>A carta '{truncatedText}' foi curtida.</p>
-                </div>
-              ), { duration: 6000 }
-            );
-          }
+    const fetchPartnerIdAndListen = async () => {
+      try {
+        // Buscar partner ID do couple document
+        const coupleDocRef = doc(db, 'couples', user.coupleId!);
+        const coupleDocSnap = await getDoc(coupleDocRef);
+        
+        if (!coupleDocSnap.exists()) {
+          console.log('[CardPilePage] Couple document não encontrado');
+          return;
         }
-      });
+
+        const coupleData = coupleDocSnap.data();
+        const partnerId = coupleData.members?.find((id: string) => id !== user.id);
+        
+        if (!partnerId) {
+          console.log('[CardPilePage] Partner ID não encontrado no couple');
+          return;
+        }
+
+        const interactionsRef = collection(db, `couples/${user.coupleId}/likedInteractions`);
+        // Ouve apenas por documentos criados a partir de agora
+        const q = query(interactionsRef, where('createdAt', '>', Timestamp.now()));
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+            if (change.type === 'added') {
+              const data = change.doc.data();
+              // Verifica se o primeiro like foi do parceiro
+              if (data.likedByUIDs && data.likedByUIDs[0] === partnerId) {
+                const cardText = data.cardData?.text || 'uma carta';
+                const truncatedText = cardText.length > 40 ? `${cardText.substring(0, 37)}...` : cardText;
+
+                toast.success(
+                  (t) => (
+                    <div onClick={() => toast.dismiss(t.id)} style={{ cursor: 'pointer' }}>
+                      <b>Seu par topou uma carta! 👀</b>
+                      <p style={{ margin: '4px 0 0' }}>A carta '{truncatedText}' foi curtida.</p>
+                    </div>
+                  ), { duration: 6000 }
+                );
+              }
+            }
+          });
+        });
+
+        // Retorna a função de limpeza
+        return unsubscribe;
+      } catch (error) {
+        console.error('[CardPilePage] Erro ao configurar listener de likes do parceiro:', error);
+      }
+    };
+
+    let unsubscribe: (() => void) | undefined;
+    fetchPartnerIdAndListen().then(unsub => {
+      unsubscribe = unsub;
     });
 
-    return () => unsubscribe();
+    // Limpa o listener quando o componente desmonta ou o usuário muda
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
 
-  }, [user?.coupleId, user?.partnerId]);
+  }, [user?.coupleId, user?.id]);
 
   const triggerHapticFeedback = (pattern: number | number[] = 30) => {
     if (navigator.vibrate) {
@@ -206,18 +233,20 @@ function CardPilePage() {
 
   const handleAcceptPeek = () => {
     acceptPeek();
+    // Substitui o alert por um toast
     toast("Considere realinhar seu filtro: com consentimento e parceria vários mundos podem ser alcançados!", {
       icon: '🤫',
     });
   };
+
+  // A função rejectPeek do hook já faz o que é preciso, então não precisamos de um wrapper.
 
   if (isLoadingSkins) {
     return <div className={styles.page}><p>Carregando skins...</p></div>;
   }
 
   return (
-    <div className={styles.page}>
-      {/* Seção de Modais: Renderizados condicionalmente sobre a página. */}
+    <div className={styles.page}> {/* Removido klnkl-themed-panel daqui */}
       {showMatchModal && currentMatchCard && (
         <MatchModal
           card={currentMatchCard}
@@ -238,7 +267,9 @@ function CardPilePage() {
           card={currentConexaoCardForModal}
           onAccept={() => handleConexaoInteractionInModal(true)}
           onReject={() => handleConexaoInteractionInModal(false)}
-          onClose={() => handleConexaoInteractionInModal(false)}
+          onClose={() => {
+            handleConexaoInteractionInModal(false); // Considera fechar como rejeitar
+          }}
         />
       )}
 
@@ -246,9 +277,9 @@ function CardPilePage() {
         <CreateUserCardModal
           isOpen={showCreateUserCardModal}
           onClose={closeCreateUserCardModal}
-          onSubmit={(category: Card['category'], text: string, intensity: number, notifyAsCreator: boolean) => {
+          onSubmit={(category: Card['category'], text: string, intensity: number, notifyAsCreator: boolean) => { // Atualiza a assinatura
             if (handleCreateUserCard) {
-                 handleCreateUserCard(category, text, intensity, notifyAsCreator);
+                 handleCreateUserCard(category, text, intensity, notifyAsCreator); // Passa o novo parâmetro
             }
             closeCreateUserCardModal();
           }}
@@ -263,43 +294,36 @@ function CardPilePage() {
         />
       )}
 
-      {/* Área de Conteúdo Principal */}
       <div className={styles.contentArea}>
         {cardForDisplay ? (
           <>
-            {/* Pilha de Cartas e Dicas Laterais */}
-            <div className={styles.cardStackContainer}>
-               <SideTipMessages
-                leftMessage={activeLeftTip}
-                rightMessage={activeRightTip}
-                animateIn={animateTipsIn}
-                cardWidth={cardDimensions.width}
-              />
+            <div className={styles.cardStackContainer}> {/* REMOVIDO klnkl-themed-panel daqui */}
               {cardForDisplay && (
                 <div className={styles.staticCardBack}>
+                  {/* CardBack estaria dentro do painel */}
                   <CardBack
                     targetWidth={cardDimensions.width}
                     targetHeight={cardDimensions.height}
                   />
                 </div>
               )}
-              <div {...bindCardDrag()} className={styles.playingCardWrapper}>
+              <div {...bindCardDrag()} className={styles.playingCardWrapper}> {/* playingCardWrapper não teria a classe de painel aqui */}
                 <PlayingCard
-                    key={cardForDisplay.id}
+                    key={cardForDisplay.id} // A key aqui é importante para o React identificar a carta mudando
                     data={cardForDisplay}
                     targetWidth={cardDimensions.width}
                     targetHeight={cardDimensions.height}
                     dragVisuals={dragVisuals}
                     isFlipped={exitingCard && exitingCard.id === cardForDisplay.id ? false : isCardFlipped}
-                    currentUserId={user?.id}
+                    currentUserId={user?.id} // Passa o ID do usuário atual
                     exitDirection={exitingCard && exitingCard.id === cardForDisplay.id ? exitingCard.direction : null}
-                    onAnimationComplete={() => {
-                      if (exitingCard) {
-                        handleInteraction(exitingCard.direction === 'right');
-                        setIsCardFlipped(true);
-                        setExitingCard(null);
-                      }
-                    }}
+                  onAnimationComplete={() => {
+                    if (exitingCard) {
+                      handleInteraction(exitingCard.direction === 'right');
+                      setIsCardFlipped(true);
+                      setExitingCard(null);
+                    }
+                  }}
                     onToggleHot={(cardId) => {
                       if (toggleHotStatus) {
                         toggleHotStatus(cardId);
@@ -307,9 +331,9 @@ function CardPilePage() {
                     }}
                 />
 
-                {/* Botão "Oops!" para desfazer a última ação de "Não Topo". */}
+                {/* Botão Oops! movido para ser filho do playingCardWrapper */}
                 {canUndoDislike && !areActionButtonsDisabled && cardForDisplay && (
-                  <div className={styles.oopsButtonContainer}>
+                  <div className={styles.oopsButtonContainer}> {/* Container para posicionamento */}
                     <button
                       onClick={undoLastDislike}
                       className={`${styles.oopsButton} genericButton`}
@@ -322,8 +346,14 @@ function CardPilePage() {
               </div>
             </div>
 
-            {/* Painel de Ações da Carta (Topo / Não Topo) */}
+            {/* Painel para botões de ação da carta e "Criar Kink" */}
+            {/* Este painel só aparece se houver cardForDisplay. Adicionada a classe global klnkl-all-buttons-panel */}
             <div className={`${styles.cardActionsPanel} klnkl-all-buttons-panel klnkl-themed-panel`}>
+              <SideTipMessages
+                leftMessage={activeLeftTip}
+                rightMessage={activeRightTip}
+                animateIn={animateTipsIn}
+              />
               <div className={styles.buttonContainer}>
                 <button
                   className={`${styles.dislikeButton} ${styles.botaoDecisao} genericButton dislikeButton actionButton`}
@@ -332,12 +362,13 @@ function CardPilePage() {
                       setExitingCard({ id: cardForDisplay.id, direction: 'left' });
                     }
                   }}
+                  onMouseDown={e => e.currentTarget.style.transform = 'scale(0.95)'}
+                  onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
                   aria-label="Rejeitar carta"
                   disabled={areActionButtonsDisabled}
                 >
-              👎 Nao Topo!
+                  👎 Nao Topo!
                 </button>
-
                 <button
                   className={`${styles.likeButton} ${styles.botaoDecisao} genericButton likeButton actionButton`}
                   onClick={() => {
@@ -345,17 +376,18 @@ function CardPilePage() {
                       setExitingCard({ id: cardForDisplay.id, direction: 'right' });
                     }
                   }}
+                  onMouseDown={e => e.currentTarget.style.transform = 'scale(0.95)'}
+                  onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
                   aria-label="Aceitar carta"
                   disabled={areActionButtonsDisabled}
                 >
-              ❤️ Topo!
-              </button>
-            </div>
-            </div>
+                  ❤️ Topo!
+                </button>
+              </div>
+            </div> {/* Fecha o cardActionsPanel */}
           </>
         ) : (
-          // Visão exibida quando não há mais cartas para mostrar.
-          unseenCardsCount === 0 ? (
+          unseenCardsCount === 0 ? ( // Este bloco também deve estar dentro do painel temático da página
             <div className={`${styles.noCardsViewContainer} klnkl-themed-panel`}>
               <h2 className={styles.pageTitle}>Fim das Cartas!</h2>
               <p className={styles.noCardsMessage}>
@@ -363,14 +395,15 @@ function CardPilePage() {
                 <br />
                 Volte mais tarde para novas sugestões ou crie as suas!
               </p>
+              {/* O botão "Crie seu Kink" foi movido para o painel de navegação inferior */}
             </div>
           ) : (
             <p className={styles.noCardsMessage}>Carregando próxima carta...</p>
           )
-        )}
-      </div>
-
-      {/* Painel de Navegação Inferior */}
+        )
+      }
+      </div> {/* Fim de styles.contentArea */}
+      {/* PAINEL DE NAVEGAÇÃO INFERIOR - SEMPRE VISÍVEL. Adicionada klnkl-all-buttons-panel para o estilo do botão Criar Kink */}
       <div className={`${styles.bottomNavPanel} klnkl-all-buttons-panel klnkl-themed-panel`}>
         <div className={styles.bottomNavContainer}>
           <button className={`${styles.bottomNavIconStyle} ${styles.ballButton} genericButton klnkl-icon-nav-button klnkl-nav-cards`} onClick={openCarinhosMimosModal} title="Carinhos & Mimos">
@@ -386,6 +419,7 @@ function CardPilePage() {
             👤
           </Link>
         </div>
+        {/* BOTÃO "CRIE SEU KINK" - AGORA É IRMÃO DO bottomNavContainer, ABAIXO DELE */}
         <button
           onClick={openCreateUserCardModal}
           className={`${styles.createKinkButtonInNav} klnkl-create-kink-btn genericButton`}
@@ -395,20 +429,9 @@ function CardPilePage() {
           Criar Kink
         </button>
       </div>
-
-      {/* Contadores de Cartas */}
-      <div className={`${styles.cardCounters} klnkl-card-counters`}>
-        <span className={`${styles.counterItem} klnkl-counter-item`}>
-          Cartas Vistas: <span className={styles.counterValue}>{seenCards.length}</span>
-        </span>
-        <span className={`${styles.counterSeparator} klnkl-counter-separator`}>|</span>
-        <span className={`${styles.counterItem} klnkl-counter-item`}>
-          Restantes: <span className={styles.counterValue}>{unseenCardsCount}</span>
-        </span>
-      </div>
     </div>
   );
-}
+} // Adicionado o fechamento da função CardPilePage
 
 
 export default CardPilePage;

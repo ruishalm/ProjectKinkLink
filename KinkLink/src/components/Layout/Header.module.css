@@ -74,35 +74,84 @@
   font-weight: 500; /* Um peso de fonte um pouco menos bold que o padrão de alguns temas */
   border: 1px solid transparent; /* Garante uma borda base para consistência, mesmo que o tema a altere */
 }
-.installButton,
-.supportButton, /* Se você tiver um botão de suporte */
-.feedbackButton {
-  composes: headerActionButtonBase; /* Herda da nova base */
+/* ===== BOTÃO INSTALAR ===== */
+.installButton {
+  composes: headerActionButtonBase;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
 }
 
-/* Estilos mais específicos para o botão de feedback para torná-lo menos "quadradão" */
-.feedbackButton {
-  border-radius: 20px; /* Deixa o botão bem mais arredondado/formato de pílula */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); /* Sombra sutil para profundidade */
-  /* As cores de fundo e texto virão do ck-theme-button */
+.installButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+  background: linear-gradient(135deg, #7c94f5 0%, #8b5cb8 100%);
 }
 
-/* Estilos para o botão "Meus Chamados" (agora um ícone) */
+.installIcon {
+  font-size: 1.2em;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+}
+
+.installText {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+/* ===== BOTÃO MEUS CHAMADOS ===== */
 .myTicketsButton {
-  composes: headerActionButtonBase; /* Herda da nova base */
-  padding: 8px 10px; /* Padding ajustado para um ícone */
-  font-size: 1.5em; /* Tamanho do ícone de carta */
-  line-height: 1; /* Para melhor alinhamento vertical do ícone */
-  border-radius: 50%; /* Torna o botão circular */
-  width: 40px; /* Largura fixa para um círculo */
-  height: 40px; /* Altura fixa para um círculo */
+  composes: headerActionButtonBase;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); /* Sombra sutil para profundidade */
-  position: relative; /* Para posicionar o badge de notificação */
-  /* As cores de fundo e texto virão do ck-theme-button, mas você pode sobrescrever se quiser uma cor específica */
-  /* Exemplo: background-color: var(--cor-info-fundo, #17a2b8); */
+  padding: 8px 12px;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.myTicketsButton:hover {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.ticketIcon {
+  font-size: 1.4em;
+  line-height: 1;
+}
+
+/* ===== BOTÃO REPORTAR ===== */
+.feedbackButton {
+  composes: headerActionButtonBase;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.feedbackButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.feedbackIcon {
+  font-size: 1.1em;
+}
+
+.feedbackText {
+  font-weight: 500;
+  font-size: 0.9rem;
 }
 
 /* Estilos para o botão de instalar PWA */
@@ -116,22 +165,92 @@
   transform: translateY(-1px); /* Efeito de leve "levantamento" */
 }
 
-/* Estilo para o indicador de símbolo */
-.userSymbolIndicator {
-  font-size: 0.9rem;
-  font-weight: 500;
-  padding: 4px 12px;
-  border-radius: 16px;
-  background-color: rgba(255, 255, 255, 0.1);
-  color: var(--cor-texto-claro);
-  margin: 0 15px; /* Adiciona margem para não colar nos outros elementos */
-  white-space: nowrap;
+/* Estilo para o indicador de símbolo - REDESIGN */
+.userSymbolContainer {
+  display: flex;
+  align-items: center;
+  margin: 0 15px;
 }
 
-/* Para tema claro, se você tiver um */
+.userSymbolIndicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, 
+    rgba(255, 215, 0, 0.15) 0%, 
+    rgba(255, 105, 180, 0.15) 100%
+  );
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  cursor: pointer; /* Mostra que é clicável */
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.userSymbolIndicator:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 215, 0, 0.5);
+}
+
+.userSymbolIndicator:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(255, 215, 0, 0.3);
+}
+
+.symbolLabel {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--cor-texto-claro, #fff);
+  opacity: 0.9;
+  letter-spacing: 0.3px;
+}
+
+.symbolIcon {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #FFD700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.6),
+               0 2px 4px rgba(0, 0, 0, 0.3);
+  filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.8));
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+/* Para tema claro */
 .light-theme .userSymbolIndicator {
-  background-color: rgba(0, 0, 0, 0.05);
-  color: var(--cor-texto-escuro);
+  background: linear-gradient(135deg, 
+    rgba(255, 215, 0, 0.2) 0%, 
+    rgba(255, 105, 180, 0.2) 100%
+  );
+  border-color: rgba(255, 180, 0, 0.4);
+}
+
+.light-theme .symbolLabel {
+  color: var(--cor-texto-escuro, #333);
+}
+
+.light-theme .symbolIcon {
+  color: #FF8C00;
+  text-shadow: 0 0 8px rgba(255, 140, 0, 0.5),
+               0 2px 3px rgba(0, 0, 0, 0.2);
 }
 
 /* Media Query para telas menores (ex: até 768px de largura) */
@@ -142,10 +261,34 @@
   .actionsContainer {
     gap: 10px; /* Reduz o espaço entre os botões */
   }
-  .installButton,
-  .supportButton,
+  .installButton {
+    padding: 6px 12px;
+    gap: 4px;
+  }
+  .installText,
+  .feedbackText {
+    font-size: 0.8rem;
+  }
   .feedbackButton {
-    padding: 7px 15px; /* Padding reduzido para mobile */
+    padding: 6px 12px;
+    gap: 4px;
+  }
+  .myTicketsButton {
+    width: 40px;
+    height: 40px;
+  }
+  .userSymbolContainer {
+    margin: 0 10px; /* Menos margem em mobile */
+  }
+  .userSymbolIndicator {
+    padding: 5px 10px;
+    gap: 6px;
+  }
+  .symbolLabel {
+    font-size: 0.75rem;
+  }
+  .symbolIcon {
+    font-size: 1.3rem;
   }
 }
 
@@ -154,27 +297,54 @@
   .logoImage {
     height: 40px; /* Reduz mais o logo */
   }
-  .appHeader {
-    /* O padding do appHeader é controlado pelo klnkl-themed-panel,
-       mas se precisássemos ajustar especificamente aqui, seria:
-       padding-left: 10px;
-       padding-right: 10px;
-    */
-  }
   .actionsContainer {
     gap: 8px; /* Espaço ainda menor entre botões */
   }
-  .installButton,
-  .supportButton,
-  .feedbackButton {
-    padding: 6px 10px; /* Padding menor para os botões */
-    font-size: 0.85rem; /* Fonte um pouco menor se necessário */
+  /* Mobile pequeno: Só ícones nos botões */
+  .installButton {
+    padding: 8px;
+    width: 42px;
+    height: 42px;
+    gap: 0;
   }
-  .myTicketsButton { /* Ajuste específico para o botão de ícone em telas menores */
-    width: 36px;
-    height: 36px;
+  .installText {
+    display: none; /* Esconde texto, só ícone */
+  }
+  .installIcon {
+    font-size: 1.4em;
+  }
+  .feedbackButton {
+    padding: 8px;
+    width: 42px;
+    height: 42px;
+    gap: 0;
+  }
+  .feedbackText {
+    display: none; /* Esconde texto, só ícone */
+  }
+  .feedbackIcon {
+    font-size: 1.4em;
+  }
+  .myTicketsButton {
+    width: 38px;
+    height: 38px;
+  }
+  .ticketIcon {
     font-size: 1.3em;
-    padding: 6px 8px;
+  }
+  /* Badge do símbolo super compacto em mobile pequeno */
+  .userSymbolContainer {
+    margin: 0 5px;
+  }
+  .userSymbolIndicator {
+    padding: 4px 8px;
+    gap: 4px;
+  }
+  .symbolLabel {
+    display: none; /* Esconde "Você" em telas muito pequenas */
+  }
+  .symbolIcon {
+    font-size: 1.4rem; /* Mantém o símbolo visível */
   }
 }
 

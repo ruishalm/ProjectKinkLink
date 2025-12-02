@@ -63,10 +63,10 @@ export function useCoupleLinking() {
             // Isso é um pouco mais complexo, pois a request é deletada ao aceitar/rejeitar.
             // A atualização do `user.partnerId` pelo `AuthContext` é a principal forma de saber se foi vinculado.
             // Se o `user.partnerId` está preenchido e `sentRequestStatus` era 'pending', então foi aceita.
-            if (user.partnerId && sentRequestStatus === 'pending') { // MODIFICADO: user.linkedPartnerId para user.partnerId
+            if (user.coupleId && sentRequestStatus === 'pending') {
                 console.log('[useCoupleLinking] Solicitação enviada parece ter sido aceita (usuário vinculado).');
                 setSentRequestStatus('accepted'); // Target email remains to show who accepted
-            } else if (sentRequestStatus === 'pending' && !user.partnerId) { // MODIFICADO: user.linkedPartnerId para user.partnerId
+            } else if (sentRequestStatus === 'pending' && !user.coupleId) {
                 // Se era pending e agora está vazia, e não foi vinculado, pode ter sido rejeitada ou cancelada.
                 // Para simplificar, se não foi vinculado, resetamos.
                 console.log('[useCoupleLinking] Solicitação enviada não está mais pendente e não houve vínculo (rejeitada/cancelada).');
@@ -227,35 +227,8 @@ export function useCoupleLinking() {
   };
 
   const unlinkPartner = async (): Promise<void> => {
-    if (!user || !user.id || !user.partnerId) { // MODIFICADO: user.linkedPartnerId para user.partnerId
-      console.warn("[useCoupleLinking] Cannot unlink: no user or user not linked.");
-      return;
-    }
-    const partnerIdToUnlink = user.partnerId; // MODIFICADO: user.linkedPartnerId para user.partnerId
-    console.log(`[useCoupleLinking] Iniciando desvinculação entre ${user.id} e ${partnerIdToUnlink}`);
-    try {
-      const batch = writeBatch(db);
-      const commonUpdates = {
-        partnerId: null, // MODIFICADO: linkedPartnerId para partnerId
-        coupleId: null, // Adicionado para garantir que coupleId também seja limpo
-        matchedCards: [],
-        seenCards: [],
-        conexaoAccepted: 0,
-        conexaoRejected: 0,
-        userCreatedCards: [],
-      };
-      const currentUserDocRef = doc(db, 'users', user.id);
-      batch.update(currentUserDocRef, commonUpdates);
-      const partnerUserDocRef = doc(db, 'users', partnerIdToUnlink);
-      batch.update(partnerUserDocRef, commonUpdates);
-      await batch.commit();
-      await updateUser(commonUpdates); // Atualiza o estado local do usuário atual
-      setSentRequestStatus(null); // Limpa qualquer status de solicitação pendente
-      setSentRequestTargetEmail(null);
-      console.log(`[useCoupleLinking] ${user.email} desvinculado de ${partnerIdToUnlink}.`);
-    } catch (error) {
-      console.error("[useCoupleLinking] Erro ao desvincular parceiro:", error);
-    }
+    console.error("[useCoupleLinking] DEPRECATED: Use unlinkCouple from AuthContext instead");
+    throw new Error("unlinkPartner is deprecated. Use unlinkCouple from AuthContext instead.");
   };
 
   // Função para cancelar uma solicitação enviada que ainda está pendente
@@ -289,8 +262,8 @@ export function useCoupleLinking() {
 
 
   return {
-    isLinked: !!user?.partnerId, // MODIFICADO: user.linkedPartnerId para user.partnerId
-    partnerId: user?.partnerId, // MODIFICADO: linkedPartnerId para partnerId (nome da prop retornada)
+    isLinked: !!user?.coupleId,
+    partnerId: user?.coupleId, // Deprecated: retorna coupleId para compatibilidade
     userLinkCode: user?.linkCode, // O código fixo do usuário
     requestLinkWithCode,
     unlinkPartner,

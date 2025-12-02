@@ -26,6 +26,7 @@
   box-sizing: border-box;
   font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", Arial, sans-serif;
   overflow: hidden;
+  background-clip: padding-box; /* Garante que o fundo não vaze para baixo da borda */
 }
 
 .cardFront {

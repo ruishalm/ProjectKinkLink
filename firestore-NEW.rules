@@ -1,0 +1,170 @@
+// 🔥 REGRAS NOVAS - RECRIADAS DO ZERO
+// Data: 24/11/2025
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Admin helper
+    function isAdmin() {
+      return request.auth != null && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // ========================================================================
+    // USERS - Regras mantidas (funcionam bem)
+    // ========================================================================
+    match /users/{userId} {
+      allow get: if request.auth != null;
+      allow list: if request.auth != null;
+      
+      allow create: if request.auth != null &&
+                       request.auth.uid == userId &&
+                       request.resource.data.isAdmin == false;
+
+      allow update: if request.auth != null && (
+        // 1. Próprio user
+        (request.auth.uid == userId &&
+         (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == resource.data.isAdmin) &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+           'bio', 'username', 'unlockedSkinIds', 'gender', 'birthDate', 
+           'linkCode', 'seenCards', 'conexaoAccepted', 'conexaoRejected', 
+           'feedbackTickets', 'coupleId', 'partnerId', 'userCreatedCards'
+         ])) ||
+        // 2. User B atualizando User A (vinculação)
+        (request.auth.uid != userId &&
+         request.resource.data.partnerId == request.auth.uid &&
+         request.resource.data.coupleId is string &&
+         request.resource.data.linkCode == null &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['partnerId', 'coupleId', 'linkCode'])) ||
+        // 3. Parceiro atualiza seenCards
+        (request.auth.uid != userId &&
+         get(/databases/$(database)/documents/users/$(userId)).data.partnerId == request.auth.uid &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seenCards'])) ||
+        // 4. Admin
+        (isAdmin() && userId != request.auth.uid &&
+         (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == resource.data.isAdmin) &&
+         request.resource.data.diff(resource.data).affectedKeys().hasAny(['isSupporter', 'bio', 'username', 'unlockedSkinIds'])) ||
+        (isAdmin() && userId != request.auth.uid &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['feedbackTickets'])) ||
+        // 5. Admin próprio
+        (isAdmin() && userId == request.auth.uid)
+      );
+      
+      allow delete: if request.auth != null && isAdmin();
+
+      match /fcmTokens/{tokenId} {
+        allow read, write, delete: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // ========================================================================
+    // PENDING LINKS - Simplificado
+    // ========================================================================
+    match /pendingLinks/{linkCode} {
+      // Qualquer autenticado pode ler (necessário para aceitar)
+      allow read: if request.auth != null;
+      
+      // Criar: só o iniciador
+      allow create: if request.auth != null &&
+                       request.resource.data.initiatorUserId == request.auth.uid &&
+                       request.resource.data.status == 'pending' &&
+                       request.resource.data.linkCode == linkCode;
+      
+      // Deletar: só em transação (durante accept)
+      allow delete: if request.auth != null;
+    }
+
+    // ========================================================================
+    // COUPLES - SUPER SIMPLIFICADO
+    // ========================================================================
+    match /couples/{coupleId} {
+      // Helper: verifica se user tem coupleId apontando aqui
+      function userLinkedHere() {
+        return request.auth != null &&
+               get(/databases/$(database)/documents/users/$(request.auth.uid)).data.coupleId == coupleId;
+      }
+
+      // Criar/Atualizar: user já tem coupleId + está nos members
+      allow create, update: if request.auth != null &&
+                               userLinkedHere() &&
+                               request.resource.data.members.size() == 2 &&
+                               request.auth.uid in request.resource.data.members;
+
+      // Ler: user tem coupleId
+      allow get: if userLinkedHere();
+      allow list: if false;
+
+      // Deletar: user está nos members DO DOCUMENTO EXISTENTE
+      allow delete: if request.auth != null &&
+                       request.auth.uid in resource.data.members;
+
+      // ======================================================================
+      // SUBCOLEÇÕES (mantidas como estavam)
+      // ======================================================================
+      match /likedInteractions/{cardId} {
+        allow read: if request.auth != null && userLinkedHere();
+        
+        allow create: if request.auth != null && userLinkedHere() &&
+                         request.resource.data.likedByUIDs.size() == 1 &&
+                         request.resource.data.likedByUIDs[0] == request.auth.uid &&
+                         request.resource.data.isMatch == false;
+
+        allow update: if request.auth != null && userLinkedHere() &&
+                         (
+                           (resource.data.likedByUIDs.size() == 1 &&
+                            !(request.auth.uid in resource.data.likedByUIDs) &&
+                            request.resource.data.likedByUIDs.size() == 2 &&
+                            request.resource.data.isMatch == true) ||
+                           (resource.data.isMatch == true &&
+                            request.resource.data.isMatch == true &&
+                            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isHot', 'lastActivity'])) ||
+                           (resource.data.isMatch == true &&
+                            request.resource.data.isMatch == true &&
+                            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isCompleted', 'isHot', 'lastActivity']))
+                         );
+
+        allow delete: if request.auth != null && userLinkedHere();
+      }
+
+      match /cardChats/{cardId_do_match} {
+        allow read, delete: if request.auth != null && userLinkedHere();
+        allow create: if request.auth != null && userLinkedHere();
+        
+        allow update: if request.auth != null && userLinkedHere() &&
+                         request.resource.data.lastMessageSenderId == request.auth.uid &&
+                         request.resource.data.lastMessageTimestamp is timestamp;
+
+        match /messages/{messageId} {
+          allow read: if request.auth != null && userLinkedHere();
+          allow create: if request.auth != null && userLinkedHere() &&
+                           request.resource.data.userId == request.auth.uid;
+          allow update, delete: if false;
+        }
+      }
+    }
+
+    // ========================================================================
+    // USER CARDS
+    // ========================================================================
+    match /userCards/{userCardId} {
+      function userInCouple(coupleDocId) {
+        let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
+        return userDoc.data != null && 
+               userDoc.data.coupleId != null && 
+               userDoc.data.coupleId == coupleDocId;
+      }
+      
+      allow create: if request.auth != null && userInCouple(request.resource.data.coupleId);
+      allow read: if (request.auth != null && userInCouple(resource.data.coupleId)) || isAdmin();
+      allow update, delete: if request.auth != null && userInCouple(resource.data.coupleId);
+    }
+
+    // ========================================================================
+    // CARDS (somente leitura)
+    // ========================================================================
+    match /cards/{cardId} {
+      allow read: if request.auth != null;
+      allow write, delete: if false;
+    }
+  }
+}

@@ -1,78 +1,214 @@
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Alinha os itens no topo */
+  gap: 120px; /* Espaço entre os dois balões. Ajuste conforme necessário */
+  position: absolute;
+  top: -75px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  pointer-events: none;
+  z-index: 6;
+}
+
 .sideMessagesContainer {
-  position: absolute; /* Posicionado em relação ao cardStackContainer */
-  top: 20px; /* Ajusta a distância do topo da área da carta. Experimente este valor. */
-  /* A rotação (transform) é definida nas classes .left e .right */
-  width: auto; 
-  max-width: 160px; /* Largura máxima para as dicas */
+  width: auto;
+  max-width: 100px;
   display: flex;
   flex-direction: column;
-  /* gap: 25px; Não tem efeito com uma única dica por container */
-  z-index: 6; /* Acima da pilha de cartas (que tem z-index 5 no container) e do conteúdo da carta */
-  pointer-events: none; /* Para não interferir com cliques */
-  /* padding: 0 10px; O padding agora está no .tipMessage */
-  opacity: 0; /* Inicialmente invisível para o fade-in */
-  /* A transição de opacidade será movida para .animateIn para garantir desaparecimento instantâneo */
+  opacity: 0;
   box-sizing: border-box;
 }
 
 .left {
-  /* 'left' será definido por style inline para alinhar com a carta */
-  /* Em telas menores, o CSS na media query controlará 'left' */
-  align-items: flex-start;
-  transform: rotate(-33deg); /* Inclinação para a esquerda, sem translateY */
+  align-items: flex-end;
 }
 
 .right {
-  /* 'right' será definido por style inline para alinhar com a carta */
-  /* Em telas menores, o CSS na media query controlará 'right' */
-  align-items: flex-end;
-  transform: rotate(33deg); /* Inclinação para a direita, sem translateY */
+  align-items: flex-start;
 }
 
 .tipMessage {
-  font-size: 1rem; /* Tamanho da fonte ajustável */
-  color: rgba(255, 255, 255, 0.65); /* Texto um pouco mais visível */
-  /* background-color: rgba(0, 0, 0, 0.15); /* Fundo removido */
-  padding: 8px 12px;
-  border-radius: 8px;
+  position: relative;
+  /* Elipse (mais largo que alto) com tamanho fixo */
+  width: 110px;
+  height: 70px;
+  border-radius: 50%; /* Elipse perfeita */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 15px;
+  box-sizing: border-box;
+  
+  /* Estilos visuais */
+  font-size: 0.65rem;
+  color: #0d0d0d;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(248, 249, 250, 0.8) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   text-align: center;
   line-height: 1.3;
-  /* Adicionando uma leve sombra para melhor legibilidade contra fundos variados */
-  text-shadow: 0px 1px 3px rgba(0,0,0,0.7);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15),
+              0 2px 6px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(0, 0, 0, 0.15);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  
+  /* Quebra de texto para caber na elipse */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
+
+/* Base para todas as bolhinhas */
+.tipMessage::before,
+.tipMessage::after,
+.bubble1 {
+  content: '';                                                                                              
+  position: absolute;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(248, 249, 250, 0.6) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+}
+
+/* Bolinha 1 - Maior, bem próxima do balão */
+.tipMessage::before {
+  bottom: -10px;
+  width: 6px;
+  height: 6px;
+}
+
+/* Bolinha 2 - Média, no meio da curva */
+.bubble1 {
+  bottom: -20px;
+  width: 4px;
+  height: 4px;
+  display: block;
+  opacity: 0.85;
+}
+
+/* Bolinha 3 - Menor, mais longe */
+.tipMessage::after {
+  bottom: -30px;
+  width: 2.5px;
+  height: 2.5px;
+  opacity: 0.7;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* CURVA para DENTRO/DIREITA (balão esquerdo - vai em direção ao centro/botão) */
+.left .tipMessage::before {
+  left: 50%; /* Começa no centro */
+}
+
+.left .bubble1 {
+  left: 60%; /* Meio da curva - vai para direita (direção do centro) */
+}
+
+.left .tipMessage::after {
+  left: 68%; /* Final da curva - continua para direita (em direção ao botão) */
+}
+
+/* CURVA para DENTRO/ESQUERDA (balão direito - vai em direção ao centro/botão) */
+.right .tipMessage::before {
+  right: 50%; /* Começa no centro */
+}
+
+.right .bubble1 {
+  right: 60%; /* Meio da curva - vai para esquerda (direção do centro) */
+}
+
+.right .tipMessage::after {
+  right: 68%; /* Final da curva - continua para esquerda (em direção ao botão) */
+}
+
 .animateIn {
-  opacity: 1; /* Torna visível com a animação */
-  transition: opacity 0.7s ease-in-out; /* Transição suave APENAS para o fade-in */
+  opacity: 1;
+  animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(-15px) scale(0.95); /* Invertido: vem de cima */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 
 /* Ajustes responsivos */
-@media (max-width: 767px) { /* Breakpoint para telas pequenas */
+@media (max-width: 767px) {
   .sideMessagesContainer {
-    /* Ajusta 'top' para garantir que as dicas fiquem visivelmente acima das cartas.
-       Considerando que o cardStackContainer tem padding-top: 20px e as cartas estão no fundo,
-       um 'top' menor ou até negativo (se o pai não tiver padding suficiente) pode ser necessário.
-       Vamos tentar um valor que as posicione claramente na parte superior do cardStackContainer. */
-    top: 10px; /* Sobe um pouco mais em relação ao topo do cardStackContainer */
-    max-width: 120px; /* Dicas um pouco menores */
-    /* gap: 15px; /* Não tem efeito com uma única dica por container */
+    top: -70px;
+    max-width: 85px;
   }
 
-  /* Quando isSmallScreen é true no JS, os estilos inline de left/right não são aplicados.
-     Estas regras definirão o posicionamento horizontal e a rotação. */
-  .sideMessagesContainer.left {
-    left: 5%; /* "Entra mais" para dentro da tela */
-    transform: rotate(-15deg); /* Rotação mais suave */
-    right: auto; /* Garante que 'right' não interfira se definido em outro lugar */
+  .left {
+    /* A posição agora é controlada pela regra base */
   }
-  .sideMessagesContainer.right {
-    right: 5%; /* "Entra mais" para dentro da tela */
-    transform: rotate(15deg); /* Rotação mais suave */
-    left: auto; /* Garante que 'left' não interfira se definido em outro lugar */
+
+  .right {
+    /* A posição agora é controlada pela regra base */
   }
 
   .tipMessage {
-    font-size: 0.85rem;
+    width: 95px;
+    height: 60px;
+    font-size: 0.6rem;
+    padding: 8px 12px;
+  }
+
+  /* Bolhinhas menores em mobile - EMBAIXO */
+  .tipMessage::before {
+    width: 6px;
+    height: 6px;
+    bottom: -7px;
+  }
+
+  .tipMessage::after {
+    width: 4px;
+    height: 4px;
+    bottom: -12px;
+  }
+}
+
+/* Para telas muito pequenas */
+@media (max-width: 480px) {
+  .sideMessagesContainer {
+    top: -65px;
+    max-width: 75px;
+  }
+  .left {
+    /* A posição agora é controlada pela regra base */
+    align-items: flex-end;
+  }
+  .right {
+    /* A posição agora é controlada pela regra base */
+    align-items: flex-start;
+  }
+  .tipMessage {
+    width: 80px;
+    height: 50px;
+    font-size: 0.55rem;
     padding: 6px 10px;
+  }
+  .tipMessage::before {
+    width: 5px;
+    height: 5px;
+    bottom: -6px;
+  }
+  .tipMessage::after {
+    width: 3.5px;
+    height: 3.5px;
+    bottom: -10px;
   }
 }

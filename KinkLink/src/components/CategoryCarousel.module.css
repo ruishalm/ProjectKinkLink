@@ -1,19 +1,12 @@
 /* d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\CategoryCarousel.module.css */
 .carouselSection {
-  margin-bottom: 20px; /* Espaço entre seções de carrossel */
-  /* 
-    max-width para acomodar:
-    - Carta central: 125px (7.8125rem)
-    - "Espiadinhas" laterais: ~40px de cada lado (2 * 2.5rem = 5rem)
-    - spaceBetween (16px = 1rem) entre a central e cada espiadinha: 2 * 1rem = 2rem
-    - Padding para setas no swiperInstance: 2 * 0.3125rem = 0.625rem
-    Total aproximado: 7.8125 + 5 + 2 + 0.625 = ~15.4375rem. Vamos usar 15.5rem ou 16rem para folga.
-  */
-  max-width: 16rem; /* (equivale a 256px) Ajustado para o efeito de "espiar" */
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 16rem;
   margin-left: auto;
   margin-right: auto;
-  position: relative; /* Cria um contexto de empilhamento para o carrossel */
-  z-index: 1; /* Garante que o carrossel fique acima das bordas do .carouselCell */
+  position: relative;
+  z-index: 1;
 }
 
 .categoryTitle {
@@ -28,10 +21,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: calc(10.9375rem + 1rem + 2px + 20px); /* Altura do swiperInstance + padding do swiperContainer */
-  /* O carrossel (swiperInstance) tem altura de ~190px. O swiperContainer tem padding de 10px.
-     Então, min-height: 210px para o estado vazio. */
-  width: 100%; /* Para ocupar a largura do .carouselSection */
+  min-height: 200px;
+  width: 100%;
   box-sizing: border-box;
 }
 
@@ -55,93 +46,68 @@
 
 /* Container para a instância do Swiper */
 .swiperContainer {
-  padding: 10px 0; /* Padding vertical, horizontal será cuidado pelo swiperInstance e setas */
-  min-height: calc(10.9375rem + 1rem + 2px); /* Mesma altura do swiperInstance para consistência */
-  position: relative; /* Para posicionamento correto das setas de navegação */
+  position: relative;
+  width: 100%;
+  min-height: 200px;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* Define um z-index base para todos os slides do Swiper */
 .swiperContainer :global(.swiper-slide) {
-  z-index: 1;
+  z-index: 0;
 }
 
 /* Estilo para cada slide do Swiper */
 .swiperSlide {
   display: flex;
   justify-content: center;
-  align-items: center;
-  height: 100%;
+  align-items: flex-start;
   box-sizing: border-box;
-  pointer-events: none; /* Por padrão, o slide não é clicável */
-
-  /* Para slidesPerView: 'auto', cada slide precisa de uma largura definida */
-  width: 7.8125rem !important; /* (125px) Largura EXATA da MatchCardItem */
-  
-  /* Efeito para slides não ativos (os que estão "espiando") */
-  /* Inclui translateZ(0) para coexistir com as otimizações do Swiper e garantir que este transform seja aplicado */
-  transform: translateY(20px) scale(0.85) translateZ(0) !important; /* Adicionado !important para diagnóstico */
-  opacity: 0.6;
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Transição suave */
-  will-change: transform, opacity; /* Otimização para transições */
-  /* z-index: 0; /* Removido daqui, pois o :global(.swiper-slide) agora controla o z-index base */
+  /* pointer-events: none; removido para permitir clique */
+  /* transform: scale(0.92) translateX(-5px) translateZ(0); removido para não empurrar para a esquerda */
+  opacity: 0.7;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              z-index 0s 0.4s;
+  will-change: transform, opacity, z-index;
 }
 
 /* Estilo para o slide ativo (visível) - o conteúdo dentro dele */
-/* Usamos o seletor que funcionou para o clique para garantir a aplicação dos estilos de "ativo" */
 .swiperContainer :global(.swiper-slide-active) {
-  /* O position:relative já estava aqui, pode ser útil para ::after se necessário no futuro */
-  /* pointer-events: auto !important; foi movido para o seletor abaixo para maior especificidade */
-  z-index: 2; /* Slide ativo na frente. O !important pode não ser necessário se a base é 1. */
+  z-index: 2;
   position: relative !important; 
 }
 
-/* Estilos para o CONTEÚDO DENTRO do slide ativo (o nosso .swiperSlide que contém o MatchCardItem) */
-.swiperContainer :global(.swiper-slide-active) > .swiperSlide, /* Para quando o .swiperSlide é filho direto */
-.swiperContainer :global(.swiper-slide-active).swiperSlide { /* Para quando o .swiperSlide é o próprio elemento ativo */
-  /* Garante que translateZ(0) também esteja presente para consistência */
-  transform: translateY(0) scale(1) translateZ(0) !important; 
-  opacity: 1 !important;          /* Totalmente opaco */
-  /* z-index: 1 !important; /* Removido daqui, pois o :global(.swiper-slide-active) já tem z-index:1 */
-  pointer-events: auto !important;  /* Garante que o slide ativo seja clicável */
+/* Slide ativo */
+.swiperContainer :global(.swiper-slide-active) > .swiperSlide,
+.swiperContainer :global(.swiper-slide-active).swiperSlide {
+  transform: scale(1) translateX(0) translateZ(0) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 10 !important;
+  transition-delay: 0s;
 }
 
-
-/* Estilização opcional para as setas de navegação do Swiper */
+/* Setas de navegação */
 .swiperContainer :global(.swiper-button-next),
 .swiperContainer :global(.swiper-button-prev) {
   color: #64b5f6;
-  top: 50%; 
-  transform: translateY(-50%);
-  /* Ajuste para as setas não ficarem muito para fora com o padding do swiperInstance */
-  /* Se o padding do swiperInstance for 0.3125rem (5px), e a seta tiver ~24px (1.5rem),
-     um offset negativo pequeno pode ajudar a centralizá-las melhor visualmente no espaço do padding.
-     Ex: --swiper-navigation-sides-offset: -8px; (teste este valor)
-  */
 }
 
-.swiperContainer :global(.swiper-button-next::after),
-.swiperContainer :global(.swiper-button-prev::after) {
-  font-size: 1.5rem; /* Setas maiores */
-}
 
 .swiperInstance {
   width: 100%;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  /* O padding lateral é importante para dar espaço às setas e para o efeito de "espiar" não colar nas bordas do .carouselSection */
-  padding-left: 0.3125rem;  /* (5px) */
-  padding-right: 0.3125rem; /* (5px) */
+  height: 100%;
   box-sizing: border-box;
-  height: calc(10.9375rem + 1rem + 2px); /* Altura da carta (175px = 10.9375rem) + padding vertical total (1rem) + 2px para evitar corte de borda */
-  overflow: hidden !important; /* Essencial para o slidesPerView: 'auto' cortar os slides laterais */
+  overflow: visible !important;
+  position: relative;
+  padding-left: 32px;
+  padding-right: 32px;
 }
 
 .singleActiveSlideOverride {
-  /* Força os estilos de ativo se for o único slide,
-     caso o Swiper não aplique swiper-slide-active corretamente neste cenário. */
-  /* Garante que translateZ(0) também esteja presente */
-  transform: translateY(0) scale(1) translateZ(0) !important; 
+  transform: translateX(0) scale(1) translateZ(0) !important; 
   opacity: 1 !important; 
   pointer-events: auto !important;
-  /* z-index: 1 !important; /* O :global(.swiper-slide-active) deve cobrir isso, ou se não, o .swiperContainer :global(.swiper-slide) já tem z-index:0, então este não precisa de z-index se for o único */
 }

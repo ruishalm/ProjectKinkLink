@@ -1,63 +1,23 @@
 // CreateLink.tsx
-import React, { useState, useEffect } from 'react';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebase'; // ajuste o caminho
-import {
-  createLink as apiCreateLink,
-  completeLinkForInitiator,
-} from '../services/linkService';
-import type { PendingLinkData } from '../services/linkService'; // Importação de tipo
+import React, { useState } from 'react';
+import { createLink as apiCreateLink } from '../services/linkService';
 import { useAuth } from '../contexts/AuthContext';
-import styles from './CreateLink.module.css'; // Importa os CSS Modules
+import styles from './CreateLink.module.css';
 
 interface CreateLinkProps {
   onLinkCreated: (code: string) => void;
-  onCancel: () => void; // Nova prop para cancelar/voltar
+  onCancel: () => void;
 }
 
 const CreateLink: React.FC<CreateLinkProps> = ({ onLinkCreated, onCancel }) => {
   const [linkCode, setLinkCode] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isCodeCopied, setIsCodeCopied] = useState(false); // Novo estado para feedback de cópia do código
-  const { user, refreshAuthContext } = useAuth(); // Adicionado refreshAuthContext
+  const [isCodeCopied, setIsCodeCopied] = useState(false);
+  const { user } = useAuth();
 
-  // Listener para finalizar o vínculo quando o parceiro aceita
-  useEffect(() => {
-    if (!linkCode || !user) {
-      return;
-    }
-
-    const pendingLinkRef = doc(db, 'pendingLinks', linkCode);
-    const unsubscribe = onSnapshot(pendingLinkRef, async (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data() as PendingLinkData;
-        if (data.status === 'completed' && data.initiatorUserId === user.id) {
-          console.log("Parceiro aceitou o link! Finalizando o vínculo...");
-          try {
-            await completeLinkForInitiator(data);
-            console.log("Vínculo finalizado com sucesso para ambos!");
-            if (refreshAuthContext) {
-              refreshAuthContext();
-            }
-            unsubscribe();
-          } catch (err) {
-            console.error("Erro ao finalizar o vínculo para o iniciador:", err);
-            setError("Ocorreu um erro ao finalizar a conexão.");
-          }
-        }
-      } else {
-        console.log("Documento de link pendente removido, processo concluído.");
-        if (refreshAuthContext) refreshAuthContext(); // Garante a atualização se o doc for deletado
-        unsubscribe();
-      }
-    });
-
-    return () => {
-      console.log("Limpando o listener do link pendente.");
-      unsubscribe();
-    };
-  }, [linkCode, user, refreshAuthContext]);
+  // O AuthContext.onSnapshot detectará automaticamente quando o parceiro aceitar o link
+  // Não precisamos mais de um listener aqui - simplificação do fluxo!
 
   const getBaseUrl = () => window.location.origin;
 
@@ -71,8 +31,8 @@ const CreateLink: React.FC<CreateLinkProps> = ({ onLinkCreated, onCancel }) => {
     try {
       const code = await apiCreateLink();
       setLinkCode(code);
-      onLinkCreated(code); // Notifica o pai que o código foi criado
-    } catch (err: unknown) { // Changed 'any' to 'unknown' for better type safety
+      onLinkCreated(code);
+    } catch (err: unknown) {
       console.error("Erro ao criar link:", err);
       let errorMessage = "Falha ao gerar o código. Tente novamente.";
       if (err instanceof Error) {
@@ -80,7 +40,6 @@ const CreateLink: React.FC<CreateLinkProps> = ({ onLinkCreated, onCancel }) => {
       } else if (typeof err === 'string') {
         errorMessage = err;
       }
-      // Se for um objeto de erro do Firebase com 'code', você pode querer tratar isso também, mas por agora, a mensagem de erro padrão é suficiente.
       setError(errorMessage);
     } finally {
       setIsLoading(false);

@@ -1,10 +1,17 @@
-# Modelo de Dados (Firestore)
+# 📊 Modelo de Dados (Firestore)
+
+> **Versão:** 4.0 | **Última Atualização:** Novembro 2025
 
 Este documento descreve a estrutura das principais coleções e documentos utilizados no Cloud Firestore para o aplicativo KinkLink.
 
 ## Visão Geral
 
-O Firestore é usado como o principal banco de dados NoSQL para armazenar dados de usuários, cartas, interações, links (matches), chats e configurações. A estrutura é projetada para permitir consultas eficientes e escalabilidade.
+O Firestore é usado como o principal banco de dados NoSQL para armazenar dados de usuários, cartas, interações, links (matches), chats e configurações. A estrutura v4.0 foi redesenhada para:
+
+- ✅ Eliminar redundância de dados
+- ✅ Simplificar regras de segurança
+- ✅ Melhorar performance com real-time sync
+- ✅ Garantir atomicidade via transações
 
 ## Coleções Principais
 
@@ -16,9 +23,7 @@ O Firestore é usado como o principal banco de dados NoSQL para armazenar dados 
         *   `email`: (String) E-mail de cadastro do usuário.
         *   `username`: (String) Nome de usuário escolhido pelo usuário no cadastro.
         *   `createdAt`: (Timestamp) Data e hora de criação da conta.
-        *   `linkCode`: (String, Opcional) Código de convite gerado pelo usuário para conectar-se a um parceiro (inicializado no cadastro).
-        *   `coupleId`: (String, Opcional) ID do documento na coleção `couples` ao qual este usuário está vinculado.
-        *   `linkedPartnerId`: (String, Opcional) `userId` do parceiro conectado (inicializado como `null`).
+        *   `coupleId`: (String, Opcional) ID do documento na coleção `couples` ao qual este usuário está vinculado. **Inicializado como `null`.**
         *   `bio`: (String, Opcional) Pequena biografia ou descrição do usuário (pode ser preenchido posteriormente).
         *   `seenCards`: (Array de Strings, Opcional) IDs das cartas que o usuário já viu/interagiu (inicializado como `[]`).
         *   `unlockedSkinIds`: (Array de Strings, Opcional) IDs das skins que o usuário desbloqueou (inicializado com skins padrão).
@@ -27,16 +32,39 @@ O Firestore é usado como o principal banco de dados NoSQL para armazenar dados 
         *   `birthDate`: (String, Opcional) Data de nascimento do usuário (formato YYYY-MM-DD).
         *   `sex`: (String, Opcional) Sexo atribuído ao nascer (ex: 'masculino', 'feminino', 'naoinformar_sexo').
         *   `gender`: (String, Opcional) Identidade de gênero do usuário (ex: 'homem_cis', 'mulher_trans', 'nao_binario').
-        // `activeSkinId` e `preferences` foram removidos pois não são inicializados no cadastro via AuthContext e podem ser gerenciados de outra forma ou adicionados posteriormente se necessário.
+
+   **Campos REMOVIDOS (v4.0):**
+   - ❌ `linkCode` - Movido para coleção `pendingLinks`
+   - ❌ `linkedPartnerId` - Redundante, info vem de `couple.members`
 
 ### 2. `couples`
    Representa a ligação entre dois usuários parceiros.
 
-   *   **Documento ID:** Gerado automaticamente pelo Firestore (ou pode ser um ID customizado).
-   *   **Campos:**
-        *   `userIds`: (Array de Strings) Contém os `userId` dos dois usuários que formam o casal. Ex: `["userId1", "userId2"]`.
-        *   `createdAt`: (Timestamp) Data e hora em que a conexão do casal foi estabelecida.
-        *   `status`: (String) Status da conexão (ex: "active", "pending").
+   *   **Documento ID:** ID aleatório gerado no formato `couple_${timestamp}_${random}` (v4.0)
+   *   **Campos (v4.0):**
+        *   `status`: (String) Status da conexão:
+            - `"pending"`: Criado pelo User A, aguardando User B
+            - `"completed"`: Vínculo completo com 2 membros
+        *   `initiatorId`: (String) `userId` do usuário que criou o vínculo (User A)
+        *   `members`: (Array de Strings) IDs dos membros do casal:
+            - 1 membro quando `status='pending'`
+            - 2 membros quando `status='completed'`
+        *   `memberSymbols`: (Map) Símbolos associados a cada membro para identificação:
+            ```typescript
+            {
+              [userId1]: '▲',  // Triângulo (aleatório)
+              [userId2]: '⭐'   // Estrela (aleatório)
+            }
+            ```
+            **Nota:** Símbolos são atribuídos aleatoriamente, não baseados em ordem
+        *   `createdAt`: (Timestamp) Data e hora de criação do couple (pelo User A)
+
+   **Mudanças v4.0:**
+   - 🔄 ID aleatório (não concatenação de UIDs)
+   - 🔄 `userIds` → `members` (nome mais claro)
+   - ➕ `initiatorId` (rastreamento de quem criou)
+   - ➕ `memberSymbols` (identificação visual)
+   - ➕ Status `pending` (couple criado antes de aceite)
 
 ### 3. `cards`
    Contém todas as cartas disponíveis no aplicativo, tanto as padrão quanto as criadas por usuários.
@@ -51,21 +79,27 @@ O Firestore é usado como o principal banco de dados NoSQL para armazenar dados 
         *   `createdAt`: (Timestamp) Data de criação da carta.
         *   `imageUrl`: (String, Opcional) URL para uma imagem associada à carta (para cartas personalizadas com imagem).
 
-### 4. `user_card_interactions`
+### 4. `user_card_interactions` *(Subcoleção de `couples`)*
    Registra as interações de cada *casal* com cada carta para determinar os "Links".
 
-   *   **Documento ID:** `coupleId_cardId` (Combinação do ID do casal e ID da carta para unicidade e fácil consulta).
+   *   **Caminho:** `couples/{coupleId}/likedInteractions/{cardId}`
+   *   **Documento ID:** `cardId`
    *   **Campos:**
-        *   `coupleId`: (String) ID do casal.
-        *   `cardId`: (String) ID da carta.
-        *   `userInteractions`: (Map) Mapeia `userId` para a interação.
-            *   `[userId1]`: (String) "liked" ou "disliked".
-            *   `[userId2]`: (String) "liked" ou "disliked".
-        *   `isMatch`: (Boolean) `true` se ambos os usuários no `userInteractions` deram "liked".
-        *   `isHot`: (Boolean, Opcional) `true` se este link foi marcado como "Top Link" pelo casal. (Pode também ser um campo no documento do link na coleção `links` se for mais conveniente).
-        *   `lastInteractionTimestamp`: (Timestamp) Data da última interação com esta carta por este casal.
-
-   *Alternativa para `isHot` e `isMatch`*: Em vez de `user_card_interactions`, poderia haver uma coleção `links` que só é criada quando `isMatch` se torna `true`.
+        *   `coupleId`: (String) ID do casal (redundante mas útil para queries)
+        *   `cardId`: (String) ID da carta
+        *   `userInteractions`: (Map) Mapeia `userId` para a interação:
+            ```typescript
+            {
+              [userId1]: "liked" | "disliked",
+              [userId2]: "liked" | "disliked"
+            }
+            ```
+        *   `isMatch`: (Boolean) `true` se ambos os usuários deram "liked"
+        *   `isHot`: (Boolean, Opcional) `true` se marcado como "Top Link"
+        *   `lastInteractionTimestamp`: (Timestamp) Data da última interação
+        
+   **Regras de Acesso (v4.0):** 
+   - Apenas membros do couple (via `userHasCoupleId()`) podem ler/escrever
 
 ### 5. `links` (Alternativa ou Adição a `user_card_interactions`)
    Se for decidido separar os "Links" formados em sua própria coleção para facilitar consultas de matches.
@@ -81,18 +115,31 @@ O Firestore é usado como o principal banco de dados NoSQL para armazenar dados 
         *   `lastMessageSenderId`: (String, Opcional) ID do remetente da última mensagem.
         *   `lastMessageTextSnippet`: (String, Opcional) Trecho da última mensagem.
 
-### 6. `chats`
-   Armazena as mensagens de chat para cada "Link" entre um casal.
+### 6. `chats` *(Subcoleção de `couples`)*
+   Armazena os metadados de chat para cada "Link" entre um casal.
 
-   *   **Estrutura:** Subcoleção dentro de cada documento da coleção `links` (ou `user_card_interactions` se `links` não for usada).
-        *   Caminho: `links/{linkId}/messages/{messageId}`
-   *   **Coleção:** `messages`
-   *   **Documento ID (`messageId`):** Gerado automaticamente pelo Firestore.
-   *   **Campos do Documento de Mensagem:**
-        *   `senderId`: (String) `userId` de quem enviou a mensagem.
-        *   `text`: (String) Conteúdo da mensagem.
-        *   `timestamp`: (Timestamp) Data e hora do envio da mensagem.
-        *   `coupleId`: (String) ID do casal (para regras de segurança).
+   *   **Caminho:** `couples/{coupleId}/cardChats/{cardId}`
+   *   **Documento ID:** `cardId`
+   *   **Campos:**
+        *   `coupleId`: (String) ID do casal
+        *   `cardId`: (String) ID da carta
+        *   `cardText`: (String) Texto da carta (denormalizado)
+        *   `createdAt`: (Timestamp) Quando o chat foi criado
+        *   `lastMessageSenderId`: (String, Opcional) ID do remetente da última mensagem
+        *   `lastMessageText`: (String, Opcional) Texto da última mensagem
+        *   `lastMessageTimestamp`: (Timestamp, Opcional) Timestamp da última mensagem
+
+   **Subcoleção de Mensagens:**
+   *   **Caminho:** `couples/{coupleId}/cardChats/{cardId}/messages/{messageId}`
+   *   **Documento ID:** Gerado automaticamente
+   *   **Campos:**
+        *   `senderId`: (String) `userId` do remetente
+        *   `text`: (String) Conteúdo da mensagem
+        *   `timestamp`: (Timestamp) Data/hora do envio
+        *   `coupleId`: (String) ID do casal (para segurança)
+
+   **Regras de Acesso (v4.0):**
+   - Apenas membros do couple (via `userHasCoupleId()`) podem ler/escrever
 
 ### 7. `skins`
    Armazena as configurações das skins disponíveis no aplicativo.

@@ -1,7 +1,7 @@
 // App.tsx
-import React, { Suspense, lazy, useState, useCallback, useEffect, useRef } from 'react';
+import React, { Suspense, lazy, useState, useCallback, useEffect, useRef } from 'react'; // Adicionado useState, useCallback, useEffect
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
-import type { Card } from './data/cards';
+import type { Card } from './data/cards'; // Importa o tipo Card
 import './App.css';
 import { Toaster } from 'react-hot-toast';
 import './config/skins/styles/panel-styles.css';
@@ -22,16 +22,17 @@ import TermsOfServicePage from './pages/TermsOfServicePage';
 import SupportPage from './pages/SupportPage';
 import SkinsPage from './pages/SkinsPage';
 import { SkinProvider } from './contexts/SkinContext';
-import { NotificationProvider } from './contexts/NotificationContext';
+import { NotificationProvider } from './contexts/NotificationContext'; // <<< IMPORTAR O NOVO PROVIDER
 import { useLinkCompletionListener } from './hooks/useLinkCompletionListener';
 import Header from './components/Layout/Header';
-import Footer from './components/Layout/Footer';
+import Footer from './components/Layout/Footer'; // <<< IMPORT PARA O RODAPÉ
 import SupportModal from './components/modals/SupportModal';
 import UnlockNotificationModal from './components/UnlockNotificationModal';
-import UserTicketsModal from './components/UserTicketsModal';
+import UserTicketsModal from './components/UserTicketsModal'; // <<< IMPORT DO NOVO MODAL
 import AdminRoute from './components/AdminRoute';
-import FeedbackModal from './components/FeedbackModal';
-import NewMatchModal from './hooks/NewMatchModal';
+import FeedbackModal from './components/FeedbackModal'; // <<< IMPORT PARA O MODAL
+import NewMatchModal from './hooks/NewMatchModal'; // Modal para exibir novos links
+// import { useTranslation } from 'react-i18next'; // Removido, pois não usaremos t() para os alertas aqui
 import { doc, updateDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from './firebase';
 
@@ -48,27 +49,24 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 function AppContent() {
-  const { user, isLoading, submitUserFeedback } = useAuth();
+  const { user, isLoading, submitUserFeedback } = useAuth(); // submitUserFeedback do AuthContext
   const location = useLocation();
-  const isUserLinked = !!user?.partnerId;
+  const isUserLinked = !!user?.coupleId; // Nova arquitetura: usa coupleId ao invés de partnerId
   const [deferredInstallPrompt, setDeferredInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallButtonInHeader, setShowInstallButtonInHeader] = React.useState(false);
+  // const { t } = useTranslation(); // Removido
 
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+  // Estado para o modal de feedback - DEVE ESTAR NO TOPO DA FUNÇÃO
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
-  const [isUserTicketsModalOpen, setIsUserTicketsModalOpen] = useState(false);
-  const [newMatchesForModal, setNewMatchesForModal] = useState<Card[]>([]);
+  const [isUserTicketsModalOpen, setIsUserTicketsModalOpen] = useState(false); // <<< NOVO ESTADO
+  const [newMatchesForModal, setNewMatchesForModal] = useState<Card[]>([]); // Estado para o modal de "Novo Link!"
 
-  // Ref e constantes para a lógica de atualização de 'lastVisitedMatchesPage'.
-  // Usado para marcar a última vez que o usuário visitou a página de matches,
-  // controlando a exibição de notificações de novos matches.
+  // evita múltiplos writes repetidos ao entrar na rota /matches
   const matchesVisitedRef = useRef(false);
   const IN_FLIGHT_LOCK_KEY = 'lk_lastVisited_lock';
   const MATCHES_UPDATE_THRESHOLD_SECONDS = 30;
 
-  // Efeito para atualizar o campo `lastVisitedMatchesPage` do usuário no Firestore.
-  // Roda apenas quando o usuário entra na rota '/matches' e previne escritas
-  // repetidas usando um lock no localStorage e um threshold de tempo.
   useEffect(() => {
     if (!user?.id) return;
 
@@ -79,7 +77,7 @@ function AppContent() {
 
     if (matchesVisitedRef.current) return;
 
-    // Previne escritas concorrentes entre abas/instâncias diferentes.
+    // check localStorage lock (prevenir múltiplas instâncias/tabs)
     const lock = localStorage.getItem(IN_FLIGHT_LOCK_KEY);
     const lockTs = lock ? Number(lock) : 0;
     if (Date.now() - lockTs < MATCHES_UPDATE_THRESHOLD_SECONDS * 1000) {
@@ -88,7 +86,6 @@ function AppContent() {
       return;
     }
 
-    // Verifica o timestamp da última visita para evitar atualizações desnecessárias.
     type LastVisitedType = Timestamp | number | string | undefined;
     const lastVisited = user.lastVisitedMatchesPage as LastVisitedType;
     let lastVisitedMs = 0;
@@ -108,24 +105,22 @@ function AppContent() {
       return;
     }
 
-    // Adquire o lock e atualiza o timestamp no Firestore.
+    // acquire lock and write
     localStorage.setItem(IN_FLIGHT_LOCK_KEY, String(Date.now()));
     matchesVisitedRef.current = true;
     const userRef = doc(db, 'users', user.id);
     updateDoc(userRef, { lastVisitedMatchesPage: serverTimestamp() })
       .catch((err) => console.warn('[App] erro ao atualizar lastVisitedMatchesPage', err))
       .finally(() => {
-        // Libera o lock após o threshold para permitir futuras atualizações.
+        // release lock após threshold para prevenir re-writes rápidos
         setTimeout(() => {
           localStorage.removeItem(IN_FLIGHT_LOCK_KEY);
           matchesVisitedRef.current = false;
         }, MATCHES_UPDATE_THRESHOLD_SECONDS * 1000);
       });
-  }, [location.pathname, user?.id]);
+  }, [location.pathname, user?.id]); // removido user.lastVisitedMatchesPage para não re-disparar quando o user for atualizado
 
-  // Efeito para gerenciar o prompt de instalação do PWA.
-  // Ouve o evento 'beforeinstallprompt' e o armazena para que o botão de
-  // instalação possa ser exibido e acionado pelo usuário no momento desejado.
+  // useEffect para o prompt de instalação PWA - ESTÁ SENDO USADO
   React.useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
@@ -137,33 +132,31 @@ function AppContent() {
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
   }, []);
 
-  // Efeito para abrir o modal de apoio se a URL contiver o hash '#openSupportModal'.
-  // Útil para links diretos que devem acionar o modal.
+  // Efeito para abrir o modal de apoio baseado no hash da URL
   React.useEffect(() => {
     if (location.hash === '#openSupportModal') {
       setIsSupportModalOpen(true);
-      // Limpa o hash para evitar que o modal reabra em um refresh da página.
+      // Limpa o hash para não reabrir em um refresh
       window.history.replaceState(null, '', location.pathname + location.search);
     }
   }, [location]);
-  
-  // Hook que ouve por eventos de conclusão de vínculo para exibir o modal de novo match.
+  // Hook customizado, chamado incondicionalmente
   useLinkCompletionListener(setNewMatchesForModal);
 
-  // Handlers para o modal de feedback.
+  // Funções para o modal de feedback - DEVEM ESTAR NO TOPO DA FUNÇÃO, ANTES DE QUALQUER RETURN CONDICIONAL
   const handleOpenFeedbackModal = useCallback(() => {
     if (user) {
       setIsFeedbackModalOpen(true);
     } else {
-      alert('Você precisa estar logado para enviar feedback.');
+      alert('Você precisa estar logado para enviar feedback.'); // String fixa
     }
-  }, [user]);
+  }, [user]); // Dependência 't' removida
 
   const handleCloseFeedbackModal = useCallback(() => {
     setIsFeedbackModalOpen(false);
-  }, []);
+  }, []); // Dependência vazia é correta aqui
 
-  // Handlers para o modal de tickets do usuário.
+  // Funções para o modal de UserTickets
   const handleOpenUserTicketsModal = useCallback(() => {
     if (user) setIsUserTicketsModalOpen(true);
   }, [user]);
@@ -175,10 +168,10 @@ function AppContent() {
   const handleSubmitFeedbackToContext = useCallback(async (feedbackText: string) => {
     if (!submitUserFeedback) {
         console.error("[App] Função submitUserFeedback não está disponível no AuthContext");
-        throw new Error('Não foi possível enviar o feedback no momento.');
+        throw new Error('Não foi possível enviar o feedback no momento.'); // String fixa
     }
     await submitUserFeedback(feedbackText);
-  }, [submitUserFeedback]);
+  }, [submitUserFeedback]); // Dependência 't' removida
 
 
   if (isLoading) {
@@ -200,7 +193,7 @@ function AppContent() {
 
   return (
     <div className="appContainer">
-      <NotificationProvider>
+      <NotificationProvider> {/* <<< ENVOLVER COM O NOTIFICATION PROVIDER */}
         <Toaster
           position="bottom-center"
           toastOptions={{
@@ -216,13 +209,13 @@ function AppContent() {
         <Header
           showInstallButton={showInstallButtonInHeader}
           onInstallClick={handleInstallClick}
-          onOpenFeedbackModal={handleOpenFeedbackModal}
-          onOpenUserTicketsModal={handleOpenUserTicketsModal}
+          onOpenFeedbackModal={handleOpenFeedbackModal} // Passa a função para o Header
+          onOpenUserTicketsModal={handleOpenUserTicketsModal} // <<< NOVA PROP
         />
         <main className="appMainContent">
           <Suspense fallback={<div className="page-container-centered">Carregando página...</div>}>
             <Routes>
-              {/* Rotas Públicas: Acessíveis a todos os usuários. */}
+              {/* Rotas Públicas */}
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
@@ -230,48 +223,50 @@ function AppContent() {
               <Route path="/termos-de-servico" element={<TermsOfServicePage />} />
               <Route path="/suporte" element={<SupportPage />} />
 
-              {/* Rotas Protegidas: Exigem autenticação. */}
+              {/* Rotas Protegidas por Autenticação */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/link-couple" element={<LinkCouplePage />} />
+                <Route path="/link-couple" element={<LinkCouplePage />} /> {/* Rota para Meus Tickets removida */}
 
-                {/* Rotas para usuários com parceiro(a) vinculado(a). */}
+                {/* Rotas que exigem que o usuário esteja vinculado */}
                 <Route element={<LinkedRoute />}>
                   <Route path="/cards" element={<CardPilePage />} />
                   <Route path="/matches" element={<MatchesPage />} />
                   <Route path="/skins" element={<SkinsPage />} />
                 </Route>
 
-                {/* Rotas para usuários sem parceiro(a) vinculado(a). */}
+                {/* Rotas que exigem que o usuário NÃO esteja vinculado */}
                 <Route element={<UnlinkedRoute />}>
-                  {/* Adicionar aqui outras rotas para usuários não-vinculados. */}
+                  {/* Outras rotas que só devem ser acessadas por usuários não vinculados podem ir aqui */}
                 </Route>
               </Route>
 
-              {/* Rota de Administração: Apenas para usuários com permissão de admin. */}
+              {/* ROTA DE ADMINISTRAÇÃO */}
               <Route element={<AdminRoute />}>
                 <Route path="/admin/users" element={<AdminUsersPage />} />
               </Route>
 
-              {/* Rota Fallback: Redireciona para a home page se nenhuma outra rota corresponder. */}
+              {/* Fallback para rotas não encontradas */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
           {location.pathname === '/cards' && (
             <div className="actionButtons">
-              {/* Espaço reservado para botões de ação globais na página de cartas. */}
+              {/* Botões de ação para a página de cartas, se aplicável globalmente aqui */}
             </div>
           )}
         </main>
-        
-        {/* Seção de Modais: Renderizados condicionalmente sobre o conteúdo principal. */}
+        {/* Renderiza o modal de feedback */}
         {isFeedbackModalOpen && user && (
           <FeedbackModal
             isOpen={isFeedbackModalOpen}
             onClose={handleCloseFeedbackModal}
             onSubmitFeedback={handleSubmitFeedbackToContext}
+            // Opcional: preencher com último feedback não visto ou um rascunho
+            // initialText={user.feedbackTickets?.find(ticket => ticket.status === 'new')?.text || ''}
           />
         )}
+        {/* Renderiza o modal de UserTickets */}
         {isUserTicketsModalOpen && user && (
           <UserTicketsModal
             isOpen={isUserTicketsModalOpen}
@@ -283,14 +278,15 @@ function AppContent() {
             isOpen={isSupportModalOpen}
             onClose={() => setIsSupportModalOpen(false)} />
         )}
+        {/* Renderiza o modal de Novo Link! */}
         {newMatchesForModal.length > 0 && (
           <NewMatchModal
             matches={newMatchesForModal}
             onClose={() => setNewMatchesForModal([])}
           />
         )}
-        <Footer />
-      </NotificationProvider>
+        <Footer /> {/* <<< RODAPÉ ADICIONADO AQUI */}
+      </NotificationProvider> {/* <<< FECHAR O NOTIFICATION PROVIDER */}
     </div>
   );
 }
@@ -298,7 +294,7 @@ function AppContent() {
 function App() {
   return (
     <SkinProvider>
-      {/* O BrowserRouter é provido no main.tsx, envolvendo toda a aplicação. */}
+      {/* O Router deve estar aqui, mas como já está no main.tsx, não o adicionamos de novo */}
       <AppContent />
     </SkinProvider>
   );

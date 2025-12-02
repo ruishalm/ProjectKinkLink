@@ -17,6 +17,103 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Fixed
 - (Correções de bugs)
 
+## [0.2.0-alpha] - 2024-11-XX
+
+### 🚀 BREAKING CHANGES - Arquitetura v4.0
+
+**Refatoração Completa do Sistema de Vínculo de Casal**
+
+Esta versão introduz uma reformulação radical da arquitetura de conexão entre usuários, resolvendo problemas críticos de permissão e loops infinitos.
+
+#### Mudanças Estruturais
+
+**Removido:**
+- ❌ Campo `partnerId` em documentos `users` (redundante)
+- ❌ Campo `linkedPartnerId` em documentos `users` (redundante)
+- ❌ Campo `linkCode` em documentos `users` (movido para coleção dedicada)
+- ❌ Edição cruzada de documentos (User B editando User A)
+
+**Adicionado:**
+- ✅ Coleção `/pendingLinks` para códigos de vínculo
+- ✅ Status `pending` em `couples` (criado antes do aceite)
+- ✅ Campo `initiatorId` em `couples` (rastreamento)
+- ✅ Campo `memberSymbols` em `couples` (identificação visual)
+- ✅ Geração de `coupleId` aleatório (não concatenação de UIDs)
+
+#### Nova Arquitetura de Linking
+
+**Princípio Fundamental:** Cada usuário edita APENAS seu próprio documento.
+
+**Fluxo v4.0:**
+1. **User A cria código:**
+   - Gera `coupleId` aleatório: `couple_${timestamp}_${random}`
+   - Cria `couples/{coupleId}` (status='pending', 1 membro)
+   - Cria `pendingLinks/{code}` apontando para coupleId
+   - Atualiza próprio perfil: `{ coupleId }`
+
+2. **User B aceita código:**
+   - Busca `pendingLinks/{code}` → obtém coupleId
+   - Atualiza próprio perfil: `{ coupleId }`
+   - Completa couple: status='completed', 2 membros
+   - Deleta pendingLink
+
+3. **Desvínculo:**
+   - Simplificado: apenas `coupleId` necessário
+   - Loop através de `couple.members` para resetar ambos
+
+#### Impacto no Código
+
+**Serviços Reescritos:**
+- `linkService.ts`: Reescrita completa das funções
+  - `createLink()`: Nova lógica de couple+pendingLink
+  - `acceptLink()`: Busca por código, não por userId
+  - `unlinkCouple()`: Assinatura simplificada (só coupleId)
+
+**Componentes Atualizados:**
+- `App.tsx`: Detecção de vínculo via `coupleId` (não `partnerId`)
+- `LinkedRoute.tsx`: Guard atualizado para `coupleId`
+- `ProfilePage.tsx`: Busca parceiro de `couple.members`
+- `LinkCouplePage.tsx`: Busca parceiro de `couple.members`
+
+**Hooks Atualizados:**
+- `useLinkCompletionListener.ts`: Remove checagens de `partnerId`
+- `useCoupleLinking.ts`: Deprecado `unlinkPartner()`
+- `useUserCardInteractions.ts`: Usa apenas `coupleId`
+
+**Regras Firestore:**
+- `pendingLinks`: Leitura aberta (qualquer autenticado)
+- `couples` create: Permite status='pending' + 1 membro
+- `couples` update: Permite se user em `members`
+- Subcoleções: Todas usam `userHasCoupleId()`
+
+#### Vantagens da v4.0
+
+✅ **Zero Loops de Permissão:** Arquitetura auto-editável  
+✅ **Regras Simplificadas:** Checagens baseadas em arrays  
+✅ **Mais Flexível:** IDs aleatórios permitem extensões  
+✅ **Menos Redundância:** Info de parceiro vem de couple  
+✅ **Atomicidade Garantida:** Todas operações em transações  
+
+### Fixed
+- 🐛 Loops infinitos no sistema de linking (10+ iterações)
+- 🐛 Erros de permissão durante vinculação (User B editando User A)
+- 🐛 `LinkedRoute` bloqueando acesso a cartas após vínculo
+- 🐛 Inconsistências entre `partnerId` e `coupleId`
+- 🐛 Função `unlinkCouple` com assinatura complexa (3 params → 1)
+
+### Documentation
+- 📚 Atualizado `04-couple-connection-flow.md` com arquitetura v4.0
+- 📚 Atualizado `01-data-model.md` com novos campos e remoções
+- 📚 Criado `07-pendinglinks-collection.md` (nova coleção)
+- 📚 Adicionada tabela comparativa v3.x vs v4.0
+
+### Migration Notes
+**⚠️ Dados existentes precisam de migração:**
+- Usuários com `partnerId` precisam ter apenas `coupleId`
+- Couples precisam ter `status`, `initiatorId`, `memberSymbols`
+- Campo `linkCode` em users pode ser removido
+- Considere script de migração se houver dados em produção
+
 ## [0.1.0-alpha] - 2024-07-25
 
 ### Added

@@ -67,6 +67,22 @@ function AppContent() {
   const IN_FLIGHT_LOCK_KEY = 'lk_lastVisited_lock';
   const MATCHES_UPDATE_THRESHOLD_SECONDS = 30;
 
+
+  // Componente de botão para testar o Sentry, visível apenas para admins.
+  function ErrorButton() {
+    return (
+      <button
+        onClick={() => {
+          throw new Error('Sentry Admin Test Error!');
+        }}
+        // Estilo para ser um botão flutuante e discreto
+        style={{ position: 'fixed', top: '80px', right: '20px', zIndex: 9999, padding: '10px', backgroundColor: 'darkred', color: 'white', border: '2px solid white', borderRadius: '8px', cursor: 'pointer', opacity: 0.8 }}
+      >
+        Testar Sentry
+      </button>
+    );
+  }
+
   useEffect(() => {
     if (!user?.id) return;
 
@@ -213,6 +229,7 @@ function AppContent() {
           onOpenUserTicketsModal={handleOpenUserTicketsModal} // <<< NOVA PROP
         />
         <main className="appMainContent">
+          {user?.isAdmin && <ErrorButton />} {/* Botão de teste do Sentry para Admins */}
           <Suspense fallback={<div className="page-container-centered">Carregando página...</div>}>
             <Routes>
               {/* Rotas Públicas */}

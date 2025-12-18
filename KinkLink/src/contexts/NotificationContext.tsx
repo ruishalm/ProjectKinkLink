@@ -44,11 +44,11 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
   const enableNotifications = async () => {
     setIsNotificationProcessing(true);
     try {
-      if (!user || !user.id || !('Notification' in window) || !('serviceWorker' in navigator)) {
+      if (!user || !user.id || !window.Notification || !('serviceWorker' in navigator)) {
         throw new Error("Usuário não logado ou navegador não suporta notificações.");
       }
       const messaging = getMessaging(firebaseApp);
-      const permission = await Notification.requestPermission();
+      const permission = await window.Notification.requestPermission();
       // setNotificationPermission(permission); // Removido, o status será atualizado pelo sync
 
       if (permission === "granted") {
@@ -104,7 +104,15 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
 
     // Função para verificar e atualizar o status da permissão
     const syncPermissionStatus = () => {
-      const browserPermission = Notification.permission;
+      // Guarda de segurança: verifica se 'Notification' existe no objeto window.
+      // Essencial para evitar crashes em navegadores/plataformas que não suportam a API de Notificação (como o iOS em certos contextos).
+      if (typeof window.Notification === "undefined") {
+        console.warn("[NotificationContext] A API de notificação não é suportada neste navegador.");
+        setAppNotificationStatus('disabled'); // Define como desabilitado se a API não existir.
+        return;
+      }
+
+      const browserPermission = window.Notification.permission;
       const hasToken = !!localStorage.getItem('fcm_token');
 
       if (browserPermission === 'denied') {

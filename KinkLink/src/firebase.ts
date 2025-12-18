@@ -43,10 +43,14 @@ if (getApps().length === 0) {
     // AVISO: Isso significa que as requisições desses clientes não serão verificadas pelo App Check.
    
     if (window.FIREBASE_APPCHECK_DEBUG_TOKEN === undefined) {
-      appCheck = initializeAppCheck(app, {
-        provider: new ReCaptchaV3Provider('6Le-pMUpAAAAAJ3Z_vI-L1i-X635tL5m5rJ7d-yC'), // Chave de site reCAPTCHA v3
-        isTokenAutoRefreshEnabled: true
-      });
+      try {
+        appCheck = initializeAppCheck(app, {
+          provider: new ReCaptchaV3Provider('6Le-pMUpAAAAAJ3Z_vI-L1i-X635tL5m5rJ7d-yC'), // Chave de site reCAPTCHA v3
+          isTokenAutoRefreshEnabled: true
+        });
+      } catch (error) {
+        console.error("Failed to initialize App Check:", error);
+      }
     } else {
         console.log("App Check initialization skipped due to debug token.");
     }

@@ -2,8 +2,14 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app"; // Adicionado getApps, getApp, FirebaseApp
 import { getAuth, type Auth } from "firebase/auth"; // Adicionado Auth
 import { getFirestore, type Firestore } from "firebase/firestore"; // Adicionado Firestore
+import * as Sentry from "@sentry/react";
 // Se for usar Analytics (opcional, não está no plano MVP inicial)
 // import { getAnalytics } from "firebase/analytics";
+
+// Inicializa o Sentry o mais cedo possível para capturar todos os erros.
+Sentry.init({
+  dsn: "https://bfd3b64ee872569b4a966c86ad2425a3@o4510556133523456.ingest.us.sentry.io/4510556144074752",
+});
 
 // TODO: Adicione aqui a configuração do seu projeto Firebase
 // Configuração do Firebase obtida do Firebase Console

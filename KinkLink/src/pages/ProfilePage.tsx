@@ -172,6 +172,12 @@ function ProfilePage() {
   };
 
   const handleExtractUserCards = async () => {
+    // Trava de segurança para garantir que apenas admins executem esta função
+    if (!user?.isAdmin) {
+      console.error("Acesso negado: Apenas administradores podem extrair userCards.");
+      alert("Acesso negado. Esta função é apenas para administradores.");
+      return;
+    }
     alert("Iniciando extração de 'userCards'. Isso pode levar um momento.");
     try {
       const userCardsQuery = collection(db, 'userCards');

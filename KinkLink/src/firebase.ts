@@ -1,7 +1,7 @@
 // Importe as funções que você precisa dos SDKs que você precisa
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app"; // Adicionado getApps, getApp, FirebaseApp
 import { getAuth, type Auth } from "firebase/auth"; // Adicionado Auth
-import { getFirestore, type Firestore } from "firebase/firestore"; // Adicionado Firestore
+import { getFirestore, initializeFirestore, memoryLocalCache, type Firestore } from "firebase/firestore"; // Adicionado Firestore
 import * as Sentry from "@sentry/react";
 // Se for usar Analytics (opcional, não está no plano MVP inicial)
 // import { getAnalytics } from "firebase/analytics";
@@ -25,15 +25,21 @@ const firebaseConfig = {
 
 // Initialize Firebase - Verifica se já existe uma instância
 let app: FirebaseApp;
+let db: Firestore; // Declarar db aqui
+
 if (getApps().length === 0) {
   app = initializeApp(firebaseConfig);
+  // Inicializa o Firestore com cache em memória para evitar erros de IndexedDB
+  db = initializeFirestore(app, {
+    localCache: memoryLocalCache(),
+  });
 } else {
   app = getApp(); // Pega a instância existente
+  db = getFirestore(app); // Pega o Firestore já inicializado
 }
 
 // Inicialize os serviços do Firebase que você vai usar (Auth e Firestore para o MVP)
 const auth: Auth = getAuth(app);
-const db: Firestore = getFirestore(app);
 // const analytics = getAnalytics(app); // Descomente se for usar Analytics
 
 // Exporte as instâncias para usar em outras partes do seu app

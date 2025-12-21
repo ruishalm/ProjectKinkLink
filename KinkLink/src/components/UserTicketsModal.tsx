@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'; // Adicionado useEffect, useRef
+import { useTranslation } from 'react-i18next';
 import { useAuth, type UserFeedback } from '../contexts/AuthContext';
 import { Timestamp } from 'firebase/firestore';
 import styles from './UserTicketsModal.module.css'; // Caminho do CSS atualizado
@@ -11,6 +12,7 @@ interface UserTicketsModalProps {
 
 function UserTicketsModal({ isOpen, onClose }: UserTicketsModalProps) {
   console.log('[UserTicketsPage] Componente montado.'); // Novo log
+  const { t } = useTranslation();
   const { user, deleteUserFeedbackTicket } = useAuth(); // <<< ADICIONA deleteUserFeedbackTicket
   const [expandedTicketId, setExpandedTicketId] = useState<string | null>(null);
   const modalContentRef = useRef<HTMLDivElement>(null);
@@ -55,7 +57,7 @@ function UserTicketsModal({ isOpen, onClose }: UserTicketsModalProps) {
   }, [isOpen, onClose]);
 
   const handleDeleteTicket = async (ticketId: string) => {
-    if (window.confirm("Tem certeza que deseja deletar este chamado? Esta ação não pode ser desfeita.")) {
+    if (window.confirm(t('tickets_delete_confirm'))) {
       setIsDeleting(ticketId);
       try {
         await deleteUserFeedbackTicket(ticketId);
@@ -63,7 +65,7 @@ function UserTicketsModal({ isOpen, onClose }: UserTicketsModalProps) {
         // Opcional: mostrar uma mensagem de sucesso
       } catch (error) {
         console.error("Erro ao deletar ticket:", error);
-        alert("Falha ao deletar o chamado. Tente novamente.");
+        alert(t('tickets_delete_error'));
       } finally {
         setIsDeleting(null);
       }
@@ -78,43 +80,43 @@ function UserTicketsModal({ isOpen, onClose }: UserTicketsModalProps) {
   return (
     <div className={styles.modalOverlay} onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="user-tickets-title">
       <div className={`${styles.modalContent} klnkl-themed-panel`} ref={modalContentRef} onClick={(e) => e.stopPropagation()}>
-        <button onClick={onClose} className={styles.closeButtonTop} aria-label="Fechar">&times;</button>
-        <h2 id="user-tickets-title" className={styles.modalTitle}>Meus Chamados de Suporte</h2>
+        <button onClick={onClose} className={styles.closeButtonTop} aria-label={t('tickets_close_aria')}>&times;</button>
+        <h2 id="user-tickets-title" className={styles.modalTitle}>{t('tickets_title')}</h2>
 
         {tickets.length === 0 ? (
-          <p className={styles.loadingOrEmpty}>Você ainda não enviou nenhum chamado.</p>
+          <p className={styles.loadingOrEmpty}>{t('tickets_empty')}</p>
         ) : (
         <ul className={styles.ticketList}>
           {tickets.slice().sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis()).map((ticket: UserFeedback) => (
             <li key={ticket.id} className={`${styles.ticketItem} ${ticket.status === 'admin_replied' ? styles.adminReplied : ''}`}>
               <div className={styles.ticketHeader} onClick={() => toggleTicketExpansion(ticket.id)}>
                 <span className={styles.ticketDate}>
-                  Enviado em: {formatFirestoreTimestamp(ticket.createdAt)}
+                  {t('tickets_sent_at')} {formatFirestoreTimestamp(ticket.createdAt)}
                 </span>
                 <span className={`${styles.ticketStatus} ${styles[`status-${ticket.status}`]}`}>
-                  {ticket.status === 'new' && 'Novo'}
-                  {ticket.status === 'seen' && 'Visto pelo Admin'}
-                  {ticket.status === 'admin_replied' && 'Respondido'}
-                  {ticket.status === 'resolved' && 'Resolvido'}
+                  {ticket.status === 'new' && t('tickets_status_new')}
+                  {ticket.status === 'seen' && t('tickets_status_seen')}
+                  {ticket.status === 'admin_replied' && t('tickets_status_replied')}
+                  {ticket.status === 'resolved' && t('tickets_status_resolved')}
                 </span>
                 <span className={styles.ticketToggleIcon}>
                   {expandedTicketId === ticket.id ? '▲' : '▼'}
                 </span>
               </div>
               <p className={styles.ticketTextPreview}>
-                <strong>Sua Mensagem:</strong> {ticket.text.substring(0, 100)}{ticket.text.length > 100 ? '...' : ''}
+                <strong>{t('tickets_your_message_label')}</strong> {ticket.text.substring(0, 100)}{ticket.text.length > 100 ? '...' : ''}
               </p>
 
               {expandedTicketId === ticket.id && (
                 <div className={styles.ticketDetails}>
-                  <p><strong>Sua Mensagem Completa:</strong></p>
+                  <p><strong>{t('tickets_full_message_label')}</strong></p>
                   <p className={styles.fullText}>{ticket.text}</p>
                   {ticket.adminResponse && (
                     <div className={styles.adminResponseSection}>
-                      <p><strong>Resposta do Suporte KinkLink:</strong></p>
+                      <p><strong>{t('tickets_admin_response_label')}</strong></p>
                       <p className={styles.adminResponseText}>{ticket.adminResponse}</p>
                       <p className={styles.responseDate}>
-                        Respondido em: {formatFirestoreTimestamp(ticket.respondedAt)}
+                        {t('tickets_responded_at')} {formatFirestoreTimestamp(ticket.respondedAt)}
                       </p>
                     </div>
                   )}
@@ -123,9 +125,9 @@ function UserTicketsModal({ isOpen, onClose }: UserTicketsModalProps) {
                     onClick={() => handleDeleteTicket(ticket.id)}
                     className={`${styles.deleteButton} genericButton genericButtonDestructive`} // Adicione estilos para deleteButton
                     disabled={isDeleting === ticket.id}
-                    aria-label={`Deletar chamado: ${ticket.text.substring(0, 30)}...`}
+                    aria-label={`${t('tickets_delete_aria')} ${ticket.text.substring(0, 30)}...`}
                   >
-                    {isDeleting === ticket.id ? 'Deletando...' : 'Deletar Chamado'}
+                    {isDeleting === ticket.id ? t('tickets_deleting') : t('tickets_delete_button')}
                   </button>
                 </div>
               )}

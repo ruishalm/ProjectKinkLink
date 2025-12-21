@@ -1,14 +1,16 @@
 // src/components/LinkedRoute.tsx
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 
 const LinkedRoute: React.FC = () => {
+  const { t } = useTranslation();
   const { user, isLoading } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
-    return <div>Carregando...</div>; // Ou um spinner/componente de loading
+    return <div>{t('linked_route_loading')}</div>; // Ou um spinner/componente de loading
   }
 
   if (!user) {

@@ -1,6 +1,7 @@
 // d:\Projetos\Github\app\KinkLink\KinkLink\src\components\MatchModal.tsx
 
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Card } from '../data/cards';
 import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 import PlayingCard from './PlayingCard'; // Importa o componente PlayingCard
@@ -12,6 +13,7 @@ interface MatchModalProps {
 }
 
 function MatchModal({ card, onClose }: MatchModalProps) {
+  const { t } = useTranslation();
   // Hooks e Efeitos
   // Adiciona listener para fechar com a tecla Escape
   useEffect(() => {
@@ -37,18 +39,18 @@ function MatchModal({ card, onClose }: MatchModalProps) {
   return (
     <div className={styles.modalOverlay} onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="match-modal-title">
       <div className={`${styles.modalContent} klnkl-themed-panel`} onClick={(e) => e.stopPropagation()}>
-        <button type="button" onClick={onClose} className={styles.closeButtonTopRight} aria-label="Fechar modal">
+        <button type="button" onClick={onClose} className={styles.closeButtonTopRight} aria-label={t('match_modal_close_aria')}>
           &times;
         </button>
-        <h2 id="match-modal-title" className={styles.title}>🔗 LINK! 🎉</h2>
-        <p className={styles.subTitle}>Vocês dois toparam a carta:</p>
+        <h2 id="match-modal-title" className={styles.title}>{t('match_modal_title')}</h2>
+        <p className={styles.subTitle}>{t('match_modal_subtitle')}</p>
         <div className={styles.cardContainer}>
           {/* Renderiza o PlayingCard com escala um pouco menor para caber bem */}
           <PlayingCard data={card}/>
         </div>
         <div className={styles.buttonContainer}>
-          <button className={`${styles.closeButton} genericButton klnkl-match-modal-action-close`} onClick={onClose}>Legal!</button>
-          <button className={`${styles.chatButton} genericButton klnkl-match-modal-action-chat`} onClick={handleGoToChat}>Vamos conversar</button>
+          <button className={`${styles.closeButton} genericButton klnkl-match-modal-action-close`} onClick={onClose}>{t('match_modal_close_button')}</button>
+          <button className={`${styles.chatButton} genericButton klnkl-match-modal-action-chat`} onClick={handleGoToChat}>{t('match_modal_chat_button')}</button>
         </div>
       </div>
     </div>

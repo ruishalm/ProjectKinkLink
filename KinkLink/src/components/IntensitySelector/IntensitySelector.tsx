@@ -1,16 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './IntensitySelector.module.css';
 
-const intensityLevels = [
-  { level: 1, label: 'Nível 1: Leve' },
-  { level: 2, label: 'Nível 2: Moderado' },
-  { level: 3, label: 'Nível 3: Apimentado' },
-  { level: 4, label: 'Nível 4: Intenso (+1)', warning: true },
-  { level: 5, label: 'Nível 5: Extremo (Grupo)', warning: true },
-  { level: 6, label: 'Nível 6: Hardcore (Grupo+)', warning: true },
-  { level: 7, label: 'Nível 7: Fetiches Específicos', warning: true },
-  { level: 8, label: 'Nível 8: Sem Limites (Padrão)', warning: false },
-];
 
 interface IntensitySelectorProps {
   currentLevel: number;
@@ -18,10 +9,22 @@ interface IntensitySelectorProps {
 }
 
 const IntensitySelector: React.FC<IntensitySelectorProps> = ({ currentLevel, onLevelChange }) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const selectedLabel = intensityLevels.find(l => l.level === currentLevel)?.label || 'Selecione...';
+  const intensityLevels = [
+    { level: 1, label: t('intensity_level_1') },
+    { level: 2, label: t('intensity_level_2') },
+    { level: 3, label: t('intensity_level_3') },
+    { level: 4, label: t('intensity_level_4'), warning: true },
+    { level: 5, label: t('intensity_level_5'), warning: true },
+    { level: 6, label: t('intensity_level_6'), warning: true },
+    { level: 7, label: t('intensity_level_7'), warning: true },
+    { level: 8, label: t('intensity_level_8'), warning: false },
+  ];
+
+  const selectedLabel = intensityLevels.find(l => l.level === currentLevel)?.label || t('intensity_select_placeholder');
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -41,7 +44,7 @@ const IntensitySelector: React.FC<IntensitySelectorProps> = ({ currentLevel, onL
 
   return (
     <div className={styles.selectorContainer} ref={wrapperRef}>
-      <label className={styles.mainLabel}>Intensidade Máxima das Cartas:</label>
+      <label className={styles.mainLabel}>{t('intensity_selector_label')}</label>
       <button
         type="button"
         className={`${styles.selectorDisplay} genericButton`}
@@ -65,7 +68,7 @@ const IntensitySelector: React.FC<IntensitySelectorProps> = ({ currentLevel, onL
               <span>{label}</span>
               {warning && (
                 <p className={styles.intensityWarning}>
-                  Aviso: Pode incluir interações com terceiros.
+                  {t('intensity_warning_third_party')}
                 </p>
               )}
             </li>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './SupportModal.module.css';
 
 // Constants for links and logos, same as footer
@@ -27,6 +28,8 @@ interface SupportModalProps {
 }
 
 const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) => {
+  const { t } = useTranslation();
+
   if (!isOpen) {
     return null;
   }
@@ -34,26 +37,26 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) => {
   return (
     <div className={styles.modalOverlay} onClick={onClose} role="dialog" aria-modal="true">
       <div className={`${styles.modalContent} klnkl-themed-panel`} onClick={(e) => e.stopPropagation()}>
-        <button onClick={onClose} className={styles.closeButton} aria-label="Fechar modal">×</button>
+        <button onClick={onClose} className={styles.closeButton} aria-label={t('support_modal_close_aria')}>×</button>
         
-        <h2 className={styles.title}>Obrigado por estar aqui!</h2>
+        <h2 className={styles.title}>{t('support_modal_title')}</h2>
         
         <p className={styles.mainText}>
-          O Kinklink foi pensado para melhorar a comunicação, e acreditamos que todos devem ter direito à comunicação, por isso nosso app é 100% gratuito e sempre será!
+          {t('support_modal_text_1')}
         </p>
         <p className={styles.mainText}>
-          Se você gosta do projeto e quer ajudar a manter ele no ar e melhorando cada dia mais, considere nos apoiar e nos siga nas nossas redes sociais.
+          {t('support_modal_text_2')}
         </p>
         <p className={styles.mainText} style={{ textAlign: 'right', fontStyle: 'italic', marginTop: '20px' }}>
-          - O Criador
+          {t('support_modal_signature')}
         </p>
 
         <div className={styles.supportSection}>
           <div className={styles.supportLogosContainer}>
-            <a href={CATARSE_LINK} target="_blank" rel="noopener noreferrer" className={styles.supportLink} aria-label="Apoie o KinkLink no Catarse">
+            <a href={CATARSE_LINK} target="_blank" rel="noopener noreferrer" className={styles.supportLink} aria-label={t('support_modal_catarse_aria')}>
               <img src={CATARSE_LOGO_SRC} alt="Logo Catarse" className={styles.supportLogo} />
             </a>
-            <a href={APOIASE_LINK} target="_blank" rel="noopener noreferrer" className={styles.supportLink} aria-label="Apoie o KinkLink no Apoia.se">
+            <a href={APOIASE_LINK} target="_blank" rel="noopener noreferrer" className={styles.supportLink} aria-label={t('support_modal_apoiase_aria')}>
               <img src={APOIASE_LOGO_SRC} alt="Logo Apoia.se" className={styles.supportLogo} />
             </a>
           </div>
@@ -61,16 +64,16 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) => {
 
         <div className={styles.socialMediaSection}>
           <div className={styles.socialIconsContainer}>
-            <a href={SOCIAL_LINKS.twitter} target="_blank" rel="noopener noreferrer" aria-label="KinkLink no X (Twitter)">
+            <a href={SOCIAL_LINKS.twitter} target="_blank" rel="noopener noreferrer" aria-label={t('support_modal_social_aria', { network: 'X (Twitter)' })}>
               <img src={SOCIAL_ICONS.twitter} alt="X (Twitter)" className={styles.socialIcon} />
             </a>
-            <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noopener noreferrer" aria-label="KinkLink no Instagram">
+            <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noopener noreferrer" aria-label={t('support_modal_social_aria', { network: 'Instagram' })}>
               <img src={SOCIAL_ICONS.instagram} alt="Instagram" className={styles.socialIcon} />
             </a>
-            <a href={SOCIAL_LINKS.bluesky} target="_blank" rel="noopener noreferrer" aria-label="KinkLink no BlueSky">
+            <a href={SOCIAL_LINKS.bluesky} target="_blank" rel="noopener noreferrer" aria-label={t('support_modal_social_aria', { network: 'BlueSky' })}>
               <img src={SOCIAL_ICONS.bluesky} alt="BlueSky" className={styles.socialIcon} />
             </a>
-            <a href={SOCIAL_LINKS.reddit} target="_blank" rel="noopener noreferrer" aria-label="KinkLink no Reddit">
+            <a href={SOCIAL_LINKS.reddit} target="_blank" rel="noopener noreferrer" aria-label={t('support_modal_social_aria', { network: 'Reddit' })}>
               <img src={SOCIAL_ICONS.reddit} alt="Reddit" className={styles.socialIcon} />
             </a>
           </div>

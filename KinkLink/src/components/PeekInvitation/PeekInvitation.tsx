@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './PeekInvitation.module.css';
 
 interface PeekInvitationProps {
@@ -7,19 +8,20 @@ interface PeekInvitationProps {
 }
 
 const PeekInvitation: React.FC<PeekInvitationProps> = ({ onAccept, onReject }) => {
+  const { t } = useTranslation();
   return (
     <div className={styles.overlay}>
       <div className={`${styles.modalContent} klnkl-themed-panel`}>
-        <h2 className={styles.title}>Opa! 👀</h2>
+        <h2 className={styles.title}>{t('peek_invitation_title')}</h2>
         <p className={styles.message}>
-          Seu parceiro(a) é um(a) safadinho(a)! Gostaria de dar uma espiada no que chamou a atenção dele(a)?
+          {t('peek_invitation_message')}
         </p>
         <div className={styles.buttonContainer}>
           <button onClick={onAccept} className={`${styles.acceptButton} genericButton`}>
-            Estou curioso(a)
+            {t('peek_invitation_accept')}
           </button>
           <button onClick={onReject} className={`${styles.rejectButton} genericButton`}>
-            Vou me manter nos meus limites
+            {t('peek_invitation_reject')}
           </button>
         </div>
       </div>

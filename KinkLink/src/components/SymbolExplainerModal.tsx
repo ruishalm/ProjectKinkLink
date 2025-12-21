@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
+import { useTranslation, } from 'react-i18next';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './SymbolExplainerModal.module.css';
@@ -10,6 +11,7 @@ interface SymbolExplainerModalProps {
 }
 
 const SymbolExplainerModal: React.FC<SymbolExplainerModalProps> = ({ isOpen, onClose }) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [partnerName, setPartnerName] = useState<string>('');
   const [userSymbol, setUserSymbol] = useState<string>('');
@@ -33,7 +35,7 @@ const SymbolExplainerModal: React.FC<SymbolExplainerModalProps> = ({ isOpen, onC
           if (partnerId) {
             const partnerDoc = await getDoc(doc(db, 'users', partnerId));
             if (partnerDoc.exists()) {
-              setPartnerName(partnerDoc.data().name || 'Parceiro(a)');
+              setPartnerName(partnerDoc.data().name || t('symbol_explainer_partner_default'));
             }
             setPartnerSymbol(memberSymbols[partnerId] || '');
           }
@@ -50,7 +52,7 @@ const SymbolExplainerModal: React.FC<SymbolExplainerModalProps> = ({ isOpen, onC
     if (isOpen) {
       fetchCoupleData();
     }
-  }, [isOpen, user?.coupleId, user?.id]);
+  }, [isOpen, user?.coupleId, user?.id, t]);
 
   if (!isOpen) return null;
 
@@ -67,15 +69,15 @@ const SymbolExplainerModal: React.FC<SymbolExplainerModalProps> = ({ isOpen, onC
           ✕
         </button>
         
-        <h2 className={styles.title}>O que é isso?</h2>
+        <h2 className={styles.title}>{t('symbol_explainer_title')}</h2>
         
         {loading ? (
-          <p className={styles.loading}>Carregando...</p>
+          <p className={styles.loading}>{t('symbol_explainer_loading')}</p>
         ) : (
           <div className={styles.content}>
             <div className={styles.symbolRow}>
               <span className={styles.symbol}>{userSymbol}</span>
-              <span className={styles.label}>Você</span>
+              <span className={styles.label}>{t('symbol_explainer_you')}</span>
             </div>
             
             <div className={styles.symbolRow}>
@@ -84,13 +86,11 @@ const SymbolExplainerModal: React.FC<SymbolExplainerModalProps> = ({ isOpen, onC
             </div>
             
             <p className={styles.explanation}>
-              Nas sugestões de cartas, você recebe cartas que <strong>{partnerName}</strong> curtiu 
-              (marcadas com {partnerSymbol}), e <strong>{partnerName}</strong> recebe cartas que você 
-              curtiu (marcadas com {userSymbol}).
+              {t('symbol_explainer_text')}
             </p>
             
             <p className={styles.note}>
-              Os símbolos foram atribuídos aleatoriamente quando vocês se conectaram.
+              {t('symbol_explainer_note')}
             </p>
           </div>
         )}

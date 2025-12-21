@@ -1,5 +1,6 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\PlayingCard.tsx
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './PlayingCard.module.css';
 
 export interface CardData {
@@ -55,12 +56,16 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
   dragVisuals,
   currentUserId
 }) => {
+  const { t } = useTranslation(['translation', 'cards']);
   const textContentRef = useRef<HTMLParagraphElement>(null);
   const textAreaRef = useRef<HTMLDivElement>(null);
   const [currentFontSize, setCurrentFontSize] = useState(16);
 
   const baseCardWidthForScaling = 250;
   const visualScaleFactor = targetWidth / baseCardWidthForScaling;
+
+  // Tenta traduzir o texto da carta usando o ID. Se não encontrar (ex: userCard), usa o texto original.
+  const displayText = t(data.id, { ns: 'cards', defaultValue: data.text });
 
   useEffect(() => {
     if (textContentRef.current && textAreaRef.current && !isFlipped) {
@@ -79,7 +84,7 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
       setCurrentFontSize(bestFitSize);
       textElement.style.fontSize = `${bestFitSize}px`;
     }
-  }, [data.text, targetWidth, targetHeight, visualScaleFactor, isFlipped]);
+  }, [displayText, targetWidth, targetHeight, visualScaleFactor, isFlipped]);
 
   const categoryStyles = getCategoryStyles(data.category);
 
@@ -172,7 +177,7 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
   };
 
   const displayIntensity = typeof data.intensity === 'number' && !isNaN(data.intensity) ? data.intensity : '-';
-  const displayCategoryName = data.category.charAt(0).toUpperCase() + data.category.slice(1).toLowerCase();
+  const displayCategoryName = t(`category_${data.category.toLowerCase()}`);
 
   const showPartnerSuggestionNotice =
     (data.category?.toLowerCase() === 'usercard' || data.category?.toLowerCase() === 'userCard') &&
@@ -196,13 +201,13 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
         <div style={cardFrontFaceDynamicInlineStyle} className={styles.cardFront}>
           {dragVisuals && dragVisuals.active && dragVisuals.dir !== 0 && (
             <div className={styles.swipeFeedbackOverlay} style={swipeFeedbackOverlayDynamicStyle}>
-              {dragVisuals.dir > 0 ? 'Topo!' : 'Passo'}
+              {dragVisuals.dir > 0 ? t('playing_card_swipe_like') : t('playing_card_swipe_dislike')}
             </div>
           )}
 
           {showPartnerSuggestionNotice && (
             <div className={styles.partnerSuggestionNotice} style={{ fontSize: `${0.7 * visualScaleFactor}em`}}>
-              💌 Sugestão do Par!
+              {t('playing_card_partner_suggestion')}
             </div>
           )}
 
@@ -217,7 +222,7 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
 
           <div ref={textAreaRef} className={styles.textArea} style={textAreaDynamicStyle}>
             <p ref={textContentRef} className={styles.textContent} style={textContentFinalStyle}>
-              {data.text}
+              {displayText}
             </p>
           </div>
 
@@ -229,8 +234,8 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
               }}
               className={styles.hotButton}
               style={hotButtonDynamicStyle}
-              aria-label={data.isHot ? "Remover dos Top Links" : "Adicionar aos Top Links"}
-              title={data.isHot ? "Remover dos Top Links" : "Adicionar aos Top Links"}
+              aria-label={data.isHot ? t('playing_card_hot_remove') : t('playing_card_hot_add')}
+              title={data.isHot ? t('playing_card_hot_remove') : t('playing_card_hot_add')}
             >
               🔥
             </button>
@@ -241,7 +246,7 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
           {/* Logo nas costas da carta */}
           <img
             src="/kinklogo512.png" // <<< ALTERADO AQUI
-            alt="KinkLink Logo"
+            alt={t('card_back_logo_alt')}
             className={styles.cardBackLogo}
           />
         </div>

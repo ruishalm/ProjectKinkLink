@@ -1,5 +1,6 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\CardChatModal.tsx
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCardChat, type ChatMessage } from '../hooks/useCardChat';
 import { useAuth } from '../contexts/AuthContext';
 import { Timestamp, doc, updateDoc, serverTimestamp } from 'firebase/firestore'; // <<< ADICIONADO
@@ -22,6 +23,7 @@ function CardChatModal({
   cardTitle,
   onClose,
 }: CardChatModalProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { messages, sendMessage, isLoading, error: chatError } = useCardChat(cardId); // Usa o cardId para o hook
   // O modal agora busca seus próprios dados e funções de interação
@@ -130,7 +132,8 @@ function CardChatModal({
   };
 
   const handleDesfazerLink = async () => {
-    if (cardId && window.confirm(`Tem certeza que deseja desfazer o Link com a carta "${cardTitle || 'esta carta'}"? Esta carta voltará para a pilha de ambos.`)) {
+    const title = cardTitle || t('chat_header_default_card_title');
+    if (cardId && window.confirm(t('chat_undo_link_confirm', { cardTitle: title }))) {
       await deleteMatch(cardId);
       onClose();
     }
@@ -155,11 +158,11 @@ function CardChatModal({
               <button
                 onClick={isCompleted ? handleRepeatCard : handleToggleCompleted}
                 className={`${styles.headerActionButton} ${styles.completedButtonInChat} ${isCompleted ? styles.isCompletedAction : ''}`}
-                aria-label={isCompleted ? "Vamos Repetir?!" : "Marcar como Realizada"}
-                title={isCompleted ? "Mover para Top Links e marcar como não realizada" : "Marcar esta carta como já realizada"}
+                aria-label={isCompleted ? t('chat_action_repeat_label') : t('chat_action_mark_completed_label')}
+                title={isCompleted ? t('chat_action_repeat_title') : t('chat_action_mark_completed_title')}
               >
                 <span className={styles.completedIcon}>{isCompleted ? '🔁' : '✅'}</span>
-                <span className={styles.completedText}>{isCompleted ? "Repetir?!" : "Realizada"}</span>
+                <span className={styles.completedText}>{isCompleted ? t('chat_action_repeat_text') : t('chat_action_completed_text')}</span>
               </button>
             )}
 
@@ -168,12 +171,12 @@ function CardChatModal({
               <button
                 onClick={handleToggleHot}
                 className={`${styles.headerActionButton} ${styles.favoriteButtonInChat} ${isHot ? styles.isHot : ''}`}
-                aria-label={isHot ? "Remover dos Top Links" : "Adicionar aos Top Links"}
-                title={isHot ? "Remover dos Top Links" : "Adicionar aos Top Links"}
+                aria-label={isHot ? t('chat_action_remove_favorite') : t('chat_action_add_favorite')}
+                title={isHot ? t('chat_action_remove_favorite') : t('chat_action_add_favorite')}
                 disabled={isCompleted} // Desabilitado se a carta estiver completada
               >
                 <span className={styles.favoriteIcon}>🔥</span>
-                <span className={styles.favoriteText}>Favoritar</span>
+                <span className={styles.favoriteText}>{t('chat_action_favorite_text')}</span>
               </button>
             )}
 
@@ -181,20 +184,20 @@ function CardChatModal({
             <button
               className={`${styles.headerActionButton} ${styles.closeButtonInGroup}`} // Nova classe para o X dentro do grupo
               onClick={onClose}
-              aria-label="Fechar chat"
+              aria-label={t('chat_close_aria')}
             >X</button>
           </div>
         </div>
         
         <div className={chatStyles.chatContainer}>
           <div className={chatStyles.chatHeader}>
-            <h3 className={chatStyles.chatHeaderName}>Conversa sobre:</h3>
+            <h3 className={chatStyles.chatHeaderName}>{t('chat_header_about')}</h3>
             <p className={chatStyles.chatHeaderName} style={{opacity: 0.8, fontSize: '0.9em'}}>
-              {cardTitle || "Carta selecionada"}
+              {cardTitle || t('chat_header_default_card_title')}
             </p>
           </div>
 
-          {isLoading && <div className={chatStyles.loadingMessages}>Carregando mensagens...</div>}
+          {isLoading && <div className={chatStyles.loadingMessages}>{t('chat_loading_messages')}</div>}
           {chatError && <div className={chatStyles.chatError}>{chatError}</div>}
           
           {!isLoading && !chatError && (
@@ -206,11 +209,11 @@ function CardChatModal({
                 >
                   <div className={chatStyles.messageContent}>{msg.text}</div>
                   <div className={chatStyles.messageInfo}>
-                    <span>{msg.userId === user?.id ? "Você" : (msg.username || "Parceiro(a)")}</span>
+                    <span>{msg.userId === user?.id ? t('chat_you') : (msg.username || t('chat_partner'))}</span>
                     <span style={{ marginLeft: '8px' }}>
                       {msg.timestamp && msg.timestamp.toDate ? 
                         msg.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 
-                        'agora'}
+                        t('chat_time_now')}
                     </span>
                   </div>
                 </div>
@@ -225,7 +228,7 @@ function CardChatModal({
               className={chatStyles.chatInput} 
               value={newMessage} 
               onChange={(e) => setNewMessage(e.target.value)} 
-              placeholder="Escreva no verso da carta..." 
+              placeholder={t('chat_input_placeholder')}
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()} 
               disabled={isLoading}
             />
@@ -234,13 +237,13 @@ function CardChatModal({
               onClick={handleSendMessage} 
               disabled={!newMessage.trim() || isLoading}
             >
-              Enviar
+              {t('chat_send_button')}
             </button>
           </div>
         </div>
 
         <button className={`${styles.destructiveButton} genericButton genericButtonDestructive`} onClick={handleDesfazerLink} disabled={isLoading}>
-          Desfazer Link
+          {t('chat_undo_link_button')}
         </button>
       </div>
     </div>

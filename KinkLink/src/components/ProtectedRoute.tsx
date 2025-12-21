@@ -1,9 +1,11 @@
 // src/components/ProtectedRoute.tsx
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 
 const ProtectedRoute: React.FC = () => {
+  const { t } = useTranslation();
   const { isAuthenticated, isLoading } = useAuth(); // Usaremos isAuthenticated diretamente
   const location = useLocation();
 
@@ -11,7 +13,7 @@ const ProtectedRoute: React.FC = () => {
 
   if (isLoading) {
     console.log('[ProtectedRoute] Ainda carregando autenticação para', location.pathname);
-    return <div>Carregando autenticação...</div>; // Ou um spinner/componente de loading
+    return <div>{t('protected_route_loading')}</div>; // Ou um spinner/componente de loading
   }
 
   if (!isAuthenticated) {

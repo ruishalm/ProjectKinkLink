@@ -1,5 +1,6 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\SkinPreviewMiniature.tsx
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ActiveSkinSettings } from '../contexts/SkinContext';
 import styles from './SkinPreviewMiniature.module.css';
 import { defaultPalette } from '../contexts/SkinContext';
@@ -9,6 +10,7 @@ export interface SkinPreviewMiniatureProps {
 }
 
 const SkinPreviewMiniature: React.FC<SkinPreviewMiniatureProps> = ({ settings }) => {
+  const { t } = useTranslation();
   // Helper para verificar se uma string é uma URL de imagem provável
   const isImageUrl = (url: string | undefined): boolean => {
     if (!url) return false;
@@ -97,7 +99,7 @@ const SkinPreviewMiniature: React.FC<SkinPreviewMiniatureProps> = ({ settings })
           <img src="/kinklogo.png" alt="Logo" className={styles.miniLogoImage} />
         </div>
         <div className={`${styles.miniSupportButton} ${settings.buttonStyleClass || ''}`}>
-          Apoio
+          {t('skin_preview_support')}
         </div>
       </div>
 
@@ -110,7 +112,7 @@ const SkinPreviewMiniature: React.FC<SkinPreviewMiniatureProps> = ({ settings })
         {/* Botão de demonstração de estilo */}
         <div className={styles.miniButtonStylePreviewContainer}>
           <div className={`${styles.miniActionButton} ${settings.buttonStyleClass || ''}`}>
-            BOTAO
+            {t('skin_preview_button')}
           </div>
         </div>
       </div>

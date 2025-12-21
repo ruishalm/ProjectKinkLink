@@ -1,10 +1,12 @@
 import React, { useState, type FormEvent, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './LoginPage.module.css'; // Importa os CSS Modules
 import ForgotPasswordModal from '../components/ForgotPasswordModal'; // Importa o modal
 
 function LoginPage() {
+  const { t } = useTranslation();
   // Hooks e Estados
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,29 +31,29 @@ function LoginPage() {
       navigate('/profile', { replace: true, state: { showTutorial: true } });
     } catch (err: unknown) {
       console.error("Falha no login:", err); // Mantém o log completo do erro para debug
-      let errorMessage = 'Falha ao tentar fazer login. Verifique suas credenciais e tente novamente.';
+      let errorMessage = t('login_error_generic');
 
       if (typeof err === 'object' && err !== null && 'code' in err) {
         const firebaseError = err as { code: string; message: string }; // Type assertion
         switch (firebaseError.code) {
           case 'auth/user-not-found':
           case 'auth/invalid-email': // O Firebase pode retornar isso se o email não estiver formatado corretamente
-            errorMessage = 'E-mail não encontrado ou inválido. Verifique o e-mail digitado.';
+            errorMessage = t('login_error_user_not_found');
             break;
           case 'auth/wrong-password':
-            errorMessage = 'Senha incorreta. Por favor, tente novamente.';
+            errorMessage = t('login_error_wrong_password');
             break;
           case 'auth/invalid-credential': // Erro mais genérico para email/senha inválidos (SDKs mais recentes)
-            errorMessage = 'Credenciais inválidas. Verifique seu e-mail e senha.';
+            errorMessage = t('login_error_invalid_credentials');
             break;
           default:
             // Para outros erros do Firebase, podemos usar a mensagem padrão ou uma genérica
-            errorMessage = 'Ocorreu um erro inesperado. Tente novamente mais tarde.';
+            errorMessage = t('login_error_unexpected');
             console.error("Erro não mapeado do Firebase:", firebaseError.code, firebaseError.message);
         }
       } else {
         // Se não for um erro estruturado do Firebase, usa uma mensagem genérica
-        errorMessage = 'Ocorreu um erro desconhecido ao tentar fazer login.';
+        errorMessage = t('login_error_unknown');
       }
       setError(errorMessage);
     } finally {
@@ -69,9 +71,9 @@ function LoginPage() {
     } catch (err: unknown) {
       console.error("Falha no login com Google:", err);
       if (typeof err === 'object' && err !== null && 'message' in err) {
-        setError((err as { message: string}).message || 'Falha ao tentar fazer login com o Google.');
+        setError((err as { message: string}).message || t('login_error_google_failed'));
       } else {
-        setError('Ocorreu um erro desconhecido ao tentar fazer login com o Google.');
+        setError(t('login_error_google_unknown'));
       }
     } finally {
       setIsSubmitting(false);
@@ -95,7 +97,7 @@ function LoginPage() {
   }, []);
 
   if (authIsLoading && !showForgotPasswordModal) { // Não mostrar loading se o modal estiver aberto
-    return <div className={styles.pageContainer}><p>Carregando...</p></div>;
+    return <div className={styles.pageContainer}><p>{t('login_loading')}</p></div>;
   }
 
   return (
@@ -109,7 +111,7 @@ function LoginPage() {
           ))}
         </div>
 
-        <h1 className={styles.pageTitle}>Login</h1>
+        <h1 className={styles.pageTitle}>{t('login_title')}</h1>
 
         {!showEmailPasswordForm && (
           <button
@@ -118,14 +120,14 @@ function LoginPage() {
             onClick={() => setShowEmailPasswordForm(true)}
             disabled={isSubmitting || authIsLoading}
           >
-            Entrar com Email/Senha
+            {t('login_with_email_button')}
           </button>
         )}
 
         {showEmailPasswordForm && (
           <form onSubmit={handleSubmit} className={styles.formContainer}>
             <div className={styles.inputGroup}>
-              <label htmlFor="email" className={styles.label}>Email:</label>
+              <label htmlFor="email" className={styles.label}>{t('login_email_label')}</label>
               <input
                 type="email"
                 id="email"
@@ -137,7 +139,7 @@ function LoginPage() {
               />
             </div>
             <div className={styles.inputGroup}>
-              <label htmlFor="password" className={styles.label}>Senha:</label>
+              <label htmlFor="password" className={styles.label}>{t('login_password_label')}</label>
               <input
                 type="password"
                 id="password"
@@ -149,7 +151,7 @@ function LoginPage() {
               />
             </div>
             <button type="submit" className={styles.button} disabled={isSubmitting || authIsLoading}>
-              {isSubmitting ? 'Entrando...' : 'Entrar'}
+              {isSubmitting ? t('login_signing_in_button') : t('login_sign_in_button')}
             </button>
             <div className={styles.forgotPasswordContainer}>
               <button
@@ -157,7 +159,7 @@ function LoginPage() {
                 onClick={() => setShowForgotPasswordModal(true)}
                 className={styles.forgotPasswordLink}
               >
-                Esqueceu sua senha?
+                {t('login_forgot_password_button')}
               </button>
             </div>
           </form>
@@ -165,7 +167,7 @@ function LoginPage() {
 
         <div className={styles.separatorContainer}>
           <span className={styles.separatorLine}></span>
-          <span className={styles.separatorText}>OU</span>
+          <span className={styles.separatorText}>{t('login_or_separator')}</span>
           <span className={styles.separatorLine}></span>
         </div>
 
@@ -175,14 +177,14 @@ function LoginPage() {
             className={`${styles.button} ${styles.googleButton}`} // Adicione uma classe específica para estilização
             disabled={isSubmitting || authIsLoading}
           >
-            {isSubmitting && !showEmailPasswordForm ? 'Aguarde...' : 'Entrar com Google'}
+            {isSubmitting && !showEmailPasswordForm ? t('login_wait_button') : t('login_google_button')}
           </button>
 
         {error && <p className={styles.errorText}>{error}</p>}
         <p className={styles.navigationText}>
-          Não tem uma conta? <Link to="/signup" className={styles.navigationLink}>Cadastre-se</Link>
+          {t('login_no_account_text')} <Link to="/signup" className={styles.navigationLink}>{t('login_signup_link')}</Link>
         </p>
-        <Link to="/" className={styles.navigationLink}>Voltar para a Página Inicial</Link>
+        <Link to="/" className={styles.navigationLink}>{t('login_back_to_home_link')}</Link>
       </main>
 
       {showForgotPasswordModal && (

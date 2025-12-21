@@ -1,9 +1,11 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\TermsOfServicePage.tsx
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { useTranslation } from 'react-i18next';
 import styles from './TermsOfServicePage.module.css'; // Importa os CSS Modules
 
 const TermsOfServicePage: React.FC = () => {
+  const { t } = useTranslation();
   const [markdownContent, setMarkdownContent] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,9 +36,9 @@ const TermsOfServicePage: React.FC = () => {
         setPrivacyMarkdownContent(privacyText);
 
       } catch (err) {
-        let errorMessage = "Não foi possível carregar os documentos legais. Por favor, tente novamente mais tarde.";
+        let errorMessage = t('terms_error_loading_generic');
         if (err instanceof Error) {
-            errorMessage = `Erro ao buscar documentos legais: ${err.message}`;
+            errorMessage = `${t('terms_error_loading_details')} ${err.message}`;
         }
         console.error("Erro ao buscar documentos legais:", err);
         setError(errorMessage);
@@ -46,14 +48,14 @@ const TermsOfServicePage: React.FC = () => {
     };
 
     fetchDocuments(); // Corrigido o nome da função chamada
-  }, []); // O array de dependências vazio garante que isso rode apenas uma vez ao montar o componente
+  }, [t]); // Adicionado t às dependências
 
   return (
     <div className={styles.pageContainer}>
       <main className={styles.mainContentWrapper}> {/* Renomeado para evitar conflito se mainContent for usado no Header */}
         <div className={styles.contentWrapper}>
           <div className={styles.markdownContent}> {/* Mantém a classe para estilos */}
-            {(isLoading) && <p>Carregando documentos legais...</p>}
+            {(isLoading) && <p>{t('terms_loading')}</p>}
             {(error || privacyError) && (
               <>
                 <p style={{ color: 'red' }}>{error}</p>

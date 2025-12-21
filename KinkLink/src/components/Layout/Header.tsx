@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom'; // useNavigate não é mais necessário aqui para os tickets
 import { useAuth, type UserFeedback } from '../../contexts/AuthContext'; // Adicionado para verificar autenticação e UserFeedback
+import { useTranslation } from 'react-i18next';
 import SymbolExplainerModal from '../SymbolExplainerModal';
 import styles from './Header.module.css';
 
@@ -17,6 +18,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOpenFeedbackModal, onOpenUserTicketsModal }) => {
   const { isAuthenticated, user, userSymbol } = useAuth(); // Obter o estado de autenticação, o usuário e o SÍMBOLO
+  const { t } = useTranslation();
   const [isSymbolModalOpen, setIsSymbolModalOpen] = useState(false);
 
   // Verifica se há tickets com respostas do admin não lidas (status 'admin_replied')
@@ -24,12 +26,11 @@ const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOp
     (ticket: UserFeedback) => ticket.status === 'admin_replied'
   );
 
-  // const { t } = useTranslation(); // Removido
   return (
     <header className={`${styles.appHeader} klnkl-themed-panel`}>
       <div className={styles.logoContainer}>
         <Link to="/cards" className={styles.logoLink}>
-          <img src={logoSrc} alt="KinkLink Logo" className={styles.logoImage} />
+          <img src={logoSrc} alt={t('header_logo_alt')} className={styles.logoImage} />
           <span className={styles.betaText}>ALPHA</span>
         </Link>
       </div>
@@ -39,9 +40,9 @@ const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOp
           <button 
             className={styles.userSymbolIndicator}
             onClick={() => setIsSymbolModalOpen(true)}
-            title="O que é isso? Clique para entender os símbolos"
+            title={t('header_symbol_explainer_title')}
           >
-            <span className={styles.symbolLabel}>Você</span>
+            <span className={styles.symbolLabel}>{t('header_you')}</span>
             <span className={styles.symbolIcon}>{userSymbol}</span>
           </button>
         )}
@@ -57,10 +58,10 @@ const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOp
           <button
             onClick={onInstallClick}
             className={`${styles.installButton} ck-theme-button genericButton`}
-            title="Instale o KinkLink como app na sua área de trabalho"
+            title={t('header_install_title')}
           >
             <span className={styles.installIcon}>📱</span>
-            <span className={styles.installText}>Instalar</span>
+            <span className={styles.installText}>{t('header_install_button')}</span>
           </button>
         )}
         {isAuthenticated && ( // Mostrar apenas se o usuário estiver autenticado
@@ -70,7 +71,7 @@ const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOp
               onOpenUserTicketsModal(); // <<< CHAMA A FUNÇÃO PARA ABRIR O MODAL
             }}
             className={`${styles.myTicketsButton} ck-theme-button genericButton ${hasUnreadTicketResponses ? styles.shakeAnimation : ''}`}
-            title="Meus Chamados"
+            title={t('header_my_tickets_title')}
           >
             <span className={styles.ticketIcon}>✉️</span>
             {hasUnreadTicketResponses && <span className={styles.notificationBadge}>!</span>}
@@ -80,10 +81,10 @@ const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOp
         <button
           onClick={onOpenFeedbackModal} // Chama a função para abrir o modal
           className={`${styles.feedbackButton} ck-theme-button genericButton`} // Pode renomear a classe se quiser
-          title="Reportar um problema ou bug"
+          title={t('header_report_bug_title')}
         >
           <span className={styles.feedbackIcon}>🐛</span>
-          <span className={styles.feedbackText}>Reportar</span>
+          <span className={styles.feedbackText}>{t('header_report_button')}</span>
         </button>
       </div>
     </header>

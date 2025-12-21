@@ -1,14 +1,16 @@
 // src/components/AdminRoute.tsx
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 
 const AdminRoute: React.FC = () => {
+  const { t } = useTranslation();
   const { user, isLoading } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
-    return <div>Carregando autenticação...</div>; // Ou um spinner/skeleton
+    return <div>{t('admin_route_loading')}</div>; // Ou um spinner/skeleton
   }
 
   if (!user || !user.isAdmin) {

@@ -1,5 +1,6 @@
 // MatchesPage.tsx
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth, type MatchedCard } from '../contexts/AuthContext';
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
@@ -20,6 +21,7 @@ import MatchCardItem from '../components/MatchCardItem';
 
 
 function MatchesPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { matchedCards: userMatchedCards, toggleHotStatus } = useUserCardInteractions();
   const navigate = useNavigate();
@@ -135,10 +137,10 @@ function MatchesPage() {
   }, [userMatchedCards]);
 
   if (isLoadingSkins || (!user || (isLoadingCardChats && !Object.keys(cardChatsData).length))) { 
-    return <div className={styles.page}><p>Carregando seus links...</p></div>;
+    return <div className={styles.page}><p>{t('matches_loading')}</p></div>;
   }
   if (cardChatsError) {
-    return <div className={styles.page}><p>Erro ao carregar dados dos chats: {cardChatsError}</p></div>;
+    return <div className={styles.page}><p>{t('matches_error_loading_chats', { error: cardChatsError })}</p></div>;
   }
 
 
@@ -181,7 +183,7 @@ function MatchesPage() {
         <div className={styles.pageHeaderControls}>
           <Link to="/cards" className={`${styles.backToCardsButton} genericButton ${hasUnseenGlobalMatches ? styles.shakeAnimation : ''}`} aria-label="Voltar para as cartas">
             {hasUnseenGlobalMatches && <span className={styles.navNotificationDot}></span>}
-            Cartas
+            {t('matches_back_to_cards_button')}
           </Link>
         </div>
 
@@ -189,13 +191,13 @@ function MatchesPage() {
         // Se não há matches ativos e nem completados
         // (ou seja, o usuário não tem nenhum link ainda)
         <p className={styles.noMatchesText}>
-          Você ainda não tem Links. Continue explorando as cartas!
+          {t('matches_no_matches_text')}
         </p>
       ) : (
         <>
           {hotMatches.length > 0 && (
             <section className={styles.topLinksSection}>
-              <h2 className={styles.sectionTitle}>🔥 Top Links</h2>
+              <h2 className={styles.sectionTitle}>{t('matches_top_links_title')}</h2>
               <div className={getTopLinksContainerClasses(hotMatches.length)}>
                 <div className={styles.matchesGrid}>
                   {hotMatches.map((card: MatchedCard) => (
@@ -220,7 +222,7 @@ function MatchesPage() {
           {otherMatches.length > 0 && (
             <section className={styles.section} style={hotMatches.length > 0 ? { marginTop: '40px' } : {}}>
               <h2 className={`${styles.sectionTitle} ${styles.sectionTitleOthers}`}>
-                {hotMatches.length > 0 ? 'Outros Links' : 'Seus Links por Categoria'}
+                {hotMatches.length > 0 ? t('matches_other_links_title') : t('matches_your_links_by_category_title')}
               </h2>
               <div className={styles.categoryCarouselsGrid}>
                 {categorizedMatches.map(({ categoryName, cards }) => {
@@ -244,7 +246,7 @@ function MatchesPage() {
           )}
 
           <section className={styles.completedSection} ref={completedSectionRef}>
-            <h2 className={styles.sectionTitleCompleted}>✅ Cartas Realizadas</h2>
+            <h2 className={styles.sectionTitleCompleted}>{t('matches_completed_cards_title')}</h2>
             {completedMatches.length > 0 ? (
               <div className={styles.matchesGrid}>
                 {completedMatches.map((card: MatchedCard) => (
@@ -260,7 +262,7 @@ function MatchesPage() {
               </div>
             ) : (
               <p className={styles.noMatchesText} style={{ marginTop: '20px', fontSize: '1em' }}>
-                Nenhuma carta marcada como realizada ainda.
+                {t('matches_no_completed_cards_text')}
               </p>
             )}
           </section>

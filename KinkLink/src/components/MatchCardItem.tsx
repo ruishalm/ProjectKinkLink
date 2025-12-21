@@ -9,6 +9,7 @@
  * - 🔥 Botão toggle: Aparece em cartas ativas (não completadas) para favoritar/desfavoritar
  */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import PlayingCard, { type CardData as PlayingCardDataType } from './PlayingCard';
 import styles from './MatchCardItem.module.css'; // Usará seu próprio CSS module
 
@@ -33,10 +34,14 @@ const MatchCardItem: React.FC<MatchCardItemProps> = ({
   lastMessageSnippet, // Trecho da última mensagem se houver
   isCompletedCard // Se é uma carta da seção "Realizadas"
 }) => {
+  const { t } = useTranslation(['translation', 'cards']);
   // A escala agora considera se é uma carta completada para não aplicar o "hot" visual
   const scaleFactor = isHot && !isCompletedCard ? 0.55 : 0.5;
   const cardWidth = 250 * scaleFactor;
   const cardHeight = 350 * scaleFactor;
+
+  // Traduz o texto para o aria-label
+  const displayText = t(card.id, { ns: 'cards', defaultValue: card.text });
 
   // Garante que a carta sempre tenha uma categoria para evitar crashes
   const safeCardData = {
@@ -53,7 +58,7 @@ const MatchCardItem: React.FC<MatchCardItemProps> = ({
       role="button"
       tabIndex={0}
       // O aria-label agora reflete se a carta é nova OU tem mensagens não lidas
-      aria-label={`Link: ${(card?.text || 'Texto indisponível').substring(0,30)}... ${isNewMatch ? ' (Novo Link!)' : ''} ${hasNewMessage ? ' (Nova Mensagem!)' : ''}`}
+      aria-label={`${t('match_card_item_aria_label_prefix')} ${(displayText || t('match_card_item_text_unavailable')).substring(0,30)}... ${isNewMatch ? t('match_card_item_new_link') : ''} ${hasNewMessage ? t('match_card_item_new_message') : ''}`}
     >
       {/* Indicador de "Novo" ou "Não Lido" */}
       {(isNewMatch || hasNewMessage) && <div className={styles.unreadIndicator}></div>}

@@ -1,0 +1,42 @@
+/* KinkLink/src/components/Layout/LanguageSelector.module.css */
+
+.languageSelectorContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+}
+
+.languageSelect {
+  background-color: var(--cor-fundo-input, #fff);
+  color: #333; /* Força cor escura para contraste em fundo claro */
+  border: 1px solid var(--cor-borda, #ccc);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  padding-right: 32px; /* space for the arrow */
+}
+
+.languageSelect:hover {
+  border-color: var(--cor-primaria, #007bff);
+}
+
+.languageSelect:focus {
+  outline: none;
+  border-color: var(--cor-primaria, #007bff);
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Garante que as opções tenham cor de texto legível */
+.languageSelect option {
+  color: #000000;
+}

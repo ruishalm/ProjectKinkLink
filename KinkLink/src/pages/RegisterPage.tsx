@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './RegisterPage.module.css'; // Importa os CSS Modules
 
 const RegisterPage: React.FC = () => {
   // Hooks
+  const { t } = useTranslation();
   const { user, isLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -28,7 +30,7 @@ const RegisterPage: React.FC = () => {
   return (
     <div className={styles.pageContainer}>
       <main className={styles.mainContent}> {/* Envolve o conteúdo principal */}
-        <p className={styles.messageText}>Página de Cadastro (Conteúdo a ser implementado ou esta página será removida se SignupPage for suficiente)</p>
+        <p className={styles.messageText}>{t('register_page_placeholder')}</p>
       </main>
     </div>
   );

@@ -1,5 +1,6 @@
 // src/pages/AdminUsersPage.tsx
-import React, { useEffect, useState, useMemo, Fragment } from 'react'; // Adicionado Fragment e useCallback
+import React, { useEffect, useState, useMemo, Fragment } from 'react';
+import { useTranslation } from 'react-i18next'; // Adicionado useTranslation // Adicionado Fragment e useCallback
 import { collection, getDocs, doc, updateDoc, query, orderBy, Timestamp } from 'firebase/firestore'; // Adicionado Timestamp
 import { db } from '../firebase'; // Ajuste o caminho se necessário
 import { type User, type UserFeedback } from '../contexts/AuthContext'; // Ajuste o caminho e adicione UserFeedback
@@ -19,6 +20,7 @@ interface SortConfig {
 }
 
 function AdminUsersPage() {
+  const { t } = useTranslation(); // Usa o namespace padrão (translation.json)
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [adminResponses, setAdminResponses] = useState<Record<string, string>>({}); // Para guardar o texto da resposta do admin por ticketId
@@ -36,7 +38,7 @@ function AdminUsersPage() {
     if (typeof timestamp === 'object' && timestamp !== null && 'seconds' in timestamp && typeof (timestamp as { seconds: number }).seconds === 'number') {
       return new Date((timestamp as { seconds: number }).seconds * 1000).toLocaleDateString();
     }
-    return 'N/A';
+    return t('admin_na');
   };
 
 
@@ -55,11 +57,11 @@ function AdminUsersPage() {
         setUsers(usersList);
       } catch (error: unknown) {
         console.error("Erro ao buscar usuários:", error);
-        let specificError = "Falha ao carregar usuários. Verifique as regras de segurança do Firestore e a conexão.";
+        let specificError = t('admin_error_loading_users_generic');
         if (error instanceof Error) {
           const firebaseError = error as FirebaseError; // Usamos nossa interface
           if (firebaseError.code === 'permission-denied') {
-            specificError = "Permissão negada ao buscar usuários. Certifique-se de que você está logado como administrador e que as regras do Firestore estão corretas.";
+            specificError = t('admin_error_loading_users_permission_denied');
           }
           // Poderíamos adicionar mais tratamentos de código de erro aqui se necessário
         }
@@ -88,7 +90,7 @@ function AdminUsersPage() {
       // if (error instanceof Error) {
       //   const firebaseError = error as FirebaseError;
       // }
-      alert("Falha ao atualizar status de apoiador.");
+      alert(t('admin_error_updating_supporter_status'));
     }
   };
 
@@ -99,13 +101,13 @@ function AdminUsersPage() {
   const handleSendAdminResponse = async (userId: string, ticketId: string) => {
     const responseText = adminResponses[ticketId];
     if (!responseText || responseText.trim() === "") {
-      alert("A resposta não pode estar vazia.");
+      alert(t('admin_response_cannot_be_empty'));
       return;
     }
 
     const userIndex = users.findIndex(u => u.id === userId);
     if (userIndex === -1) {
-      alert("Erro: Usuário não encontrado.");
+      alert(t('admin_error_user_not_found'));
       return;
     }
 
@@ -113,7 +115,7 @@ function AdminUsersPage() {
     const ticketIndex = targetUser.feedbackTickets?.findIndex(t => t.id === ticketId);
 
     if (!targetUser.feedbackTickets || ticketIndex === undefined || ticketIndex === -1) {
-      alert("Erro: Ticket não encontrado para este usuário.");
+      alert(t('admin_error_ticket_not_found'));
       return;
     }
 
@@ -130,10 +132,10 @@ function AdminUsersPage() {
         prevUsers.map(u => (u.id === userId ? { ...u, feedbackTickets: updatedTickets } : u))
       );
       setAdminResponses(prev => ({ ...prev, [ticketId]: '' })); // Limpa o campo de resposta
-      alert("Resposta enviada com sucesso!");
+      alert(t('admin_response_sent_successfully'));
     } catch (error) {
       console.error("Erro ao enviar resposta do admin:", error);
-      alert("Falha ao enviar resposta. Verifique o console.");
+      alert(t('admin_error_sending_response'));
     }
   };
 
@@ -147,7 +149,7 @@ function AdminUsersPage() {
     const userIndex = users.findIndex(u => u.id === userId);
     if (userIndex === -1) {
       console.error("Usuário não encontrado no estado local para atualizar ticket.");
-      alert("Erro: Usuário não encontrado para atualizar o ticket.");
+      alert(t('admin_error_user_not_found_for_ticket_update'));
       return;
     }
 
@@ -156,7 +158,7 @@ function AdminUsersPage() {
 
     if (!targetUser.feedbackTickets || ticketIndex === undefined || ticketIndex === -1) {
       console.error("Ticket não encontrado para o usuário no estado local.");
-      alert("Erro: Ticket não encontrado para este usuário.");
+      alert(t('admin_error_ticket_not_found_for_update'));
       return;
     }
 
@@ -176,7 +178,7 @@ function AdminUsersPage() {
       // alert(`Status do ticket atualizado para "${newStatus}" para o usuário ${targetUser.username || targetUser.email}.`); // Feedback para o admin
     } catch (error) {
       console.error("Erro ao atualizar status do ticket no Firestore:", error);
-      alert("Falha ao atualizar o status do ticket. Verifique o console para mais detalhes.");
+      alert(t('admin_error_updating_ticket_status'));
     }
   };
 
@@ -253,40 +255,40 @@ function AdminUsersPage() {
     return sortConfig.direction === 'ascending' ? ' ▲' : ' ▼';
   };
 
-  if (loading) return <div className={styles.container}><p>Carregando usuários...</p></div>;
+  if (loading) return <div className={styles.container}><p>{t('admin_loading_users')}</p></div>;
   if (error) return <div className={styles.container}><p className={styles.errorText}>{error}</p></div>;
 
   return (
     <div className={styles.container}>
-      <h1>Gerenciar Usuários</h1>
+      <h1>{t('admin_manage_users')}</h1>
       <input
         type="text"
-        placeholder="Pesquisar por nome de usuário ou email..."
+        placeholder={t('admin_search_users_placeholder')}
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         className={styles.searchInput}
       />
-      {sortedAndFilteredUsers.length === 0 && !loading && <p>Nenhum usuário encontrado com os critérios da busca.</p>}
+      {sortedAndFilteredUsers.length === 0 && !loading && <p>{t('admin_no_users_found')}</p>}
       <div className={styles.tableWrapper}>
         <table className={styles.usersTable}>
           <thead>
             <tr>
-              <th className={styles.truncateCell} onClick={() => requestSort('username')}>Username{getSortIndicator('username')}</th>
-              <th className={styles.truncateCell} onClick={() => requestSort('email')}>Email{getSortIndicator('email')}</th>
-              <th onClick={() => requestSort('isSupporter')}>Apoiador?{getSortIndicator('isSupporter')}</th>
-              <th onClick={() => requestSort('newTickets')}>Tickets Novos{getSortIndicator('newTickets')}</th>
-              <th onClick={() => requestSort('resolvedTickets')}>Tickets Resolvidos{getSortIndicator('resolvedTickets')}</th>
-              <th onClick={() => requestSort('createdAt')}>Data Cadastro{getSortIndicator('createdAt')}</th>
-              <th>Ações</th>
+              <th className={styles.truncateCell} onClick={() => requestSort('username')}>{t('admin_username')}{getSortIndicator('username')}</th>
+              <th className={styles.truncateCell} onClick={() => requestSort('email')}>{t('admin_email')}{getSortIndicator('email')}</th>
+              <th onClick={() => requestSort('isSupporter')}>{t('admin_is_supporter')}{getSortIndicator('isSupporter')}</th>
+              <th onClick={() => requestSort('newTickets')}>{t('admin_new_tickets')}{getSortIndicator('newTickets')}</th>
+              <th onClick={() => requestSort('resolvedTickets')}>{t('admin_resolved_tickets')}{getSortIndicator('resolvedTickets')}</th>
+              <th onClick={() => requestSort('createdAt')}>{t('admin_registration_date')}{getSortIndicator('createdAt')}</th>
+              <th>{t('admin_actions')}</th>
             </tr>
           </thead>
           <tbody>
             {sortedAndFilteredUsers.map(u => (
               <Fragment key={u.id}>
                 <tr>
-                  <td className={styles.truncateCell} title={u.username || 'N/A'}>{u.username || 'N/A'}</td>
+                  <td className={styles.truncateCell} title={u.username || t('admin_na')}>{u.username || t('admin_na')}</td>
                   <td className={styles.truncateCell} title={u.email ?? ''}>{u.email}</td>
-                  <td>{u.isSupporter ? 'Sim ✅' : 'Não ❌'}</td>
+                  <td>{u.isSupporter ? t('admin_yes') : t('admin_no')}</td>
                   <td>
                     {u.feedbackTickets?.filter(t => t.status === 'new').length || 0}
                   </td>
@@ -299,13 +301,13 @@ function AdminUsersPage() {
                       onClick={() => handleToggleSupporter(u.id, u.isSupporter)}
                       className={`${styles.actionButton} genericButton`}
                     >
-                      {u.isSupporter ? 'Remover Apoiador' : 'Tornar Apoiador'}
+                      {u.isSupporter ? t('admin_remove_supporter') : t('admin_make_supporter')}
                     </button>
                     <button
                       onClick={() => toggleExpandRow(u.id)}
                       className={`${styles.actionButton} genericButton`}
                     >
-                      {expandedRows[u.id] ? 'Ocultar Tickets' : `Ver Tickets`}
+                      {expandedRows[u.id] ? t('admin_hide_tickets') : t('admin_view_tickets')}
                     </button>
                   </td>
                 </tr>
@@ -313,24 +315,24 @@ function AdminUsersPage() {
                   <tr className={styles.expandedTicketsRow}>
                     <td colSpan={7}> {/* Colspan atualizado para 7 colunas */}
                       <div className={styles.ticketsDetailContainer}>
-                        <h3>Tickets de {u.username || u.email}:</h3>
+                        <h3>{t('admin_tickets_for')} {u.username || u.email}:</h3>
                         {u.feedbackTickets && u.feedbackTickets.length > 0 ? (
                           <ul className={styles.ticketList}>
                             {u.feedbackTickets.map(ticket => (
                               <li key={ticket.id} className={styles.ticketItem}>
-                                <p><strong>ID:</strong> <span className={styles.ticketIdText}>{ticket.id.substring(0, 8)}...</span></p>
-                                <p><strong>Texto:</strong> {ticket.text}</p>
-                                <p><strong>Data:</strong> {ticket.createdAt instanceof Timestamp ? ticket.createdAt.toDate().toLocaleString() : 'Data inválida'}</p>
+                                <p><strong>{t('admin_id')}</strong> <span className={styles.ticketIdText}>{ticket.id.substring(0, 8)}...</span></p>
+                                <p><strong>{t('admin_text')}</strong> {ticket.text}</p>
+                                <p><strong>{t('admin_date')}</strong> {ticket.createdAt instanceof Timestamp ? ticket.createdAt.toDate().toLocaleString() : t('admin_invalid_date')}</p>
                                 {ticket.adminResponse && (
-                                  <p><strong>Resposta Admin:</strong> {ticket.adminResponse}</p>
+                                  <p><strong>{t('admin_admin_response')}</strong> {ticket.adminResponse}</p>
                                 )}
                                 {ticket.respondedAt && (
-                                  <p><strong>Respondido em:</strong> {formatFirestoreTimestamp(ticket.respondedAt)}</p>
+                                  <p><strong>{t('admin_responded_at')}</strong> {formatFirestoreTimestamp(ticket.respondedAt)}</p>
                                 )}
                                   {!ticket.adminResponse && ticket.status !== 'resolved' && ( // Só mostra se não houver resposta e não estiver resolvido
                                     <div className={styles.adminResponseArea}>
                                       <textarea
-                                        placeholder="Digite sua resposta aqui..."
+                                        placeholder={t('admin_type_your_response_here')}
                                         value={adminResponses[ticket.id] || ''}
                                         onChange={(e) => handleAdminResponseChange(ticket.id, e.target.value)}
                                         className={styles.adminResponseTextarea}
@@ -338,24 +340,24 @@ function AdminUsersPage() {
                                       <button
                                         onClick={() => handleSendAdminResponse(u.id, ticket.id)}
                                         className={`${styles.actionButton} ${styles.sendResponseButton} genericButton`}
-                                      >Enviar Resposta</button>
+                                      > {t('admin_send_response')} </button>
                                     </div>
                                   )}
-                                <p><strong>Status:</strong> <span className={`${styles.ticketStatus} ${styles[`ticketStatus-${ticket.status}`]}`}>{ticket.status}</span></p>
+                                <p><strong>{t('admin_status')}</strong> <span className={`${styles.ticketStatus} ${styles[`ticketStatus-${ticket.status}`]}`}>{ticket.status}</span></p>
                                 <div className={styles.ticketActions}>
                                   {ticket.status === 'new' && (
                                     <button onClick={() => handleUpdateTicketStatus(u.id, ticket.id, 'seen')} className={`${styles.actionButton} ${styles.markSeenButton} genericButton`}>
-                                      Marcar como Visto
+                                      {t('admin_mark_as_seen')}
                                     </button>
                                   )}
                                   {ticket.status !== 'resolved' && (
                                     <button onClick={() => handleUpdateTicketStatus(u.id, ticket.id, 'resolved')} className={`${styles.actionButton} ${styles.markResolvedButton} genericButton`}>
-                                      Marcar como Resolvido
+                                      {t('admin_mark_as_resolved')}
                                     </button>
                                   )}
                                   {ticket.status === 'resolved' && (
                                     <button onClick={() => handleUpdateTicketStatus(u.id, ticket.id, 'new')} className={`${styles.actionButton} ${styles.markSeenButton} genericButton`}> {/* Reutilizando markSeenButton para estilo ou crie um novo */}
-                                      Reabrir Ticket
+                                      {t('admin_reopen_ticket')}
                                     </button>
                                   )}
                                 </div>
@@ -363,7 +365,7 @@ function AdminUsersPage() {
                             ))}
                           </ul>
                         ) : (
-                          <p>Nenhum ticket de feedback para este usuário.</p>
+                          <p>{t('admin_no_feedback_tickets_for_this_user')}</p>
                         )}
                       </div>
                     </td>

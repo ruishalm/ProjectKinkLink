@@ -1,9 +1,11 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\UnlockNotificationModal.tsx
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './UnlockNotificationModal.module.css';
 
 const UnlockNotificationModal: React.FC = () => {
+  const { t } = useTranslation();
   const { newlyUnlockedSkinsForModal, clearNewlyUnlockedSkinsForModal } = useAuth();
 
   useEffect(() => {
@@ -29,8 +31,8 @@ const UnlockNotificationModal: React.FC = () => {
   return (
     <div className={styles.modalOverlay} onClick={clearNewlyUnlockedSkinsForModal}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <h2 className={styles.title}>🎉 Skin Desbloqueada! 🎉</h2>
-        <button className={styles.closeButtonTop} onClick={clearNewlyUnlockedSkinsForModal} aria-label="Fechar">&times;</button>
+        <h2 className={styles.title}>{t('unlock_notification_title')}</h2>
+        <button className={styles.closeButtonTop} onClick={clearNewlyUnlockedSkinsForModal} aria-label={t('unlock_notification_close_aria')}>&times;</button>
 
         <div className={styles.skinListContainer}> {/* Novo container para a lista rolável */}
           {newlyUnlockedSkinsForModal.map((skin) => (
@@ -58,10 +60,10 @@ const UnlockNotificationModal: React.FC = () => {
 
         <div className={styles.footerContent}> {/* Agrupa o texto e o botão */}
           <p className={styles.infoText}>
-            Você pode equipá-la na página "Minhas Skins"!
+            {t('unlock_notification_info')}
           </p>
           <button className={`${styles.confirmButton} genericButton`} onClick={clearNewlyUnlockedSkinsForModal}>
-            Legal!
+            {t('unlock_notification_button')}
           </button>
               </div>
       </div>

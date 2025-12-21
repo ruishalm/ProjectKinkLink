@@ -32,7 +32,7 @@ import UserTicketsModal from './components/UserTicketsModal'; // <<< IMPORT DO N
 import AdminRoute from './components/AdminRoute';
 import FeedbackModal from './components/FeedbackModal'; // <<< IMPORT PARA O MODAL
 import NewMatchModal from './hooks/NewMatchModal'; // Modal para exibir novos links
-// import { useTranslation } from 'react-i18next'; // Removido, pois não usaremos t() para os alertas aqui
+import { useTranslation } from 'react-i18next';
 import { doc, updateDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from './firebase';
 
@@ -51,10 +51,10 @@ interface BeforeInstallPromptEvent extends Event {
 function AppContent() {
   const { user, isLoading, submitUserFeedback } = useAuth(); // submitUserFeedback do AuthContext
   const location = useLocation();
+  const { t } = useTranslation();
   const isUserLinked = !!user?.coupleId; // Nova arquitetura: usa coupleId ao invés de partnerId
   const [deferredInstallPrompt, setDeferredInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallButtonInHeader, setShowInstallButtonInHeader] = React.useState(false);
-  // const { t } = useTranslation(); // Removido
 
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   // Estado para o modal de feedback - DEVE ESTAR NO TOPO DA FUNÇÃO
@@ -67,21 +67,6 @@ function AppContent() {
   const IN_FLIGHT_LOCK_KEY = 'lk_lastVisited_lock';
   const MATCHES_UPDATE_THRESHOLD_SECONDS = 30;
 
-
-  // Componente de botão para testar o Sentry, visível apenas para admins.
-  function ErrorButton() {
-    return (
-      <button
-        onClick={() => {
-          throw new Error('Sentry Admin Test Error!');
-        }}
-        // Estilo para ser um botão flutuante e discreto
-        style={{ position: 'fixed', top: '80px', right: '20px', zIndex: 9999, padding: '10px', backgroundColor: 'darkred', color: 'white', border: '2px solid white', borderRadius: '8px', cursor: 'pointer', opacity: 0.8 }}
-      >
-        Testar Sentry
-      </button>
-    );
-  }
 
   useEffect(() => {
     if (!user?.id) return;
@@ -164,9 +149,9 @@ function AppContent() {
     if (user) {
       setIsFeedbackModalOpen(true);
     } else {
-      alert('Você precisa estar logado para enviar feedback.'); // String fixa
+      alert(t('feedback_login_required'));
     }
-  }, [user]); // Dependência 't' removida
+  }, [user, t]);
 
   const handleCloseFeedbackModal = useCallback(() => {
     setIsFeedbackModalOpen(false);
@@ -184,14 +169,14 @@ function AppContent() {
   const handleSubmitFeedbackToContext = useCallback(async (feedbackText: string) => {
     if (!submitUserFeedback) {
         console.error("[App] Função submitUserFeedback não está disponível no AuthContext");
-        throw new Error('Não foi possível enviar o feedback no momento.'); // String fixa
+        throw new Error(t('feedback_submit_error'));
     }
     await submitUserFeedback(feedbackText);
-  }, [submitUserFeedback]); // Dependência 't' removida
+  }, [submitUserFeedback, t]);
 
 
   if (isLoading) {
-    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#282c34', color: 'white' }}>Carregando KinkLink...</div>;
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#282c34', color: 'white' }}>{t('loading_app')}</div>;
   }
 
   console.log('Dev log - App states: User loaded, isUserLinked:', isUserLinked);
@@ -229,8 +214,7 @@ function AppContent() {
           onOpenUserTicketsModal={handleOpenUserTicketsModal} // <<< NOVA PROP
         />
         <main className="appMainContent">
-          {user?.isAdmin && <ErrorButton />} {/* Botão de teste do Sentry para Admins */}
-          <Suspense fallback={<div className="page-container-centered">Carregando página...</div>}>
+          <Suspense fallback={<div className="page-container-centered">{t('loading_page')}</div>}>
             <Routes>
               {/* Rotas Públicas */}
               <Route path="/" element={<HomePage />} />

@@ -1,5 +1,6 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\SkinItemDisplay.tsx
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { SkinDefinition } from '../config/skins';
 import styles from './SkinItemDisplay.module.css'; // Usaremos um novo CSS Module para ele
 
@@ -26,6 +27,7 @@ const SkinItemDisplay: React.FC<SkinItemDisplayProps> = ({
   onForceUnlock,
   // onMouseEnter, // Removido
 }) => {
+  const { t } = useTranslation();
   const unlockDescription = skin.unlockCriteria?.description;
 
   const handleToggleChange = () => {
@@ -53,7 +55,7 @@ const SkinItemDisplay: React.FC<SkinItemDisplayProps> = ({
       aria-disabled={!isEffectivelyUnlocked}
     >
       <h3 className={styles.skinName}>{skin.name}</h3>
-      {!isEffectivelyUnlocked && <span className={styles.lockedIcon} title={unlockDescription || 'Bloqueada'}>🔒</span>}
+      {!isEffectivelyUnlocked && <span className={styles.lockedIcon} title={unlockDescription || t('skin_item_locked')}>🔒</span>}
 
       {/* Previews específicos por tipo */}
       {skin.type === 'colorPalette' && Array.isArray(skin.preview) && (
@@ -79,14 +81,14 @@ const SkinItemDisplay: React.FC<SkinItemDisplayProps> = ({
       <label
         className={styles.activateButton}
         onClick={(e) => e.stopPropagation()} // Impede que o clique no label acione o onForceUnlock do card
-        title={isEffectivelyUnlocked ? (isActive ? `Desativar ${skin.name}` : `Ativar ${skin.name}`) : (unlockDescription || "Skin bloqueada")}
+        title={isEffectivelyUnlocked ? (isActive ? `${t('skin_item_deactivate')} ${skin.name}` : `${t('skin_item_activate')} ${skin.name}`) : (unlockDescription || t('skin_item_skin_locked'))}
       >
         <input
           type="checkbox"
           checked={isActive && isEffectivelyUnlocked}
           disabled={!isEffectivelyUnlocked}
           onChange={handleToggleChange}
-          aria-label={isEffectivelyUnlocked ? (isActive ? `Desativar ${skin.name}` : `Ativar ${skin.name}`) : `${skin.name} - ${unlockDescription || "bloqueada"}`}
+          aria-label={isEffectivelyUnlocked ? (isActive ? `${t('skin_item_deactivate')} ${skin.name}` : `${t('skin_item_activate')} ${skin.name}`) : `${skin.name} - ${unlockDescription || t('skin_item_locked_lower')}`}
           onKeyDown={(e) => {
             if ((e.key === 'Enter' || e.key === ' ') && isEffectivelyUnlocked) {
               e.preventDefault();

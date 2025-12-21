@@ -1,5 +1,6 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\SideTipMessages.tsx
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './SideTipMessages.module.css';
 
 interface SideTipMessagesProps {
@@ -13,22 +14,23 @@ const SideTipMessages: React.FC<SideTipMessagesProps> = ({
   rightMessage,
   animateIn,
 }) => {
+  const { t } = useTranslation();
   const animationClass = animateIn ? styles.animateIn : '';
 
   return (
     <div className={styles.wrapper}>
       {leftMessage && (
-        <div className={`${styles.sideMessagesContainer} ${styles.left} ${animationClass}`}>
+        <div className={`${styles.sideMessagesContainer} ${styles.left} ${animationClass}`} key={leftMessage}>
           <div className={styles.tipMessage}>
-            {leftMessage}
+            {t(leftMessage)}
             <span className={styles.bubble1}></span>
           </div>
         </div>
       )}
       {rightMessage && (
-        <div className={`${styles.sideMessagesContainer} ${styles.right} ${animationClass}`}>
+        <div className={`${styles.sideMessagesContainer} ${styles.right} ${animationClass}`} key={rightMessage}>
           <div className={styles.tipMessage}>
-            {rightMessage}
+            {t(rightMessage)}
             <span className={styles.bubble1}></span>
           </div>
         </div>

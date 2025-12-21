@@ -5585,4 +5585,4 @@ const allKinkLinkCards = [
 ];
 
 // Exporta o array DIRETAMENTE para que o script de upload possa usá-lo.
-module.exports = allKinkLinkCards;
+module.exports = allKinkLinkCards;module.exports = { allKinkLinkCards };

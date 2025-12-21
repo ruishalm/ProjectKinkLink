@@ -1,10 +1,11 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\ProfilePage.tsx
 import React, { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useTranslation,  } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { db } from '../firebase';
-import { doc, getDoc, updateDoc, collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import styles from './ProfilePage.module.css';
 import IntensitySelector from '../components/IntensitySelector/IntensitySelector';
 import TutorialModal from '../components/TutorialModal'; // Importa o novo modal
@@ -23,6 +24,7 @@ interface ExtractedUserCard {
 }
 
 function ProfilePage() {
+  const { t } = useTranslation();
   const { user, userSymbol, logout, updateUser, isLoading: authIsLoading, resetNonMatchedSeenCards } = useAuth(); // Adicionado userSymbol do contexto
   const { appNotificationStatus, isNotificationProcessing, enableNotifications } = useNotification();
   const navigate = useNavigate();
@@ -84,30 +86,30 @@ function ProfilePage() {
                 setPartnerInfo({ username: partnerData.username, email: partnerData.email });
               } else {
                 console.warn('ProfilePage: Documento do parceiro não encontrado.');
-                setPartnerInfo({ username: 'Parceiro(a) não encontrado(a)' });
+                setPartnerInfo({ username: t('profile_partner_not_found') });
               }
             }
           } else {
             console.warn('ProfilePage: Documento do couple não encontrado.');
-            setPartnerInfo({ username: 'Parceiro(a) não encontrado(a)' });
+            setPartnerInfo({ username: t('profile_partner_not_found') });
           }
         } catch (error) {
           console.error('ProfilePage: Erro ao buscar informações do parceiro:', error);
-          setPartnerInfo({ username: 'Erro ao buscar parceiro(a)' });
+          setPartnerInfo({ username: t('profile_error_fetching_partner') });
         }
       };
       fetchPartnerInfo();
     } else if (user && !user.coupleId) {
       setPartnerInfo(null); // Limpa info do parceiro se desvinculado
     }
-  }, [user, user?.coupleId]);
+  }, [user, user?.coupleId, t]);
 
   const handleLogout = async () => {
     try {
       await logout();
       navigate('/login', { replace: true }); // Redireciona para login após logout
     } catch (error) {
-      console.error("Erro ao fazer logout:", error);
+      console.error(t('profile_error_logout'), error);
       // Adicionar feedback para o usuário aqui, se necessário
     }
   };
@@ -123,7 +125,7 @@ function ProfilePage() {
         setIsEditing(false);
         // Adicionar feedback de sucesso para o usuário aqui, se desejar
       } catch (error) {
-        console.error("Erro ao atualizar perfil:", error);
+        console.error(t('profile_error_update'), error);
         // Adicionar feedback de erro para o usuário aqui, se desejar
       }
     } else {
@@ -146,12 +148,12 @@ function ProfilePage() {
   };
 
   const handleResetDisliked = async () => {
-    if (window.confirm("Tem certeza que deseja reavaliar todas as cartas que você marcou como 'Não Topo!' ou passou? Elas voltarão para a sua pilha.")) {
+    if (window.confirm(t('profile_reset_disliked_confirm'))) {
       try {
         await resetNonMatchedSeenCards();
-        alert("Cartas descartadas foram retornadas à pilha!");
+        alert(t('profile_reset_disliked_success'));
       } catch (error) {
-        alert("Falha ao reavaliar cartas. Tente novamente.");
+        alert(t('profile_reset_disliked_fail'));
         console.error("Erro ao reavaliar cartas descartadas:", error);
       }
     }
@@ -175,16 +177,16 @@ function ProfilePage() {
     // Trava de segurança para garantir que apenas admins executem esta função
     if (!user?.isAdmin) {
       console.error("Acesso negado: Apenas administradores podem extrair userCards.");
-      alert("Acesso negado. Esta função é apenas para administradores.");
+      alert(t('profile_admin_extract_user_cards_denied'));
       return;
     }
-    alert("Iniciando extração de 'userCards'. Isso pode levar um momento.");
+    alert(t('profile_admin_extract_user_cards_start'));
     try {
       const userCardsQuery = collection(db, 'userCards');
       const querySnapshot = await getDocs(userCardsQuery);
 
       if (querySnapshot.empty) {
-        alert("Nenhuma carta de usuário encontrada para extrair.");
+        alert(t('profile_admin_extract_user_cards_not_found'));
         return;
       }
 
@@ -219,18 +221,18 @@ function ProfilePage() {
 
     } catch (error) {
       console.error("Erro ao extrair cartas de usuário:", error);
-      alert("Ocorreu um erro ao extrair as cartas. Verifique o console.");
+      alert(t('profile_admin_extract_error'));
     }
   };
 
   const handleExtractMainCards = async () => {
-    alert("Iniciando extração de 'cards' principais. Isso pode levar um momento.");
+    alert(t('profile_admin_extract_main_cards_start'));
     try {
       const cardsQuery = collection(db, 'cards');
       const querySnapshot = await getDocs(cardsQuery);
 
       if (querySnapshot.empty) {
-        alert("Nenhuma carta principal encontrada para extrair.");
+        alert(t('profile_admin_extract_main_cards_not_found'));
         return;
       }
 
@@ -260,7 +262,7 @@ function ProfilePage() {
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Erro ao extrair cartas principais:", error);
-      alert("Ocorreu um erro ao extrair as cartas. Verifique o console.");
+      alert(t('profile_admin_extract_error'));
     }
   };
 
@@ -282,7 +284,7 @@ function ProfilePage() {
 
   // Funções auxiliares para formatação
   const formatBirthDate = (dateString?: string): string => {
-    if (!dateString) return 'Não informada';
+    if (!dateString) return t('profile_data_not_informed');
     try {
       const [year, month, day] = dateString.split('-');
       if (year && month && day) {
@@ -296,25 +298,25 @@ function ProfilePage() {
   };
 
   const getGenderLabel = (genderValue?: string): string => {
-    if (!genderValue) return 'Não informada';
+    if (!genderValue) return t('profile_data_not_informed');
     const labels: Record<string, string> = {
-      'homem_cis': 'Homem Cisgênero',
-      'mulher_cis': 'Mulher Cisgênero',
-      'homem_trans': 'Homem Transgênero',
-      'mulher_trans': 'Mulher Transgênero',
-      'nao_binario': 'Não-binário',
-      'outro_genero': 'Outro',
-      'naoinformar_genero': 'Prefiro não informar',
+      'homem_cis': t('profile_gender_male_cis'),
+      'mulher_cis': t('profile_gender_female_cis'),
+      'homem_trans': t('profile_gender_male_trans'),
+      'mulher_trans': t('profile_gender_female_trans'),
+      'nao_binario': t('profile_gender_non_binary'),
+      'outro_genero': t('profile_gender_other'),
+      'naoinformar_genero': t('profile_gender_prefer_not_to_say'),
     };
     return labels[genderValue] || genderValue;
   };
 
   if (authIsLoading || !user) {
     // Mostra uma mensagem de carregamento mais genérica que cobre ambos os casos
-    return <div className={styles.page}><p className={styles.infoText}>Carregando perfil...</p></div>;
+    return <div className={styles.page}><p className={styles.infoText}>{t('profile_loading')}</p></div>;
   }
 
-  const displayName = user.username || (user.email ? user.email.split('@')[0] : 'Usuário KinkLink');
+  const displayName = user.username || (user.email ? user.email.split('@')[0] : t('profile_default_username'));
   const hasProfileChanged = username !== initialUsername || bio !== initialBio || gender !== initialGender;
 
   return (
@@ -323,18 +325,18 @@ function ProfilePage() {
         <div className={styles.pageHeader}>
           <div className={styles.titleContainer}>
             <h1 className={`${styles.title}`} style={{borderBottom: 'none', marginBottom: '0px', marginRight: 'auto'}}>
-              Meu Perfil
+              {t('profile_title')}
             </h1>
             {userSymbol && (
-              <div className={styles.userSymbolIndicator}>Você é {userSymbol}</div>
+              <div className={styles.userSymbolIndicator}>{t('profile_you_are_symbol', { userSymbol })}</div>
             )}
           </div>
           <button
             onClick={() => navigate('/cards')}
             className={`${styles.actionButton} ${styles.headerButton} genericButton`}
-            aria-label="Ir para cartas"
+            aria-label={t('profile_go_to_cards_button')}
           >
-            Ir para cartas
+            {t('profile_go_to_cards_button')}
           </button>
         </div>
 
@@ -350,7 +352,7 @@ function ProfilePage() {
             aria-controls="personal-info-content"
           >
             <h2 className={styles.sectionTitleInHeader}>
-              {isEditing ? 'Editar Dados Pessoais' : 'Seus Dados Pessoais'}
+              {isEditing ? t('profile_edit_personal_data_title') : t('profile_personal_data_title')}
             </h2>
             <span className={`${styles.toggleIcon} ${!isPersonalInfoOpen ? styles.toggleIconClosed : ''}`}>
               ▼
@@ -371,7 +373,7 @@ function ProfilePage() {
                     className={styles.input}
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Como você quer ser chamado(a)?"
+                    placeholder={t('profile_username_placeholder')}
                   />
                 </div>
                 <div style={{ marginTop: '15px' }}>
@@ -381,7 +383,7 @@ function ProfilePage() {
                     className={styles.textarea}
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
-                    placeholder="Conte um pouco sobre você..."
+                    placeholder={t('profile_bio_placeholder')}
                     rows={4}
                   />
                 </div>
@@ -395,14 +397,14 @@ function ProfilePage() {
                     className={styles.select} // Reutiliza o estilo do select da SignupPage
                     required // Pode ser opcional dependendo da sua lógica
                   >
-                    <option value="">Selecione...</option>
-                    <option value="homem_cis">Homem Cisgênero</option>
-                    <option value="mulher_cis">Mulher Cisgênero</option>
-                    <option value="homem_trans">Homem Transgênero</option>
-                    <option value="mulher_trans">Mulher Transgênero</option>
-                    <option value="nao_binario">Não-binário</option>
-                    <option value="outro_genero">Outro</option>
-                    <option value="naoinformar_genero">Prefiro não informar</option>
+                    <option value="">{t('profile_gender_select_placeholder')}</option>
+                    <option value="homem_cis">{t('profile_gender_male_cis')}</option>
+                    <option value="mulher_cis">{t('profile_gender_female_cis')}</option>
+                    <option value="homem_trans">{t('profile_gender_male_trans')}</option>
+                    <option value="mulher_trans">{t('profile_gender_female_trans')}</option>
+                    <option value="nao_binario">{t('profile_gender_non_binary')}</option>
+                    <option value="outro_genero">{t('profile_gender_other')}</option>
+                    <option value="naoinformar_genero">{t('profile_gender_prefer_not_to_say')}</option>
                   </select>
                 </div>
                 <div className={styles.formActions}>
@@ -411,22 +413,22 @@ function ProfilePage() {
                     className={`${!hasProfileChanged ? styles.buttonDisabled : styles.button} genericButton`}
                     disabled={!hasProfileChanged}
                   >
-                    Salvar Alterações
+                    {t('profile_save_changes_button')}
                   </button>
                   <button type="button" onClick={handleCancelEdit} className={`${styles.buttonCancel} genericButton`}>
-                    Cancelar
+                    {t('profile_cancel_button')}
                   </button>
                 </div>
               </form>
             ) : (
               <div>
-                <p className={styles.infoText}><strong>Email:</strong> {user.email}</p>
-                <p className={styles.infoText}><strong>Nome de Usuário:</strong> {displayName}</p>
-                <p className={styles.infoText}><strong>Bio:</strong> {user.bio || 'Não definida'}</p>
-                <p className={styles.infoText}><strong>Data de Nascimento:</strong> {formatBirthDate(user.birthDate)}</p>
-                <p className={styles.infoText}><strong>Identidade de Gênero:</strong> {getGenderLabel(user.gender)}</p>
+                <p className={styles.infoText}><strong>{t('profile_email_label')}</strong> {user.email}</p>
+                <p className={styles.infoText}><strong>{t('profile_username_label')}</strong> {displayName}</p>
+                <p className={styles.infoText}><strong>{t('profile_bio_label')}</strong> {user.bio || t('profile_bio_not_defined')}</p>
+                <p className={styles.infoText}><strong>{t('profile_birthdate_label')}</strong> {formatBirthDate(user.birthDate)}</p>
+                <p className={styles.infoText}><strong>{t('profile_gender_identity_label')}</strong> {getGenderLabel(user.gender)}</p>
                 <button onClick={handleEditClick} className={`${styles.button} genericButton`} style={{ marginTop: '20px' }}>
-                  Editar Perfil
+                  {t('profile_edit_button')}
                 </button>
               </div>
             )}
@@ -437,23 +439,23 @@ function ProfilePage() {
                 <div className={styles.profileActionsContainer}>
                   <div className={styles.actionItem}>
                     <div className={styles.actionItemHeader}>
-                      <label className={styles.formLabel}>Notificações Push</label>
+                      <label className={styles.formLabel}>{t('profile_notifications_title')}</label>
                       <button
                         onClick={enableNotifications}
                         disabled={appNotificationStatus === 'enabled' || appNotificationStatus === 'denied' || isNotificationProcessing}
                         className={`${styles.button} ${styles.smallButton} genericButton`}
                       >
-                        {isNotificationProcessing ? 'Aguardando...' : appNotificationStatus === 'enabled' ? 'Ativadas' : appNotificationStatus === 'denied' ? 'Bloqueadas' : 'Ativar'}
+                        {isNotificationProcessing ? t('profile_notifications_waiting') : appNotificationStatus === 'enabled' ? t('profile_notifications_enabled') : appNotificationStatus === 'denied' ? t('profile_notifications_denied') : t('profile_notifications_activate_button')}
                       </button>
                     </div>
-                    <p className={styles.actionItemDescription}>Ative para ser avisado sobre novos Links e mensagens!</p>
+                    <p className={styles.actionItemDescription}>{t('profile_notifications_description')}</p>
                   </div>
                   <div className={styles.actionItem}>
                     <div className={styles.actionItemHeader}>
-                      <label className={styles.formLabel}>Guia Rápido</label>
-                      <button onClick={() => setIsTutorialModalOpen(true)} className={`${styles.button} ${styles.smallButton} genericButton`}>Mostrar Tutorial</button>
+                      <label className={styles.formLabel}>{t('profile_quick_guide_title')}</label>
+                      <button onClick={() => setIsTutorialModalOpen(true)} className={`${styles.button} ${styles.smallButton} genericButton`}>{t('profile_show_tutorial_button')}</button>
                     </div>
-                    <p className={styles.actionItemDescription}>Relembre como usar as principais funções do app.</p>
+                    <p className={styles.actionItemDescription}>{t('profile_quick_guide_description')}</p>
                   </div>
                 </div>
               </>
@@ -468,31 +470,31 @@ function ProfilePage() {
 
         {/* SEÇÃO DE VÍNCULO */}
         <div className={`${styles.section} klnkl-themed-panel`}>
-          <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>Vínculo de Casal</h2>
+          <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>{t('profile_couple_link_section_title')}</h2>
           {user.coupleId ? (
             <>              
               <p className={styles.infoText}>
-                Você está vinculado com:{' '}
+                {t('profile_couple_linked_with')}{' '}
                 <strong>
                   {partnerInfo?.username || partnerInfo?.email || '...'} ({userSymbol === '★' ? '▲' : '★'})
                 </strong>
               </p>
               <p className={styles.infoText}>
-                Você está jogando como <strong>{userSymbol}</strong>
+                {t('profile_playing_as')} <strong>{userSymbol}</strong>
               </p>
               
               <p className={styles.infoText} style={{fontSize: '0.9em', opacity: 0.8, marginTop: '-5px', marginBottom: '15px'}}>
-                Explore os Links e converse com seu par!
+                {t('profile_explore_links_and_chat')}
               </p>
               <button onClick={() => navigate('/link-couple')} className={`${styles.actionButton} genericButton`}>
-                Gerenciar Vínculo
+                {t('profile_manage_link_button')}
               </button>
             </>
           ) : (
             <>
-              <p className={styles.infoText}>Você ainda não está vinculado. Conecte-se com seu parceiro(a) para começar a diversão!</p>
+              <p className={styles.infoText}>{t('profile_not_linked_message')}</p>
               <button onClick={() => navigate('/link-couple')} className={`${styles.actionButton} genericButton`}>
-                Vincular Agora
+                {t('profile_link_now_button')}
               </button>
             </>
           )}
@@ -500,15 +502,15 @@ function ProfilePage() {
 
         {/* SEÇÃO DE SKINS */}
         <div className={`${styles.section} klnkl-themed-panel`}>
-          <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>Personalização</h2>
+          <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>{t('profile_personalization_section_title')}</h2>
           <Link to="/skins" className={`${styles.actionButton} genericButton`}>
-            Minhas Skins
+            {t('profile_my_skins_button')}
           </Link>
         </div>
 
         {/* SEÇÃO DE FILTRO DE INTENSIDADE */}
         <div className={`${styles.section} klnkl-themed-panel`}>
-          <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>‼️ Filtro de Intensidade ‼️</h2>
+          <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>{t('profile_intensity_filter_section_title')}</h2>
           <IntensitySelector
             currentLevel={user?.maxIntensity ?? 8} // Usa 8 (mostrar tudo) como padrão se não definido
             onLevelChange={handleIntensityChange}
@@ -517,15 +519,15 @@ function ProfilePage() {
 
         {/* SEÇÃO DE REAVALIAR CARTAS */}
         <div className={`${styles.section} klnkl-themed-panel`}>
-          <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>Opções de Jogo</h2>
+          <h2 className={styles.sectionTitleInHeader} style={{borderBottom: 'none', marginBottom: '15px'}}>{t('profile_game_options_section_title')}</h2>
           <button onClick={handleResetDisliked} className={`${styles.actionButton} genericButton`}>
-            Reavaliar Cartas Descartadas
+            {t('profile_reassess_discarded_cards_button')}
           </button>
         </div>
 
         {/* SEÇÃO DE LOGOUT */}
         <div className={`${styles.section} ${styles.textCenter} klnkl-themed-panel`}>
-          <button onClick={handleLogout} className={`${styles.buttonDestructive} genericButton`}>Logout</button>
+          <button onClick={handleLogout} className={`${styles.buttonDestructive} genericButton`}>{t('profile_logout_button')}</button>
         </div>
 
         {/* SEÇÃO DE RESET (DEV) - TEMPORARIAMENTE OCULTADA */}
@@ -546,15 +548,15 @@ function ProfilePage() {
         {/* SEÇÃO DE FERRAMENTAS DE DESENVOLVEDOR (APENAS PARA ADMINS) */}
         {user?.isAdmin && (
           <div className={`${styles.section} ${styles.textCenter} klnkl-themed-panel`}>
-            <h2 className={styles.sectionTitleInHeader} style={{ borderBottom: 'none', marginBottom: '15px' }}>Ferramentas de Desenvolvedor</h2>
+            <h2 className={styles.sectionTitleInHeader} style={{ borderBottom: 'none', marginBottom: '15px' }}>{t('profile_developer_tools_section_title')}</h2>
             <Link to="/admin/users" className={`${styles.actionButton} genericButton`}>
-              Gerenciar Usuários
+              {t('profile_manage_users_button')}
             </Link>
             <button onClick={handleExtractUserCards} className={`${styles.actionButton} genericButton`}>
-              Extrair UserCards (JSON)
+              {t('profile_extract_usercards_json_button')}
             </button>
             <button onClick={handleExtractMainCards} className={`${styles.actionButton} genericButton`} style={{marginTop: '10px'}}>
-              Extrair Cartas Principais (JSON)
+              {t('profile_extract_maincards_json_button')}
             </button>
           </div>
         )}

@@ -1,5 +1,6 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\components\FeedbackModal.tsx
 import React, { useState, useEffect, type FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './FeedbackModal.module.css';
 
 interface FeedbackModalProps {
@@ -14,6 +15,7 @@ interface FeedbackModalProps {
  */
 const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmitFeedback, initialText = '' }) => {
   // Estados para controlar o texto do formulário, e os estados de envio, erro e sucesso.
+  const { t } = useTranslation();
   const [feedbackText, setFeedbackText] = useState(initialText);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +49,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!feedbackText.trim()) {
-      setError('Por favor, escreva seu feedback antes de enviar.');
+      setError(t('feedback_modal_error_empty'));
       return;
     }
     setIsSubmitting(true);
@@ -55,11 +57,11 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
     setSuccessMessage(null);
     try {
       await onSubmitFeedback(feedbackText.trim());
-      setSuccessMessage('Feedback enviado com sucesso! Obrigado.');
+      setSuccessMessage(t('feedback_modal_success'));
       setFeedbackText(''); // Limpa o campo após o envio.
     } catch (err) {
       console.error("Erro ao enviar feedback:", err);
-      setError('Erro ao enviar o feedback. Por favor, tente novamente.');
+      setError(t('feedback_modal_error_generic'));
     } finally {
       setIsSubmitting(false);
     }
@@ -72,16 +74,16 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={`${styles.modalContent} klnkl-themed-panel`} onClick={(e) => e.stopPropagation()}>
-        <button onClick={onClose} className={styles.closeButtonTop} aria-label="Fechar">&times;</button>
-        <h2 className={styles.title}>Enviar Feedback / Reportar Bug</h2>
-        <p className={styles.instructions}>Encontrou um problema ou tem uma sugestão? Conte-nos! Seu feedback nos ajuda a melhorar o KinkLink.</p>
+        <button onClick={onClose} className={styles.closeButtonTop} aria-label={t('feedback_modal_close_aria')}>&times;</button>
+        <h2 className={styles.title}>{t('feedback_modal_title')}</h2>
+        <p className={styles.instructions}>{t('feedback_modal_instructions')}</p>
         
         <form onSubmit={handleSubmit}>
           <textarea
             className={styles.textarea}
             value={feedbackText}
             onChange={(e) => setFeedbackText(e.target.value)}
-            placeholder="Descreva o bug ou sua sugestão aqui..."
+            placeholder={t('feedback_modal_placeholder')}
             rows={6}
             disabled={isSubmitting || !!successMessage}
           />
@@ -93,18 +95,18 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
           {/* Botões de Ação */}
           <div className={styles.buttonContainer}>
             <button type="button" onClick={onClose} className={`${styles.buttonSecondary} genericButton`} disabled={isSubmitting}>
-              Cancelar
+              {t('feedback_modal_cancel_button')}
             </button>
             <button type="submit" className={`${styles.buttonPrimary} genericButton`} disabled={isSubmitting || !feedbackText.trim() || !!successMessage}>
-              {isSubmitting ? 'Enviando...' : 'Enviar Feedback'}
+              {isSubmitting ? t('feedback_modal_sending_button') : t('feedback_modal_send_button')}
             </button>
           </div>
         </form>
         
         {/* Contato Alternativo */}
         <div className={styles.alternativeContact}>
-          <p>OU</p>
-          <p>nos contacte em <a href="mailto:ruishalm.matzukan@gmail.com" className={styles.emailLink}>ruishalm.matzukan@gmail.com</a></p>
+          <p>{t('feedback_modal_or')}</p>
+          <p>{t('feedback_modal_contact_us')} <a href="mailto:ruishalm.matzukan@gmail.com" className={styles.emailLink}>ruishalm.matzukan@gmail.com</a></p>
         </div>
       </div>
     </div>

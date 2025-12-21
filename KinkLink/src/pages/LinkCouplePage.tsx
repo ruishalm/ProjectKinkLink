@@ -1,6 +1,7 @@
 // d:\Projetos\Github\app\ProjectKinkLink\KinkLink\src\pages\LinkCouplePage.tsx
 import React, { useState, useEffect, Fragment } from 'react';
 import { useNavigate, Link } from 'react-router-dom'; // Restaurado Link
+import { useTranslation } from 'react-i18next';
 import { useAuth, type User } from '../contexts/AuthContext';
 import CreateLink from '../components/CreateLink';
 import AcceptLink from '../components/AcceptLink';
@@ -9,6 +10,7 @@ import { doc, getDoc } from 'firebase/firestore'; // writeBatch não é mais usa
 import styles from './LinkCouplePage.module.css';
 
 const LinkCouplePage: React.FC = () => {
+  const { t } = useTranslation();
   const { user, isLoading: authIsLoading, unlinkCouple: authUnlinkCouple } = useAuth(); // Adicionado unlinkCouple e removido updateUser se não for usado
   const navigate = useNavigate();
   const [showCreateLinkUI, setShowCreateLinkUI] = useState(false);
@@ -36,16 +38,16 @@ const LinkCouplePage: React.FC = () => {
                 setPartnerInfo({ username: partnerData.username, email: partnerData.email });
               } else {
                 console.warn("Documento do parceiro não encontrado.");
-                setPartnerInfo({ username: "Parceiro(a) não encontrado(a)" });
+                setPartnerInfo({ username: t('link_couple_partner_not_found') });
               }
             }
           } else {
             console.warn("Documento do couple não encontrado.");
-            setPartnerInfo({ username: "Parceiro(a) não encontrado(a)" });
+            setPartnerInfo({ username: t('link_couple_partner_not_found') });
           }
         } catch (error) {
           console.error("Erro ao buscar informações do parceiro:", error);
-          setPartnerInfo({ username: "Erro ao buscar parceiro(a)" });
+          setPartnerInfo({ username: t('link_couple_error_fetching_partner') });
         }
       };
       fetchPartnerInfo();
@@ -55,31 +57,31 @@ const LinkCouplePage: React.FC = () => {
   }, [user, user?.coupleId, partnerInfo]);
 
   if (authIsLoading) {
-    return <div className={styles.page}><p className={styles.loadingText}>Carregando informações do usuário...</p></div>;
+    return <div className={styles.page}><p className={styles.loadingText}>{t('link_couple_loading_user')}</p></div>;
   }
 
   if (!user) {
-    return <div className={styles.page}><p className={styles.loadingText}>Por favor, faça login para vincular sua conta.</p></div>;
+    return <div className={styles.page}><p className={styles.loadingText}>{t('link_couple_login_required')}</p></div>;
   }
 
   const handleUnlink = async () => {
-    if (window.confirm("Tem certeza que deseja desfazer o vínculo com seu parceiro(a)?")) {
+    if (window.confirm(t('link_couple_unlink_confirm'))) {
       setIsUnlinking(true);
       try {
         // Chama a função unlinkCouple do AuthContext
         // A verificação de user, user.id, user.partnerId, user.coupleId já é feita dentro de authUnlinkCouple
         await authUnlinkCouple();
-        alert("Vínculo desfeito com sucesso!");
+        alert(t('link_couple_unlink_success'));
         // A página será re-renderizada devido à mudança no 'user' do AuthContext,
         // mostrando a UI para vincular novamente.
       } catch (error) {
-        let errorMessage = "Ocorreu um erro ao tentar desfazer o vínculo.";
+        let errorMessage = t('link_couple_unlink_error_generic');
         if (error instanceof Error) {
-          errorMessage += ` Detalhes: ${error.message || 'Erro desconhecido.'}`;
+          errorMessage += ` ${t('link_couple_unlink_error_details')} ${error.message || t('link_couple_unlink_error_unknown')}`;
         } else if (typeof error === 'object' && error !== null && 'message' in error) {
-          errorMessage += ` Detalhes: ${(error as { message: string }).message}`;
+          errorMessage += ` ${t('link_couple_unlink_error_details')} ${(error as { message: string }).message}`;
         }
-        console.error("Erro ao desfazer vínculo:", error); // Mantém o log completo do objeto de erro
+        console.error(t('link_couple_unlink_error_console'), error); // Mantém o log completo do objeto de erro
         alert(errorMessage);
       } finally {
         setIsUnlinking(false);
@@ -91,16 +93,16 @@ const LinkCouplePage: React.FC = () => {
     return (
       <div className={styles.page}>
         <main className={`${styles.mainContent} klnkl-themed-panel`}> {/* Envolve o conteúdo principal */}
-          <h1 className={styles.title}>Você já está Vinculado!</h1>
-          <p className={styles.partnerInfoText}>Seu parceiro(a) é: {partnerInfo?.username || partnerInfo?.email || '...'}</p>
-          <p className={styles.subText}>Agora vocês podem começar a usar o KinkLink juntos!</p>
+          <h1 className={styles.title}>{t('link_couple_already_linked_title')}</h1>
+          <p className={styles.partnerInfoText}>{t('link_couple_partner_is')} {partnerInfo?.username || partnerInfo?.email || '...'}</p>
+          <p className={styles.subText}>{t('link_couple_start_playing')}</p>
           <button 
             onClick={() => {
               console.log('Botão "Ir para as Cartas" clicado. Navegando para /cards...');
               navigate('/cards');
             }} 
-            className={`${styles.button} genericButton`} style={{ marginTop: '20px' }}>Ir para as Cartas</button>
-          <button onClick={handleUnlink} className={`${styles.destructiveButton} genericButton genericButtonDestructive`} disabled={isUnlinking}>{isUnlinking ? "Desfazendo..." : "Desfazer Vínculo"}</button>
+            className={`${styles.button} genericButton`} style={{ marginTop: '20px' }}>{t('link_couple_go_to_cards_button')}</button>
+          <button onClick={handleUnlink} className={`${styles.destructiveButton} genericButton genericButtonDestructive`} disabled={isUnlinking}>{isUnlinking ? t('link_couple_unlinking_button') : t('link_couple_unlink_button')}</button>
         </main>
       </div>
     );
@@ -126,10 +128,9 @@ const LinkCouplePage: React.FC = () => {
   return (
     <div className={styles.page}>
       <main className={`${styles.mainContent} klnkl-themed-panel`}> {/* Envolve o conteúdo principal */}
-        <h1 className={styles.title}>Vincular Casal</h1>
+        <h1 className={styles.title}>{t('link_couple_page_title')}</h1>
         <p className={styles.subText}>
-          Para usar o KinkLink e compartilhar experiências com seu parceiro(a),
-          vocês precisam vincular suas contas.
+          {t('link_couple_intro_text')}
         </p>
 
         {!showCreateLinkUI && !showAcceptLinkUI && (
@@ -139,20 +140,20 @@ const LinkCouplePage: React.FC = () => {
                 onClick={() => { setShowCreateLinkUI(true); setShowAcceptLinkUI(false); }}
                 className={`${styles.actionButton} genericButton`}
               >
-                Quero Gerar um Código
+                {t('link_couple_generate_code_button')}
               </button>
-              <p className={styles.orText}>OU</p>
+              <p className={styles.orText}>{t('link_couple_or_separator')}</p>
               <button
                 onClick={() => { setShowAcceptLinkUI(true); setShowCreateLinkUI(false); }}
                 className={`${styles.actionButton} genericButton`}
               >
-                Tenho um Código para Inserir
+                {t('link_couple_enter_code_button')}
               </button>
             </div>
             <div className={styles.backLinkContainer}>
               {/* Restaurado para Link para /profile */}
               <Link to="/profile" className={`${styles.secondaryButton} ${styles.backLink} genericButton`}>
-                &larr; Voltar para o Perfil
+                {t('link_couple_back_to_profile_button')}
               </Link>
             </div>
           </Fragment>
@@ -167,7 +168,7 @@ const LinkCouplePage: React.FC = () => {
               onClick={handleCancelAction} // Usa a nova função
               className={`${styles.secondaryButton} genericButton`}
             >
-              Voltar / Cancelar
+              {t('link_couple_back_cancel_button')}
             </button>
           </div>
         )}

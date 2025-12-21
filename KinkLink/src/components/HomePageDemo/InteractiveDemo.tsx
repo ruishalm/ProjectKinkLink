@@ -1,6 +1,7 @@
 // InteractiveDemo.tsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation, Trans } from 'react-i18next';
 import DemoCard from './DemoCard';
 import { demoCards } from './demoCardData';
 import styles from './InteractiveDemo.module.css';
@@ -17,6 +18,7 @@ function shuffleArray<T>(array: T[]): T[] {
 }
 
 const InteractiveDemo: React.FC = () => {
+  const { t } = useTranslation();
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
   const [showMatchModal, setShowMatchModal] = useState(false);
@@ -31,17 +33,10 @@ const InteractiveDemo: React.FC = () => {
   const currentCard = shuffledDemoCards[currentCardIndex];
 
   useEffect(() => {
-    // Lida com o avanço da carta para feedback simples (não-match) ou após swipe
-    // Este useEffect é acionado quando feedbackMessage muda.
     if (feedbackMessage && !showMatchModal) {
-      // Se a mensagem de feedback foi definida e não vamos mostrar um modal,
-      // configuramos um timer para limpar a mensagem e avançar a carta.
-      // Isso acontece após uma interação (botão ou swipe) que não resultou em "Link!".
-
       const timer = setTimeout(() => {
         setFeedbackMessage(null);
         setCurrentCardIndex((prevIndex) => (prevIndex + 1) % shuffledDemoCards.length);
-        // Resetar exitingDirection aqui garante que a próxima carta não comece "saindo"
         setExitingDirection(null); 
       }, 1200);
       return () => clearTimeout(timer);
@@ -55,34 +50,27 @@ const InteractiveDemo: React.FC = () => {
 
     if (liked) {
       if (currentCard && simulatedPartnerLikes.includes(currentCard.id)) {
-        // A mensagem é apenas para o conteúdo do modal. A flag `showMatchModal` controla a exibição.
-        setFeedbackMessage("É assim que você e seu parceiro alinham seus interesses!");
-        setShowMatchModal(true); // Apenas ativa o modal
-        return; // Não avança a carta imediatamente, espera o modal ser fechado
+        setFeedbackMessage(t('demo_match_message'));
+        setShowMatchModal(true);
+        return;
       } else {
-        message = "Você topou! 👍";
+        message = t('demo_liked_message');
       }
     } else {
-      message = "Você não topou. 👎";
+      message = t('demo_disliked_message');
     }
     setFeedbackMessage(message);
-    // O avanço da carta para feedback simples é tratado pelo useEffect
   };
 
   const handleSwipeInteraction = (direction: 'left' | 'right') => {
-    if (exitingDirection || showMatchModal) return; // Evita múltiplas interações rápidas
-    setExitingDirection(direction); // Isso vai disparar a animação de saída no DemoCard
-    // A chamada para handleInteraction (e subsequente avanço da carta)
-    // acontecerá no onAnimationComplete do DemoCard.
+    if (exitingDirection || showMatchModal) return;
+    setExitingDirection(direction);
   };
 
   const handleCardAnimationComplete = () => {
     if (exitingDirection) {
       const liked = exitingDirection === 'right';
-      handleInteraction(liked); // Define feedback ou mostra modal
-      // Não resetamos exitingDirection aqui diretamente.
-      // Se for um feedback simples, o useEffect do feedbackMessage o fará após o timeout.
-      // Se for um modal, o handleCloseMatchModal o fará.
+      handleInteraction(liked);
     }
   };
 
@@ -90,12 +78,12 @@ const InteractiveDemo: React.FC = () => {
     setShowMatchModal(false);
     setFeedbackMessage(null);
     setCurrentCardIndex((prevIndex) => (prevIndex + 1) % shuffledDemoCards.length);
-    setExitingDirection(null); // Limpa a direção de saída após fechar o modal e avançar
+    setExitingDirection(null);
   };
 
   const bindCardDrag = useDrag(({ active, movement: [mx], direction: [dx], velocity: [vx], down, cancel, event }) => {
-    event.preventDefault(); // Previne scroll da página durante o drag
-    if (showMatchModal || exitingDirection) { // Não permite drag se modal estiver aberto ou carta já saindo
+    event.preventDefault();
+    if (showMatchModal || exitingDirection) {
         if (active && cancel) cancel();
         return;
     }
@@ -118,36 +106,33 @@ const InteractiveDemo: React.FC = () => {
       }
     }
   }, {
-    axis: 'x', // Restringe o drag ao eixo X
-    filterTaps: true, // Permite cliques nos botões dentro da área de drag
-    preventScroll: true, // Tenta prevenir o scroll da página durante o drag
+    axis: 'x',
+    filterTaps: true,
+    preventScroll: true,
   });
 
   return (
     <div className={styles.demoContainer}>
-      {/* Container para as marcas d'água */}
       <div className={styles.watermarkContainer}>
-        <span className={`${styles.watermarkText} ${styles.watermark1}`}>demonstração</span>
-        <span className={`${styles.watermarkText} ${styles.watermark2}`}>demonstração</span>
-        <span className={`${styles.watermarkText} ${styles.watermark3}`}>demonstração</span>
-        <span className={`${styles.watermarkText} ${styles.watermark4}`}>demonstração</span>
-        <span className={`${styles.watermarkText} ${styles.watermark5}`}>demonstração</span>
+        {[...Array(5)].map((_, i) => (
+            <span key={i} className={`${styles.watermarkText} ${styles[`watermark${i + 1}`]}`}>{t('demo_watermark')}</span>
+        ))}
       </div>
-      <h3 className={styles.demoTitle}>Entenda como funciona o KinkLink</h3>
+      <h3 className={styles.demoTitle}>{t('demo_title')}</h3>
 
       <p className={styles.partnerInfoText}>
-        Descubra os seus interesses em comum (parceiro simulado)
+        {t('demo_partner_info')}
       </p>
 
       <div className={styles.tipsAndCardArea}>
         <div className={`${styles.sideTip} ${styles.leftTip}`}>
-          <span>arraste para a esquerda o que você não topar!</span>
+          <span>{t('demo_tip_left')}</span>
         </div>
 
         <div
           {...bindCardDrag()}
           className={styles.demoCardArea}
-          style={{ touchAction: 'pan-y' }} // Permite scroll vertical se necessário, mas o drag é horizontal
+          style={{ touchAction: 'pan-y' }}
         >
           {currentCard ? (
             <DemoCard
@@ -156,44 +141,42 @@ const InteractiveDemo: React.FC = () => {
               exitDirection={exitingDirection}
               onAnimationComplete={handleCardAnimationComplete}
             />
-          ) : <p>Carregando demo...</p>}
+          ) : <p>{t('demo_loading')}</p>}
         </div>
 
         <div className={`${styles.sideTip} ${styles.rightTip}`}>
-          <span>arraste pra direita o que vc topar!</span>
+          <span>{t('demo_tip_right')}</span>
         </div>
       </div>
 
-      {/* Mensagem de feedback simples (não-match) */}
       {feedbackMessage && !showMatchModal && (
         <p className={styles.feedbackMessage}>{feedbackMessage}</p>
       )}
 
-      {/* Botões de interação (ainda úteis para quem não usa swipe ou para acessibilidade) */}
       {currentCard && !exitingDirection && !showMatchModal && (
         <div className={styles.interactionButtons}>
-          <button className={styles.dislike} onClick={() => handleSwipeInteraction('left')}>Não Topo!</button>
-          <button className={styles.like} onClick={() => handleSwipeInteraction('right')}>Topo!</button>
+          <button className={styles.dislike} onClick={() => handleSwipeInteraction('left')}>{t('demo_dislike_button')}</button>
+          <button className={styles.like} onClick={() => handleSwipeInteraction('right')}>{t('demo_like_button')}</button>
         </div>
       )}
-      {/* Texto sobre funcionalidades extras - AGORA DENTRO DA DEMO */}
-      <p className={styles.demoExtraFeaturesText}>
-        Ainda temos: chat individual por carta, cartas personalizadas, temas e skins e muito mais!
-        <br /><strong>Confira!</strong>
-      </p>
+      <p className={styles.demoExtraFeaturesText} dangerouslySetInnerHTML={{ __html: t('demo_extra_features') }} />
 
       <p className={styles.demoDisclaimer}>
-        Este é um minigame demonstrativo. Suas escolhas não são salvas.
+        {t('demo_disclaimer_text')}
         <br />
-        <Link to="/login" className={styles.loginLinkInDemo}>Faça login</Link> ou <Link to="/signup" className={styles.signupLinkInDemo}>cadastre-se</Link> para encontrar seu par real!
+        <Trans 
+          i18nKey="demo_disclaimer_action"
+          components={[
+            <Link to="/login" className={styles.loginLinkInDemo} key="0">login</Link>,
+            <Link to="/signup" className={styles.signupLinkInDemo} key="1">signup</Link>
+          ]}
+        />
       </p>
 
-      {/* Modal Simulado para "Link!" */}
       {showMatchModal && (
         <div className={styles.feedbackModalOverlay} onClick={handleCloseMatchModal}>
           <div className={styles.feedbackModalContent} onClick={(e) => e.stopPropagation()}>
-            {/* O conteúdo do modal agora é mais estruturado e usa o estado do feedback */}
-            <strong>🎉 Link! ✨</strong>
+            <strong>{t('demo_match_modal_title')}</strong>
             <p>{feedbackMessage}</p>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './CreateUserCardModal.module.css';
 import type { Card } from '../data/cards';
 import IntensitySelector from './IntensitySelector/IntensitySelector';
@@ -13,6 +14,7 @@ interface CreateUserCardModalProps {
  * Modal com um formulário para que os usuários criem suas próprias cartas personalizadas.
  */
 const CreateUserCardModal: React.FC<CreateUserCardModalProps> = ({ isOpen, onClose, onSubmit }) => {
+  const { t } = useTranslation();
   // Estados para controlar os campos do formulário.
   const [text, setText] = useState('');
   const [category, setCategory] = useState<Card['category']>('sensorial');
@@ -83,47 +85,47 @@ const CreateUserCardModal: React.FC<CreateUserCardModalProps> = ({ isOpen, onClo
   return (
     <div className={styles.modalOverlay}>
       <div className={`${styles.modalContent} klnkl-themed-panel`} ref={modalContentRef}>
-        <h2 className={styles.modalTitle}>Criar Nova Carta</h2>
+        <h2 className={styles.modalTitle}>{t('create_user_card_title')}</h2>
         <form onSubmit={handleSubmit}>
           {/* Campo de Texto da Carta */}
           <div className={styles.formGroup}>
-            <label htmlFor="card-text" className={styles.formLabel}>Texto da Carta:</label>
+            <label htmlFor="card-text" className={styles.formLabel}>{t('create_user_card_text_label')}</label>
             <textarea
               id="card-text"
               ref={textareaRef}
               className={styles.textarea}
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Ex: ★ faz uma massagem sensual em ▲..."
+              placeholder={t('create_user_card_placeholder')}
               rows={5}
               required
             />
             <div className={styles.symbolButtonsContainer}>
-              <button type="button" onClick={() => handleInsertSymbol('★')} className={styles.symbolButton}>Inserir ★</button>
-              <button type="button" onClick={() => handleInsertSymbol('▲')} className={styles.symbolButton}>Inserir ▲</button>
+              <button type="button" onClick={() => handleInsertSymbol('★')} className={styles.symbolButton}>{t('create_user_card_insert_star')}</button>
+              <button type="button" onClick={() => handleInsertSymbol('▲')} className={styles.symbolButton}>{t('create_user_card_insert_triangle')}</button>
             </div>
           </div>
 
           {/* Seletor de Categoria */}
           <div className={styles.formGroup}>
-            <label htmlFor="card-category" className={styles.formLabel}>Categoria:</label>
+            <label htmlFor="card-category" className={styles.formLabel}>{t('create_user_card_category_label')}</label>
             <select
               id="card-category"
               className={styles.select}
               value={category}
               onChange={(e) => setCategory(e.target.value as Card['category'])}
             >
-              <option value="sensorial">Sensorial</option>
-              <option value="poder">Poder</option>
-              <option value="fantasia">Fantasia</option>
-              <option value="exposicao">Exposição</option>
+              <option value="sensorial">{t('category_sensorial')}</option>
+              <option value="poder">{t('category_poder')}</option>
+              <option value="fantasia">{t('category_fantasia')}</option>
+              <option value="exposicao">{t('category_exposicao')}</option>
               {/* Conexão removida - categoria reservada para cartas do sistema */}
             </select>
           </div>
 
           {/* Seletor de Intensidade */}
           <div className={styles.formGroup}>
-            <label className={styles.formLabel}>Intensidade:</label>
+            <label className={styles.formLabel}>{t('create_user_card_intensity_label')}</label>
             <IntensitySelector
               currentLevel={intensity}
               onLevelChange={setIntensity}
@@ -138,14 +140,14 @@ const CreateUserCardModal: React.FC<CreateUserCardModalProps> = ({ isOpen, onClo
                 checked={notifyAsCreator}
                 onChange={(e) => setNotifyAsCreator(e.target.checked)}
               />
-              Notificar meu par que esta carta foi criada por mim
+              {t('create_user_card_notify_label')}
             </label>
           </div>
 
           {/* Botões de Ação */}
           <div className={styles.formActions}>
-            <button type="submit" className={`${styles.button} genericButton`}>Criar Carta</button>
-            <button type="button" onClick={onClose} className={`${styles.buttonCancel} genericButton`}>Cancelar</button>
+            <button type="submit" className={`${styles.button} genericButton`}>{t('create_user_card_submit_button')}</button>
+            <button type="button" onClick={onClose} className={`${styles.buttonCancel} genericButton`}>{t('create_user_card_cancel_button')}</button>
           </div>
         </form>
       </div>

@@ -5,6 +5,7 @@ import { useDrag } from '@use-gesture/react';
 import { collection, query, where, onSnapshot, Timestamp, doc, getDoc } from 'firebase/firestore'; // <<< ADICIONADO
 import { useAuth } from '../contexts/AuthContext'; // Importar useAuth
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation, Trans } from 'react-i18next';
 import { useUserCardInteractions } from '../hooks/useUserCardInteractions';
 import MatchModal from '../components/MatchModal';
 import PlayingCard, { type CardData as PlayingCardDataType } from '../components/PlayingCard';
@@ -43,6 +44,7 @@ function CardPilePage() {
   } = useCardPileLogic();
   const { isLoadingSkins } = useSkin(); 
   const { user } = useAuth(); // Obter o usuário atual
+  const { t } = useTranslation();
 
   const { matchedCards, seenCards, handleCreateUserCard, toggleHotStatus } = useUserCardInteractions();
   const navigate = useNavigate();
@@ -164,10 +166,10 @@ function CardPilePage() {
                 const truncatedText = cardText.length > 40 ? `${cardText.substring(0, 37)}...` : cardText;
 
                 toast.success(
-                  (t) => (
-                    <div onClick={() => toast.dismiss(t.id)} style={{ cursor: 'pointer' }}>
-                      <b>Seu par topou uma carta! 👀</b>
-                      <p style={{ margin: '4px 0 0' }}>A carta '{truncatedText}' foi curtida.</p>
+                  (toastInstance) => (
+                    <div onClick={() => toast.dismiss(toastInstance.id)} style={{ cursor: 'pointer' }}>
+                      <b>{t('card_pile_partner_liked_title')}</b>
+                      <p style={{ margin: '4px 0 0' }}>{t('card_pile_partner_liked_body', { text: truncatedText })}</p>
                     </div>
                   ), { duration: 6000 }
                 );
@@ -234,7 +236,7 @@ function CardPilePage() {
   const handleAcceptPeek = () => {
     acceptPeek();
     // Substitui o alert por um toast
-    toast("Considere realinhar seu filtro: com consentimento e parceria vários mundos podem ser alcançados!", {
+    toast(t('card_pile_peek_toast'), {
       icon: '🤫',
     });
   };
@@ -242,7 +244,7 @@ function CardPilePage() {
   // A função rejectPeek do hook já faz o que é preciso, então não precisamos de um wrapper.
 
   if (isLoadingSkins) {
-    return <div className={styles.page}><p>Carregando skins...</p></div>;
+    return <div className={styles.page}><p>{t('card_pile_loading_skins')}</p></div>;
   }
 
   return (
@@ -337,9 +339,9 @@ function CardPilePage() {
                     <button
                       onClick={undoLastDislike}
                       className={`${styles.oopsButton} genericButton`}
-                      aria-label="Desfazer última ação Não Topo!"
+                      aria-label={t('card_pile_oops_button')}
                     >
-                      Oops!
+                      {t('card_pile_oops_button')}
                     </button>
                   </div>
                 )}
@@ -364,10 +366,10 @@ function CardPilePage() {
                   }}
                   onMouseDown={e => e.currentTarget.style.transform = 'scale(0.95)'}
                   onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-                  aria-label="Rejeitar carta"
+                  aria-label={t('card_pile_dislike_button')}
                   disabled={areActionButtonsDisabled}
                 >
-                  👎 Nao Topo!
+                  {t('card_pile_dislike_button')}
                 </button>
                 <button
                   className={`${styles.likeButton} ${styles.botaoDecisao} genericButton likeButton actionButton`}
@@ -378,10 +380,10 @@ function CardPilePage() {
                   }}
                   onMouseDown={e => e.currentTarget.style.transform = 'scale(0.95)'}
                   onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-                  aria-label="Aceitar carta"
+                  aria-label={t('card_pile_like_button')}
                   disabled={areActionButtonsDisabled}
                 >
-                  ❤️ Topo!
+                  {t('card_pile_like_button')}
                 </button>
               </div>
             </div> {/* Fecha o cardActionsPanel */}
@@ -389,16 +391,16 @@ function CardPilePage() {
         ) : (
           unseenCardsCount === 0 ? ( // Este bloco também deve estar dentro do painel temático da página
             <div className={`${styles.noCardsViewContainer} klnkl-themed-panel`}>
-              <h2 className={styles.pageTitle}>Fim das Cartas!</h2>
+              <h2 className={styles.pageTitle}>{t('card_pile_no_cards_title')}</h2>
               <p className={styles.noCardsMessage}>
-                Você viu todas as cartas disponíveis por enquanto.
-                <br />
-                Volte mais tarde para novas sugestões ou crie as suas!
+                <Trans i18nKey="card_pile_no_cards_message">
+                  Você viu todas as cartas disponíveis por enquanto.<br />Volte mais tarde para novas sugestões ou crie as suas!
+                </Trans>
               </p>
               {/* O botão "Crie seu Kink" foi movido para o painel de navegação inferior */}
             </div>
           ) : (
-            <p className={styles.noCardsMessage}>Carregando próxima carta...</p>
+            <p className={styles.noCardsMessage}>{t('card_pile_loading_next_card')}</p>
           )
         )
       }
@@ -413,7 +415,7 @@ function CardPilePage() {
             onClick={() => navigate('/matches')}
             className={`${styles.matchesNavButton} ${styles.linkButton} genericButton klnkl-nav-matches`}
           >
-            Links ({matchedCards.length})
+            {t('card_pile_nav_matches', { count: matchedCards.length })}
           </button>
           <Link to="/profile" className={`${styles.bottomNavIconStyle} ${styles.ballButton} genericButton klnkl-icon-nav-button klnkl-nav-profile`} aria-label="Perfil" title="Perfil">
             👤
@@ -423,10 +425,11 @@ function CardPilePage() {
         <button
           onClick={openCreateUserCardModal}
           className={`${styles.createKinkButtonInNav} klnkl-create-kink-btn genericButton`}
-          title="Criar novo Kink"
-          aria-label="Criar novo Kink"
+          title={t('card_pile_create_kink_button')}
+          // Garante que o texto e os atributos de acessibilidade sejam traduzidos
+          aria-label={t('card_pile_create_kink_button')}
         >
-          Criar Kink
+          {t('card_pile_create_kink_button')}
         </button>
       </div>
     </div>

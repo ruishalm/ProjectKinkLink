@@ -1,5 +1,6 @@
 // DemoCard.tsx
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { DemoCardData } from './demoCardData';
 import styles from './InteractiveDemo.module.css';
 
@@ -11,13 +12,15 @@ interface DemoCardProps {
 }
 
 const DemoCard: React.FC<DemoCardProps> = ({ card, dragVisuals, exitDirection, onAnimationComplete }) => {
+  const { t } = useTranslation();
+
   if (!card) {
-    return <div className={styles.demoCard}>Carregando carta...</div>;
+    return <div className={styles.demoCard}>{t('demo_card_loading')}</div>;
   }
 
   const categoryClassName = card.category ? styles[`cardCategory_${card.category.toLowerCase().replace(/\s+/g, '')}`] : styles.cardCategory_outros;
   const displayIntensity = typeof card.intensity === 'number' && !isNaN(card.intensity) ? card.intensity : '-';
-  const displayCategoryName = card.category ? (card.category.charAt(0).toUpperCase() + card.category.slice(1).toLowerCase()) : "N/A";
+  const displayCategoryName = card.category ? t(`category_${card.category.toLowerCase()}`) : "N/A";
 
   let cardDynamicClassName = styles.demoCard;
 
@@ -59,7 +62,7 @@ const DemoCard: React.FC<DemoCardProps> = ({ card, dragVisuals, exitDirection, o
 
       <div className={styles.cardContent}>
         <div className={styles.demoCardText}>
-          <p>{card.text}</p>
+          <p>{t(card.text)}</p>
         </div>
       </div>
 

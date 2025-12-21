@@ -1,5 +1,6 @@
 // CategoryCarousel.tsx
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext'; // <<< ADICIONADO
 import { type Timestamp } from 'firebase/firestore';
 import { type MatchedCard } from '../contexts/AuthContext'; // Usaremos o tipo MatchedCard
@@ -28,6 +29,7 @@ interface CategoryCarouselProps {
 }
 
 const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCardClick, onToggleHot, cardChatsData, userLastVisitedMatchesPage }) => {
+  const { t } = useTranslation();
   const { user } = useAuth(); // <<< ADICIONADO
 
   // Função auxiliar para determinar o status de notificação de cada carta
@@ -52,14 +54,20 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCar
     return { isNewMatch, hasNewMessage };
   };
 
+  // Tenta traduzir o título se for uma categoria conhecida
+  const knownCategories = ['sensorial', 'poder', 'fantasia', 'exposicao', 'voceescolhe', 'conexao', 'outros'];
+  const displayTitle = knownCategories.includes(title.toLowerCase()) 
+    ? t(`category_${title.toLowerCase()}`) 
+    : title;
+
   if (cards.length === 0) {
     return (
       <div className={styles.carouselSection}>
-        <h3 className={styles.categoryTitle}>{title}</h3>
+        <h3 className={styles.categoryTitle}>{displayTitle}</h3>
         <div className={styles.emptyStateContainer}>
           <div className={styles.emptyCard}>
             <CardBack targetHeight={175} targetWidth={125} /> {/* Ajuste o tamanho conforme necessário */}
-            <div className={styles.emptyCardText}>Vazio</div>
+            <div className={styles.emptyCardText}>{t('carousel_empty')}</div>
           </div>
         </div>
       </div>
@@ -68,7 +76,7 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({ title, cards, onCar
 
   return (
     <div className={styles.carouselSection}>
-      <h3 className={styles.categoryTitle}>{title}</h3>
+      <h3 className={styles.categoryTitle}>{displayTitle}</h3>
       <div className={styles.swiperContainer}>
         <Swiper
           modules={[Navigation, A11y]}

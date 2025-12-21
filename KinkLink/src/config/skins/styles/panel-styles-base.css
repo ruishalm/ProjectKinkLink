@@ -80,13 +80,13 @@ html:not(.klnkl-panel-xp-active) .klnkl-all-buttons-panel.klnkl-themed-panel .kl
 
 /* Pseudo-elemento ::after para o texto "Criar Kink" (Botão Criar Kink - Padrão) */
 html:not(.klnkl-panel-xp-active) .klnkl-all-buttons-panel.klnkl-themed-panel .klnkl-create-kink-btn.genericButton::after {
-  content: 'Criar Kink'; /* Texto alterado para o do botão */
+  content: attr(title); /* Usa o atributo 'title' do botão, que já está traduzido */
   position: absolute;
   top: 0; left: 0; right: 0; 
   height: 6rem; /* IMPORTANTE: Confina o texto KINKLINK à altura da parte visual da carta */
   display: flex; align-items: center; justify-content: center;
   font-size: 14px !important; /* Tamanho ajustado para "Criar Kink" */
-  font-weight: bold;
+  font-weight: 700; /* Usando font-weight numérico para consistência */
   color: #f0f0f0 !important; /* Cor bem clara para alta visibilidade */
   opacity: 1 !important; /* Totalmente opaco para alta visibilidade */
   transform: rotate(-45deg);

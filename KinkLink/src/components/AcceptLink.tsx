@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom'; // Para ler query params
+import { useTranslation } from 'react-i18next';
 import { acceptLink } from '../services/linkService'; // Ajuste o caminho se necessário
 import { requestNotificationPermission } from '../services/notificationService'; // Importa o novo serviço
 import styles from './AcceptLink.module.css'; // Importa os CSS Modules
@@ -10,6 +11,7 @@ interface AcceptLinkProps {
 }
 
 const AcceptLink: React.FC<AcceptLinkProps> = ({ onLinkAccepted, onCancel }) => {
+  const { t } = useTranslation();
   // Hooks e Estados
   const [linkCode, setLinkCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -38,7 +40,7 @@ const AcceptLink: React.FC<AcceptLinkProps> = ({ onLinkAccepted, onCancel }) => 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!linkCode.trim()) {
-      setError("Por favor, insira um código de vínculo.");
+      setError(t('accept_link_error_empty'));
       return;
     }
     setIsLoading(true);
@@ -52,7 +54,7 @@ const AcceptLink: React.FC<AcceptLinkProps> = ({ onLinkAccepted, onCancel }) => 
       // Após o vínculo bem-sucedido, solicita permissão e salva o token
       await requestNotificationPermission();
 
-      setSuccessMessage(`Vínculo realizado com sucesso!`);
+      setSuccessMessage(t('accept_link_success'));
       onLinkAccepted(result.coupleId, result.partnerId);
       // Opcional: Limpar o campo de código ou desabilitar o formulário após o sucesso
       // setLinkCode(''); 
@@ -60,7 +62,7 @@ const AcceptLink: React.FC<AcceptLinkProps> = ({ onLinkAccepted, onCancel }) => 
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("Falha ao aceitar o código de vínculo. Ocorreu um erro desconhecido.");
+        setError(t('accept_link_error_generic'));
       }
       console.error("Erro em handleSubmit (AcceptLink):", err);
     } finally {
@@ -71,10 +73,10 @@ const AcceptLink: React.FC<AcceptLinkProps> = ({ onLinkAccepted, onCancel }) => 
   // Lógica de Renderização e JSX
   return (
     <div className={styles.section}>
-      <h3 className={styles.title}>Conectar com Parceiro(a)</h3>
+      <h3 className={styles.title}>{t('accept_link_title')}</h3>
       <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="linkCodeInput" className={styles.label}>Insira o Código de Vínculo:</label>
+          <label htmlFor="linkCodeInput" className={styles.label}>{t('accept_link_label')}</label>
           <input
             type="text"
             id="linkCodeInput" // Mudado para evitar conflito com possível id 'linkCode' em outro lugar
@@ -86,16 +88,16 @@ const AcceptLink: React.FC<AcceptLinkProps> = ({ onLinkAccepted, onCancel }) => 
             className={styles.input}
           />
           <button type="submit" disabled={isLoading || !!successMessage} className={`${styles.primaryButton} genericButton`}>
-            {isLoading ? 'Conectando...' : 'Conectar'}
+            {isLoading ? t('accept_link_connecting_button') : t('accept_link_connect_button')}
           </button>
         </div>
       </form>
-      {error && <p className={styles.errorText}>Erro: {error}</p>}
+      {error && <p className={styles.errorText}>{t('accept_link_error_prefix')} {error}</p>}
       {successMessage && <p className={styles.successText}>{successMessage}</p>}
       {/* Botão para chamar onCancel */}
       {!successMessage && (
         <button onClick={onCancel} className={`${styles.secondaryButton} genericButton`} disabled={isLoading}>
-          Cancelar
+          {t('accept_link_cancel_button')}
         </button>
       )}
     </div>

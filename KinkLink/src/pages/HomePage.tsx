@@ -1,42 +1,37 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import React, { useEffect } from 'react'; // Removido CSSProperties
-import styles from './HomePage.module.css'; // Importa os CSS Modules
-import InteractiveDemo from '../components/HomePageDemo/InteractiveDemo'; // <<< ADICIONE ESTE IMPORT
+import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import styles from './HomePage.module.css';
+import InteractiveDemo from '../components/HomePageDemo/InteractiveDemo';
 
 function HomePage() {
   const { user, isLoading } = useAuth();
   const navigate = useNavigate();
-
-  // console.log('[HomePage] isLoading:', isLoading, 'User:', user); // Comentado para limpeza
+  const { t } = useTranslation();
 
   useEffect(() => {
-    // Se o usuário está carregando, não faz nada ainda
     if (isLoading) {
       return;
     }
-    if (user) { // Usuário está logado
-      // Se o usuário está logado, sempre redireciona para o perfil primeiro.
+    if (user) {
       navigate('/profile', { replace: true });
     }
-    // Se !user (não logado), permanece na HomePage, que é o comportamento desejado.
   }, [user, isLoading, navigate]);
 
   return (
     <div className={styles.pageContainer}>
-      {/* Envolve o conteúdo principal para melhor organização e estilização se o header for sticky */}
       <main className={styles.mainContent}>
-        <h1 className={styles.title}>Bem-vindo(a) ao KinkLink!</h1>
+        <h1 className={styles.title}>{t('homepage_title')}</h1>
         <p className={styles.subTitle}>
-          Descubra, explore e conecte-se com seu parceiro(a) de uma maneira totalmente nova.
+          {t('homepage_subtitle')}
         </p>
         <div className={styles.buttonContainer}>
-          <Link to="/login" className={styles.primaryButton}>Login</Link>
-          <Link to="/signup" className={styles.secondaryButton}>Cadastre-se</Link>
+          <Link to="/login" className={styles.primaryButton}>{t('homepage_login_button')}</Link>
+          <Link to="/signup" className={styles.secondaryButton}>{t('homepage_signup_button')}</Link>
         </div>
 
-        {/* Seção da Demonstração Interativa */}
-        <section className={styles.demoSection}> {/* Você pode adicionar estilos para demoSection em HomePage.module.css se necessário */}
+        <section className={styles.demoSection}>
           <InteractiveDemo />
         </section>
       </main>

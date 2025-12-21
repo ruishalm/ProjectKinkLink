@@ -1,5 +1,6 @@
 // CreateLink.tsx
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { createLink as apiCreateLink } from '../services/linkService';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './CreateLink.module.css';
@@ -10,6 +11,7 @@ interface CreateLinkProps {
 }
 
 const CreateLink: React.FC<CreateLinkProps> = ({ onLinkCreated, onCancel }) => {
+  const { t } = useTranslation();
   const [linkCode, setLinkCode] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +25,7 @@ const CreateLink: React.FC<CreateLinkProps> = ({ onLinkCreated, onCancel }) => {
 
   const handleCreateLink = async () => {
     if (!user) {
-      setError("Você precisa estar logado para criar um link.");
+      setError(t('create_link_error_not_logged_in'));
       return;
     }
     setIsLoading(true);
@@ -34,7 +36,7 @@ const CreateLink: React.FC<CreateLinkProps> = ({ onLinkCreated, onCancel }) => {
       onLinkCreated(code);
     } catch (err: unknown) {
       console.error("Erro ao criar link:", err);
-      let errorMessage = "Falha ao gerar o código. Tente novamente.";
+      let errorMessage = t('create_link_error_generation_failed');
       if (err instanceof Error) {
         errorMessage = err.message;
       } else if (typeof err === 'string') {
@@ -55,7 +57,7 @@ const CreateLink: React.FC<CreateLinkProps> = ({ onLinkCreated, onCancel }) => {
         })
         .catch(err => {
           console.error('Falha ao copiar código: ', err);
-          alert('Não foi possível copiar o código. Por favor, tente manualmente.');
+          alert(t('create_link_error_copy_failed'));
         });
     }
   };
@@ -66,7 +68,7 @@ const CreateLink: React.FC<CreateLinkProps> = ({ onLinkCreated, onCancel }) => {
   const handleCopyLink = () => {
     if (inviteUrl) {
       navigator.clipboard.writeText(inviteUrl)
-        .then(() => alert('Link de convite completo copiado!')) // Mensagem um pouco mais clara
+        .then(() => alert(t('create_link_success_copy_link'))) // Mensagem um pouco mais clara
         .catch(err => console.error('Erro ao copiar o link: ', err));
     }
   };
@@ -74,20 +76,20 @@ const CreateLink: React.FC<CreateLinkProps> = ({ onLinkCreated, onCancel }) => {
   // Lógica de Renderização e JSX
   return (
     <div className={`${styles.section} klnkl-themed-panel`}> {/* Adicionado klnkl-themed-panel */}
-      <h2 className={styles.title}>Gerar Código de Vínculo</h2>
+      <h2 className={styles.title}>{t('create_link_title')}</h2>
       {!linkCode ? (
         <button onClick={handleCreateLink} disabled={isLoading} className={`${styles.primaryButton} genericButton`}>
-          {isLoading ? 'Gerando...' : 'Gerar Meu Código'}
+          {isLoading ? t('create_link_generating_button') : t('create_link_generate_button')}
         </button>
       ) : (
         <>
           {/* Seção do código com botão de copiar */}
           <div className={styles.codeSection}>
-            <p className={styles.infoText}>Compartilhe este código com seu parceiro(a):</p>
+            <p className={styles.infoText}>{t('create_link_share_instruction')}</p>
             <div className={styles.codeAndCopyContainer}>
               <span className={styles.codeDisplay}>{linkCode}</span>
               <button onClick={handleCopyCodeToClipboard} className={`${styles.copyCodeButton} genericButton`} disabled={isCodeCopied}>
-                {isCodeCopied ? 'Copiado!' : 'Copiar Código'}
+                {isCodeCopied ? t('create_link_copied_button') : t('create_link_copy_code_button')}
               </button>
             </div>
           </div>
@@ -95,9 +97,9 @@ const CreateLink: React.FC<CreateLinkProps> = ({ onLinkCreated, onCancel }) => {
           {/* Seção do link de convite completo */}
           {inviteUrl && (
             <div className={styles.inviteLinkContainer}>
-              <p className={styles.infoText}>Ou envie este link direto:</p>
+              <p className={styles.infoText}>{t('create_link_share_link_instruction')}</p>
               <input type="text" readOnly value={inviteUrl} className={styles.linkDisplayInput} onClick={(e) => e.currentTarget.select()} />
-              <button onClick={handleCopyLink} className={`${styles.secondaryButton} ${styles.copyLinkButton} genericButton`}>Copiar Link</button> {/* Added genericButton */}
+              <button onClick={handleCopyLink} className={`${styles.secondaryButton} ${styles.copyLinkButton} genericButton`}>{t('create_link_copy_link_button')}</button> {/* Added genericButton */}
             </div>
           )}
         </>
@@ -105,7 +107,7 @@ const CreateLink: React.FC<CreateLinkProps> = ({ onLinkCreated, onCancel }) => {
       {error && <p className={styles.errorText}>{error}</p>}
       {/* Botão para chamar onCancel */}
       <button onClick={onCancel} className={`${styles.secondaryButton} genericButton`}>
-        {linkCode ? 'Concluído / Voltar' : 'Cancelar'}
+        {linkCode ? t('create_link_done_button') : t('create_link_cancel_button')}
       </button>
     </div>
   );

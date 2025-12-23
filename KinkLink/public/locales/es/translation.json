@@ -1,4 +1,8 @@
 {
+  "homepage_title": "Descubre Nuevas Conexiones",
+  "homepage_subtitle": "Explora deseos y límites con tu pareja de forma divertida y privada.",
+  "homepage_login_button": "Iniciar sesión",
+  "homepage_signup_button": "Registrarse",
   "profile_partner_not_found": "Pareja no encontrada",
   "profile_error_fetching_partner": "Error al buscar información de la pareja:",
   "profile_error_logout": "Error al cerrar sesión",

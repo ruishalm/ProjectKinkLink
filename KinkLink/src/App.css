@@ -19,8 +19,7 @@
 }
 
 .appLogo {
-  height: 80%;
-  max-height: 45px;
+  height: 45px; /* Simplificado para definir a altura diretamente. */
 }
 
 /* Estilos para botões de ação na CardPilePage */

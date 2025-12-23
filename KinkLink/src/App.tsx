@@ -35,6 +35,7 @@ import NewMatchModal from './hooks/NewMatchModal'; // Modal para exibir novos li
 import { useTranslation } from 'react-i18next';
 import { doc, updateDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from './firebase';
+import IosInstallPrompt from './components/IosInstallPrompt';
 
 
 const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'));
@@ -55,6 +56,7 @@ function AppContent() {
   const isUserLinked = !!user?.coupleId; // Nova arquitetura: usa coupleId ao invés de partnerId
   const [deferredInstallPrompt, setDeferredInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallButtonInHeader, setShowInstallButtonInHeader] = React.useState(false);
+  const [showIosInstallPrompt, setShowIosInstallPrompt] = useState(false);
 
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   // Estado para o modal de feedback - DEVE ESTAR NO TOPO DA FUNÇÃO
@@ -121,7 +123,7 @@ function AppContent() {
       });
   }, [location.pathname, user?.id]); // removido user.lastVisitedMatchesPage para não re-disparar quando o user for atualizado
 
-  // useEffect para o prompt de instalação PWA - ESTÁ SENDO USADO
+  // useEffect para o prompt de instalação PWA (Android/Desktop)
   React.useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
@@ -132,6 +134,21 @@ function AppContent() {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
   }, []);
+
+  // useEffect para o prompt de instalação PWA (iOS)
+  useEffect(() => {
+    const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isStandalone = 'standalone' in window.navigator && (window.navigator as any).standalone;
+    const hasSeenPrompt = sessionStorage.getItem('hasSeenIosInstallPrompt');
+
+    if (isIos && !isStandalone && !hasSeenPrompt) {
+      // Adiciona um pequeno delay para não sobrecarregar o usuário assim que a página carrega
+      setTimeout(() => {
+        setShowIosInstallPrompt(true);
+      }, 3000); // 3 segundos
+    }
+  }, []);
+
 
   // Efeito para abrir o modal de apoio baseado no hash da URL
   React.useEffect(() => {
@@ -156,6 +173,11 @@ function AppContent() {
   const handleCloseFeedbackModal = useCallback(() => {
     setIsFeedbackModalOpen(false);
   }, []); // Dependência vazia é correta aqui
+
+  const handleCloseIosInstallPrompt = () => {
+    sessionStorage.setItem('hasSeenIosInstallPrompt', 'true');
+    setShowIosInstallPrompt(false);
+  };
 
   // Funções para o modal de UserTickets
   const handleOpenUserTicketsModal = useCallback(() => {
@@ -286,6 +308,7 @@ function AppContent() {
             onClose={() => setNewMatchesForModal([])}
           />
         )}
+        {showIosInstallPrompt && <IosInstallPrompt onClose={handleCloseIosInstallPrompt} />}
         <Footer /> {/* <<< RODAPÉ ADICIONADO AQUI */}
       </NotificationProvider> {/* <<< FECHAR O NOTIFICATION PROVIDER */}
     </div>

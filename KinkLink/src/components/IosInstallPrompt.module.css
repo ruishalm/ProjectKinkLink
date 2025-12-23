@@ -1,0 +1,80 @@
+/* IosInstallPrompt.module.css */
+.iosInstallPrompt {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #f9f9f9;
+  color: #333;
+  padding: 16px;
+  border-top: 1px solid #ddd;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  font-size: 14px;
+}
+
+/* Adaptação para o tema escuro */
+@media (prefers-color-scheme: dark) {
+  .iosInstallPrompt {
+    background-color: #333;
+    color: #f0f0f0;
+    border-top: 1px solid #555;
+  }
+}
+
+.content {
+  text-align: center;
+  max-width: 90%;
+}
+
+.content p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.shareIcon {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 4px;
+  /* Cor do ícone no tema claro */
+  stroke: #007aff;
+}
+
+/* Cor do ícone no tema escuro */
+@media (prefers-color-scheme: dark) {
+  .shareIcon {
+    stroke: #0af;
+  }
+}
+
+.closeButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  color: #aaa;
+  cursor: pointer;
+  padding: 5px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .closeButton {
+    color: #888;
+  }
+}
+
+.closeButton:hover {
+  color: #333;
+}
+
+@media (prefers-color-scheme: dark) {
+  .closeButton:hover {
+    color: #fff;
+  }
+}

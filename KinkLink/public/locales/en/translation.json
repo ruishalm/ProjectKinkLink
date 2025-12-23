@@ -1,4 +1,8 @@
 {
+  "homepage_title": "Discover New Connections",
+  "homepage_subtitle": "Explore desires and limits with your partner in a fun and private way.",
+  "homepage_login_button": "Login",
+  "homepage_signup_button": "Sign Up",
   "profile_partner_not_found": "Partner not found",
   "profile_error_fetching_partner": "Error fetching partner information:",
   "profile_error_logout": "Error logging out",
@@ -614,5 +618,7 @@
   "tips_default_right_1": "Communication is key.",
   "tips_default_right_2": "Respect each other's boundaries.",
   "tips_default_right_3": "Consent always!",
-  "tips_default_right_4": "Enjoy the journey together."
+  "tips_default_right_4": "Enjoy the journey together.",
+  "ios_install_prompt_p1": "To install the app, tap the ",
+  "ios_install_prompt_p2": " icon and then 'Add to Home Screen'."
 }

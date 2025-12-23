@@ -1,4 +1,8 @@
 {
+  "homepage_title": "Descubra Novas Conexões",
+  "homepage_subtitle": "Explore desejos e limites com seu par de uma forma divertida e privada.",
+  "homepage_login_button": "Entrar",
+  "homepage_signup_button": "Cadastre-se",
   "profile_partner_not_found": "Parceiro(a) não encontrado(a)",
   "profile_error_fetching_partner": "Erro ao buscar informações do parceiro:",
   "profile_error_logout": "Erro ao fazer logout",
@@ -614,5 +618,7 @@
   "tips_default_right_1": "Comunicação é a chave.",
   "tips_default_right_2": "Respeitem os limites um do outro.",
   "tips_default_right_3": "Consentimento sempre!",
-  "tips_default_right_4": "Aproveitem a jornada juntos."
+  "tips_default_right_4": "Aproveitem a jornada juntos.",
+  "ios_install_prompt_p1": "Para instalar o app, toque no ícone ",
+  "ios_install_prompt_p2": " e depois em 'Adicionar à Tela de Início'."
 }

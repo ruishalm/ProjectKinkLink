@@ -138,7 +138,7 @@ function AppContent() {
   // useEffect para o prompt de instalação PWA (iOS)
   useEffect(() => {
     const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const isStandalone = 'standalone' in window.navigator && (window.navigator as any).standalone;
+    const isStandalone = 'standalone' in window.navigator && window.navigator.standalone;
     const hasSeenPrompt = sessionStorage.getItem('hasSeenIosInstallPrompt');
 
     if (isIos && !isStandalone && !hasSeenPrompt) {

@@ -372,3 +372,19 @@
   line-height: 1;
   pointer-events: none; /* Para não interferir com o clique no botão */
 }
+
+.christmasHat {
+  position: absolute;
+  top: -5px;
+  left: -20px; /* Movido mais para a esquerda */
+  width: 50px;
+  height: auto;
+  z-index: 10;
+  pointer-events: none;
+  transform: scaleX(-1) rotate(-15deg); /* Espelhado e rotação ajustada */
+  transition: transform 0.3s ease-in-out;
+}
+
+.logoLink:hover .christmasHat {
+  transform: scaleX(-1) rotate(0deg) scale(1.1); /* Mantém o espelhamento */
+}

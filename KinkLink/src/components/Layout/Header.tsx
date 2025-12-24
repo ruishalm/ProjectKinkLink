@@ -31,6 +31,7 @@ const Header: React.FC<HeaderProps> = ({ showInstallButton, onInstallClick, onOp
       <div className={styles.logoContainer}>
         <Link to="/cards" className={styles.logoLink}>
           <img src={logoSrc} alt={t('header_logo_alt')} className={styles.logoImage} />
+          <img src="/Natal.png" alt="Christmas Hat" className={styles.christmasHat} />
           <span className={styles.betaText}>ALPHA</span>
         </Link>
       </div>

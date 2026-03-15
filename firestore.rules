@@ -108,8 +108,10 @@ service cloud.firestore {
                        request.auth.uid in request.resource.data.members;
 
       // Atualizar: user é membro no novo estado do couple (permite acceptLink completar)
+      // OU user é o initiator (para casos onde o coupleId ainda não foi atualizado no user)
       allow update: if request.auth != null &&
-                       request.auth.uid in request.resource.data.members;
+                       (request.auth.uid in request.resource.data.members ||
+                        (resource.data.status == 'pending' && resource.data.initiatorId == request.auth.uid));
 
       // Ler: 
       // - Couple pending: qualquer user autenticado (para acceptLink)

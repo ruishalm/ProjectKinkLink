@@ -128,16 +128,20 @@ export const acceptLink = async (
   const normalizedCode = code.toUpperCase().trim();
 
   return await runTransaction(db, async (tx: Transaction) => {
+    console.log(`[acceptLink] Iniciando transação para código: ${normalizedCode}, user: ${user.uid}`);
+
     // 1. Buscar pendingLink
     const pendingLinkRef = doc(db, 'pendingLinks', normalizedCode);
     const pendingLinkSnap = await tx.get(pendingLinkRef);
 
     if (!pendingLinkSnap.exists()) {
+      console.error(`[acceptLink] Código ${normalizedCode} não encontrado`);
       throw new Error('Código inválido');
     }
 
     const pendingLink = pendingLinkSnap.data() as PendingLink;
     const { coupleId } = pendingLink;
+    console.log(`[acceptLink] PendingLink encontrado, coupleId: ${coupleId}`);
 
     // 2. Buscar couple
     const coupleRef = doc(db, 'couples', coupleId);
@@ -148,12 +152,15 @@ export const acceptLink = async (
     }
 
     const couple = coupleSnap.data() as Couple;
+    console.log(`[acceptLink] Couple encontrado, status: ${couple.status}, members: ${couple.members}`);
 
     if (couple.status !== 'pending') {
+      console.error(`[acceptLink] Couple ${coupleId} não está pending, status: ${couple.status}`);
       throw new Error('Código já foi usado');
     }
 
     if (couple.initiatorId === user.uid) {
+      console.error(`[acceptLink] User ${user.uid} tentando linkar consigo mesmo`);
       throw new Error('Não pode vincular consigo mesmo');
     }
 
@@ -167,13 +174,13 @@ export const acceptLink = async (
 
     const userBData = userBSnap.data();
     if (userBData.coupleId) {
+      console.error(`[acceptLink] User ${user.uid} já está vinculado, coupleId: ${userBData.coupleId}`);
       throw new Error('Você já está vinculado');
     }
 
-    // 4. Atualizar próprio perfil (User B)
-    tx.update(userBRef, { coupleId });
+    console.log(`[acceptLink] Validações passaram, atualizando couple primeiro`);
 
-    // 5. Completar Couple (adicionar 2º membro)
+    // 4. Completar Couple primeiro (adicionar 2º membro)
     tx.update(coupleRef, {
         status: 'completed',
         members: [couple.initiatorId, user.uid],
@@ -181,7 +188,12 @@ export const acceptLink = async (
         [couple.initiatorId]: '★',
         [user.uid]: '▲'
         }
-      });    // 6. Deletar pendingLink
+      });
+
+    console.log(`[acceptLink] Couple atualizado, agora atualizando user`);
+
+    // 5. Atualizar próprio perfil (User B) - DEPOIS do couple
+    tx.update(userBRef, { coupleId });    // 6. Deletar pendingLink
     tx.delete(pendingLinkRef);
 
     console.log(`✅ Vínculo completo! Couple: ${coupleId}`);

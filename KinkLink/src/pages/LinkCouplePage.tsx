@@ -11,7 +11,7 @@ import styles from './LinkCouplePage.module.css';
 
 const LinkCouplePage: React.FC = () => {
   const { t } = useTranslation();
-  const { user, isLoading: authIsLoading, unlinkCouple: authUnlinkCouple } = useAuth(); // Adicionado unlinkCouple e removido updateUser se não for usado
+  const { user, isLoading: authIsLoading, unlinkCouple: authUnlinkCouple, refreshAuthContext } = useAuth();
   const navigate = useNavigate();
   const [showCreateLinkUI, setShowCreateLinkUI] = useState(false);
   const [showAcceptLinkUI, setShowAcceptLinkUI] = useState(false);
@@ -116,6 +116,11 @@ const LinkCouplePage: React.FC = () => {
 
   const handleLinkAccepted = (coupleId: string, partnerId: string) => {
     console.log(`LinkCouplePage: Link aceito! CoupleID: ${coupleId}, PartnerID: ${partnerId}`);
+    // Forçar refresh do AuthContext após linking
+    if (refreshAuthContext) {
+      console.log('LinkCouplePage: Forçando refresh do AuthContext');
+      refreshAuthContext();
+    }
     setShowCreateLinkUI(false);
     setShowAcceptLinkUI(false);
   };

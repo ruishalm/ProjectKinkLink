@@ -674,7 +674,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     try {
       // Importamos e usamos a função do linkService que faz tudo atomicamente
       const { unlinkCouple: unlinkCoupleService } = await import('../services/linkService');
-      await unlinkCoupleService(coupleIdToDelete);
+      await unlinkCoupleService(user.id, user.partnerId!, coupleIdToDelete);
       console.log(`[AuthContext] Desvinculação completa via linkService.`);
       // O onSnapshot atualizará automaticamente o estado do usuário
     } catch (error) {

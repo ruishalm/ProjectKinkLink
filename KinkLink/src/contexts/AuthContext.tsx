@@ -27,7 +27,8 @@ import {
   where,
   getDocs,
   getDoc,
-  arrayUnion
+  arrayUnion,
+  runTransaction
 } from 'firebase/firestore'; // Removida importação de deleteDoc se não usada diretamente aqui
 
 export interface MatchedCard extends Card {
@@ -672,17 +673,48 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     const coupleIdToDelete = user.coupleId;
 
     try {
-      // Importamos e usamos a função do linkService que faz tudo atomicamente
-      const { unlinkCouple: unlinkCoupleService } = await import('../services/linkService');
-      await unlinkCoupleService(user.id, user.partnerId!, coupleIdToDelete);
-      console.log(`[AuthContext] Desvinculação completa via linkService.`);
-      // O onSnapshot atualizará automaticamente o estado do usuário
+        await runTransaction(db, async (transaction) => {
+          const coupleRef = doc(db, 'couples', coupleIdToDelete);
+          const coupleSnap = await transaction.get(coupleRef);
+
+          if (coupleSnap.exists()) {
+            const members = coupleSnap.data().members || [];
+            
+            // Atualiza ambos os membros para limpar os dados de vínculo e do jogo
+            for (const memberId of members) {
+              const memberRef = doc(db, 'users', memberId);
+              transaction.update(memberRef, {
+                coupleId: null,
+                partnerId: null,
+                linkCode: null,
+                seenCards: [],
+                conexaoAccepted: 0,
+                conexaoRejected: 0,
+                userCreatedCards: [],
+                matchedCards: []
+              });
+            }
+            
+            // Deleta o documento do casal
+            transaction.delete(coupleRef);
+          } else {
+            // Fallback de segurança caso o casal já não exista na base
+            const userRef = doc(db, 'users', user.id);
+            transaction.update(userRef, {
+              coupleId: null,
+              partnerId: null,
+              linkCode: null
+            });
+          }
+        });
+        
+        console.log(`[AuthContext] Desvinculação completa e segura via runTransaction interna.`);
     } catch (error) {
       console.error(`[AuthContext] Erro ao desvincular:`, error);
-      setIsLoading(false);
       throw error;
+      } finally {
+        setIsLoading(false);
     }
-    // setIsLoading(false) será chamado quando o onSnapshot detectar as mudanças
   }, [user, setIsLoading]);
 
   const resetNonMatchedSeenCards = useCallback(async () => {

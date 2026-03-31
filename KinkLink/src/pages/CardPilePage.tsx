@@ -420,7 +420,6 @@ function CardPilePage() {
           <Link to="/profile" className={`${styles.bottomNavIconStyle} ${styles.ballButton} genericButton klnkl-icon-nav-button klnkl-nav-profile`} aria-label="Perfil" title="Perfil">
             <div className={styles.profileIconContainer}>
               <span className={styles.profileEmoji}>👤</span>
-              <img src="/Natal.png" alt="Christmas Hat" className={styles.christmasHatProfile} />
             </div>
           </Link>
         </div>
